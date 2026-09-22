@@ -1,6 +1,6 @@
 # CLR R Port — Port Notes
 
-Package `clr` at `/home/hatch/workspace/code/clr-r/`.
+Package `clr`, at the root of this repository.
 R6 port of the CLR (Context Likelihood of Relatedness) algorithm, reframed as
 iterative attention over continuous data distributions.
 

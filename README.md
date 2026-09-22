@@ -34,21 +34,23 @@ sudo apt install r-base r-base-dev
 brew install r
 ```
 
-Then in R:
+Clone and install R dependencies:
 
-```r
-install.packages(c("R6", "Rcpp", "testthat", "pkgload"))
+```sh
+git clone https://github.com/rimorob/ClrAttention.git
+cd ClrAttention
+Rscript -e 'install.packages(c("R6", "Rcpp", "testthat", "pkgload"))'
 ```
 
-Install the package from this checkout:
+Install the package from the checkout (run from the repo root):
 
-```r
-# option 1: install into your library
-install.packages(".", repos = NULL, type = "source")
-
-# option 2: use in place without installing
-pkgload::load_all(".")
+```sh
+R CMD INSTALL .
 ```
+
+(Alternative: skip installing and load the package in place with
+`pkgload::load_all(".")` from the repo root — the demos do this
+automatically if `clr` is not installed.)
 
 ## Run the demos
 
