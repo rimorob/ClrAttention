@@ -1,0 +1,26 @@
+Package: clr
+Title: Context Likelihood of Relatedness as Iterative Attention
+Version: 0.1.0
+Authors@R: person(given = "Boris", family = "Hayete",
+    email = "rimorob@users.noreply.github.com", role = c("aut", "cre"),
+    comment = "Email is a placeholder GitHub noreply address")
+Description: Reframes the Context Likelihood of Relatedness (CLR) network
+    inference algorithm as an early form of attention over continuous data
+    distributions. Provides a B-spline mutual-information estimator (ported
+    from the original CLR C sources), CLR calibration (Euclidean and the new
+    Stouffer bilateral combination, plus Rayleigh and KDE variants), sparse
+    row-stochastic attention operators, and iterative diffusion, orchestrated
+    by the R6 class ClrAttention.
+License: MIT + file LICENSE
+Encoding: UTF-8
+RoxygenNote: 7.3.1
+Imports:
+    R6,
+    Rcpp,
+    stats
+LinkingTo:
+    Rcpp
+Suggests:
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+SystemRequirements: C++17

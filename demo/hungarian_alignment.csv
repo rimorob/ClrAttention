@@ -1,0 +1,4 @@
+"reference","size_ref","f1","precision","recall","jaccard","top_found","top_prob"
+"module_A",8,0.941176470588235,0.888888888888889,1,0.888888888888889,"module_1",1
+"module_B",7,0.933333333333333,0.875,1,0.875,"module_2",1
+"module_C",6,1,1,1,1,"module_3",1
