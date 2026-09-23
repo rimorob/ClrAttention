@@ -13,3 +13,5 @@ src/**/*.o
 .DS_Store
 data/
 results/
+tools/setup_mac.log
+tools/.Makevars.generated
