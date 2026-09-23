@@ -1,6 +1,6 @@
 # CLR as attention on single-cell data:  BEELINE case study
 
-*Working draft and findings log, 2026-09-23.  Results pending; the full run is queued on the local workstation (`results/beeline/`).*
+*Working draft and findings log, 2026-09-23.  Full run completed on the local workstation (`results/beeline/`).*
 
 ## 1. Question
 
@@ -56,14 +56,44 @@ A secondary metric is co-membership AUPR ratio, using TF target sets from the ce
 - Across all four mESC ground truths, plain CLR had the highest median AUPRC ratio (1.46; EPR 2.38).  CLR attention was next (1.41), then |Pearson| (1.33).
 - Partial correlation, the linear-model baseline, was the weakest.
 
-## 4. Results
+## 4. Results (7 datasets × 2 gene sets × 3–4 ground truths = 44 settings)
 
-*To be filled from `results/beeline/summary.csv` and `tfnode_metrics.csv`:*
+**Held-out depth.**  The held-out cell split chose t* = 6–11 for CLR attention in every dataset.  That matches the *E. coli* depth of 8, although the depth was never tuned on single-cell data.  Pearson attention always chose t* = 2.
 
-- median AUPRC ratio and EPR per method across 7 datasets × 2 gene sets × 3–4 truths;
-- ratio to |Pearson|;
-- the fraction of settings in which each method beats CLR;
-- held-out depths per dataset.
+**Median AUPRC ratio over all 44 settings:**
+
+| Method | Median AUPRC ratio | Median EPR | Beats CLR (AUPRC) |
+|---|---|---|---|
+| CLR | 1.48 | 2.84 | — |
+| CLR attention (`soft10`) | 1.44 | 2.29 | 27% |
+| \|Pearson\| attention | 1.23 | 2.08 | 20% |
+| \|Spearman\| | 1.21 | 1.67 | 25% |
+| \|Pearson\| | 1.20 | 1.60 | 36% |
+| Raw MI | 1.14 | 1.69 | 20% |
+| Partial correlation (ridge) | 1.06 | 1.22 | 23% |
+
+**By ground truth (median AUPRC ratio):**
+
+| Truth | CLR | CLR attention | \|Pearson\| | Partial correlation |
+|---|---|---|---|---|
+| Cell-type ChIP-seq (14) | 1.00 | 0.93 | 1.02 | 1.01 |
+| Non-specific ChIP-seq (14) | 1.54 | 1.59 | 1.32 | 1.08 |
+| STRING (14) | 2.11 | 1.76 | 1.90 | 1.19 |
+| mESC LOF/GOF (2) | 1.45 | 1.54 | 1.34 | 0.93 |
+
+**Co-membership** (targets sharing a TF in the cell-type ChIP network):  every method scores 0.99–1.00, which is random.
+
+**Topline.**
+
+1. CLR is the best method overall on BEELINE.  It beats correlation, MI and the linear-model baseline by about 20–40% in AUPRC ratio and more in EPR.  The MI-plus-context-normalization idea carries over to single-cell data.
+2. CLR attention does *not* improve on CLR here.  It is about equal or slightly better on non-specific ChIP and LOF/GOF, and worse on STRING.  The bulk *E. coli* gain does not transfer.
+3. Against cell-type-specific ChIP-seq, and on regulon co-membership, every method is at chance.  This agrees with BEELINE's own finding that these truths are barely recoverable from scRNA-seq co-expression.  Nothing in this benchmark can separate the methods on those truths.
+4. The ridge partial correlation (the linear-model baseline) is the weakest method, which fits the pattern that linear conditional-independence models struggle on sparse single-cell data.
+
+**Possible reasons attention helps in bulk data but not here.**  These are hypotheses and have not been tested.
+
+- Single-cell co-expression is dominated by broad cell-state programs and by dropout.  Multi-hop propagation spreads program-level signal, which may blur the specific edges that STRING rewards.
+- BEELINE scores directed TF-to-target edges.  Attention mass is a symmetric multi-hop quantity, better matched to co-membership, and that metric is at chance for every method here.
 
 ## 5. Notes for interpretation
 

@@ -41,22 +41,26 @@ All numbers are on the 466 experiments with strong/confirmed regulons, unless st
    - Stouffer and Euclidean combination are equivalent.
    - The permutation-FDR operator alone leaves 62–77% of genes without neighbours, which makes it unusable for propagation.
 
-## 4. 907-chip compendium and replicate-aware bootstrap (running)
+## 4. 907-chip compendium and replicate-aware bootstrap
 
-Point estimates on all 907 chips reproduce the 466-experiment result.  Co-membership AUPR at strong/confirmed evidence:
+Every bootstrap draw recomputes MI, CLR and attention from scratch.  There are two schemes:
 
-| Method | AUPR |
-|---|---|
-| CLR | 0.135 |
-| `soft10` at t = 8 | 0.159 |
-| `pearson_top10` at t = 6 | 0.137 |
+- **Cluster:**  40 draws.  The 466 experiments are resampled with replacement, with one replicate chip per occurrence.  This captures condition-level and technical variability, and it gives the headline intervals.
+- **Replicate:**  20 draws.  One randomly chosen chip is used per experiment, which captures technical variability only.
 
-Each bootstrap draw recomputes MI from scratch.  There are two schemes:
+Co-membership AUPR and per-regulon coherence at strong/confirmed evidence.  Differences are paired against CLR within each draw, with 2.5–97.5% bootstrap percentiles:
 
-- **Cluster:**  40 draws, resampling experiments with one replicate chip per occurrence.
-- **Replicate:**  20 draws, one chip per experiment.
+| Method | Point AUPR (907 chips) | ΔAUPR vs CLR, cluster | ΔAUPR vs CLR, replicate | ΔCoherence vs CLR, cluster |
+|---|---|---|---|---|
+| CLR (HG, Stouffer) | 0.135 | 0 | 0 | 0 |
+| `soft10` at t = 8 | 0.158 | **+0.020 [+0.018, +0.022]** | +0.021 [+0.020, +0.022] | **+0.030 [+0.014, +0.051]** |
+| `pearson_top10` at t = 6 | 0.136 | −0.002 [−0.004, +0.002] | −0.002 [−0.003, −0.001] | −0.026 [−0.049, −0.011] |
 
-*Results to be added:*  `results/chips_bootstrap/summary.csv`.
+With all evidence levels, `soft10` gains +0.007 [+0.005, +0.010] AUPR and +0.014 [+0.004, +0.026] coherence in the cluster bootstrap.  `pearson_top10` loses on both (−0.013 AUPR and −0.034 coherence).
+
+**Reading.**  The 907-chip analysis reproduces the 466-experiment result almost exactly, and resampling whole experiments does not shrink the gain.  The attention gain is therefore not an artefact of pseudo-replication or of a few influential experiments.  Propagation on |Pearson| gives no gain on AUPR and costs coherence, so the gain again depends on the CLR kernel.
+
+*An extension to 200 cluster and 100 replicate draws is queued, to firm up the tail percentiles.*
 
 ## 5. Secondary:  TF-node edges (Faith, Hayete et al. 2007 convention)
 
@@ -79,7 +83,20 @@ Each bootstrap draw recomputes MI from scratch.  There are two schemes:
 
 **Reference method.**  The then state of the art on this exact task and compendium is SSEM-Lasso network filtering (Cosgrove, Zhou, Gardner & Kolaczyk, *Bioinformatics* 2008, [doi:10.1093/bioinformatics/btn476](https://doi.org/10.1093/bioinformatics/btn476)).  It fits a sparse regression network and scores genes by how much the perturbation departs from what the network predicts.  It was evaluated on M3D genetic perturbations by sensitivity among the top 100 ranked genes, a metric we now report as well.  Boris's original KL-divergence approach matched it but did not beat it.  Re-running SSEM-Lasso, and porting the KLD method once the MATLAB source is located, are the natural comparisons.
 
-**Early signal, 800-gene cloud test with 5 null draws (not a result):**  CLR-attention influence had a median AUROC of 0.63, against 0.55 for differential expression.  It won in 10 of 14 perturbations, with the largest gains for LexA/SOS (0.88 against 0.51), RyhB, SoxS and AppY.  It failed for ppGpp, which is again the diffuse regulon.  *The full run is queued:  `results/perturbation/`.*
+**First full run (all 4,297 genes, 30 null draws per k, 15 perturbation groups).**  Median AUROC for recovering the perturbed regulator's regulon:
+
+| Score | Median AUROC | Wins vs DE | Paired Wilcoxon p vs DE |
+|---|---|---|---|
+| Gene variance (ignores the perturbation) | 0.646 | 14/15 | 2×10⁻⁴ |
+| CLR-attention influence | 0.590 | 13/15 | 0.013 |
+| CLR influence | 0.573 | 13/15 | 0.008 |
+| DE + CLR-attention (Stouffer) | 0.564 | 12/15 | 0.015 |
+| \|Pearson\| influence | 0.526 | 9/15 | 0.85 |
+| Differential expression | 0.519 | — | — |
+
+**This run exposes a confound, and it is not yet a positive result.**  Gene variance knows nothing about the perturbation, yet it beats every score.  Regulon members are simply more variable than other genes, so any score correlated with variance gets credit.  The network influence scores beat differential expression, but they may partly be tracking variance too.  The perturbation-specific cases are encouraging:  CLR-attention influence exceeds gene variance for LexA/SOS (0.73 against 0.55), HU (0.83 against 0.75) and AppY (0.90 against 0.82).  Across the board, however, the variance prior wins.  Sensitivity among the top 100 genes is low for every method (at most 0.07).
+
+**Next run (queued):**  100 null draws per k, plus a variance-stratified AUROC.  That AUROC compares targets only with non-targets in the same gene-variance decile, so a score that merely tracks variance gets 0.5.  That comparison decides whether network influence carries perturbation-specific information.
 
 ## 7. Limitations
 

@@ -1,6 +1,6 @@
 # CLR as attention:  methods
 
-*Working draft and findings log, 2026-09-23.  Numbers are drafts until the confidence-interval runs finish; see `CITATION_LOG.md` (D17–D27) for the full decision record.*
+*Working draft and findings log, 2026-09-23.  See `CITATION_LOG.md` (D17–D28) for the full decision record.*
 
 ## 1. Summary
 
