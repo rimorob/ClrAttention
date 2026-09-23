@@ -172,6 +172,10 @@ ClrAttention <- R6::R6Class("ClrAttention",
       # parallel. Replicate 1 runs here and fixes the histogram range; the
       # rest run on the registered foreach backend (sequential if none).
       seeds <- sample.int(.Machine$integer.max, B)
+      # one_rep() reseeds; on a sequential backend that is the caller's RNG,
+      # so save it here and restore it after the replicates.
+      rng_saved <- get(".Random.seed", envir = globalenv())
+      on.exit(assign(".Random.seed", rng_saved, envir = globalenv()), add = TRUE)
       one_rep <- function(b, hi, nthreads) {
         set.seed(seeds[b])
         Xp <- t(apply(X, 1L, sample))
