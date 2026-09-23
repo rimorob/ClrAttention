@@ -33,7 +33,7 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
             Bcluster = 40L, Brep = 20L, out = "results/chips_bootstrap",
             threads = NULL, quick = 0L, seed = 20260924L, alpha = 0.5,
-            workers = NULL, mem_gb = 3.5)
+            workers = NULL, mem_gb = 3.3)
 ints <- c("Bcluster", "Brep", "threads", "quick", "seed", "workers")
 i <- 1L
 while (i <= length(args)) {

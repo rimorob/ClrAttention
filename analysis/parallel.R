@@ -57,35 +57,49 @@ par_stop_file <- function() file.path("jobs", "control", "stop")
 par_should_stop <- function() file.exists(par_stop_file())
 
 # Start the backend. mem_gb = peak RAM of one task (measured); the worker
-# count is min(cores - reserve, (RAM * ram_frac - master_gb) / mem_gb).
+# count is min(cores - reserve, (RAM - reserve_ram_gb - master_gb) / mem_gb).
+# reserve_ram_gb is the RAM left to the user: environment CLR_RESERVE_RAM_GB,
+# else max(6, 15% of RAM) (about 6 GB on a 32 GB Mac, 19 GB on 128 GB).
 # `workers` (e.g. from --workers) overrides the automatic choice.
 #
-# Hyper-threading: workers are always placed one per *physical* core (the
-# R-level work is single-threaded and memory-hungry, so a second worker on
-# a sibling hyper-thread mostly competes for the same FPU, cache and RAM).
-# With ht = TRUE (or environment CLR_HT=1) the OpenMP threads of the MI
-# kernel are counted in hardware threads instead, so each worker's MI
-# runs on both hyper-threads of its core. The MI kernel is a scattered
-# histogram accumulation (latency-bound), the kind of code where SMT
-# usually helps; measure with tools/bench_ht.sh before relying on it.
-par_start <- function(mem_gb, workers = NULL, reserve = 2L, ram_frac = 0.8,
+# Hyper-threading: by default workers are capped at one per *physical* core.
+# With ht = TRUE (or environment CLR_HT=1) the cap is counted in hardware
+# threads instead, so when RAM allows more workers than physical cores the
+# extra workers share cores as hyper-threads, and when it does not, the MI
+# kernel's OpenMP threads use the spare hyper-threads. Whether a second
+# thread per core raises throughput for this workload is measured by
+# tools/bench_ht.sh rather than assumed.
+par_plan <- function(mem_gb, workers = NULL, reserve = 2L, reserve_ram_gb = NULL,
+                     master_gb = 1.5, ht = identical(Sys.getenv("CLR_HT"), "1")) {
+  cores <- .par_cores()
+  tpc <- if (isTRUE(ht)) .par_threads_per_core() else 1L
+  usable <- max(1L, cores - as.integer(reserve))
+  ram <- .par_total_ram_gb()
+  if (is.null(reserve_ram_gb)) {
+    e <- suppressWarnings(as.numeric(Sys.getenv("CLR_RESERVE_RAM_GB")))
+    reserve_ram_gb <- if (!is.na(e)) e else if (is.na(ram)) 6 else max(6, 0.15 * ram)
+  }
+  by_ram <- if (is.na(ram)) usable * tpc else
+    max(1L, floor((ram - reserve_ram_gb - master_gb) / mem_gb))
+  W <- if (!is.null(workers) && !is.na(workers)) as.integer(workers) else
+    as.integer(min(usable * tpc, by_ram))
+  # OpenMP threads per worker: the usable cores' hardware threads (physical
+  # cores only, unless ht) divided among the workers, so workers x threads
+  # never exceeds them.
+  omp <- max(1L, (usable * tpc) %/% W)
+  list(W = W, omp = omp, cores = cores, tpc = tpc, reserve = as.integer(reserve),
+       ram = ram, reserve_ram_gb = reserve_ram_gb, mem_gb = mem_gb)
+}
+
+par_start <- function(mem_gb, workers = NULL, reserve = 2L, reserve_ram_gb = NULL,
                       master_gb = 1.5, export = ls(globalenv()), say = message,
                       ht = identical(Sys.getenv("CLR_HT"), "1")) {
-  cores <- .par_cores()
-  usable <- max(1L, cores - as.integer(reserve))
-  tpc <- if (isTRUE(ht)) .par_threads_per_core() else 1L
-  ram <- .par_total_ram_gb()
-  by_ram <- if (is.na(ram)) usable else
-    max(1L, floor((ram * ram_frac - master_gb) / mem_gb))
-  W <- if (!is.null(workers) && !is.na(workers)) as.integer(workers) else
-    as.integer(min(usable, by_ram))
-  # OpenMP threads per worker: the usable cores (or their hardware threads,
-  # with ht) divided among the workers, so that workers x threads never
-  # exceeds the usable cores' hardware threads.
-  omp <- max(1L, (usable * tpc) %/% W)
-  say(sprintf("compute: %d physical cores (%d reserved), %s GB RAM -> %d workers x %d OpenMP threads%s (JIT level %d)",
-              cores, as.integer(reserve), if (is.na(ram)) "?" else format(round(ram)),
-              W, omp, if (tpc > 1L) sprintf(" [hyper-threading: %d threads/core]", tpc) else "",
+  pl <- par_plan(mem_gb, workers, reserve, reserve_ram_gb, master_gb, ht)
+  W <- pl$W; omp <- pl$omp
+  say(sprintf("compute: %d physical cores (%d reserved), %s GB RAM (%.0f GB reserved, %.1f GB/worker) -> %d workers x %d OpenMP threads%s (JIT level %d)",
+              pl$cores, pl$reserve, if (is.na(pl$ram)) "?" else format(round(pl$ram)),
+              pl$reserve_ram_gb, mem_gb, W, omp,
+              if (pl$tpc > 1L) sprintf(" [hyper-threading: %d threads/core]", pl$tpc) else "",
               compiler::enableJIT(-1L)))
   Sys.setenv(OMP_NUM_THREADS = omp, VECLIB_MAXIMUM_THREADS = 1,
              OPENBLAS_NUM_THREADS = 1, MKL_NUM_THREADS = 1,
