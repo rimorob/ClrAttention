@@ -30,3 +30,14 @@ test_that("bins_for_genes handles rules and integers", {
   expect_error(bins_for_genes(d, bins = 1), ">= 2")
   expect_error(bins_for_genes(d, bins = "nope"), "match.arg|should be one of")
 })
+
+test_that("per-gene bin vectors pass through and shuffles reuse observed bins", {
+  set.seed(3)
+  X <- rbind(rnorm(200), rt(200, 3), runif(200), rexp(200))
+  b <- bins_for_genes(X, "fd")
+  expect_identical(bins_for_genes(X, b), b)
+  expect_error(bins_for_genes(X, c(10L, 1L, 10L, 10L)), ">= 2")
+  fit <- ClrAttention$new(X)$estimate_mi(bins = "fd", threads = 1)
+  expect_identical(fit$params$mi$bins_used, b)
+  expect_equal(bspline_mi(X, bins = b, threads = 1), fit$mi)
+})

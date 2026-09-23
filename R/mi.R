@@ -31,6 +31,15 @@ bspline_mi <- function(data, bins = "fd", spline_order = 3, threads = NULL) {
       stop("threads must be NULL or a positive integer")
   }
 
+  rng <- apply(data, 1L, function(x) max(x) - min(x))
+  if (any(rng <= 0)) {
+    bad <- which(rng <= 0)
+    lab <- if (!is.null(rownames(data))) rownames(data)[bad] else bad
+    stop("constant gene(s) carry no information and would become spurious ",
+         "MI hubs; remove them first: ",
+         paste(utils::head(lab, 10), collapse = ", "),
+         if (length(bad) > 10) ", ..." else "")
+  }
   bins_vec <- bins_for_genes(data, bins = bins)
   mi <- cpp_mi_matrix(data, bins_vec, spline_order, n_threads)
   if (!is.null(rownames(data))) {

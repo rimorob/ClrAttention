@@ -54,8 +54,12 @@ test_that("pipeline chains and each stage populates its binding", {
 test_that("trajectory starts at the raw data", {
   d <- make_toy()
   fit <- ClrAttention$new(d)$estimate_mi(bins = 10)$calibrate()$
-    build_operator(k = 4)$diffuse(steps = 3)
+    build_operator(k = 4)$diffuse(steps = 3, standardize = FALSE)
   expect_equal(unname(fit$trajectory[[1]]), unname(d), ignore_attr = TRUE)
+  fit$diffuse(steps = 3)  # default: row-standardized start
+  E0 <- fit$trajectory[[1]]
+  expect_equal(unname(rowMeans(E0)), rep(0, nrow(d)), tolerance = 1e-12)
+  expect_equal(unname(apply(E0, 1, sd)), rep(1, nrow(d)), tolerance = 1e-12)
 })
 
 test_that("diffusion converges toward a stationary embedding on a toy", {
@@ -80,7 +84,29 @@ test_that("build_operator validates and supports tau", {
   A <- fit$operator
   expect_true(all(A[A > 0] <= 1.0 + 1e-12))  # row-stochastic: no entry exceeds 1
   rs <- rowSums(A)
-  expect_equal(unname(rs[rs > 0]), rep(1, sum(rs > 0)), tolerance = 1e-12)
+  expect_equal(unname(rs), rep(1, nrow(A)), tolerance = 1e-12)
+})
+
+test_that("isolated genes keep their profile (self-loop), tau = Inf is identity", {
+  d <- make_toy()
+  fit <- ClrAttention$new(d)$estimate_mi(bins = 10)$calibrate()$
+    build_operator(tau = Inf)
+  expect_equal(unname(fit$operator), diag(nrow(d)))
+  fit$diffuse(steps = 20, standardize = FALSE)
+  expect_equal(unname(fit$embedding), unname(d), ignore_attr = TRUE)
+})
+
+test_that("constant genes are rejected before they become MI hubs", {
+  d <- make_toy()
+  d[3, ] <- 5
+  expect_error(bspline_mi(d, bins = 10), "constant gene")
+  expect_error(ClrAttention$new(d)$estimate_mi(bins = 10), "constant gene")
+})
+
+test_that("select_threshold() refuses non-normal calibrations", {
+  fit <- ClrAttention$new(make_toy())$estimate_mi(bins = 10)$
+    calibrate(method = "kde")
+  expect_error(fit$select_threshold(B = 2), "normal")
 })
 
 test_that("re-running a stage invalidates downstream stages", {

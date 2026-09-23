@@ -59,6 +59,36 @@ double marginal_entropy(const double *weights, std::size_t n_samples, int num_bi
 double mi_pair(const double *wx, const double *wy, double hx, double hy,
                std::size_t n_samples, int nbx, int nby);
 
+// ---------------------------------------------------------------------------
+// Sparse B-spline weights (the production kernel)
+// ---------------------------------------------------------------------------
+//
+// A sample's B-spline weights are nonzero in at most `spline_order`
+// CONSECUTIVE bins. SparseWeights stores, per sample s, the first bin
+// first[s] and the spline_order values vals[s * order + a] for bins
+// first[s] + a. The joint histogram of a pair then costs
+// O(n_samples * order^2 + nbx * nby) instead of O(n_samples * nbx * nby).
+// Each joint cell receives its contributions in ascending-sample order, the
+// same order as the dense loop, so mi_pair_sparse() is BIT-IDENTICAL to
+// mi_pair() (verified in tests/test_core.cpp).
+struct SparseWeights {
+  int num_bins = 0;
+  int order = 0;
+  std::vector<int> first;     // [n_samples]
+  std::vector<double> vals;   // [n_samples * order]
+};
+
+// Compress dense [num_bins][n_samples] weights. Throws if any sample has
+// nonzero weight outside a window of `order` consecutive bins.
+SparseWeights sparsify_weights(const double *weights, std::size_t n_samples,
+                               int num_bins, int order);
+
+// Same contract as mi_pair(). `joint` is caller-owned scratch of at least
+// nbx * nby doubles (one per thread); it is overwritten.
+double mi_pair_sparse(const SparseWeights &wx, const SparseWeights &wy,
+                      double hx, double hy, std::size_t n_samples,
+                      double *joint);
+
 // Serial driver over all pairs. data is [n_vars][n_samples] row-major;
 // bins_per_var[v] is gene v's own bin count (adaptive binning); mi_out is
 // [n_vars][n_vars] row-major, symmetric. The diagonal holds the genes'

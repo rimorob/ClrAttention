@@ -36,8 +36,13 @@ ClrAttention <- R6::R6Class("ClrAttention",
     estimate_mi = function(bins = "fd", spline_order = 3, threads = NULL) {
       private$mi_ <- bspline_mi(private$data_, bins = bins,
                                 spline_order = spline_order, threads = threads)
+      # The per-gene bin counts actually used are recorded so that every
+      # downstream re-estimation (permutation nulls) reuses them verbatim:
+      # the null must be computed with the observed data's discretization.
       private$params_$mi <- list(bins = bins, spline_order = spline_order,
-                                 threads = threads)
+                                 threads = threads,
+                                 bins_used = bins_for_genes(private$data_,
+                                                            bins = bins))
       # downstream stages are stale once MI is re-estimated
       private$scores_ <- private$operator_ <- private$trajectory_ <-
         private$threshold_ <- NULL
@@ -83,6 +88,10 @@ ClrAttention <- R6::R6Class("ClrAttention",
         stop("q must be in (0, 1)")
       G <- nrow(private$data_)
       if (G < 4L) stop("select_threshold() needs at least 4 genes")
+      if (!identical(private$params_$calibrate$method, "normal"))
+        stop('select_threshold() requires calibrate(method = "normal"): ',
+             "kde scores are non-positive log-probabilities and rayleigh ",
+             "scores live in [0, 1]; the streaming null assumes z-type scores")
       M <- as.numeric(G) * (G - 1L) / 2
       mi_p <- private$params_$mi
       cal_p <- private$params_$calibrate
@@ -100,12 +109,13 @@ ClrAttention <- R6::R6Class("ClrAttention",
         Xp <- t(apply(X, 1L, sample))
         dimnames(Xp) <- dimnames(X)
         Sb <- clr_calibrate(
-          bspline_mi(Xp, bins = mi_p$bins, spline_order = mi_p$spline_order,
+          bspline_mi(Xp, bins = mi_p$bins_used,
+                     spline_order = mi_p$spline_order,
                      threads = threads),
           method = cal_p$method, combine = cal_p$combine)
         v <- Sb[ut]
         if (is.null(hi)) {
-          hi <- max(10, 1.25 * max(v))
+          hi <- max(1e-8, 1.25 * max(v))
           w <- hi / nbins
         }
         idx <- as.integer(v / w) + 1L
@@ -114,13 +124,18 @@ ClrAttention <- R6::R6Class("ClrAttention",
         counts <- counts + tabulate(idx, nbins + 1L)
         n_null <- n_null + length(v)
       }
-      # suf[k] = #{null in bins >= k}; trailing 0 keeps idx + 1 in range.
-      suf <- c(rev(cumsum(rev(counts))), 0)
+      # suf[k] = #{null in bins >= k}. A score s in bin k gets p from
+      # #{null in bins >= k}: this counts the null values sharing s's bin
+      # (some of which may lie below s), so the p-value is conservative by
+      # at most one bin's mass. (An earlier version used bins > k, which
+      # dropped same-bin nulls >= s and was anti-conservative.) Scores in the
+      # overflow bin are compared against the whole overflow count.
+      suf <- rev(cumsum(rev(counts)))
       pvals <- function(s) {
         idx <- as.integer(s / w) + 1L
         idx[idx < 1L] <- 1L
         idx[idx > nbins] <- nbins + 1L
-        (1 + suf[idx + 1L]) / (1 + n_null)
+        (1 + suf[idx]) / (1 + n_null)
       }
 
       s_obs <- private$scores_[ut]
@@ -170,7 +185,13 @@ ClrAttention <- R6::R6Class("ClrAttention",
         stop("alpha must be in (0, 1]")
       rs <- rowSums(A)
       nz <- rs > 0
-      A[nz, ] <- A[nz, ] / rs[nz]   # row-stochastic; zero rows stay zero
+      A[nz, ] <- A[nz, ] / rs[nz]
+      # Genes that attend to nobody attend to themselves: every row is then a
+      # probability distribution, so P = (1-a)I + aA is stochastic and an
+      # isolated gene's profile is preserved. (Previously such rows stayed
+      # zero and the gene decayed as (1-a)^t toward 0; tau = Inf wiped the
+      # whole embedding.)
+      if (any(!nz)) A[cbind(which(!nz), which(!nz))] <- 1
       if (!is.null(rownames(S))) {
         rownames(A) <- colnames(A) <- rownames(S)
       }
@@ -183,7 +204,13 @@ ClrAttention <- R6::R6Class("ClrAttention",
 
     #' @description Iterate E <- ((1-alpha) I + alpha A_hat) E, caching the trajectory.
     #' @param steps positive integer number of diffusion steps.
-    diffuse = function(steps = 10) {
+    #' @param standardize if TRUE (default), E^(0) is the row-standardized
+    #'   data (each gene centered and scaled to unit sd), so diffusion mixes
+    #'   expression *shapes*, not baseline levels or measurement scales.
+    #'   FALSE diffuses the raw matrix (the pre-2026-09-23 behavior).
+    #'   Note: MI is sign-blind, so anticorrelated neighbours still partially
+    #'   cancel under diffusion; see PORT_NOTES.md section 10.
+    diffuse = function(steps = 10, standardize = TRUE) {
       private$.need(private$operator_, "build_operator()")
       steps <- as.integer(steps)
       if (length(steps) != 1L || is.na(steps) || steps < 1L)
@@ -192,10 +219,18 @@ ClrAttention <- R6::R6Class("ClrAttention",
       G <- nrow(private$operator_)
       P <- (1 - alpha) * diag(G) + alpha * private$operator_
       traj <- vector("list", steps + 1L)
-      traj[[1L]] <- private$data_
+      E0 <- private$data_
+      if (isTRUE(standardize)) {
+        mu <- rowMeans(E0)
+        sdv <- sqrt(rowSums((E0 - mu)^2) / (ncol(E0) - 1))
+        sdv[!(sdv > 0)] <- 1  # constant gene: centered only
+        E0 <- (E0 - mu) / sdv
+      }
+      traj[[1L]] <- E0
       for (t in seq_len(steps)) traj[[t + 1L]] <- P %*% traj[[t]]
       private$trajectory_ <- traj
-      private$params_$diffuse <- list(steps = steps)
+      private$params_$diffuse <- list(steps = steps,
+                                      standardize = isTRUE(standardize))
       invisible(self)
     },
 

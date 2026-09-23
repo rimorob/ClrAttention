@@ -68,6 +68,11 @@ void x_to_z(const double *x, double *z, std::size_t n_samples, int spline_order,
     if (x[s] < xmin) xmin = x[s];
     if (x[s] > xmax) xmax = x[s];
   }
+  // DEVIATION: the original divided by (xmax - xmin) unguarded; a constant
+  // gene then produced NaN z, all-zero weights, H(X) = 0 and MI(X, Y) = H(Y)
+  // -- i.e. the constant gene became the strongest hub. Refuse instead.
+  if (!(xmax > xmin))
+    throw std::invalid_argument("constant variable: max == min (no information)");
   const double scale =
       static_cast<double>(num_bins - spline_order + 1) / (xmax - xmin);
   for (std::size_t s = 0; s < n_samples; ++s) z[s] = (x[s] - xmin) * scale;
@@ -117,6 +122,60 @@ double mi_pair(const double *wx, const double *wy, double hx, double hy,
   return hx + hy - H;
 }
 
+SparseWeights sparsify_weights(const double *weights, std::size_t n_samples,
+                               int num_bins, int order) {
+  if (order < 1 || order > num_bins)
+    throw std::invalid_argument("order must be in [1, num_bins]");
+  SparseWeights sw;
+  sw.num_bins = num_bins;
+  sw.order = order;
+  sw.first.assign(n_samples, 0);
+  sw.vals.assign(n_samples * static_cast<std::size_t>(order), 0.0);
+  for (std::size_t s = 0; s < n_samples; ++s) {
+    int lo = -1, hi = -1;
+    for (int b = 0; b < num_bins; ++b) {
+      if (weights[static_cast<std::size_t>(b) * n_samples + s] != 0.0) {
+        if (lo < 0) lo = b;
+        hi = b;
+      }
+    }
+    int f = (lo < 0) ? 0 : lo;
+    if (f + order > num_bins) f = num_bins - order;
+    if (lo >= 0 && hi >= f + order)
+      throw std::logic_error("B-spline support wider than spline order");
+    sw.first[s] = f;
+    for (int a = 0; a < order; ++a)
+      sw.vals[s * static_cast<std::size_t>(order) + static_cast<std::size_t>(a)] =
+          weights[static_cast<std::size_t>(f + a) * n_samples + s];
+  }
+  return sw;
+}
+
+double mi_pair_sparse(const SparseWeights &wx, const SparseWeights &wy,
+                      double hx, double hy, std::size_t n_samples,
+                      double *joint) {
+  const int nbx = wx.num_bins, nby = wy.num_bins;
+  const int kx = wx.order, ky = wy.order;
+  const std::size_t cells = static_cast<std::size_t>(nbx) * nby;
+  for (std::size_t c = 0; c < cells; ++c) joint[c] = 0.0;
+  for (std::size_t s = 0; s < n_samples; ++s) {
+    const double *vx = wx.vals.data() + s * static_cast<std::size_t>(kx);
+    const double *vy = wy.vals.data() + s * static_cast<std::size_t>(ky);
+    const int fx = wx.first[s], fy = wy.first[s];
+    for (int a = 0; a < kx; ++a) {
+      double *row = joint + static_cast<std::size_t>(fx + a) * nby + fy;
+      for (int b = 0; b < ky; ++b) row[b] += vx[a] * vy[b];
+    }
+  }
+  double H = 0.0;
+  const double n = static_cast<double>(n_samples);
+  for (std::size_t c = 0; c < cells; ++c) {
+    const double h = joint[c] / n;
+    if (h > 0.0) H -= h * log2d(h);
+  }
+  return hx + hy - H;
+}
+
 int default_num_threads() {
   const unsigned hc = std::thread::hardware_concurrency();
   if (hc <= 3) return 1;  // tiny machines (or unknown): stay serial
@@ -129,34 +188,49 @@ void mi_matrix(const double *data, std::size_t n_vars, std::size_t n_samples,
   if (n_vars < 2) throw std::invalid_argument("n_vars must be >= 2");
   if (n_samples < 2) throw std::invalid_argument("n_samples must be >= 2");
 
-  // Precompute marginal weights + entropies once per gene (as miSubMarix did).
-  std::vector<std::vector<double>> W(n_vars);
+  // Precompute marginal weights + entropies once per gene (as miSubMarix
+  // did), then keep only the sparse form: memory is O(G * N * order)
+  // instead of O(G * N * bins).
+  std::vector<SparseWeights> W(n_vars);
   std::vector<double> H(n_vars);
+  int max_bins = 0;
   for (std::size_t v = 0; v < n_vars; ++v) {
     const int nb = bins_per_var[v];
     if (nb < 2) throw std::invalid_argument("each bin count must be >= 2");
-    W[v].resize(static_cast<std::size_t>(nb) * n_samples);
+    if (spline_order > nb)
+      throw std::invalid_argument("spline_order must be <= every bin count");
+    std::vector<double> dense(static_cast<std::size_t>(nb) * n_samples);
     gene_weights(data + v * n_samples, n_samples, spline_order, nb,
-                 W[v].data());
-    H[v] = marginal_entropy(W[v].data(), n_samples, nb);
+                 dense.data());
+    H[v] = marginal_entropy(dense.data(), n_samples, nb);
+    W[v] = sparsify_weights(dense.data(), n_samples, nb, spline_order);
+    if (nb > max_bins) max_bins = nb;
   }
+  const std::size_t scratch = static_cast<std::size_t>(max_bins) * max_bins;
 
   // Triangular pair loop: iteration i owns pairs (i, j>=i) and writes each
   // entry exactly once, so iterations are independent. Dynamic scheduling
   // absorbs the triangular load imbalance. Pure C++ in here: no R/Python
-  // API calls from worker threads.
+  // API calls from worker threads. Each thread owns its joint scratch.
 #ifdef _OPENMP
   const int nt = (n_threads > 0) ? n_threads : default_num_threads();
-#pragma omp parallel for schedule(dynamic) num_threads(nt)
+#pragma omp parallel num_threads(nt)
 #endif
-  for (std::size_t i = 0; i < n_vars; ++i) {
-    for (std::size_t j = i; j < n_vars; ++j) {
-      const double m = mi_pair(W[i].data(), W[j].data(), H[i], H[j], n_samples,
-                               bins_per_var[i], bins_per_var[j]);
-      mi_out[i * n_vars + j] = m;
-      mi_out[j * n_vars + i] = m;
+  {
+    std::vector<double> joint(scratch);
+#ifdef _OPENMP
+#pragma omp for schedule(dynamic)
+#endif
+    for (std::size_t i = 0; i < n_vars; ++i) {
+      for (std::size_t j = i; j < n_vars; ++j) {
+        const double m = mi_pair_sparse(W[i], W[j], H[i], H[j], n_samples,
+                                        joint.data());
+        mi_out[i * n_vars + j] = m;
+        mi_out[j * n_vars + i] = m;
+      }
     }
   }
+  (void)n_threads;
 }
 
 void clr_calibrate(const double *mi, std::size_t n_vars, Combine combine,

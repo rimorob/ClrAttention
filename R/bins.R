@@ -39,8 +39,9 @@ fd_bins <- function(x, rule = c("fd", "scott", "sturges"),
 #' Per-gene bin counts for an expression matrix
 #'
 #' @param data numeric matrix, genes x samples.
-#' @param bins "fd" | "scott" | "sturges" (per-gene adaptive) or a single
-#'   positive integer used for every gene (historical parity mode).
+#' @param bins "fd" | "scott" | "sturges" (per-gene adaptive), a single
+#'   integer >= 2 used for every gene (historical parity mode), or an integer
+#'   vector with one count per gene (used verbatim).
 #' @param min_bins,max_bins clamp range applied to adaptive counts only.
 #' @return integer vector of length nrow(data).
 #' @export
@@ -54,8 +55,15 @@ bins_for_genes <- function(data, bins = "fd", min_bins = 5, max_bins = 50) {
            integer(1))
   } else {
     nb <- as.integer(bins)
+    if (length(nb) == G && G > 1L) {
+      # explicit per-gene vector (e.g. counts fitted on the observed data and
+      # propagated verbatim to permutation replicates)
+      if (anyNA(nb) || any(nb < 2L))
+        stop("per-gene bin counts must all be integers >= 2")
+      return(nb)
+    }
     if (length(nb) != 1L || is.na(nb) || nb < 2L)
-      stop("integer bins must be a single value >= 2")
+      stop("integer bins must be a single value >= 2 or one value per gene")
     rep(nb, G)
   }
 }

@@ -64,6 +64,31 @@ int main() {
           "mi_pair seam disagrees with mi_matrix driver");
   }
 
+  // --- sparse kernel is BIT-IDENTICAL to the dense reference kernel ---
+  {
+    std::uniform_int_distribution<int> ub(3, 40);
+    std::vector<double> scratch(40 * 40);
+    int mismatches = 0;
+    for (int order = 2; order <= 3; ++order) {
+      for (int rep = 0; rep < 40; ++rep) {
+        const int nbx = ub(rng), nby = ub(rng);
+        const std::size_t gx = static_cast<std::size_t>(rep) % G;
+        const std::size_t gy = (gx + 1 + static_cast<std::size_t>(rep) % (G - 1)) % G;
+        std::vector<double> wx(nbx * E), wy(nby * E);
+        clr_core::gene_weights(data.data() + gx * E, E, order, nbx, wx.data());
+        clr_core::gene_weights(data.data() + gy * E, E, order, nby, wy.data());
+        const double hx = clr_core::marginal_entropy(wx.data(), E, nbx);
+        const double hy = clr_core::marginal_entropy(wy.data(), E, nby);
+        const double dense = clr_core::mi_pair(wx.data(), wy.data(), hx, hy, E, nbx, nby);
+        const auto sx = clr_core::sparsify_weights(wx.data(), E, nbx, order);
+        const auto sy = clr_core::sparsify_weights(wy.data(), E, nby, order);
+        const double sparse = clr_core::mi_pair_sparse(sx, sy, hx, hy, E, scratch.data());
+        if (dense != sparse) ++mismatches;
+      }
+    }
+    CHECK(mismatches == 0, "sparse MI kernel not bit-identical to dense kernel");
+  }
+
   // --- adaptive bins: different per-gene counts still work ---
   {
     std::vector<int> abins = {6, 8, 10, 12, 15, 20};

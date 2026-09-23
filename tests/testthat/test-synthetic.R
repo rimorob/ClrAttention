@@ -112,9 +112,13 @@ test_that("build_operator() picks up the selected threshold automatically", {
     build_operator(alpha = 0.5)
   op <- fit$operator
   S <- fit$clr_scores
-  expect_equal(sum(op > 0), sum(S >= fit$threshold))
+  off <- row(op) != col(op)
+  expect_equal(sum(op[off] > 0), sum(S[off] >= fit$threshold))
   rs <- rowSums(op)
-  expect_true(all(rs == 0 | abs(rs - 1) < 1e-12))
+  expect_true(all(abs(rs - 1) < 1e-12))
+  # genes with no surviving edge carry exactly a self-loop
+  iso <- rowSums(S >= fit$threshold & off) == 0
+  expect_true(all(diag(op)[iso] == 1))
 })
 
 test_that("threshold needs select_threshold() first", {
