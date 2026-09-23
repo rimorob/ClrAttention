@@ -74,21 +74,48 @@ gradually reveals mixed membership.
 
 ## Real data: M3D E. coli x RegulonDB (macOS, Apple Silicon)
 
+Set up once:
+
 ```sh
-tools/setup_mac.sh     # deps, OpenMP build via libomp (project-local Makevars),
-                       # M3D download, test suite
-# put the RegulonDB TF->gene file (NetworkRegulatorGene.tsv) in data/, then
-tools/run_m3d.sh data/NetworkRegulatorGene.tsv 100
+tools/setup_mac.sh
 ```
 
-Outputs go to `results/chips/` (907 arrays) and `results/avg/` (466
-replicate-averaged experiments):
+This installs the dependencies, builds with OpenMP through libomp using a
+project-local Makevars, downloads M3D, and runs the test suite.
 
-- `edge_pr_by_config.csv`
-- `selected_edges.csv`
-- `depth_sweep.csv` and `depth_sweep.png`
-- `primary_fit.rds`
-- `run.log` and `timings.csv`
+Then download four files from RegulonDB's Datasets page into
+`data/RegulonDBExtract/`:
+
+- `RISet.tsv`
+- `TUSet.tsv`
+- `OperonSet.tsv`
+- `NetworkSigmaGene.tsv`
+
+Quick check, then the full run:
+
+```sh
+Rscript analysis/run_m3d_regulondb.R --quick 600 --B 10 --out results/quick
+tools/run_m3d.sh data/RegulonDBExtract 100
+```
+
+**The primary benchmark ignores which regulator is involved.**  It builds
+regulons for every kind of regulator:  transcription factors, sRNAs, ppGpp,
+other proteins and sigma factors.  Promoter and transcription-unit targets
+are expanded to their genes.  The score asks whether genes that share a
+regulon come out as related.  The regulator itself is never treated as a
+node, and pairs of genes in the same operon are excluded.
+
+The Faith-2007 style TF–gene edge score is reported as a secondary result.
+See `analysis/regulons.R` for how the benchmark is built.
+
+The 907-array results go to `results/chips/`, and the 466
+replicate-averaged experiments go to `results/avg/`:
+
+- `comembership_by_config.csv` and `coherence_by_config.csv`
+- `depth_comembership.csv` and `depth_coherence.csv`
+- `tfnode_edge_pr_by_config.csv` and `selected_edges.csv`
+- `depth_sweep.png`
+- `run.log`
 
 ## Run the tests
 

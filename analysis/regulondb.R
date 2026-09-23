@@ -135,19 +135,24 @@ edge_universe <- function(net, sym, conf_keep = NULL) {
 }
 
 # Precision-recall summary of a score vector against 0/1 labels.
-# Ties are broken pessimistically (negatives first within a tie) so that a
-# constant score cannot look informative.
+# Tie handling is threshold-based (as in sklearn's average_precision_score):
+# tied scores form one block, and every positive in a block is credited with
+# the precision at the end of that block. A constant score therefore gets
+# AP = base rate, and sparse scores with many exact ties (e.g. attention mass)
+# are neither favoured nor penalised by an arbitrary tie order. AUROC uses
+# average ranks (Mann-Whitney), which is the same tie convention.
 pr_summary <- function(score, label, prec_levels = c(0.8, 0.6, 0.4)) {
   score[is.na(score)] <- -Inf               # undefined scores rank last
-  o <- order(-score, label)
-  l <- label[o]
-  tp <- cumsum(l); k <- seq_along(l)
-  prec <- tp / k; rec <- tp / sum(l)
-  aupr <- sum(prec[l == 1]) / sum(l)          # average precision
-  # AUROC via Mann-Whitney
-  r <- rank(score)
+  o <- order(-score)
+  s <- score[o]; l <- label[o]
+  last <- c(s[-1L] != s[-length(s)], TRUE)  # end of each tie block
+  tp <- cumsum(l)[last]; k <- seq_along(l)[last]
+  prec <- tp / k
+  dtp <- diff(c(0, tp))
   n1 <- sum(label); n0 <- length(label) - n1
-  auroc <- (sum(r[label == 1]) - n1 * (n1 + 1) / 2) / (n1 * n0)
+  aupr <- sum(dtp * prec) / n1               # average precision
+  r <- rank(score)
+  auroc <- (sum(r[label == 1]) - n1 * (n1 + 1) / 2) / (as.numeric(n1) * n0)
   at <- vapply(prec_levels, function(p) {
     ok <- which(prec >= p & k >= 10)
     if (!length(ok)) 0 else tp[max(ok)]

@@ -3,49 +3,50 @@
 #
 # Usage (from the repo root):
 #   Rscript analysis/run_m3d_regulondb.R \
-#       --m3d data/E_coli_v4_Build_6 --regulondb data/NetworkRegulatorGene.tsv \
-#       [--set chips|avg] [--B 100] [--threads N] [--tmax 20] [--alpha 0.5]
+#       [--m3d data/E_coli_v4_Build_6] [--rdb data/RegulonDBExtract] \
+#       [--set chips|avg] [--B 100] [--threads N] [--alpha 0.5] \
+#       [--depths 0,1,2,3,5,8,12,20] [--min-size 5] [--max-size 500] \
 #       [--quick 600] [--mi-null] [--out results/<set>]
 #
-# Stages (all outputs under --out):
-#   1. Load compendium (genes = b-numbers) and RegulonDB; build the
-#      Faith-2007-style evaluation universe (every known-TF x gene pair).
-#   2. Edge-level PR for four MI/CLR configurations:
-#        parity2007  transform none, 10 bins, Euclidean   (historical CLR)
-#        none_fd     transform none, FD bins,  Euclidean   (pre-review default)
-#        rank_fd     transform rank, FD bins,  Euclidean   (new default)
-#        rank_fd_st  transform rank, FD bins,  Stouffer
-#      scored by raw MI and by CLR, against all and strong/confirmed-only
-#      RegulonDB interactions.
-#   3. Primary config (rank_fd): permutation edge selection (BH on the CLR
-#      null, B replicates), precision/recall of the selected set; optional
-#      MI-null comparison (--mi-null, costs another B MI builds).
-#   4. Design-A diffusion depth sweep with the fixed operator: per depth t,
-#      per-TF regulon average precision when genes are ranked by
-#        (a) multi-hop attention mass (P^t)[TF, ], and
-#        (b) correlation of diffused profiles cor(E_t[TF, ], E_t[g, ]),
-#      plus edge-level AUPR of |cor(E_t)| on the universe.
-#   5. Artifacts for reproducibility (see docs/diffusion_depth_design_review.md
-#      section 9): MI/CLR/edges/operator of the primary config, parameters,
-#      seed, sessionInfo, timings.
+# PRIMARY BENCHMARK (regulator-agnostic; see analysis/regulons.R): regulons of
+# every regulator type in RegulonDB -- TFs, sRNAs, small molecules (ppGpp),
+# other proteins, and sigma factors (sigmulons) -- expanded from promoter/TU
+# targets to genes, size window [min-size, max-size]. A gene pair is positive
+# if the two genes share a regulon; same-operon pairs are excluded. Scored by
+#   * co-membership AUPR/AUROC over all annotated gene pairs, overall and per
+#     regulator class, for strong/confirmed ("SC") and all ("all") evidence;
+#   * per-regulon coherence AUROC (within-regulon pairs vs member-to-non-
+#     co-regulated pairs), summarized as the median over regulons.
+# SECONDARY (continuity with Faith et al. 2007): TF-node edge PR, where the TF's
+# own mRNA stands in for its activity.
+#
+# Stages:
+#   1. data + regulons
+#   2. four MI/CLR configurations (parity2007, none_fd, rank_fd, rank_fd_st),
+#      each scored by raw MI and by CLR; plus plain |Pearson| as a baseline
+#   3. permutation edge selection (BH, CLR null) on rank_fd; optional MI null
+#   4. Design-A depth sweep with the fixed operator: similarity of diffused
+#      profiles |cor(E_t)| and symmetrized attention mass (P^t + P^t') / 2
+#   5. artifacts (MI/CLR/edges/operator, parameters, seed, sessionInfo, timings)
 
 ## ---- arguments ---------------------------------------------------------------
 args <- commandArgs(trailingOnly = TRUE)
-opt <- list(m3d = "data/E_coli_v4_Build_6", regulondb = NULL, set = "chips",
-            B = 100L, threads = NULL, tmax = 20L, alpha = 0.5, quick = 0L,
-            mi_null = FALSE, out = NULL, seed = 20260922L)
+opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
+            set = "chips", B = 100L, threads = NULL, alpha = 0.5,
+            depths = "0,1,2,3,5,8,12,20", min_size = 5L, max_size = 500L,
+            quick = 0L, mi_null = FALSE, out = NULL, seed = 20260922L)
+int_opts <- c("B", "threads", "quick", "seed", "min_size", "max_size")
 i <- 1L
 while (i <= length(args)) {
-  a <- args[i]
-  key <- gsub("-", "_", sub("^--", "", a))
+  key <- gsub("-", "_", sub("^--", "", args[i]))
   if (key == "mi_null") { opt$mi_null <- TRUE; i <- i + 1L; next }
-  if (!key %in% names(opt)) stop("unknown argument: ", a)
+  if (!key %in% names(opt)) stop("unknown argument: ", args[i])
   val <- args[i + 1L]
-  opt[[key]] <- if (key %in% c("B", "threads", "tmax", "quick", "seed"))
-    as.integer(val) else if (key == "alpha") as.numeric(val) else val
+  opt[[key]] <- if (key %in% int_opts) as.integer(val) else
+    if (key == "alpha") as.numeric(val) else val
   i <- i + 2L
 }
-if (is.null(opt$regulondb)) stop("--regulondb <path> is required")
+depths <- sort(unique(as.integer(strsplit(opt$depths, ",")[[1]])))
 if (is.null(opt$out)) opt$out <- file.path("results", opt$set)
 dir.create(opt$out, recursive = TRUE, showWarnings = FALSE)
 logf <- file.path(opt$out, "run.log")
@@ -60,15 +61,15 @@ script_dir <- (function() {
   if (length(f)) dirname(normalizePath(sub("^--file=", "", f[1]))) else "analysis"
 })()
 repo_root <- normalizePath(file.path(script_dir, ".."))
-if (requireNamespace("clr", quietly = TRUE)) {
-  library(clr)
-} else {
+if (requireNamespace("clr", quietly = TRUE)) library(clr) else
   pkgload::load_all(repo_root, quiet = TRUE)
-}
 suppressPackageStartupMessages(library(Matrix))
 source(file.path(script_dir, "regulondb.R"))
+source(file.path(script_dir, "regulons.R"))
 say("options: ", paste(names(opt), unlist(lapply(opt, format)), sep = "=",
                        collapse = " "))
+say("clr OpenMP: ", paste(names(clr_openmp_info()), clr_openmp_info(),
+                          sep = "=", collapse = " "))
 timings <- list()
 tic <- function(label, expr) {
   t0 <- Sys.time(); val <- force(expr)
@@ -76,8 +77,10 @@ tic <- function(label, expr) {
   say(sprintf("%s: %.1f s", label, timings[[label]]))
   invisible(val)
 }
+wcsv <- function(x, name) utils::write.csv(x, file.path(opt$out, name),
+                                           row.names = FALSE)
 
-## ---- 1. data -----------------------------------------------------------------
+## ---- 1. data and regulons -------------------------------------------------------
 base <- basename(normalizePath(opt$m3d))
 f <- if (opt$set == "chips")
   file.path(opt$m3d, paste0(base, "_chips907probes4297.tab")) else
@@ -87,167 +90,253 @@ raw <- tic("read_m3d", utils::read.delim(f, check.names = FALSE,
 probe <- raw[[1]]
 X <- as.matrix(raw[, -1]); storage.mode(X) <- "double"
 bnum <- vapply(strsplit(probe, "_"), function(p) p[length(p) - 1L], "")
-desc <- utils::read.delim(file.path(opt$m3d, paste0(base, ".probe_set_descriptions")),
-                          stringsAsFactors = FALSE)
-if (!all(c("probe_set_name", "gene_symbol") %in% names(desc)))
-  stop("probe_set_descriptions lacks probe_set_name/gene_symbol columns: ",
-       paste(names(desc), collapse = ", "))
-sym <- desc$gene_symbol[match(probe, desc$probe_set_name)]
-from_probe <- vapply(strsplit(probe, "_"), function(p) p[1], "")
-miss <- is.na(sym) | !nzchar(sym)
-sym[miss] <- from_probe[miss]
-say(sprintf("symbols: %d from descriptions, %d from probe names", sum(!miss), sum(miss)))
+stopifnot(all(grepl("^b[0-9]+$", bnum)), !anyDuplicated(bnum))
 rownames(X) <- bnum
-stopifnot(!anyDuplicated(bnum))
 rng <- apply(X, 1, function(x) diff(range(x)))
 if (any(rng <= 0)) {
   say("dropping ", sum(rng <= 0), " constant genes")
-  X <- X[rng > 0, , drop = FALSE]; sym <- sym[rng > 0]
+  X <- X[rng > 0, , drop = FALSE]
 }
 if (anyNA(X)) stop("NA values in the compendium")
 if (opt$quick > 0L) {
   v <- apply(X, 1, stats::var)
-  keep <- sort(order(-v)[seq_len(min(opt$quick, nrow(X)))])
-  X <- X[keep, ]; sym <- sym[keep]
+  X <- X[sort(order(-v)[seq_len(min(opt$quick, nrow(X)))]), ]
   say("QUICK MODE: top-", nrow(X), " variance genes only")
 }
-say("compendium: ", nrow(X), " genes x ", ncol(X), " arrays (", opt$set, ")")
+genes <- rownames(X); G <- length(genes)
+say("compendium: ", G, " genes x ", ncol(X), " arrays (", opt$set, ")")
 
-net <- read_regulondb(opt$regulondb)
-u_all <- edge_universe(net, sym)
-u_str <- edge_universe(net, sym, conf_keep = c("S", "C"))
-say(sprintf("universe (all evidence): %d TFs, %d pairs, %d positives (%d mapped rows)",
-            length(u_all$tfs), length(u_all$label), u_all$n_pos, u_all$n_known_rows))
-say(sprintf("universe (strong/confirmed): %d TFs, %d pairs, %d positives",
-            length(u_str$tfs), length(u_str$label), u_str$n_pos))
+to_bn <- make_bnumber_mapper(file.path(script_dir, "ecoli_k12_genes.tsv"))
+rtab <- build_regulon_table(opt$rdb, to_bn)
+operon_of <- build_operon_map(opt$rdb, to_bn)
+say(sprintf("RegulonDB: %d regulator-target rows, %d target names unmapped to b-numbers; %d regulated genes, %d on the array",
+            nrow(rtab), sum(is.na(rtab$bnumber)), length(unique(na.omit(rtab$bnumber))),
+            length(intersect(unique(rtab$bnumber), genes))))
+bench <- list()
+for (ev in c("SC", "all")) {
+  ck <- if (ev == "SC") c("C", "S") else c("C", "S", "W", "?")
+  reg <- make_regulons(rtab, genes, conf_keep = ck, min_size = opt$min_size,
+                       max_size = opt$max_size)
+  pairs <- comembership_pairs(reg, operon_of, genes)
+  co <- comember_matrix(reg, G)
+  say(sprintf("regulons [%s]: %d (%s); dropped by size: %s; annotated genes %d, pairs %d, positive %d (%.1f%%), same-operon removed %d",
+              ev, length(reg$members),
+              paste(names(table(reg$class)), table(reg$class), sep = "=", collapse = " "),
+              paste(sprintf("%s(%d)", reg$dropped$regulon[reg$dropped$size > opt$max_size],
+                            reg$dropped$size[reg$dropped$size > opt$max_size]), collapse = " "),
+              length(pairs$genes_in), length(pairs$label), sum(pairs$label),
+              100 * mean(pairs$label), pairs$n_same_operon_removed))
+  bench[[ev]] <- list(reg = reg, pairs = pairs, co = co)
+}
+wcsv(data.frame(regulon = names(bench$all$reg$members), class = bench$all$reg$class,
+                size = bench$all$reg$size), "regulons_all.csv")
 
-## ---- 2. edge-level PR for four configurations -----------------------------------
+# Score a similarity matrix on every benchmark; returns long data.frames.
+score_all <- function(S, label) {
+  cm <- lapply(names(bench), function(ev) {
+    r <- comembership_eval(S, bench[[ev]]$pairs)
+    cbind(method = label, evidence = ev, r)
+  })
+  coh <- lapply(names(bench), function(ev) {
+    b <- bench[[ev]]
+    a <- regulon_coherence(S, b$reg, b$co, operon_of, genes)
+    rbind(data.frame(method = label, evidence = ev, class = "all",
+                     median_auroc = stats::median(a, na.rm = TRUE),
+                     frac_gt_0.6 = mean(a > 0.6, na.rm = TRUE),
+                     n = sum(!is.na(a))),
+          do.call(rbind, lapply(sort(unique(b$reg$class)), function(c) {
+            ac <- a[b$reg$class == c]
+            data.frame(method = label, evidence = ev, class = c,
+                       median_auroc = stats::median(ac, na.rm = TRUE),
+                       frac_gt_0.6 = mean(ac > 0.6, na.rm = TRUE),
+                       n = sum(!is.na(ac)))
+          })))
+  })
+  list(comembership = do.call(rbind, cm), coherence = do.call(rbind, coh))
+}
+cm_rows <- list(); coh_rows <- list()
+add_scores <- function(sc) {
+  cm_rows[[length(cm_rows) + 1L]] <<- sc$comembership
+  coh_rows[[length(coh_rows) + 1L]] <<- sc$coherence
+}
+headline <- function(label) {
+  cm <- do.call(rbind, cm_rows); coh <- do.call(rbind, coh_rows)
+  a <- cm[cm$method == label & cm$stratum == "all", ]
+  h <- coh[coh$method == label & coh$class == "all", ]
+  say(sprintf("  %-22s co-membership AUPR SC %.4f (base %.4f) all %.4f (base %.4f) | coherence median AUROC SC %.3f all %.3f",
+              label, a$aupr[a$evidence == "SC"], a$base_rate[a$evidence == "SC"],
+              a$aupr[a$evidence == "all"], a$base_rate[a$evidence == "all"],
+              h$median_auroc[h$evidence == "SC"], h$median_auroc[h$evidence == "all"]))
+}
+
+# Secondary: TF-node network (TF class only), TF gene resolved by name.
+tfr <- rtab[rtab$reg_class == "TF" & !is.na(rtab$bnumber), ]
+tf_genes <- .classic_tf_to_genes(tfr$regulator)   # CRP -> cRP, IHF -> ihfA;ihfB ...
+tf_parts <- strsplit(tf_genes, ";", fixed = TRUE)
+tfnet <- data.frame(tf_gene = to_bn(unlist(tf_parts)),
+                    target = rep(tfr$bnumber, lengths(tf_parts)),
+                    confidence = rep(tfr$confidence, lengths(tf_parts)),
+                    stringsAsFactors = FALSE)
+say(sprintf("TF-node network: %d/%d TF names resolved to a b-number",
+            length(unique(tfr$regulator[!is.na(to_bn(vapply(tf_parts, `[`, "", 1L)))])),
+            length(unique(tfr$regulator))))
+tfnet <- tfnet[!is.na(tfnet$tf_gene), ]
+u_all <- edge_universe(tfnet, genes)
+u_str <- edge_universe(tfnet, genes, conf_keep = c("S", "C"))
+tfnode <- function(S, label) {
+  do.call(rbind, lapply(c("SC", "all"), function(ev) {
+    u <- if (ev == "SC") u_str else u_all
+    data.frame(method = label, evidence = ev,
+               t(pr_summary(S[cbind(u$i, u$j)], u$label)), check.names = FALSE)
+  }))
+}
+tf_rows <- list()
+
+## ---- 2. configurations ---------------------------------------------------------
+Z <- X - rowMeans(X); Z <- Z / sqrt(rowSums(Z^2) / (ncol(Z) - 1))
+C0 <- abs(tcrossprod(Z) / (ncol(Z) - 1))
+add_scores(score_all(C0, "abs_pearson")); headline("abs_pearson")
+tf_rows[[length(tf_rows) + 1L]] <- tfnode(C0, "abs_pearson")
+rm(C0); invisible(gc())
+
 configs <- list(
   parity2007 = list(transform = "none", bins = 10, combine = "euclidean"),
   none_fd    = list(transform = "none", bins = "fd", combine = "euclidean"),
   rank_fd    = list(transform = "rank", bins = "fd", combine = "euclidean"),
   rank_fd_st = list(transform = "rank", bins = "fd", combine = "stouffer")
 )
-edge_rows <- list()
-fits <- list()
+fit <- NULL
 for (nm in names(configs)) {
   cf <- configs[[nm]]
-  fit <- ClrAttention$new(X)
-  tic(paste0("mi_", nm), fit$estimate_mi(bins = cf$bins, transform = cf$transform,
-                                         threads = opt$threads))
-  fit$calibrate(method = "normal", combine = cf$combine)
-  b <- fit$params$mi$bins_used
+  f_ <- ClrAttention$new(X)
+  tic(paste0("mi_", nm), f_$estimate_mi(bins = cf$bins, transform = cf$transform,
+                                        threads = opt$threads))
+  f_$calibrate(method = "normal", combine = cf$combine)
+  b <- f_$params$mi$bins_used
   say(sprintf("%s: bins median %g (range %d-%d)", nm, stats::median(b), min(b), max(b)))
-  for (ref in c("all", "strong")) {
-    u <- if (ref == "all") u_all else u_str
-    for (st in c("mi", "clr")) {
-      V <- if (st == "mi") fit$mi else fit$clr_scores
-      s <- pr_summary(V[cbind(u$i, u$j)], u$label)
-      edge_rows[[length(edge_rows) + 1L]] <- data.frame(
-        config = nm, reference = ref, score = st, t(s), check.names = FALSE)
-    }
+  M <- f_$mi; diag(M) <- 0
+  if (nm != "rank_fd_st") {   # MI is identical to rank_fd's (only CLR differs)
+    add_scores(score_all(M, paste0(nm, ":mi"))); headline(paste0(nm, ":mi"))
+    tf_rows[[length(tf_rows) + 1L]] <- tfnode(M, paste0(nm, ":mi"))
   }
-  if (nm == "rank_fd") fits[[nm]] <- fit
-  rm(fit); invisible(gc())
+  add_scores(score_all(f_$clr_scores, paste0(nm, ":clr"))); headline(paste0(nm, ":clr"))
+  tf_rows[[length(tf_rows) + 1L]] <- tfnode(f_$clr_scores, paste0(nm, ":clr"))
+  if (nm == "rank_fd") fit <- f_
+  rm(f_, M); invisible(gc())
 }
-edge_tab <- do.call(rbind, edge_rows)
-utils::write.csv(edge_tab, file.path(opt$out, "edge_pr_by_config.csv"), row.names = FALSE)
-print(edge_tab, digits = 3, row.names = FALSE)
+wcsv(do.call(rbind, cm_rows), "comembership_by_config.csv")
+wcsv(do.call(rbind, coh_rows), "coherence_by_config.csv")
+wcsv(do.call(rbind, tf_rows), "tfnode_edge_pr_by_config.csv")
+n_cfg_cm <- length(cm_rows)
 
 ## ---- 3. permutation edge selection (primary config) ----------------------------
-fit <- fits$rank_fd
+sel_eval <- function(E, label, tau) {
+  do.call(rbind, lapply(names(bench), function(ev) {
+    p <- bench[[ev]]$pairs
+    s <- E[cbind(p$i, p$j)]
+    data.frame(null = label, evidence = ev, tau = tau, n_edges = sum(E) / 2,
+               mean_degree = mean(rowSums(E)),
+               selected_annotated_pairs = sum(s),
+               comember_precision = if (sum(s)) mean(p$label[s]) else NA_real_,
+               comember_base_rate = mean(p$label),
+               comember_recall = sum(s & p$label == 1) / sum(p$label),
+               tfnode_precision = selected_pr(E, if (ev == "SC") u_str else u_all)[["precision"]])
+  }))
+}
 set.seed(opt$seed)
 tic("select_threshold_clr", fit$select_threshold(B = opt$B, method = "fdr", q = 0.05,
                                                  threads = opt$threads,
                                                  statistic = "clr"))
 E_sel <- fit$edges
-sel_row <- function(nm, f, E) data.frame(
-  null = nm, tau = f$threshold, n_edges = sum(E) / 2,
-  mean_degree = mean(rowSums(E)), t(selected_pr(E, u_all)),
-  strong_recall = selected_pr(E, u_str)[["recall"]])
-sel_rows <- list(sel_row("clr", fit, E_sel))
+sel_rows <- list(sel_eval(E_sel, "clr", fit$threshold))
 if (opt$mi_null) {
   fit_m <- fit$clone()
   set.seed(opt$seed)
   tic("select_threshold_mi", fit_m$select_threshold(B = opt$B, method = "fdr",
                                                     threads = opt$threads,
                                                     statistic = "mi"))
-  sel_rows[[2]] <- sel_row("mi", fit_m, fit_m$edges)
+  sel_rows[[2]] <- sel_eval(fit_m$edges, "mi", fit_m$threshold)
   rm(fit_m)
 }
 sel_tab <- do.call(rbind, sel_rows)
-utils::write.csv(sel_tab, file.path(opt$out, "selected_edges.csv"), row.names = FALSE)
+wcsv(sel_tab, "selected_edges.csv")
 print(sel_tab, digits = 3, row.names = FALSE)
 
 ## ---- 4. diffusion depth sweep (Design A: fixed operator) ------------------------
 fit$build_operator(alpha = opt$alpha)
 A <- Matrix::Matrix(fit$operator, sparse = TRUE)
-G <- nrow(A)
 P <- (1 - opt$alpha) * Matrix::Diagonal(G) + opt$alpha * A
-say(sprintf("operator: %d nonzeros off-diagonal, %d isolated genes (self-loop)",
-            sum(fit$operator > 0 & row(fit$operator) != col(fit$operator)),
-            sum(diag(fit$operator) == 1)))
-Z <- X - rowMeans(X); Z <- Z / sqrt(rowSums(Z^2) / (ncol(Z) - 1))
-tfs <- u_all$tfs
-Rt <- Matrix::sparseMatrix(i = seq_along(tfs), j = tfs, x = 1, dims = c(length(tfs), G))
-Rt <- as.matrix(Rt)                    # (P^t)[tfs, ], starts at identity rows
-Et <- Z
-depth <- list()
-for (t in 0:opt$tmax) {
+say(sprintf("operator: %d off-diagonal nonzeros, %d isolated genes (self-loop), alpha %.2f",
+            Matrix::nnzero(A) - sum(Matrix::diag(A) != 0), sum(Matrix::diag(A) == 1),
+            opt$alpha))
+Pt <- diag(G)                        # dense P^t
+Et <- Z                              # E^(0): row-standardized data
+depth_rows <- list()
+for (t in 0:max(depths)) {
   if (t > 0) {
-    Rt <- as.matrix(Rt %*% P)
+    Pt <- as.matrix(Pt %*% P)
     Et <- as.matrix(P %*% Et)
   }
-  Ctf <- stats::cor(t(Et[tfs, , drop = FALSE]), t(Et))       # |tfs| x G
-  ap_att <- regulon_ap(Rt, u_all)
-  ap_cor <- regulon_ap(abs(Ctf), u_all)
-  # edge-level |cor| AUPR on the universe
-  tf_row <- match(u_all$i, tfs); other <- u_all$j
-  swap <- is.na(tf_row); tf_row[swap] <- match(u_all$j[swap], tfs); other[swap] <- u_all$i[swap]
-  ci <- abs(Ctf[cbind(tf_row, other)])
-  e <- pr_summary(ci, u_all$label)
-  depth[[t + 1L]] <- data.frame(
-    t = t,
-    regulon_ap_attention_median = if (t == 0) NA_real_ else stats::median(ap_att, na.rm = TRUE),
-    regulon_ap_cor_median = stats::median(ap_cor, na.rm = TRUE),
-    edge_aupr_abscor = e[["aupr"]],
-    n_tfs_scored = sum(!is.na(ap_cor)),
-    median_abs_cor_all = stats::median(abs(Ctf)),
-    row_sd_min = min(apply(Et, 1, stats::sd)))
-  if (t %% 5 == 0 || t == opt$tmax)
-    say(sprintf("t=%2d  regulonAP(att)=%.4f  regulonAP(|cor|)=%.4f  edgeAUPR(|cor|)=%.4f  median|cor|=%.3f",
-                t, depth[[t + 1L]]$regulon_ap_attention_median,
-                depth[[t + 1L]]$regulon_ap_cor_median, e[["aupr"]],
-                depth[[t + 1L]]$median_abs_cor_all))
+  if (!t %in% depths) next
+  Ez <- Et - rowMeans(Et)
+  sdv <- sqrt(rowSums(Ez^2) / (ncol(Ez) - 1)); sdv[sdv <= 0] <- 1
+  Ez <- Ez / sdv
+  Ct <- abs(tcrossprod(Ez) / (ncol(Ez) - 1))
+  sc <- score_all(Ct, sprintf("depth%02d:abscor", t)); add_scores(sc)
+  headline(sprintf("depth%02d:abscor", t))
+  if (t > 0) {
+    Sa <- (Pt + t(Pt)) / 2; diag(Sa) <- 0
+    add_scores(score_all(Sa, sprintf("depth%02d:attention", t)))
+    headline(sprintf("depth%02d:attention", t))
+  }
+  depth_rows[[length(depth_rows) + 1L]] <- data.frame(
+    t = t, median_abs_cor_offdiag = stats::median(Ct[upper.tri(Ct)]),
+    effective_rank = { ev <- svd(Ez, nu = 0, nv = 0)$d^2; sum(ev)^2 / sum(ev^2) })
+  rm(Ct); invisible(gc())
 }
-depth_tab <- do.call(rbind, depth)
-utils::write.csv(depth_tab, file.path(opt$out, "depth_sweep.csv"), row.names = FALSE)
+cm_all <- do.call(rbind, cm_rows); coh_all <- do.call(rbind, coh_rows)
+dep_cm <- cm_all[grepl("^depth", cm_all$method), ]
+dep_coh <- coh_all[grepl("^depth", coh_all$method), ]
+wcsv(dep_cm, "depth_comembership.csv")
+wcsv(dep_coh, "depth_coherence.csv")
+wcsv(do.call(rbind, depth_rows), "depth_collapse.csv")
 
-png(file.path(opt$out, "depth_sweep.png"), width = 900, height = 560, res = 110)
-par(mar = c(5, 4.5, 3, 1))
-yl <- range(unlist(depth_tab[, c("regulon_ap_attention_median",
-                                 "regulon_ap_cor_median", "edge_aupr_abscor")]),
-            na.rm = TRUE)
-plot(depth_tab$t, depth_tab$regulon_ap_cor_median, type = "b", pch = 16,
-     col = "#1b6ca8", ylim = yl, xlab = "diffusion depth t",
-     ylab = "average precision", main = paste0("M3D (", opt$set,
-                                              ") x RegulonDB: depth sweep"))
-lines(depth_tab$t, depth_tab$regulon_ap_attention_median, type = "b", pch = 17,
-      col = "#e8833a")
-lines(depth_tab$t, depth_tab$edge_aupr_abscor, type = "b", pch = 15, col = "#2ca02c")
-legend("topright", bty = "n", pch = c(16, 17, 15),
-       col = c("#1b6ca8", "#e8833a", "#2ca02c"),
-       legend = c("per-TF regulon AP, |cor| of diffused profiles (median)",
-                  "per-TF regulon AP, attention mass (P^t) (median)",
-                  "edge AUPR, |cor| of diffused profiles"))
+png(file.path(opt$out, "depth_sweep.png"), width = 1000, height = 560, res = 110)
+par(mfrow = c(1, 2), mar = c(5, 4.5, 3, 1))
+for (what in c("aupr", "coh")) {
+  for (kind in c("abscor", "attention")) {
+    if (what == "aupr") {
+      d <- dep_cm[dep_cm$stratum == "all" & dep_cm$evidence == "SC" &
+                    grepl(kind, dep_cm$method), ]
+      y <- d$aupr
+    } else {
+      d <- dep_coh[dep_coh$class == "all" & dep_coh$evidence == "SC" &
+                     grepl(kind, dep_coh$method), ]
+      y <- d$median_auroc
+    }
+    tt <- as.integer(sub("^depth([0-9]+):.*$", "\\1", d$method))
+    if (kind == "abscor") {
+      plot(tt, y, type = "b", pch = 16, col = "#1b6ca8",
+           ylim = range(c(y, if (what == "aupr")
+             dep_cm$aupr[dep_cm$stratum == "all" & dep_cm$evidence == "SC"] else
+               dep_coh$median_auroc[dep_coh$class == "all" & dep_coh$evidence == "SC"]),
+             na.rm = TRUE),
+           xlab = "diffusion depth t",
+           ylab = if (what == "aupr") "co-membership AUPR (SC)" else
+             "median regulon coherence AUROC (SC)",
+           main = if (what == "aupr") "Regulon co-membership" else "Regulon coherence")
+    } else lines(tt, y, type = "b", pch = 17, col = "#e8833a")
+  }
+  legend("bottomright", bty = "n", pch = c(16, 17), col = c("#1b6ca8", "#e8833a"),
+         legend = c("|cor| of diffused profiles", "attention mass (P^t sym.)"))
+}
 dev.off()
 
 ## ---- 5. artifacts ------------------------------------------------------------
 saveRDS(list(mi = fit$mi, clr = fit$clr_scores, edges = E_sel,
-             operator = A, params = fit$params, genes = rownames(X),
-             symbols = sym, seed = opt$seed, options = opt),
+             operator = A, params = fit$params, genes = genes,
+             seed = opt$seed, options = opt),
         file.path(opt$out, "primary_fit.rds"), compress = "gzip")
-utils::write.csv(data.frame(stage = names(timings), seconds = unlist(timings)),
-                 file.path(opt$out, "timings.csv"), row.names = FALSE)
+wcsv(data.frame(stage = names(timings), seconds = unlist(timings)), "timings.csv")
 writeLines(capture.output(sessionInfo()), file.path(opt$out, "sessionInfo.txt"))
 say("done; outputs in ", normalizePath(opt$out))
