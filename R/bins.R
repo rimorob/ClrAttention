@@ -39,7 +39,9 @@ fd_bins <- function(x, rule = c("fd", "scott", "sturges"),
 #' Per-gene bin counts for an expression matrix
 #'
 #' @param data numeric matrix, genes x samples.
-#' @param bins "fd" | "scott" | "sturges" (per-gene adaptive), a single
+#' @param bins "fd" | "scott" | "sturges" (per-gene adaptive);
+#'   "median_fd" | "median_scott" | "median_sturges" (per-gene rule, then the
+#'   median count used for every gene -- the historical practice); a single
 #'   integer >= 2 used for every gene (historical parity mode), or an integer
 #'   vector with one count per gene (used verbatim).
 #' @param min_bins,max_bins clamp range applied to adaptive counts only.
@@ -47,6 +49,18 @@ fd_bins <- function(x, rule = c("fd", "scott", "sturges"),
 #' @export
 bins_for_genes <- function(data, bins = "fd", min_bins = 5, max_bins = 50) {
   G <- nrow(data)
+  if (is.character(bins) && startsWith(bins, "median_")) {
+    # Historical CLR practice (user, 2026-09-23): estimate each gene's own
+    # optimal count, then use the MEDIAN for every gene, so all pairs share
+    # one discretization (no bins_i x bins_j bias heterogeneity) while the
+    # count still reflects the data's typical resolution.
+    rule <- match.arg(sub("^median_", "", bins), c("fd", "scott", "sturges"))
+    per <- vapply(seq_len(G), function(i) fd_bins(data[i, ], rule = rule,
+                                                  min_bins = min_bins,
+                                                  max_bins = max_bins),
+                  integer(1))
+    return(rep(as.integer(round(stats::median(per))), G))
+  }
   if (is.character(bins)) {
     rule <- match.arg(bins, c("fd", "scott", "sturges"))
     vapply(seq_len(G), function(i) fd_bins(data[i, ], rule = rule,

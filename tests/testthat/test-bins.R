@@ -47,3 +47,15 @@ test_that("per-gene bin vectors pass through and shuffles reuse observed bins", 
   expect_identical(fr$params$mi$bins_used,
                    bins_for_genes(t(apply(X, 1, rank)), "fd"))
 })
+
+test_that("median_* rules give one common count equal to the per-gene median", {
+  set.seed(4)
+  X <- rbind(matrix(rnorm(10 * 300), 10), matrix(rt(10 * 300, 3), 10))
+  per <- bins_for_genes(X, "scott")
+  b <- bins_for_genes(X, "median_scott")
+  expect_length(unique(b), 1L)
+  expect_equal(b[1], as.integer(round(median(per))))
+  fit <- ClrAttention$new(X)$estimate_mi(bins = "median_fd", transform = "none",
+                                         threads = 1)
+  expect_length(unique(fit$params$mi$bins_used), 1L)
+})

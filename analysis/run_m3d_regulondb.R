@@ -7,6 +7,9 @@
 #       [--set chips|avg] [--B 100] [--threads N] [--alpha 0.5] \
 #       [--depths 0,1,2,3,5,8,12,20] [--min-size 5] [--max-size 500] \
 #       [--quick 600] [--mi-null] [--out results/<set>]
+#       [--primary none_median_scott (default; historical median-of-per-gene rule,
+#        Scott ~ Wand zero-stage) | rank_fd | none_median_fd | parity2007 | ...]
+#       [--bin-sweep 8,12,16,20]   (rank-transform sensitivity; "" to skip)
 #
 # PRIMARY BENCHMARK (regulator-agnostic; see analysis/regulons.R): regulons of
 # every regulator type in RegulonDB -- TFs, sRNAs, small molecules (ppGpp),
@@ -34,7 +37,8 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
             set = "chips", B = 100L, threads = NULL, alpha = 0.5,
             depths = "0,1,2,3,5,8,12,20", min_size = 5L, max_size = 500L,
-            quick = 0L, mi_null = FALSE, out = NULL, seed = 20260922L)
+            quick = 0L, mi_null = FALSE, out = NULL, seed = 20260922L,
+            primary = "none_median_scott", bin_sweep = "8,12,16,20")
 int_opts <- c("B", "threads", "quick", "seed", "min_size", "max_size")
 i <- 1L
 while (i <= length(args)) {
@@ -200,11 +204,31 @@ tf_rows[[length(tf_rows) + 1L]] <- tfnode(C0, "abs_pearson")
 rm(C0); invisible(gc())
 
 configs <- list(
-  parity2007 = list(transform = "none", bins = 10, combine = "euclidean"),
-  none_fd    = list(transform = "none", bins = "fd", combine = "euclidean"),
-  rank_fd    = list(transform = "rank", bins = "fd", combine = "euclidean"),
-  rank_fd_st = list(transform = "rank", bins = "fd", combine = "stouffer")
+  parity2007        = list(transform = "none", bins = 10, combine = "euclidean"),
+  none_fd           = list(transform = "none", bins = "fd", combine = "euclidean"),
+  # historical practice: per-gene optimal count, median used for all genes
+  none_median_fd    = list(transform = "none", bins = "median_fd", combine = "euclidean"),
+  none_median_scott = list(transform = "none", bins = "median_scott", combine = "euclidean"),
+  rank_fd           = list(transform = "rank", bins = "fd", combine = "euclidean"),
+  rank_fd_st        = list(transform = "rank", bins = "fd", combine = "stouffer")
 )
+sweep <- if (nzchar(opt$bin_sweep)) as.integer(strsplit(opt$bin_sweep, ",")[[1]]) else integer()
+for (nb in sweep)
+  configs[[sprintf("rank_b%02d", nb)]] <- list(transform = "rank", bins = nb,
+                                                combine = "euclidean")
+if (!opt$primary %in% names(configs))
+  stop("--primary must be one of: ", paste(names(configs), collapse = ", "))
+
+# Parametric (Gaussian) MI: I = -1/2 log2(1 - r^2) on the raw values, then CLR.
+{
+  r2 <- pmin((tcrossprod(Z) / (ncol(Z) - 1))^2, 1 - 1e-12)
+  Mg <- -0.5 * log2(1 - r2); diag(Mg) <- 0
+  add_scores(score_all(Mg, "gaussian:mi")); headline("gaussian:mi")
+  Sg <- clr_calibrate(Mg, method = "normal", combine = "euclidean")
+  add_scores(score_all(Sg, "gaussian:clr")); headline("gaussian:clr")
+  tf_rows[[length(tf_rows) + 1L]] <- tfnode(Sg, "gaussian:clr")
+  rm(r2, Mg, Sg); invisible(gc())
+}
 fit <- NULL
 for (nm in names(configs)) {
   cf <- configs[[nm]]
@@ -221,7 +245,7 @@ for (nm in names(configs)) {
   }
   add_scores(score_all(f_$clr_scores, paste0(nm, ":clr"))); headline(paste0(nm, ":clr"))
   tf_rows[[length(tf_rows) + 1L]] <- tfnode(f_$clr_scores, paste0(nm, ":clr"))
-  if (nm == "rank_fd") fit <- f_
+  if (nm == opt$primary) fit <- f_
   rm(f_, M); invisible(gc())
 }
 wcsv(do.call(rbind, cm_rows), "comembership_by_config.csv")
@@ -230,6 +254,7 @@ wcsv(do.call(rbind, tf_rows), "tfnode_edge_pr_by_config.csv")
 n_cfg_cm <- length(cm_rows)
 
 ## ---- 3. permutation edge selection (primary config) ----------------------------
+say("primary configuration for selection and diffusion: ", opt$primary)
 sel_eval <- function(E, label, tau) {
   do.call(rbind, lapply(names(bench), function(ev) {
     p <- bench[[ev]]$pairs
