@@ -33,16 +33,22 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #' @description Estimate the gene-gene MI matrix with the B-spline estimator.
     #' @param bins "fd" | "scott" | "sturges" (per-gene adaptive) or a fixed integer.
     #' @param spline_order 2 or 3.
-    estimate_mi = function(bins = "fd", spline_order = 3, threads = NULL) {
+    #' @param threads OpenMP threads (NULL = cores - 2).
+    #' @param transform "none" (historical) or "rank" (empirical copula);
+    #'   see [bspline_mi()].
+    estimate_mi = function(bins = "fd", spline_order = 3, threads = NULL,
+                           transform = "none") {
       private$mi_ <- bspline_mi(private$data_, bins = bins,
-                                spline_order = spline_order, threads = threads)
+                                spline_order = spline_order, threads = threads,
+                                transform = transform)
       # The per-gene bin counts actually used are recorded so that every
       # downstream re-estimation (permutation nulls) reuses them verbatim:
       # the null must be computed with the observed data's discretization.
       private$params_$mi <- list(bins = bins, spline_order = spline_order,
-                                 threads = threads,
-                                 bins_used = bins_for_genes(private$data_,
-                                                            bins = bins))
+                                 threads = threads, transform = transform,
+                                 bins_used = bins_for_genes(
+                                   .transform_rows(private$data_, transform),
+                                   bins = bins))
       # downstream stages are stale once MI is re-estimated
       private$scores_ <- private$operator_ <- private$trajectory_ <-
         private$threshold_ <- NULL
@@ -76,8 +82,18 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #' @param method "hc" (default) or "fdr".
     #' @param q FDR level, used only with method = "fdr".
     #' @param threads thread count for the bootstrap MI builds (NULL = default).
+    #' @param hc_alpha0 HC search range: only the top hc_alpha0 * M pairs are
+    #'   candidate cutoffs (Donoho & Jin 2004/2008 use alpha0 <= 1/2; small
+    #'   values stop the argmax from wandering into the null bulk).
+    #' @param hc_level significance level of the permutation-calibrated HC
+    #'   gate: the observed HC* must exceed the (1 - hc_level) quantile of the
+    #'   leave-one-out HC* of the B permutation replicates, otherwise no edge
+    #'   is selected (tau = Inf). The asymptotic sqrt(2 log log M) bound is
+    #'   NOT used as a gate: it is the typical size of null HC*, not a
+    #'   significance cutoff (~25% of null HC* exceed it at M ~ 2000).
     select_threshold = function(B = 100, method = c("hc", "fdr"), q = 0.05,
-                                threads = NULL) {
+                                threads = NULL, hc_alpha0 = 0.1,
+                                hc_level = 0.05) {
       private$.need(private$mi_, "estimate_mi()")
       private$.need(private$scores_, "calibrate()")
       method <- match.arg(method)
@@ -86,6 +102,17 @@ ClrAttention <- R6::R6Class("ClrAttention",
         stop("B must be a positive integer")
       if (!is.numeric(q) || length(q) != 1L || !is.finite(q) || q <= 0 || q >= 1)
         stop("q must be in (0, 1)")
+      if (!is.numeric(hc_alpha0) || length(hc_alpha0) != 1L ||
+          !(hc_alpha0 > 0 && hc_alpha0 <= 0.5))
+        stop("hc_alpha0 must be in (0, 0.5]")
+      if (!is.numeric(hc_level) || length(hc_level) != 1L ||
+          !(hc_level > 0 && hc_level < 1))
+        stop("hc_level must be in (0, 1)")
+      if (method == "hc" && B < 2L)
+        stop("method = \"hc\" needs B >= 2 (leave-one-out HC calibration)")
+      if (method == "hc" && (B + 1) * hc_level < 1)
+        warning("B = ", B, " is too small to resolve hc_level = ", hc_level,
+                "; use B >= ", ceiling(1 / hc_level - 1), call. = FALSE)
       G <- nrow(private$data_)
       if (G < 4L) stop("select_threshold() needs at least 4 genes")
       if (!identical(private$params_$calibrate$method, "normal"))
@@ -102,6 +129,7 @@ ClrAttention <- R6::R6Class("ClrAttention",
       # overflow bin. Double counts: B * M can exceed 2^31.
       nbins <- 20000L
       counts <- numeric(nbins + 1L)
+      rep_counts <- matrix(0, nbins + 1L, B)  # per-replicate histograms (HC gate)
       n_null <- 0
       hi <- NULL
       w <- NULL
@@ -111,7 +139,7 @@ ClrAttention <- R6::R6Class("ClrAttention",
         Sb <- clr_calibrate(
           bspline_mi(Xp, bins = mi_p$bins_used,
                      spline_order = mi_p$spline_order,
-                     threads = threads),
+                     threads = threads, transform = mi_p$transform),
           method = cal_p$method, combine = cal_p$combine)
         v <- Sb[ut]
         if (is.null(hi)) {
@@ -121,7 +149,9 @@ ClrAttention <- R6::R6Class("ClrAttention",
         idx <- as.integer(v / w) + 1L
         idx[idx < 1L] <- 1L
         idx[idx > nbins] <- nbins + 1L
-        counts <- counts + tabulate(idx, nbins + 1L)
+        cb <- tabulate(idx, nbins + 1L)
+        rep_counts[, b] <- cb
+        counts <- counts + cb
         n_null <- n_null + length(v)
       }
       # suf[k] = #{null in bins >= k}. A score s in bin k gets p from
@@ -139,16 +169,45 @@ ClrAttention <- R6::R6Class("ClrAttention",
       }
 
       s_obs <- private$scores_[ut]
-      p_obs <- pvals(s_obs)
-      ord <- order(p_obs)
-      p_sorted <- p_obs[ord]
-      s_by_p <- s_obs[ord]  # scores in ascending-p-value order
-      tau <- if (method == "hc") .hc_cutoff(p_sorted, s_by_p, M)
-             else .fdr_cutoff(p_sorted, s_by_p, M, q)
+      hc_info <- NULL
+      if (method == "hc") {
+        idx_obs <- as.integer(s_obs / w) + 1L
+        idx_obs[idx_obs < 1L] <- 1L
+        idx_obs[idx_obs > nbins] <- nbins + 1L
+        obs_counts <- tabulate(idx_obs, nbins + 1L)
+        obs <- .hc_binned(obs_counts, suf, n_null, M, hc_alpha0)
+        # Leave-one-out null HC*: replicate b scored against the pool of the
+        # other B - 1 replicates, exactly as the observed data are scored
+        # against a pool it is not part of.
+        hc_null <- vapply(seq_len(B), function(b) {
+          cb <- rep_counts[, b]
+          .hc_binned(cb, suf - rev(cumsum(rev(cb))), n_null - M, M,
+                     hc_alpha0)$hc_star
+        }, numeric(1))
+        kq <- min(B, ceiling((B + 1) * (1 - hc_level)))
+        crit <- sort(hc_null)[kq]
+        if (is.finite(obs$hc_star) && obs$hc_star > crit) {
+          tau <- (obs$k - 1L) * w       # keep every score in bins >= k
+        } else {
+          tau <- Inf
+          message("higher criticism: no signal beyond the permutation null ",
+                  "(HC* = ", format(obs$hc_star, digits = 3),
+                  " <= null ", 100 * (1 - hc_level), "% quantile ",
+                  format(crit, digits = 3), "); no edges selected")
+        }
+        hc_info <- list(hc_star = obs$hc_star, hc_crit = crit,
+                        hc_null = hc_null, alpha0 = hc_alpha0,
+                        level = hc_level)
+      } else {
+        p_obs <- pvals(s_obs)
+        ord <- order(p_obs)
+        tau <- .fdr_cutoff(p_obs[ord], s_obs[ord], M, q)
+      }
       private$threshold_ <- tau
       private$operator_ <- private$trajectory_ <- NULL
       private$params_$threshold <- list(B = B, method = method, q = q,
-                                       tau = tau, n_null = n_null)
+                                       tau = tau, n_null = n_null,
+                                       hc = hc_info)
       invisible(self)
     },
 
@@ -288,27 +347,26 @@ ClrAttention <- R6::R6Class("ClrAttention",
   )
 )
 
-# Tukey's higher criticism cutoff (Donoho & Jin).
-# p_sorted: ascending p-values; s_by_p: corresponding scores (descending).
-# Returns the score threshold: keep pairs with p <= p_(ihat),
-# i.e. scores >= s_by_p[ihat].
-.hc_cutoff <- function(p_sorted, s_by_p, M) {
-  n <- length(p_sorted)
-  K <- max(1L, floor(n / 2))
-  i <- seq_len(K)
-  p <- p_sorted[i]
-  ok <- p < i / M
-  hc <- rep(-Inf, K)
-  # p > 0 always: p-values carry a (1 + #{null > s}) / (1 + n_null) correction.
-  hc[ok] <- sqrt(M) * (i[ok] / M - p[ok]) / sqrt(p[ok] * (1 - p[ok]))
-  ihat <- which.max(hc)
-  hcstar <- hc[ihat]
-  crit <- sqrt(2 * log(log(M)))
-  if (!is.finite(hcstar) || hcstar < crit)
-    warning("higher criticism detected no significant signal (HC* = ",
-            format(hcstar, digits = 3), " < ", format(crit, digits = 3),
-            "); threshold may be noise", call. = FALSE)
-  s_by_p[ihat]
+# Tukey's higher criticism on a binned score histogram (Donoho & Jin 2004;
+# HC thresholding: Donoho & Jin 2008).
+# obs_counts: histogram of the M scores under test (same bins as the null);
+# suf: null survival counts, suf[k] = #{null in bins >= k}; n_null: null size.
+# Candidate cutoffs are bin lower edges. Keeping bins >= k keeps
+# i_k = #{scores in bins >= k} pairs, whose largest p-value is
+# p_k = (1 + suf[k]) / (1 + n_null). HC(k) = sqrt(M)(i_k/M - p_k) /
+# sqrt(p_k(1 - p_k)), maximized over i_k <= alpha0 * M and p_k >= 1/M (HC+,
+# which stops a single extreme score from dominating). Evaluating at bin
+# edges treats tied scores as one block, never splitting them.
+# Returns list(hc_star, k): the maximum and the bin index attaining it.
+.hc_binned <- function(obs_counts, suf, n_null, M, alpha0) {
+  i_k <- rev(cumsum(rev(obs_counts)))
+  p_k <- (1 + suf) / (1 + n_null)
+  ok <- i_k >= 1 & i_k <= alpha0 * M & p_k >= 1 / M & p_k < 1
+  if (!any(ok)) return(list(hc_star = -Inf, k = NA_integer_))
+  hc <- rep(-Inf, length(i_k))
+  hc[ok] <- sqrt(M) * (i_k[ok] / M - p_k[ok]) / sqrt(p_k[ok] * (1 - p_k[ok]))
+  k <- which.max(hc)
+  list(hc_star = hc[k], k = k)
 }
 
 # Benjamini-Hochberg FDR cutoff at level q. Returns Inf when nothing survives.

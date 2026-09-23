@@ -106,7 +106,7 @@ test_that("constant genes are rejected before they become MI hubs", {
 test_that("select_threshold() refuses non-normal calibrations", {
   fit <- ClrAttention$new(make_toy())$estimate_mi(bins = 10)$
     calibrate(method = "kde")
-  expect_error(fit$select_threshold(B = 2), "normal")
+  expect_error(fit$select_threshold(B = 2, method = "fdr"), "normal")
 })
 
 test_that("re-running a stage invalidates downstream stages", {

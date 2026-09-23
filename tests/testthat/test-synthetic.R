@@ -148,3 +148,27 @@ test_that("attention diffusion aggregates genes by planted module", {
   # Observed between/within ratio ~4-5x across seeds; 2x is a safe floor.
   expect_gt(between, 2 * within)
 })
+
+test_that("calibrated HC selects nothing on pure noise (seeded)", {
+  set.seed(101)
+  X <- rbind(matrix(rnorm(20 * 300), 20), matrix(rt(20 * 300, 3), 20))
+  fit <- ClrAttention$new(X)$
+    estimate_mi(bins = "fd", transform = "rank", threads = 1)$
+    calibrate()
+  expect_message(fit$select_threshold(B = 20, method = "hc", threads = 1),
+                 "no signal")
+  expect_identical(fit$threshold, Inf)
+  hc <- fit$params$threshold$hc
+  expect_length(hc$hc_null, 20)
+  expect_lte(hc$hc_star, hc$hc_crit)
+})
+
+test_that("rank transform makes MI invariant to monotone distortions", {
+  d <- synthetic_clr_data()
+  X2 <- d$X
+  X2[2, ] <- exp(X2[2, ])            # strictly monotone per-gene maps
+  X2[6, ] <- X2[6, ]^3
+  a <- bspline_mi(d$X, bins = "fd", transform = "rank", threads = 1)
+  b <- bspline_mi(X2, bins = "fd", transform = "rank", threads = 1)
+  expect_equal(a, b)
+})

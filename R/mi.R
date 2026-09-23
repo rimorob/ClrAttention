@@ -10,10 +10,19 @@
 #' @param threads OpenMP thread count for the gene-pair loop. NULL (default)
 #'   uses the core default: machine cores minus 2 (floored at 1). Must be a
 #'   positive integer if given.
+#' @param transform "none" (default; historical) or "rank": replace each
+#'   gene by its within-gene ranks (average ties) before binning, i.e.
+#'   estimate MI on the empirical copula. MI is invariant to monotone
+#'   transforms, so this changes only the estimator, not the estimand; it
+#'   equalizes marginal shapes across genes, which removes the
+#'   heavy-tail -> more-bins -> upward-MI-bias -> false-hub pathway and makes
+#'   a pooled permutation null valid for every pair.
 #' @return symmetric G x G MI matrix (bits). The diagonal holds each gene's
 #'   self-MI and is zeroed by [clr_calibrate()].
 #' @export
-bspline_mi <- function(data, bins = "fd", spline_order = 3, threads = NULL) {
+bspline_mi <- function(data, bins = "fd", spline_order = 3, threads = NULL,
+                       transform = c("none", "rank")) {
+  transform <- match.arg(transform)
   if (!is.matrix(data) || !is.numeric(data))
     stop("data must be a numeric matrix (genes x samples)")
   if (any(!is.finite(data))) stop("data must not contain NA/NaN/Inf")
@@ -40,10 +49,19 @@ bspline_mi <- function(data, bins = "fd", spline_order = 3, threads = NULL) {
          paste(utils::head(lab, 10), collapse = ", "),
          if (length(bad) > 10) ", ..." else "")
   }
+  data <- .transform_rows(data, transform)
   bins_vec <- bins_for_genes(data, bins = bins)
   mi <- cpp_mi_matrix(data, bins_vec, spline_order, n_threads)
   if (!is.null(rownames(data))) {
     rownames(mi) <- colnames(mi) <- rownames(data)
   }
   mi
+}
+
+# Per-gene marginal transform applied before MI estimation.
+.transform_rows <- function(data, transform) {
+  if (transform == "none") return(data)
+  out <- t(apply(data, 1L, rank, ties.method = "average"))
+  dimnames(out) <- dimnames(data)
+  out
 }
