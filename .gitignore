@@ -15,3 +15,4 @@ data/
 results/
 tools/setup_mac.log
 tools/.Makevars.generated
+results_install.log
