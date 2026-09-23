@@ -83,7 +83,10 @@ int main() {
         const auto sx = clr_core::sparsify_weights(wx.data(), E, nbx, order);
         const auto sy = clr_core::sparsify_weights(wy.data(), E, nby, order);
         const double sparse = clr_core::mi_pair_sparse(sx, sy, hx, hy, E, scratch.data());
-        if (dense != sparse) ++mismatches;
+        // Bit-identical at default flags (same per-cell summation order);
+        // aggressive FP contraction (-ffp-contract=fast/-march=native) can
+        // introduce ~1e-15 differences, hence the tolerance.
+        if (std::fabs(dense - sparse) > 1e-12) ++mismatches;
       }
     }
     CHECK(mismatches == 0, "sparse MI kernel not bit-identical to dense kernel");

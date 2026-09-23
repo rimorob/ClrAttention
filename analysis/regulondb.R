@@ -47,7 +47,7 @@ read_regulondb <- function(path) {
   } else {
     reg <- tab[, 1]; tgt <- tab[, 2]
     conf <- if (ncol(tab) >= 5) tab[, 5] else NA_character_
-    reg <- gsub("-", ";", reg)
+    reg <- .classic_tf_to_genes(reg)
     fmt <- "network_tf_gene"
   }
   conf <- toupper(substr(trimws(conf), 1, 1))  # Strong/Weak/Confirmed -> S/W/C
@@ -56,9 +56,6 @@ read_regulondb <- function(path) {
                     target = rep(trimws(tgt), lengths(parts)),
                     confidence = rep(conf, lengths(parts)),
                     stringsAsFactors = FALSE)
-  if (fmt == "network_tf_gene")
-    out$tf_gene <- paste0(tolower(substr(out$tf_gene, 1, 1)),
-                          substring(out$tf_gene, 2))
   out$tf_gene <- trimws(out$tf_gene)
   out <- out[nzchar(out$tf_gene) & nzchar(out$target), ]
   out <- unique(out)
@@ -68,6 +65,30 @@ read_regulondb <- function(path) {
                   paste(names(table(out$confidence, useNA = "ifany")),
                         table(out$confidence, useNA = "ifany"),
                         sep = "=", collapse = " ")))
+  out
+}
+
+# Classic-format TF *protein* names -> ";"-joined gene symbols. Complexes and
+# names that do not follow the ArcA -> arcA rule are listed explicitly;
+# otherwise "A-B" heteromers are split only when both parts look like protein
+# names (e.g. "RcsA-RcsB"), and single names get a lower-cased first letter.
+.tf_alias <- c("H-NS" = "hns", "IHF" = "ihfA;ihfB", "HU" = "hupA;hupB",
+               "FlhDC" = "flhD;flhC", "RcsAB" = "rcsA;rcsB",
+               "GadE-RcsB" = "gadE;rcsB", "RcsB-BglJ" = "rcsB;bglJ",
+               "Cra" = "cra", "Fis" = "fis", "Fur" = "fur",
+               "Lrp" = "lrp", "Nac" = "nac", "Crl" = "crl",
+               "StpA" = "stpA", "Dan" = "dan", "IscR" = "iscR")
+.classic_tf_to_genes <- function(reg) {
+  reg <- trimws(reg)
+  out <- ifelse(reg %in% names(.tf_alias), .tf_alias[reg], NA_character_)
+  rest <- which(is.na(out))
+  one <- function(x) paste0(tolower(substr(x, 1, 1)), substring(x, 2))
+  out[rest] <- vapply(reg[rest], function(x) {
+    parts <- strsplit(x, "-", fixed = TRUE)[[1]]
+    if (length(parts) > 1 && all(grepl("^[A-Z][a-z]{2}[A-Z0-9]?$", parts)))
+      paste(vapply(parts, one, ""), collapse = ";")
+    else one(x)
+  }, "")
   out
 }
 
@@ -86,6 +107,15 @@ edge_universe <- function(net, sym, conf_keep = NULL) {
   if (!is.null(conf_keep)) net <- net[net$confidence %in% conf_keep, ]
   ti <- map_symbols(net$tf_gene, sym)
   gi <- map_symbols(net$target, sym)
+  if (is.null(conf_keep)) {
+    dup <- sum(duplicated(tolower(sym)))
+    um_tf <- sort(unique(net$tf_gene[is.na(ti)]))
+    message(sprintf("mapping: %d duplicated symbols in compendium; %d/%d regulator genes unmapped%s; %d/%d target rows unmapped",
+                    dup, length(um_tf), length(unique(net$tf_gene)),
+                    if (length(um_tf)) paste0(" (", paste(utils::head(um_tf, 25), collapse = ","),
+                                              if (length(um_tf) > 25) ",..." else "", ")") else "",
+                    sum(is.na(gi)), length(gi)))
+  }
   ok <- !is.na(ti) & !is.na(gi) & ti != gi
   ti <- ti[ok]; gi <- gi[ok]
   G <- length(sym)
@@ -108,6 +138,7 @@ edge_universe <- function(net, sym, conf_keep = NULL) {
 # Ties are broken pessimistically (negatives first within a tie) so that a
 # constant score cannot look informative.
 pr_summary <- function(score, label, prec_levels = c(0.8, 0.6, 0.4)) {
+  score[is.na(score)] <- -Inf               # undefined scores rank last
   o <- order(-score, label)
   l <- label[o]
   tp <- cumsum(l); k <- seq_along(l)
@@ -137,9 +168,25 @@ selected_pr <- function(sel, u) {
 # Per-TF regulon ranking: for each TF with >= min_targets targets, rank all
 # other genes by a TF-row score vector and compute average precision.
 # score_rows: |tfs| x G matrix (rows aligned to u$tfs).
-regulon_ap <- function(score_rows, u, min_targets = 5L) {
+# ties = "random" (default) averages AP over n_draws random orderings within
+# tied blocks, so a score with many exact ties (e.g. attention mass (P^t)[TF,],
+# mostly exact zeros at small t) is compared fairly with a tie-free score
+# (|cor|); "pessimistic" puts negatives first within ties. The RNG state of
+# the caller is left untouched.
+regulon_ap <- function(score_rows, u, min_targets = 5L,
+                       ties = c("random", "pessimistic"), n_draws = 5L) {
+  ties <- match.arg(ties)
+  if (exists(".Random.seed", envir = globalenv())) {
+    old <- get(".Random.seed", envir = globalenv())
+    on.exit(assign(".Random.seed", old, envir = globalenv()))
+  }
+  set.seed(1L)
   G <- ncol(score_rows)
-  res <- vapply(seq_along(u$tfs), function(k) {
+  ap_of <- function(o, l) {
+    l <- l[o]
+    sum((cumsum(l) / seq_along(l))[l == 1]) / sum(l)
+  }
+  vapply(seq_along(u$tfs), function(k) {
     t <- u$tfs[k]
     tg <- unique(u$targets[[as.character(t)]])
     tg <- setdiff(tg, t)
@@ -147,9 +194,9 @@ regulon_ap <- function(score_rows, u, min_targets = 5L) {
     lab <- integer(G); lab[tg] <- 1L
     keep <- setdiff(seq_len(G), t)
     s <- score_rows[k, keep]; l <- lab[keep]
-    o <- order(-s, l)
-    l <- l[o]
-    sum((cumsum(l) / seq_along(l))[l == 1]) / sum(l)
+    s[is.na(s)] <- -Inf
+    if (ties == "pessimistic") return(ap_of(order(-s, l), l))
+    mean(vapply(seq_len(n_draws), function(d)
+      ap_of(order(-s, stats::runif(length(s))), l), numeric(1)))
   }, numeric(1))
-  res
 }

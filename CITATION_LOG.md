@@ -260,12 +260,16 @@ heavy-tailed genes many bins: the median was 23 bins for Gaussian genes and
 50, the clamp, for t3 and lognormal genes. The finite-sample upward bias of
 MI grows with bins_i × bins_j: at N = 907 the null MI was 0.012 bits with
 10 bins, 0.09 with 25 and 0.32 with 50. That bias survived CLR calibration
-(Spearman correlation 0.48 between null CLR score and bins_i × bins_j), so
+(Spearman correlation between null CLR score and bins_i × bins_j was 0.32–0.51
+across gene mixes), so
 heavy-tailed genes became false hubs. Freedman–Diaconis applied to the ranks
 gives ⌈N^(1/3)⌉-type counts that are identical across genes (10 at N = 907).
 On a synthetic with M3D-like N = 907, with monotone heavy-tail distortions,
 the edge AUPR was 0.24 for raw values with FD bins, 0.57 for raw values with
-10 bins (2007 parity) and 0.955 for ranks with FD bins. The
+10 bins (2007 parity) and 0.955 for ranks with FD bins. An independent
+QC replication got 0.31, 0.58 and 0.94. Caveat: the synthetic uses
+monotone distortions, which favour the rank transform by construction. The
+real-data comparison of the four configurations is part of the M3D run. The
 Gaussian-copula MI literature makes the same argument: separate the
 marginals from the dependence. Historical parity remains available as
 `transform = "none", bins = 10`. **Default changed with user approval.**
@@ -306,7 +310,11 @@ to answer "exceptional relative to each gene's background", which is
 CLR's contribution. With a global confounder that answer is the only usable
 one. In a synthetic with a global factor (loading 0.35), BH on the MI null
 kept 45% of pairs at precision 0.03, while BH on the CLR null kept 1.2% at
-precision 0.99. The CLR null is the default. The small-G compression is
+precision 0.99. That is seed 3, which is enshrined as a test. An
+independent QC replication with other seeds and designs found the same
+direction at a smaller magnitude: the MI null kept 7–18% of pairs at
+precision 0.07–0.19, and the CLR null kept 0.8–0.9% at precision
+0.94–0.98. The CLR null is the default. The small-G compression is
 documented as a limitation of the regime and is not treated as a reason to
 switch statistics. If the permutation null misbehaves at compendium scale,
 the principled refinement is an empirical null fitted to the central bulk of
@@ -335,6 +343,9 @@ with different bins_i × bins_j still mixes different null distributions.
 - **Histogram p-values.** These now count the null values that share the
   observed score's bin. The earlier code was anti-conservative by up to one
   bin.
+- **BH ties.** The cutoff returns the smallest score in the whole rejected
+  set, so tied histogram p-values no longer drop members of the last
+  rejected block. The QC agent found this.
 - **Calibration guard.** `select_threshold(statistic = "clr")` refuses KDE
   and Rayleigh calibrations. KDE scores are ≤ 0 and put every null value in
   one bin.

@@ -240,3 +240,14 @@ test_that("default CLR null stays sparse under a global confounder; MI null does
   a$select_threshold(B = 10, statistic = "mi", threads = 2)
   expect_gt(sum(a$edges) / (G * (G - 1)), 0.2)       # MI null: "everything"
 })
+
+test_that("BH cutoff keeps every member of a tied rejected block", {
+  # six scores share the smallest (histogram) p-value; order() may put any
+  # of them last in p-order, but tau must keep all six
+  p <- c(rep(1e-4, 6), 0.3, 0.6, 0.9)
+  s <- c(6.9, 6.7, 7.4, 6.8, 7.1, 7.0, 1, 0.5, 0.1)
+  o <- order(p)
+  tau <- clr:::.fdr_cutoff(p[o], s[o], M = 9, q = 0.05)
+  expect_equal(tau, 6.7)
+  expect_equal(sum(s >= tau), 6)
+})

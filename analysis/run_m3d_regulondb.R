@@ -89,8 +89,14 @@ X <- as.matrix(raw[, -1]); storage.mode(X) <- "double"
 bnum <- vapply(strsplit(probe, "_"), function(p) p[length(p) - 1L], "")
 desc <- utils::read.delim(file.path(opt$m3d, paste0(base, ".probe_set_descriptions")),
                           stringsAsFactors = FALSE)
+if (!all(c("probe_set_name", "gene_symbol") %in% names(desc)))
+  stop("probe_set_descriptions lacks probe_set_name/gene_symbol columns: ",
+       paste(names(desc), collapse = ", "))
 sym <- desc$gene_symbol[match(probe, desc$probe_set_name)]
-sym[is.na(sym) | !nzchar(sym)] <- bnum[is.na(sym) | !nzchar(sym)]
+from_probe <- vapply(strsplit(probe, "_"), function(p) p[1], "")
+miss <- is.na(sym) | !nzchar(sym)
+sym[miss] <- from_probe[miss]
+say(sprintf("symbols: %d from descriptions, %d from probe names", sum(!miss), sum(miss)))
 rownames(X) <- bnum
 stopifnot(!anyDuplicated(bnum))
 rng <- apply(X, 1, function(x) diff(range(x)))
@@ -196,7 +202,6 @@ for (t in 0:opt$tmax) {
   ap_att <- regulon_ap(Rt, u_all)
   ap_cor <- regulon_ap(abs(Ctf), u_all)
   # edge-level |cor| AUPR on the universe
-  ci <- vapply(seq_along(u_all$i), function(k) 0, 0)
   tf_row <- match(u_all$i, tfs); other <- u_all$j
   swap <- is.na(tf_row); tf_row[swap] <- match(u_all$j[swap], tfs); other[swap] <- u_all$i[swap]
   ci <- abs(Ctf[cbind(tf_row, other)])

@@ -105,7 +105,9 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #'   gene's own module inflates its row background and the CLR null
     #'   becomes conservative, possibly selecting nothing; this is a small-G
     #'   artifact, not the regime CLR was designed for.
-    #'   "mi": the null is built on raw MI (CLR remains the attention weight).
+    #'   "mi": the null is built on raw MI (CLR remains the attention weight;
+    #'   a selected pair whose clipped CLR score is 0 gets zero weight, so
+    #'   its genes can still end up isolated, i.e. self-loop only).
     #'   Exact per pair under the rank transform with equal bins, but it tests
     #'   "any dependence", which in real compendia is true of most pairs;
     #'   use only for small or confounder-free data.
@@ -172,7 +174,7 @@ ClrAttention <- R6::R6Class("ClrAttention",
           hi <- max(1e-8, 1.25 * max(v))
           w <- hi / nbins
         }
-        idx <- as.integer(v / w) + 1L
+        idx <- as.integer(pmin(v / w, nbins)) + 1L
         idx[idx < 1L] <- 1L
         idx[idx > nbins] <- nbins + 1L
         cb <- tabulate(idx, nbins + 1L)
@@ -188,16 +190,25 @@ ClrAttention <- R6::R6Class("ClrAttention",
       # overflow bin are compared against the whole overflow count.
       suf <- rev(cumsum(rev(counts)))
       pvals <- function(s) {
-        idx <- as.integer(s / w) + 1L
+        idx <- as.integer(pmin(s / w, nbins)) + 1L
         idx[idx < 1L] <- 1L
         idx[idx > nbins] <- nbins + 1L
         (1 + suf[idx]) / (1 + n_null)
       }
 
+      # TODO(empirical null, Efron 2004 JASA 99:96-104): implement an
+      # alternative to the full-independence permutation null for the CLR
+      # statistic -- estimate the null (center, scale) from the central bulk
+      # of the OBSERVED CLR z-scores (e.g. Efron's central-matching /
+      # locfdr-style fit) and compute p-values or local fdr against it. This
+      # follows CLR's own logic (the data are their own background) and is
+      # the principled fix if the permutation CLR null proves miscalibrated
+      # at compendium scale (see CITATION_LOG.md D19; small-G compression).
+      # Requested by the user 2026-09-23; not yet implemented.
       s_obs <- if (statistic == "mi") private$mi_[ut] else private$scores_[ut]
       hc_info <- NULL
       if (method == "hc") {
-        idx_obs <- as.integer(s_obs / w) + 1L
+        idx_obs <- as.integer(pmin(s_obs / w, nbins)) + 1L
         idx_obs[idx_obs < 1L] <- 1L
         idx_obs[idx_obs > nbins] <- nbins + 1L
         obs_counts <- tabulate(idx_obs, nbins + 1L)
@@ -213,7 +224,9 @@ ClrAttention <- R6::R6Class("ClrAttention",
         kq <- min(B, ceiling((B + 1) * (1 - hc_level)))
         crit <- sort(hc_null)[kq]
         if (is.finite(obs$hc_star) && obs$hc_star > crit) {
-          tau <- (obs$k - 1L) * w       # keep every score in bins >= k
+          # NB: the HC tau is a histogram bin's lower edge (keeps every score
+          # in bins >= k), not an observed score as with BH.
+          tau <- (obs$k - 1L) * w
         } else {
           tau <- Inf
           message("higher criticism: no signal beyond the permutation null ",
@@ -424,5 +437,10 @@ ClrAttention <- R6::R6Class("ClrAttention",
   i <- seq_along(p_sorted)
   ok <- which(p_sorted <= i * q / M)
   if (!length(ok)) return(Inf)
-  s_by_p[max(ok)]
+  # Histogram p-values are tied within a bin; order() breaks those ties by
+  # index, so the score at position max(ok) is an arbitrary member of the
+  # last rejected block. Return the smallest score among ALL rejected p's,
+  # so score >= tau keeps exactly the BH rejection set.
+  p_cut <- p_sorted[max(ok)]
+  min(s_by_p[p_sorted <= p_cut])
 }

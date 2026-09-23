@@ -69,8 +69,9 @@ double mi_pair(const double *wx, const double *wy, double hx, double hy,
 // first[s] + a. The joint histogram of a pair then costs
 // O(n_samples * order^2 + nbx * nby) instead of O(n_samples * nbx * nby).
 // Each joint cell receives its contributions in ascending-sample order, the
-// same order as the dense loop, so mi_pair_sparse() is BIT-IDENTICAL to
-// mi_pair() (verified in tests/test_core.cpp).
+// same order as the dense loop, so mi_pair_sparse() is bit-identical to
+// mi_pair() at default compiler flags (aggressive FP contraction can add
+// ~1e-15 differences; tests/test_core.cpp checks to 1e-12).
 struct SparseWeights {
   int num_bins = 0;
   int order = 0;
