@@ -4,11 +4,12 @@
 # Usage (from the repo root):
 #   Rscript analysis/run_m3d_regulondb.R \
 #       [--m3d data/E_coli_v4_Build_6] [--rdb data/RegulonDBExtract] \
-#       [--set chips|avg] [--B 100] [--threads N] [--alpha 0.5] \
+#       [--set avg|chips]  (default avg: 466 replicate-averaged experiments;
+#        chips = 907 arrays with technical replicates counted as samples) [--B 100] [--threads N] [--alpha 0.5] \
 #       [--depths 0,1,2,3,5,8,12,20] [--min-size 5] [--max-size 500] \
 #       [--quick 600] [--mi-null] [--out results/<set>]
 #       [--primary none_hg (default: raw values, Hacine-Gharbi joint-histogram
-#        bin rule) | none_scott2d | none_median_scott | parity2007 | rank_fd | ...]
+#        bin rule, Stouffer CLR) | none_hg_eu | none_scott2d | parity2007 | ...]
 #       [--bin-sweep 6,8,12,16]    (raw-value fixed-bin sensitivity; "" to skip)
 #       [--reuse results/<set>/primary_fit.rds]  skip the configuration sweep
 #        and the permutation null: recompute the primary MI/CLR (seconds) and
@@ -39,7 +40,7 @@
 ## ---- arguments ---------------------------------------------------------------
 args <- commandArgs(trailingOnly = TRUE)
 opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
-            set = "chips", B = 100L, threads = NULL, alpha = 0.5,
+            set = "avg", B = 100L, threads = NULL, alpha = 0.5,
             depths = "0,1,2,3,5,8,12,20", min_size = 5L, max_size = 500L,
             quick = 0L, mi_null = FALSE, out = NULL, seed = 20260922L,
             primary = "none_hg", bin_sweep = "6,8,12,16", reuse = "")
@@ -215,7 +216,8 @@ configs <- list(
   none_median_scott = list(transform = "none", bins = "median_scott", combine = "euclidean"),
   # 2-D-aware counts: the budget is the joint histogram, not the marginal
   none_scott2d      = list(transform = "none", bins = "median_scott2d", combine = "euclidean"),
-  none_hg           = list(transform = "none", bins = "hg", combine = "euclidean"),
+  none_hg           = list(transform = "none", bins = "hg", combine = "stouffer"),
+  none_hg_eu        = list(transform = "none", bins = "hg", combine = "euclidean"),
   rank_fd           = list(transform = "rank", bins = "fd", combine = "euclidean"),
   rank_fd_st        = list(transform = "rank", bins = "fd", combine = "stouffer")
 )

@@ -9,19 +9,20 @@
 #'
 #' @param mi symmetric numeric MI matrix (e.g. from [bspline_mi()]).
 #' @param method "normal" (z-scores, default), "rayleigh", or "kde".
-#' @param combine bilateral combination for method = "normal": "euclidean"
-#'   (historical: sqrt(z_ij^2 + z_ji^2)) or "stouffer" (new: (z_ij+z_ji)/sqrt(2)).
+#' @param combine bilateral combination for method = "normal": "stouffer"
+#'   (default since 2026-09-23: (z_ij+z_ji)/sqrt(2), standard-normal null) or
+#'   "euclidean" (historical 2007: sqrt(z_ij^2 + z_ji^2), Rayleigh-type null).
 #'   Ignored (with an error if non-default) for other methods.
 #' @return symmetric G x G CLR score matrix with zero diagonal.
 #' @export
 clr_calibrate <- function(mi, method = c("normal", "rayleigh", "kde"),
-                          combine = c("euclidean", "stouffer")) {
+                          combine = c("stouffer", "euclidean")) {
   method <- match.arg(method)
   combine <- match.arg(combine)
   if (!is.matrix(mi) || !is.numeric(mi) || nrow(mi) != ncol(mi) ||
       nrow(mi) < 2) stop("mi must be a square numeric matrix with >= 2 rows")
   if (any(!is.finite(mi))) stop("mi must not contain NA/NaN/Inf")
-  if (method != "normal" && combine != "euclidean")
+  if (method != "normal" && !missing(combine))
     stop('combine is only meaningful with method = "normal"')
 
   if (method == "normal") {

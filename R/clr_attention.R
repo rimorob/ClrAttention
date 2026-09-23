@@ -57,11 +57,13 @@ ClrAttention <- R6::R6Class("ClrAttention",
 
     #' @description Calibrate MI to CLR scores.
     #' @param method "normal" | "rayleigh" | "kde".
-    #' @param combine "euclidean" (historical) | "stouffer" (new); normal only.
-    calibrate = function(method = "normal", combine = "euclidean") {
+    #' @param combine "stouffer" (default) | "euclidean" (historical 2007);
+    #'   normal only.
+    calibrate = function(method = "normal", combine = "stouffer") {
       private$.need(private$mi_, "estimate_mi()")
-      private$scores_ <- clr_calibrate(private$mi_, method = method,
-                                       combine = combine)
+      private$scores_ <- if (method == "normal")
+        clr_calibrate(private$mi_, method = method, combine = combine) else
+        clr_calibrate(private$mi_, method = method)
       private$params_$calibrate <- list(method = method, combine = combine)
       private$operator_ <- private$trajectory_ <- private$threshold_ <- NULL
       invisible(self)

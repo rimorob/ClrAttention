@@ -1,6 +1,7 @@
 #!/bin/bash
-# Full M3D x RegulonDB run: 907-chip compendium (primary) and the 466
-# replicate-averaged experiments (sensitivity). Usage:
+# Full M3D x RegulonDB run on the 466 replicate-averaged experiments (the
+# 907-chip set counts technical replicates as samples, inflating N; run it
+# explicitly with SET=chips if wanted). Usage:
 #   tools/run_m3d.sh [RegulonDB extract dir] [B]
 # The extract dir must contain RISet.tsv, TUSet.tsv, OperonSet.tsv and
 # NetworkSigmaGene.tsv (RegulonDB "Datasets" downloads).
@@ -30,7 +31,6 @@ else
 fi
 Rscript -e 'library(clr); i <- clr_openmp_info(); cat("clr", as.character(packageVersion("clr")), "OpenMP threads:", i[["openmp_max_threads"]], "\n")'
 
-for SET in chips avg; do
-  Rscript analysis/run_m3d_regulondb.R --m3d data/E_coli_v4_Build_6 \
-    --rdb "$RDB" --set "$SET" --B "$B" --mi-null --out "results/$SET"
-done
+SET="${SET:-avg}"
+Rscript analysis/run_m3d_regulondb.R --m3d data/E_coli_v4_Build_6 \
+  --rdb "$RDB" --set "$SET" --B "$B" --out "results/$SET"

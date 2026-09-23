@@ -465,3 +465,33 @@ diffusion to 4 decimals, and conditional diffusion is slightly below raw
 (co-membership AUPR on strong/confirmed evidence 0.192 vs 0.196 at t = 8).
 Sign cancellation is not what limits diffusion on this benchmark with this
 operator. Results on the full compendium are pending.
+
+## D25. Stouffer is the default bilateral combination, and the default run uses the 466-experiment compendium [user]
+
+The default changes from `combine = "euclidean"` to `"stouffer"` on
+principle. With independent standard-normal directed z-scores, Stouffer's
+null is standard normal; the Euclidean norm's null is Rayleigh-type. The
+2007 Euclidean combination remains available (`combine = "euclidean"`, and
+the `parity2007` and `none_hg_eu` run configurations).
+
+The change has almost no empirical effect on M3D (466 experiments, default
+MI settings):
+
+- Across pairs with any positive score, the Spearman correlation between
+  the two combinations' scores is 0.993.
+- The two top-5,000 lists share 4,864 pairs.
+- The share of negatively correlated pairs among the top 100,000 is 5.9%
+  under Stouffer and 6.3% under Euclidean.
+- On the full 907-array data, co-membership AUPR differs by 0.0003.
+
+The scarcity of anti-correlated edges comes from the data, not from the
+combination. MI is sign-blind, and both combinations use clipped,
+non-negative z-scores.
+
+`tools/run_m3d.sh` now runs only the 466 replicate-averaged experiments by
+default (`SET=chips` runs the 907-array set). The 907-array set counts
+technical replicates as independent samples, which inflates N: it pushes
+the bin rule from 7 to 9 bins and overstates evidence for condition-specific
+genes. Both sets cover the same experiments and all 4,297 genes. The
+optional MI-null comparison (`--mi-null`) is no longer part of the default
+run.
