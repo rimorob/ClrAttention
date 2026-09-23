@@ -11,6 +11,14 @@
 #       [--primary none_hg (default: raw values, Hacine-Gharbi joint-histogram
 #        bin rule, Stouffer CLR) | none_hg_eu | none_scott2d | parity2007 | ...]
 #       [--bin-sweep 6,8,12,16]    (raw-value fixed-bin sensitivity; "" to skip)
+#       [--operators fdr05,fdr20,fdr05_top5,fdr05_top10,soft10,pearson_top5,pearson_top10]
+#        attention operators for the depth sweep (pre-declared 2026-09-23):
+#          fdrQQ        CLR edges passing BH at q = QQ/100 (permutation null)
+#          fdr05_topK   fdr05 plus each gene's own top-K CLR neighbours
+#                       (directed: row i attends to its K highest S[i, ])
+#          softK        softmax over each row's top-50 CLR scores, per-row
+#                       temperature giving K effective neighbours
+#          pearson_topK control: directed top-K by |Pearson|, weights |r|
 #       [--reuse results/<set>/primary_fit.rds]  skip the configuration sweep
 #        and the permutation null: recompute the primary MI/CLR (seconds) and
 #        rebuild the operator from the saved CLR threshold (deterministic).
@@ -43,7 +51,8 @@ opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
             set = "avg", B = 100L, threads = NULL, alpha = 0.5,
             depths = "0,1,2,3,5,8,12,20", min_size = 5L, max_size = 500L,
             quick = 0L, mi_null = FALSE, out = NULL, seed = 20260922L,
-            primary = "none_hg", bin_sweep = "6,8,12,16", reuse = "")
+            primary = "none_hg", bin_sweep = "6,8,12,16", reuse = "",
+            operators = "fdr05,fdr20,fdr05_top5,fdr05_top10,soft10,pearson_top5,pearson_top10")
 int_opts <- c("B", "threads", "quick", "seed", "min_size", "max_size")
 i <- 1L
 while (i <= length(args)) {
@@ -289,6 +298,12 @@ sel_eval <- function(E, label, tau) {
 }
 if (!is.null(reuse)) {
   E_sel <- reuse$edges
+  if (!is.null(reuse$null)) {
+    fit$restore_threshold(reuse$null, reuse$params$threshold$tau,
+                          reuse$params$threshold$q %||% 0.05)
+  } else fit$restore_threshold(list(suf = 0, w = 1, n_null = 0, nbins = 1,
+                                    M = 1, statistic = "clr"),
+                               reuse$params$threshold$tau)
 } else {
 set.seed(opt$seed)
 tic("select_threshold_clr", fit$select_threshold(B = opt$B, method = "fdr", q = 0.05,
@@ -310,102 +325,139 @@ wcsv(sel_tab, "selected_edges.csv")
 print(sel_tab, digits = 3, row.names = FALSE)
 }
 
-## ---- 4. diffusion depth sweep (Design A: fixed operator) ------------------------
-if (is.null(reuse)) fit$build_operator(alpha = opt$alpha) else {
-  fit$build_operator(tau = reuse$params$threshold$tau, alpha = opt$alpha)
-  E_now <- fit$clr_scores >= reuse$params$threshold$tau
-  diag(E_now) <- FALSE
-  if (!identical(unname(E_now), unname(reuse$edges)))
-    stop("reused threshold does not reproduce the saved edge set")
+## ---- 4. diffusion depth sweep (Design A: fixed operators) ---------------------
+# Every pre-declared operator gets the same sweep: depths t, value modes
+# raw / signed / conditional, readout |cor| of diffused profiles; plus the
+# value-independent attention mass (P^t + P^t')/2. Nothing here is chosen by
+# RegulonDB; all cells are reported.
+R0 <- tcrossprod(Z) / (ncol(Z) - 1)           # Pearson, for signs and control
+q_base <- fit$params$threshold$q %||% 0.05
+build_op <- function(name) {
+  if (grepl("^fdr[0-9]+$", name)) {
+    fit$reselect(as.numeric(sub("^fdr", "", name)) / 100)
+    fit$build_operator(alpha = opt$alpha)
+  } else if (grepl("^fdr[0-9]+_top[0-9]+$", name)) {
+    fit$reselect(as.numeric(sub("^fdr([0-9]+)_top.*$", "\\1", name)) / 100)
+    fit$build_operator(alpha = opt$alpha,
+                       topk_union = as.integer(sub("^.*_top", "", name)))
+  } else if (grepl("^soft[0-9]+$", name)) {
+    fit$build_operator(alpha = opt$alpha,
+                       softmax_keff = as.numeric(sub("^soft", "", name)),
+                       softmax_cap = 50L)
+  } else if (grepl("^pearson_top[0-9]+$", name)) {
+    k <- as.integer(sub("^pearson_top", "", name))
+    Ar <- abs(R0); diag(Ar) <- 0
+    fit$set_operator(clr:::.topk_rows(Ar, k), alpha = opt$alpha, label = name)
+  } else stop("unknown operator: ", name)
+  invisible(fit$operator)
 }
-A <- Matrix::Matrix(fit$operator, sparse = TRUE)
-P <- (1 - opt$alpha) * Matrix::Diagonal(G) + opt$alpha * A
-say(sprintf("operator: %d off-diagonal nonzeros, %d isolated genes (self-loop), alpha %.2f",
-            Matrix::nnzero(A) - sum(Matrix::diag(A) != 0), sum(Matrix::diag(A) == 1),
-            opt$alpha))
-Pt <- diag(G)                        # dense P^t
-Et <- Z                              # E^(0): row-standardized data
-depth_rows <- list()
-for (t in 0:max(depths)) {
-  if (t > 0) {
-    Pt <- as.matrix(Pt %*% P)
-    Et <- as.matrix(P %*% Et)
-  }
-  if (!t %in% depths) next
-  Ez <- Et - rowMeans(Et)
+readout <- function(E) {
+  Ez <- E - rowMeans(E)
   sdv <- sqrt(rowSums(Ez^2) / (ncol(Ez) - 1)); sdv[sdv <= 0] <- 1
   Ez <- Ez / sdv
-  Ct <- abs(tcrossprod(Ez) / (ncol(Ez) - 1))
-  sc <- score_all(Ct, sprintf("depth%02d:abscor", t)); add_scores(sc)
-  headline(sprintf("depth%02d:abscor", t))
-  if (t > 0) {
-    Sa <- (Pt + t(Pt)) / 2; diag(Sa) <- 0
-    add_scores(score_all(Sa, sprintf("depth%02d:attention", t)))
-    headline(sprintf("depth%02d:attention", t))
-  }
-  depth_rows[[length(depth_rows) + 1L]] <- data.frame(
-    t = t, median_abs_cor_offdiag = stats::median(Ct[upper.tri(Ct)]),
-    effective_rank = { ev <- svd(Ez, nu = 0, nv = 0)$d^2; sum(ev)^2 / sum(ev^2) })
-  rm(Ct); invisible(gc())
+  abs(tcrossprod(Ez) / (ncol(Ez) - 1))
 }
-# Value transforms (the continuous W_V): same operator and readout, but the
-# message from gene j to gene i is sign(cor) * E_j ("signed") or the B-spline
-# conditional expectation E[z_i | z_j] applied to E_j ("conditional").
-for (vt in c("signed", "conditional")) {
-  tic(paste0("diffuse_", vt), fit$diffuse(steps = max(depths), values = vt))
-  tr <- fit$trajectory
-  for (t in depths[depths > 0]) {
-    Ez <- tr[[t + 1L]] - rowMeans(tr[[t + 1L]])
-    sdv <- sqrt(rowSums(Ez^2) / (ncol(Ez) - 1)); sdv[sdv <= 0] <- 1
-    Ez <- Ez / sdv
-    Ct <- abs(tcrossprod(Ez) / (ncol(Ez) - 1))
-    lab <- sprintf("depth%02d:abscor_%s", t, vt)
-    add_scores(score_all(Ct, lab)); headline(lab)
-    rm(Ct); invisible(gc())
-  }
-  fit$reset_diffusion(); rm(tr); invisible(gc())
+op_rows <- list(); depth_rows <- list()
+Ct0 <- readout(Z)
+add_scores(score_all(Ct0, "op=none;values=none;t=00;readout=abscor"))
+headline("op=none;values=none;t=00;readout=abscor")
+depth_rows[[1]] <- data.frame(operator = "none", values = "none", t = 0L,
+                              median_abs_cor_offdiag = stats::median(Ct0[upper.tri(Ct0)]))
+rm(Ct0); invisible(gc())
+ops <- strsplit(opt$operators, ",")[[1]]
+if (!is.null(reuse) && is.null(reuse$null)) {
+  drop <- grepl("^fdr", ops) & !grepl("^fdr05", ops)
+  if (any(drop)) say("reused fit has no stored null: skipping ",
+                     paste(ops[drop], collapse = ", "))
+  ops <- ops[!drop]
 }
+for (op in ops) {
+  A <- build_op(op)
+  off <- A > 0 & row(A) != col(A)
+  op_rows[[length(op_rows) + 1L]] <- data.frame(
+    operator = op, edges = sum(off), mean_out_degree = mean(rowSums(off)),
+    isolated_genes = sum(rowSums(off) == 0),
+    neg_cor_edge_share = mean(R0[off] < 0), alpha = opt$alpha)
+  say(sprintf("operator %-14s edges %6d, mean out-degree %5.1f, isolated %4d, negative-cor share %.4f",
+              op, sum(off), mean(rowSums(off)), sum(rowSums(off) == 0),
+              mean(R0[off] < 0)))
+  # attention mass (value-independent)
+  P <- Matrix::Matrix((1 - opt$alpha) * diag(G) + opt$alpha * A, sparse = TRUE)
+  Pt <- diag(G)
+  for (t in seq_len(max(depths))) {
+    Pt <- as.matrix(Pt %*% P)
+    if (t %in% depths) {
+      Sa <- (Pt + t(Pt)) / 2; diag(Sa) <- 0
+      lab <- sprintf("op=%s;values=none;t=%02d;readout=attention", op, t)
+      add_scores(score_all(Sa, lab)); headline(lab)
+    }
+  }
+  rm(Pt, Sa, P); invisible(gc())
+  for (vt in c("raw", "signed", "conditional")) {
+    tic(sprintf("diffuse_%s_%s", op, vt),
+        fit$diffuse(steps = max(depths), values = vt))
+    tr <- fit$trajectory
+    for (t in depths[depths > 0]) {
+      Ct <- readout(tr[[t + 1L]])
+      lab <- sprintf("op=%s;values=%s;t=%02d;readout=abscor", op, vt, t)
+      add_scores(score_all(Ct, lab)); headline(lab)
+      depth_rows[[length(depth_rows) + 1L]] <- data.frame(
+        operator = op, values = vt, t = t,
+        median_abs_cor_offdiag = stats::median(Ct[upper.tri(Ct)]))
+      rm(Ct); invisible(gc())
+    }
+    fit$reset_diffusion(); rm(tr); invisible(gc())
+  }
+}
+wcsv(do.call(rbind, op_rows), "operators.csv")
+# restore the primary operator for the saved artifacts
+build_op(ops[1]); A <- Matrix::Matrix(fit$operator, sparse = TRUE)
 
 cm_all <- do.call(rbind, cm_rows); coh_all <- do.call(rbind, coh_rows)
-dep_cm <- cm_all[grepl("^depth", cm_all$method), ]
-dep_coh <- coh_all[grepl("^depth", coh_all$method), ]
+parse_lab <- function(d) {
+  m <- grepl("^op=", d$method)
+  d <- d[m, ]
+  kv <- strsplit(d$method, ";", fixed = TRUE)
+  get <- function(key) vapply(kv, function(x) sub(paste0("^", key, "="), "",
+                                                  grep(paste0("^", key, "="), x, value = TRUE)), "")
+  cbind(operator = get("op"), values = get("values"), t = as.integer(get("t")),
+        readout = get("readout"), d)
+}
+dep_cm <- parse_lab(cm_all); dep_coh <- parse_lab(coh_all)
 wcsv(dep_cm, "depth_comembership.csv")
 wcsv(dep_coh, "depth_coherence.csv")
 wcsv(do.call(rbind, depth_rows), "depth_collapse.csv")
 
-png(file.path(opt$out, "depth_sweep.png"), width = 1000, height = 560, res = 110)
-par(mfrow = c(1, 2), mar = c(5, 4.5, 3, 1))
-for (what in c("aupr", "coh")) {
-  for (kind in c("abscor", "attention")) {
-    if (what == "aupr") {
-      d <- dep_cm[dep_cm$stratum == "all" & dep_cm$evidence == "SC" &
-                    grepl(paste0(":", kind, "$"), dep_cm$method), ]
-      y <- d$aupr
-    } else {
-      d <- dep_coh[dep_coh$class == "all" & dep_coh$evidence == "SC" &
-                     grepl(paste0(":", kind, "$"), dep_coh$method), ]
-      y <- d$median_auroc
-    }
-    tt <- as.integer(sub("^depth([0-9]+):.*$", "\\1", d$method))
-    if (kind == "abscor") {
-      plot(tt, y, type = "b", pch = 16, col = "#1b6ca8",
-           ylim = range(c(y, if (what == "aupr")
-             dep_cm$aupr[dep_cm$stratum == "all" & dep_cm$evidence == "SC"] else
-               dep_coh$median_auroc[dep_coh$class == "all" & dep_coh$evidence == "SC"]),
-             na.rm = TRUE),
-           xlab = "diffusion depth t",
-           ylab = if (what == "aupr") "co-membership AUPR (SC)" else
-             "median regulon coherence AUROC (SC)",
-           main = if (what == "aupr") "Regulon co-membership" else "Regulon coherence")
-    } else lines(tt, y, type = "b", pch = 17, col = "#e8833a")
+# Figure: co-membership AUPR (SC, all classes) vs depth, one panel per value
+# mode, one line per operator (|cor| readout); horizontal reference = CLR of
+# the primary configuration.
+clr_ref <- cm_all$aupr[cm_all$method == paste0(opt$primary, ":clr") &
+                         cm_all$stratum == "all" & cm_all$evidence == "SC"]
+d0 <- dep_cm[dep_cm$stratum == "all" & dep_cm$evidence == "SC" &
+               dep_cm$readout == "abscor", ]
+png(file.path(opt$out, "depth_sweep.png"), width = 1500, height = 520, res = 110)
+par(mfrow = c(1, 3), mar = c(5, 4.5, 3, 1))
+cols <- stats::setNames(grDevices::hcl.colors(length(ops), "Dark 3"), ops)
+base0 <- d0$aupr[d0$operator == "none"]
+yl <- range(c(d0$aupr, clr_ref), na.rm = TRUE)
+for (vt in c("raw", "signed", "conditional")) {
+  plot(NA, xlim = c(0, max(depths)), ylim = yl, xlab = "diffusion depth t",
+       ylab = "co-membership AUPR (SC)", main = paste("values =", vt))
+  abline(h = clr_ref, lty = 2, col = "grey40")
+  for (op in ops) {
+    d <- d0[d0$operator == op & d0$values == vt, ]
+    d <- d[order(d$t), ]
+    lines(c(0, d$t), c(base0, d$aupr), type = "b", pch = 16, cex = 0.7,
+          col = cols[op])
   }
-  legend("bottomright", bty = "n", pch = c(16, 17), col = c("#1b6ca8", "#e8833a"),
-         legend = c("|cor| of diffused profiles", "attention mass (P^t sym.)"))
+  if (vt == "raw") legend("bottomright", bty = "n", cex = 0.8, lty = 1,
+                          col = cols, legend = ops)
 }
 dev.off()
 
 ## ---- 5. artifacts ------------------------------------------------------------
 saveRDS(list(mi = fit$mi, clr = fit$clr_scores, edges = E_sel,
+             null = tryCatch(fit$null_distribution, error = function(e) NULL),
              operator = A, params = fit$params, genes = genes,
              seed = opt$seed, options = opt),
         file.path(opt$out, "primary_fit.rds"), compress = "gzip")

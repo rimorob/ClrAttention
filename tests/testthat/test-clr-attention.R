@@ -158,3 +158,30 @@ test_that("weights_at reproduces the MI estimator's basis and sums to 1", {
   expect_equal(W2[1, ], W[which.min(z), ])
   expect_equal(W2[2, ], W[which.max(z), ])
 })
+
+test_that("operator variants: directed top-k union, softmax k_eff, external, reselect", {
+  set.seed(9)
+  f <- ClrAttention$new(make_toy())$estimate_mi(bins = 10, threads = 1)$calibrate()
+  S <- f$clr_scores
+  f$build_operator(tau = Inf, topk_union = 2)
+  A <- f$operator
+  expect_true(all(rowSums(A > 0 & row(A) != col(A)) <= 2))
+  # directed: row i's neighbours are its own top-2 by S[i, ]
+  i <- 1; Si <- S[i, ]; Si[i] <- -Inf
+  expect_setequal(which(A[i, ] > 0), order(Si, decreasing = TRUE)[1:2])
+  expect_true(all(abs(rowSums(A) - 1) < 1e-12))
+  f$build_operator(softmax_keff = 3, softmax_cap = 8)
+  A <- f$operator
+  ne <- apply(A, 1, function(w) { w <- w[w > 0]; exp(-sum(w * log(w))) })
+  expect_equal(unname(ne[rowSums(A > 0) > 3]), rep(3, sum(rowSums(A > 0) > 3)),
+               tolerance = 1e-6)
+  f$set_operator(abs(cor(t(make_toy()))) * (1 - diag(10)), label = "pearson")
+  expect_equal(f$params$operator$selection, "pearson")
+  expect_true(all(abs(rowSums(f$operator) - 1) < 1e-12))
+  set.seed(1)
+  f$select_threshold(B = 5, threads = 1)
+  t05 <- f$threshold
+  f$reselect(0.5)
+  expect_lte(f$threshold, t05)
+  expect_equal(f$params$threshold$q, 0.5)
+})

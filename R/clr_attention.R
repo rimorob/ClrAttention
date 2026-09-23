@@ -251,6 +251,8 @@ ClrAttention <- R6::R6Class("ClrAttention",
         tau <- .fdr_cutoff(p_obs[ord], s_obs[ord], M, q)
       }
       private$threshold_ <- tau
+      private$null_ <- list(suf = suf, w = w, n_null = n_null, nbins = nbins,
+                            M = M, statistic = statistic)
       private$operator_ <- private$trajectory_ <- NULL
       private$params_$threshold <- list(B = B, method = method, q = q,
                                        statistic = statistic,
@@ -265,55 +267,107 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #'   the threshold from select_threshold() when available, else k.
     #'   tau = Inf keeps nothing (empty operator).
     #' @param alpha diffusion weight in (0, 1].
-    build_operator = function(k = 50, tau = NULL, alpha = 0.5) {
+    build_operator = function(k = 50, tau = NULL, alpha = 0.5,
+                              topk_union = NULL, softmax_keff = NULL,
+                              softmax_cap = 50L) {
       private$.need(private$scores_, "calibrate()")
       S <- private$scores_
       G <- nrow(S)
       selected <- NULL
-      if (is.null(tau) && !is.null(private$threshold_)) {
-        selected <- self$edges    # permutation-selected edge set
-        A <- S * selected
-      } else if (!is.null(tau)) {
-        if (!is.numeric(tau) || length(tau) != 1L || is.na(tau) || tau < 0)
-          stop("tau must be a single non-negative number")
-        A <- S * (S >= tau)
+      if (!is.null(softmax_keff)) {
+        A <- .softmax_rows(S, keff = softmax_keff, cap = softmax_cap)
+        sel_label <- sprintf("softmax_keff%g_cap%d", softmax_keff,
+                             as.integer(softmax_cap))
       } else {
-        k <- as.integer(k)
-        if (length(k) != 1L || is.na(k) || k < 1L)
-          stop("k must be a positive integer")
-        k <- min(k, G - 1L)
-        A <- matrix(0, G, G)
-        for (i in seq_len(G)) {
-          row <- S[i, ]
-          cutoff <- sort(row, decreasing = TRUE)[k]
-          keep <- row >= cutoff & row > 0
-          A[i, keep] <- row[keep]
+        if (is.null(tau) && !is.null(private$threshold_)) {
+          selected <- self$edges    # permutation-selected edge set
+          A <- S * selected
+          sel_label <- private$params_$threshold$statistic
+        } else if (!is.null(tau)) {
+          if (!is.numeric(tau) || length(tau) != 1L || is.na(tau) || tau < 0)
+            stop("tau must be a single non-negative number")
+          A <- S * (S >= tau)
+          diag(A) <- 0
+          sel_label <- "clr_tau"
+        } else {
+          A <- .topk_rows(S, k)
+          sel_label <- "top_k"
+        }
+        if (!is.null(topk_union)) {
+          # Directed: gene i additionally attends to its own top-k CLR
+          # neighbours (row i of S), whether or not they passed selection.
+          Tk <- .topk_rows(S, topk_union)
+          A <- ifelse(Tk > 0, Tk, A)
+          sel_label <- paste0(sel_label, "+top", as.integer(topk_union))
         }
       }
-      alpha <- as.numeric(alpha)
-      if (length(alpha) != 1L || !is.finite(alpha) || alpha <= 0 || alpha > 1)
-        stop("alpha must be in (0, 1]")
-      rs <- rowSums(A)
-      nz <- rs > 0
-      A[nz, ] <- A[nz, ] / rs[nz]
-      # Genes that attend to nobody attend to themselves: every row is then a
-      # probability distribution, so P = (1-a)I + aA is stochastic and an
-      # isolated gene's profile is preserved. (Previously such rows stayed
-      # zero and the gene decayed as (1-a)^t toward 0; tau = Inf wiped the
-      # whole embedding.)
-      if (any(!nz)) A[cbind(which(!nz), which(!nz))] <- 1
-      if (!is.null(rownames(S))) {
-        rownames(A) <- colnames(A) <- rownames(S)
-      }
-      private$operator_ <- A
-      private$params_$operator <- list(
-        k = if (is.null(tau) && is.null(selected)) k else NULL,
+      private$.finish_operator(A, alpha, list(
+        k = if (sel_label == "top_k") as.integer(k) else NULL,
         tau = if (!is.null(selected)) private$threshold_ else tau,
-        selection = if (!is.null(selected))
-          private$params_$threshold$statistic else if (!is.null(tau))
-          "clr_tau" else "top_k",
-        alpha = alpha)
-      private$trajectory_ <- NULL
+        topk_union = topk_union, softmax_keff = softmax_keff,
+        selection = sel_label))
+    },
+
+    #' @description Install an externally built attention matrix (e.g. a
+    #'   control operator from another similarity). Rows are normalized to
+    #'   sum to 1; rows with no mass get a self-loop.
+    #' @param A non-negative G x G matrix (row i = gene i's attention).
+    #' @param alpha diffusion weight in (0, 1].
+    #' @param label free-text description stored in params$operator.
+    set_operator = function(A, alpha = 0.5, label = "external") {
+      G <- nrow(private$data_)
+      if (!is.matrix(A) || !is.numeric(A) || any(dim(A) != G))
+        stop("A must be a numeric ", G, " x ", G, " matrix")
+      if (any(!is.finite(A)) || any(A < 0)) stop("A must be finite and >= 0")
+      private$.finish_operator(A, alpha, list(selection = label))
+    },
+
+    #' @description Restore a saved selection (null distribution + threshold)
+    #'   without re-running permutations, e.g. from a saved run.
+    #' @param null a list as returned by the null_distribution field.
+    #' @param tau the saved threshold.
+    #' @param q the saved FDR level.
+    restore_threshold = function(null, tau, q = 0.05) {
+      private$.need(private$scores_, "calibrate()")
+      stopifnot(is.list(null), all(c("suf", "w", "n_null", "nbins", "M",
+                                     "statistic") %in% names(null)))
+      private$null_ <- null
+      private$threshold_ <- tau
+      private$params_$threshold <- list(method = "fdr", q = q, tau = tau,
+                                        statistic = null$statistic,
+                                        n_null = null$n_null, restored = TRUE)
+      private$operator_ <- private$trajectory_ <- NULL
+      invisible(self)
+    },
+
+    #' @description Re-run the Benjamini-Hochberg selection at a new FDR level
+    #'   against the permutation null stored by select_threshold() -- no new
+    #'   permutations.
+    #' @param q FDR level in (0, 1).
+    reselect = function(q) {
+      nl <- private$.need(private$null_, "select_threshold()")
+      if (!is.numeric(q) || length(q) != 1L || !(q > 0 && q < 1))
+        stop("q must be in (0, 1)")
+      if (!(nl$n_null > 0)) {
+        if (isTRUE(all.equal(q, private$params_$threshold$q))) {
+          private$operator_ <- private$trajectory_ <- NULL
+          return(invisible(self))    # restored selection without a null
+        }
+        stop("no stored permutation null: cannot reselect at a new q")
+      }
+      G <- nrow(private$data_)
+      ut <- upper.tri(matrix(0, G, G))
+      s_obs <- if (nl$statistic == "mi") private$mi_[ut] else private$scores_[ut]
+      idx <- as.integer(pmin(s_obs / nl$w, nl$nbins)) + 1L
+      idx[idx < 1L] <- 1L
+      p_obs <- (1 + nl$suf[idx]) / (1 + nl$n_null)
+      ord <- order(p_obs)
+      tau <- .fdr_cutoff(p_obs[ord], s_obs[ord], nl$M, q)
+      private$threshold_ <- tau
+      private$params_$threshold$method <- "fdr"
+      private$params_$threshold$q <- q
+      private$params_$threshold$tau <- tau
+      private$operator_ <- private$trajectory_ <- NULL
       invisible(self)
     },
 
@@ -361,15 +415,17 @@ ClrAttention <- R6::R6Class("ClrAttention",
       traj <- vector("list", steps + 1L)
       traj[[1L]] <- E0
       if (values == "raw") {
-        P <- (1 - alpha) * diag(G) + alpha * A
-        for (t in seq_len(steps)) traj[[t + 1L]] <- P %*% traj[[t]]
+        P <- Matrix::Matrix((1 - alpha) * diag(G) + alpha * A, sparse = TRUE)
+        for (t in seq_len(steps))
+          traj[[t + 1L]] <- as.matrix(P %*% traj[[t]])
       } else if (values == "signed") {
         off <- A > 0 & row(A) != col(A)
         R <- stats::cor(t(E0))
         As <- A
         As[off] <- A[off] * sign(R[off])
-        P <- (1 - alpha) * diag(G) + alpha * As
-        for (t in seq_len(steps)) traj[[t + 1L]] <- P %*% traj[[t]]
+        P <- Matrix::Matrix((1 - alpha) * diag(G) + alpha * As, sparse = TRUE)
+        for (t in seq_len(steps))
+          traj[[t + 1L]] <- as.matrix(P %*% traj[[t]])
       } else {
         vm <- private$.value_model(E0)
         for (t in seq_len(steps))
@@ -433,13 +489,38 @@ ClrAttention <- R6::R6Class("ClrAttention",
     },
     #' @field trajectory the full diffusion trajectory, E^(0..T) (after diffuse()).
     trajectory = function() private$.need(private$trajectory_, "diffuse()"),
+    #' @field null_distribution the pooled permutation null stored by
+    #'   select_threshold() (histogram survival counts, bin width, size,
+    #'   statistic), for reuse by reselect() or restore_threshold().
+    null_distribution = function() private$.need(private$null_,
+                                                  "select_threshold()"),
     #' @field params read-only list of data dimensions and stage parameters.
     params = function() private$params_
   ),
 
   private = list(
     data_ = NULL, mi_ = NULL, scores_ = NULL, operator_ = NULL,
-    trajectory_ = NULL, threshold_ = NULL, params_ = NULL,
+    trajectory_ = NULL, threshold_ = NULL, params_ = NULL, null_ = NULL,
+
+    # Row-normalize, give empty rows a self-loop, store, invalidate trajectory.
+    .finish_operator = function(A, alpha, info) {
+      alpha <- as.numeric(alpha)
+      if (length(alpha) != 1L || !is.finite(alpha) || alpha <= 0 || alpha > 1)
+        stop("alpha must be in (0, 1]")
+      rs <- rowSums(A)
+      nz <- rs > 0
+      A[nz, ] <- A[nz, ] / rs[nz]
+      # Genes that attend to nobody attend to themselves: every row is then a
+      # probability distribution, so P = (1-a)I + aA is stochastic and an
+      # isolated gene's profile is preserved.
+      if (any(!nz)) A[cbind(which(!nz), which(!nz))] <- 1
+      if (!is.null(rownames(private$data_)))
+        rownames(A) <- colnames(A) <- rownames(private$data_)
+      private$operator_ <- A
+      private$params_$operator <- c(info, list(alpha = alpha))
+      private$trajectory_ <- NULL
+      invisible(self)
+    },
     .need = function(value, stage) {
       if (is.null(value))
         stop("not available yet: run $", stage, " first", call. = FALSE)
@@ -521,4 +602,52 @@ ClrAttention <- R6::R6Class("ClrAttention",
   # so score >= tau keeps exactly the BH rejection set.
   p_cut <- p_sorted[max(ok)]
   min(s_by_p[p_sorted <= p_cut])
+}
+
+# Directed top-k: row i keeps its k largest positive off-diagonal scores.
+.topk_rows <- function(S, k) {
+  k <- as.integer(k)
+  if (length(k) != 1L || is.na(k) || k < 1L) stop("k must be a positive integer")
+  G <- nrow(S)
+  k <- min(k, G - 1L)
+  A <- matrix(0, G, G)
+  for (i in seq_len(G)) {
+    row <- S[i, ]; row[i] <- -Inf
+    top <- order(row, decreasing = TRUE)[seq_len(k)]
+    top <- top[row[top] > 0]
+    A[i, top] <- row[top]
+  }
+  A
+}
+
+# Softmax attention over each row's top-`cap` positive scores, with a
+# per-row temperature chosen so the effective number of attended genes,
+# exp(entropy), equals keff (bisection on log temperature). Rows with fewer
+# than keff candidates get uniform weights over what they have.
+.softmax_rows <- function(S, keff = 10, cap = 50L) {
+  if (!is.numeric(keff) || length(keff) != 1L || !(keff > 1))
+    stop("softmax_keff must be > 1")
+  cap <- as.integer(cap)
+  G <- nrow(S)
+  A <- matrix(0, G, G)
+  for (i in seq_len(G)) {
+    row <- S[i, ]; row[i] <- -Inf
+    top <- order(row, decreasing = TRUE)[seq_len(min(cap, G - 1L))]
+    top <- top[row[top] > 0]
+    if (!length(top)) next
+    s <- row[top]
+    if (length(top) <= keff) { A[i, top] <- 1 / length(top); next }
+    neff <- function(lt) {
+      w <- exp((s - max(s)) / exp(lt)); w <- w / sum(w)
+      exp(-sum(w[w > 0] * log(w[w > 0])))
+    }
+    lo <- log(1e-4); hi <- log(1e4)
+    for (it in 1:60) {
+      mid <- (lo + hi) / 2
+      if (neff(mid) < keff) lo <- mid else hi <- mid
+    }
+    w <- exp((s - max(s)) / exp((lo + hi) / 2))
+    A[i, top] <- w / sum(w)
+  }
+  A
 }

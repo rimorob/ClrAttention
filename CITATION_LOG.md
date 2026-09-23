@@ -495,3 +495,24 @@ the bin rule from 7 to 9 bins and overstates evidence for condition-specific
 genes. Both sets cover the same experiments and all 4,297 genes. The
 optional MI-null comparison (`--mi-null`) is no longer part of the default
 run.
+
+## D26. A pre-declared grid of denser attention operators [joint]
+
+The FDR-only operator (BH q = 0.05) left 62% of genes isolated on the
+907-array set, so it could not test diffusion fairly. The following
+operators are fixed in advance, and every one is reported. None is
+selected on RegulonDB.
+
+| Operator | Construction |
+|---|---|
+| `fdr05` | The current operator: CLR edges passing BH at q = 0.05. |
+| `fdr20` | Same test at q = 0.2. `reselect()` reuses the stored permutation null, so no new permutations are run. |
+| `fdr05_top5`, `fdr05_top10` | `fdr05` plus each gene's own top-k CLR neighbours. The graph is **directed**: row i attends to the k largest entries of S[i, ]. The user chose directed attention because CLR is usually made directional by designating regulators. |
+| `soft10` | Softmax attention over each row's top-50 CLR scores. The per-row temperature is set so that exp(entropy) = 10 effective neighbours. |
+| `pearson_top5`, `pearson_top10` | Control: a directed top-k graph by |Pearson| with |r| as weights. It separates "any smoothing helps" from "MI/CLR attention helps". |
+
+Each operator is run through the full depth sweep with raw, signed and
+conditional values. The readouts are |cor| of the diffused profiles and
+the attention mass (P^t + P^t')/2. `operators.csv` reports each operator's
+density and its share of negatively correlated edges. Interpretation
+waits for bootstrap confidence intervals.

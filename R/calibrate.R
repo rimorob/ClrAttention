@@ -17,12 +17,13 @@
 #' @export
 clr_calibrate <- function(mi, method = c("normal", "rayleigh", "kde"),
                           combine = c("stouffer", "euclidean")) {
+  combine_given <- !missing(combine)
   method <- match.arg(method)
   combine <- match.arg(combine)
   if (!is.matrix(mi) || !is.numeric(mi) || nrow(mi) != ncol(mi) ||
       nrow(mi) < 2) stop("mi must be a square numeric matrix with >= 2 rows")
   if (any(!is.finite(mi))) stop("mi must not contain NA/NaN/Inf")
-  if (method != "normal" && !missing(combine))
+  if (method != "normal" && combine_given)
     stop('combine is only meaningful with method = "normal"')
 
   if (method == "normal") {
