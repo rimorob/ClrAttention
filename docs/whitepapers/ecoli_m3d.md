@@ -77,6 +77,8 @@ Each bootstrap draw recomputes MI from scratch.  There are two schemes:
 - **Score:**  the delete-k jackknife influence of P's experiments on |Pearson|, CLR and CLR-attention networks.  It is z-scored per gene against random delete-k subsets.
 - **Baselines:**  differential expression (mean |z| of P's experiments) and gene variance.
 
+**Reference method.**  The then state of the art on this exact task and compendium is SSEM-Lasso network filtering (Cosgrove, Zhou, Gardner & Kolaczyk, *Bioinformatics* 2008, [doi:10.1093/bioinformatics/btn476](https://doi.org/10.1093/bioinformatics/btn476)).  It fits a sparse regression network and scores genes by how much the perturbation departs from what the network predicts.  It was evaluated on M3D genetic perturbations by sensitivity among the top 100 ranked genes, a metric we now report as well.  Boris's original KL-divergence approach matched it but did not beat it.  Re-running SSEM-Lasso, and porting the KLD method once the MATLAB source is located, are the natural comparisons.
+
 **Early signal, 800-gene cloud test with 5 null draws (not a result):**  CLR-attention influence had a median AUROC of 0.63, against 0.55 for differential expression.  It won in 10 of 14 perturbations, with the largest gains for LexA/SOS (0.88 against 0.51), RyhB, SoxS and AppY.  It failed for ppGpp, which is again the diffuse regulon.  *The full run is queued:  `results/perturbation/`.*
 
 ## 7. Limitations

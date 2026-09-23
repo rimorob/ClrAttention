@@ -18,7 +18,10 @@
 # gene's value against all other experiments -- the "trivial gene-level
 # feature" of Kendiukhov 2026), and gene variance (a P-independent prior).
 # Pre-declared combination: Stouffer of rank-normalized DE and CLR-attention
-# influence.
+# influence. Reference method for this task on M3D: SSEM-Lasso network
+# filtering (Cosgrove, Zhou, Gardner & Kolaczyk, Bioinformatics 2008,
+# doi:10.1093/bioinformatics/btn476), which reports sensitivity among the top
+# 100 ranked genes; that metric is reported here too (not yet re-run).
 #
 # Truth: the RegulonDB regulon of the perturbed regulator, mapped by a table
 # fixed in advance (gene -> regulator, including relA -> ppGpp,
@@ -172,10 +175,15 @@ for (k in names(groups)) {
   tr <- truth[[k]]; use <- !tr$exclude
   for (m in names(sc)) {
     ps <- pr_summary(sc[[m]][use], tr$label[use])
+    top100 <- order(-sc[[m]][use])[1:100]
     res[[length(res) + 1L]] <- data.frame(perturbation = k, k = length(cols),
                                           n_targets = sum(tr$label[use]),
                                           method = m, auroc = ps[["auroc"]],
-                                          aupr_ratio = ps[["aupr"]] / mean(tr$label[use]))
+                                          aupr_ratio = ps[["aupr"]] / mean(tr$label[use]),
+                                          # Cosgrove et al. 2008 (SSEM-Lasso on M3D)
+                                          # report sensitivity among the top 100 genes
+                                          sens_top100 = sum(tr$label[use][top100]) /
+                                            sum(tr$label[use]))
   }
   scores_out[[k]] <- as.data.frame(sc)
   cur <- do.call(rbind, res); cur <- cur[cur$perturbation == k, ]
@@ -192,6 +200,7 @@ m <- merge(res, de_ref)
 summ <- do.call(rbind, lapply(split(m, m$method), function(x) data.frame(
   method = x$method[1], n = nrow(x), median_auroc = stats::median(x$auroc),
   median_aupr_ratio = stats::median(x$aupr_ratio),
+  mean_sens_top100 = mean(x$sens_top100),
   wins_vs_de_auroc = sum(x$auroc > x$auroc_de),
   wilcoxon_p_vs_de = if (all(x$auroc == x$auroc_de)) NA_real_ else
     suppressWarnings(stats::wilcox.test(x$auroc, x$auroc_de, paired = TRUE)$p.value))))
@@ -199,7 +208,8 @@ summ <- summ[order(-summ$median_auroc), ]
 utils::write.csv(summ, file.path(opt$out, "summary.csv"), row.names = FALSE)
 say("summary over perturbations (AUROC; paired vs differential expression):")
 for (j in seq_len(nrow(summ)))
-  say(sprintf("  %-28s median AUROC %.3f  median AUPR ratio %.2f  wins vs DE %d/%d  p = %.3g",
+  say(sprintf("  %-28s median AUROC %.3f  median AUPR ratio %.2f  mean sens@100 %.3f  wins vs DE %d/%d  p = %.3g",
               summ$method[j], summ$median_auroc[j], summ$median_aupr_ratio[j],
+              summ$mean_sens_top100[j],
               summ$wins_vs_de_auroc[j], summ$n[j], summ$wilcoxon_p_vs_de[j]))
 say("done")
