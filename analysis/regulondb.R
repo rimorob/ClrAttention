@@ -98,7 +98,7 @@ map_symbols <- function(x, sym) {
   match(tolower(x), tolower(sym))
 }
 
-# Build the undirected evaluation universe in the style of Faith et al. 2007:
+# Build the undirected evaluation universe in the style of Faith, Hayete et al. 2007:
 # all pairs (tf, g), tf a regulator gene with >= 1 known target present in the
 # data, g any other gene. A pair is positive if either direction is a known
 # interaction. Returns list(i, j, label) with i < j (matrix indices), plus the

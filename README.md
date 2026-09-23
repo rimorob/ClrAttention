@@ -105,7 +105,7 @@ are expanded to their genes.  The score asks whether genes that share a
 regulon come out as related.  The regulator itself is never treated as a
 node, and pairs of genes in the same operon are excluded.
 
-The Faith-2007 style TF–gene edge score is reported as a secondary result.
+The Faith, Hayete et al. (2007) style TF–gene edge score is reported as a secondary result.
 See `analysis/regulons.R` for how the benchmark is built.
 
 The 907-array results go to `results/chips/`, and the 466

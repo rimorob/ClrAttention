@@ -4,6 +4,8 @@
 # Start it once in Terminal from the repo root and leave it running:
 #     caffeinate -i tools/job_runner.sh
 # (caffeinate keeps the Mac awake while it runs). Stop with Ctrl-C.
+# To stop the *current* job without stopping the runner, use the control
+# channel (tools/control_runner.sh): cp tools/kill_running_job.sh jobs/control/
 # SECURITY: anything placed in jobs/queue/*.sh is executed as you. Only this
 # repo folder is watched.
 cd "$(dirname "$0")/.." || exit 1

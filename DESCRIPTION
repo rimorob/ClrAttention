@@ -13,8 +13,10 @@ Description: Reframes the Context Likelihood of Relatedness (CLR) network
     by the R6 class ClrAttention.
 License: MIT + file LICENSE
 Encoding: UTF-8
+ByteCompile: true
 RoxygenNote: 7.3.1
 Imports:
+    foreach,
     Matrix,
     R6,
     Rcpp,

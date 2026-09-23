@@ -30,18 +30,25 @@
 #
 # Usage (repo root):
 #   Rscript analysis/perturbation.R [--B 30] [--out results/perturbation]
-#       [--threads N] [--quick 0]
+#       [--threads N] [--quick 0] [--workers W] [--mem_gb 4]
+# The null draws and the per-perturbation fits run in parallel (foreach over
+# local cores minus 2, capped by RAM; analysis/parallel.R). The delete-k
+# subsets are drawn in the master in the original order, so they match the
+# sequential version; each fit then runs under its own seed (used only for
+# the 1e-9 jitter of a gene that is constant in a subset).
 
 args <- commandArgs(trailingOnly = TRUE)
 opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
             B = 30L, out = "results/perturbation", threads = NULL,
-            quick = 0L, seed = 20260926L, alpha = 0.5, t_att = 8L)
-ints <- c("B", "threads", "quick", "seed", "t_att")
+            quick = 0L, seed = 20260926L, alpha = 0.5, t_att = 8L,
+            workers = NULL, mem_gb = 4)
+ints <- c("B", "threads", "quick", "seed", "t_att", "workers")
 i <- 1L
 while (i <= length(args)) {
   key <- gsub("-", "_", sub("^--", "", args[i]))
   if (!key %in% names(opt)) stop("unknown argument: ", args[i])
-  opt[[key]] <- if (key %in% ints) as.integer(args[i + 1L]) else args[i + 1L]
+  opt[[key]] <- if (key %in% ints) as.integer(args[i + 1L]) else
+    if (key == "mem_gb") as.numeric(args[i + 1L]) else args[i + 1L]
   i <- i + 2L
 }
 dir.create(opt$out, recursive = TRUE, showWarnings = FALSE)
@@ -119,21 +126,30 @@ for (k in names(groups))
 ## ---- networks ------------------------------------------------------------
 Zs <- function(M) { Z <- M - rowMeans(M); s <- sqrt(rowSums(Z^2) / (ncol(Z) - 1))
                     s[s <= 0] <- 1; Z / s }
+OMP_THREADS <- NULL                  # master: bspline_mi default (cores - 2)
+nthr <- function() if (is.null(opt$threads)) OMP_THREADS else opt$threads
 networks <- function(cols) {
   Y <- X[, cols, drop = FALSE]
   rng <- apply(Y, 1, function(x) diff(range(x)))
   if (any(rng <= 0))
     Y[rng <= 0, ] <- Y[rng <= 0, ] + stats::rnorm(sum(rng <= 0) * ncol(Y), sd = 1e-9)
   Z <- Zs(Y)
+  pear <- abs(tcrossprod(Z) / (ncol(Z) - 1)); rm(Z)
   f <- ClrAttention$new(Y)$estimate_mi(bins = "hg", transform = "none",
-                                       threads = opt$threads)
+                                       threads = nthr())
+  rm(Y)
   f$calibrate(method = "normal", combine = "stouffer")
   f$build_operator(alpha = opt$alpha, softmax_keff = 10, softmax_cap = 50L)
-  P <- Matrix::Matrix((1 - opt$alpha) * diag(G) + opt$alpha * f$operator, sparse = TRUE)
-  Pt <- diag(G); for (t in seq_len(opt$t_att)) Pt <- as.matrix(Pt %*% P)
-  A <- (Pt + t(Pt)) / 2
-  out <- list(pearson = abs(tcrossprod(Z) / (ncol(Z) - 1)), clr = f$clr_scores,
-              clr_attention = A)
+  # Sparse lazy operator built directly (identical values to the dense
+  # construction), so no dense (1-a)I + aA temporary.
+  P <- Matrix::Diagonal(G, 1 - opt$alpha) +
+    opt$alpha * Matrix::Matrix(f$operator, sparse = TRUE)
+  Pt <- as.matrix(P)
+  if (opt$t_att > 1L) for (t in 2:opt$t_att) Pt <- as.matrix(Pt %*% P)
+  rm(P)
+  A <- Pt + t(Pt); rm(Pt); A <- A / 2
+  out <- list(pearson = pear, clr = f$clr_scores, clr_attention = A)
+  f$release(); rm(f, pear, A)
   lapply(out, function(s) { diag(s) <- 0; s })
 }
 influence <- function(full, part) vapply(names(full), function(m)
@@ -143,18 +159,41 @@ t0 <- Sys.time()
 full <- networks(E)
 say(sprintf("full networks built in %.0f s", as.numeric(difftime(Sys.time(), t0, units = "secs"))))
 
+# Task list: B random delete-k draws per k (drawn here, in the original
+# order), then one delete-P fit per perturbation group.
 ks <- sort(unique(lengths(groups)))
+tasks <- list()
+for (k in ks) for (b in seq_len(opt$B))
+  tasks[[length(tasks) + 1L]] <- list(kind = "null", k = k, b = b,
+                                      keep = setdiff(E, sample(E, k)))
+for (g in names(groups))
+  tasks[[length(tasks) + 1L]] <- list(kind = "pert", g = g,
+                                      keep = setdiff(E, groups[[g]]))
+say(sprintf("%d network fits (%d null draws for k in {%s}, %d perturbations)",
+            length(tasks), opt$B * length(ks), paste(ks, collapse = ","),
+            length(groups)))
+source(file.path(script_dir, "parallel.R"))
+pc <- par_start(mem_gb = opt$mem_gb, workers = opt$workers, say = say)
+t0 <- Sys.time()
+fits <- foreach(task = tasks, ti = seq_along(tasks), .errorhandling = "stop") %dopar% {
+  if (par_should_stop()) stop("stop file jobs/control/stop present")
+  set.seed(opt$seed + ti)
+  I <- influence(full, part <- networks(task$keep)); rm(part); par_release()
+  I
+}
+par_stop(pc)
+say(sprintf("fits done in %.0f s", as.numeric(difftime(Sys.time(), t0, units = "secs"))))
+kind <- vapply(tasks, `[[`, "", "kind")
 null <- list()
 for (k in ks) {
-  say(sprintf("null for k = %d: %d random delete-%d draws", k, opt$B, k))
-  arr <- array(NA_real_, c(G, length(full), opt$B),
-               dimnames = list(genes, names(full), NULL))
-  for (b in seq_len(opt$B)) {
-    drop <- sample(E, k)
-    arr[, , b] <- influence(full, networks(setdiff(E, drop)))
-  }
+  sel <- which(kind == "null" & vapply(tasks, function(t) if (is.null(t$k)) NA_integer_ else t$k, 0L) == k)
+  arr <- array(NA_real_, c(G, length(full), opt$B), dimnames = list(genes, names(full), NULL))
+  for (j in seq_along(sel)) arr[, , j] <- fits[[sel[j]]]
   null[[as.character(k)]] <- arr
 }
+pert_I <- stats::setNames(fits[kind == "pert"],
+                          vapply(tasks[kind == "pert"], `[[`, "", "g"))
+rm(fits); invisible(gc())
 
 ## ---- scores and evaluation ---------------------------------------------------
 qn <- function(x) stats::qnorm((rank(x) - 0.5) / length(x))
@@ -165,7 +204,7 @@ for (k in names(groups)) {
   ref <- setdiff(E, cols)
   mu <- rowMeans(X[, ref]); sdv <- apply(X[, ref], 1, stats::sd); sdv[sdv <= 0] <- 1
   de <- rowMeans(abs((X[, cols, drop = FALSE] - mu) / sdv))
-  I <- influence(full, networks(ref))
+  I <- pert_I[[k]]
   nl <- null[[as.character(length(cols))]]
   zI <- (I - apply(nl, c(1, 2), mean)) / pmax(apply(nl, c(1, 2), stats::sd), 1e-12)
   sc <- list(differential_expression = de, gene_variance = apply(X, 1, stats::var),

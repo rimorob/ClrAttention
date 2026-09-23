@@ -167,29 +167,60 @@ ClrAttention <- R6::R6Class("ClrAttention",
       counts <- numeric(nbins + 1L)
       rep_counts <- matrix(0, nbins + 1L, B)  # per-replicate histograms (HC gate)
       n_null <- 0
-      hi <- NULL
-      w <- NULL
-      for (b in seq_len(B)) {
+      # One RNG seed per replicate, drawn from the caller's stream, so the
+      # null is identical whether the replicates run sequentially or in
+      # parallel. Replicate 1 runs here and fixes the histogram range; the
+      # rest run on the registered foreach backend (sequential if none).
+      seeds <- sample.int(.Machine$integer.max, B)
+      one_rep <- function(b, hi, nthreads) {
+        set.seed(seeds[b])
         Xp <- t(apply(X, 1L, sample))
         dimnames(Xp) <- dimnames(X)
         Mb <- bspline_mi(Xp, bins = mi_p$bins_used,
                          spline_order = mi_p$spline_order,
-                         threads = threads, transform = mi_p$transform)
+                         threads = nthreads, transform = mi_p$transform)
+        rm(Xp)
+        ut <- upper.tri(Mb)
         v <- if (statistic == "mi") Mb[ut] else
           clr_calibrate(Mb, method = cal_p$method,
                         combine = cal_p$combine)[ut]
-        if (is.null(hi)) {
-          hi <- max(1e-8, 1.25 * max(v))
-          w <- hi / nbins
-        }
-        idx <- as.integer(pmin(v / w, nbins)) + 1L
+        rm(Mb, ut)
+        if (is.null(hi)) hi <- max(1e-8, 1.25 * max(v))
+        idx <- as.integer(pmin(v / (hi / nbins), nbins)) + 1L
         idx[idx < 1L] <- 1L
         idx[idx > nbins] <- nbins + 1L
-        cb <- tabulate(idx, nbins + 1L)
-        rep_counts[, b] <- cb
-        counts <- counts + cb
-        n_null <- n_null + length(v)
+        list(cb = tabulate(idx, nbins + 1L), n = length(v), hi = hi)
       }
+      # Minimal closure: only what a replicate needs is shipped to parallel
+      # workers (not this object's environment, which holds the MI and
+      # score matrices).
+      environment(one_rep) <- list2env(
+        list(X = X, mi_p = mi_p, cal_p = cal_p, statistic = statistic,
+             nbins = nbins, seeds = seeds),
+        parent = asNamespace("clr"))
+      r1 <- one_rep(1L, NULL, threads)
+      hi <- r1$hi
+      w <- hi / nbins
+      rest <- list()
+      if (B > 1L) {
+        par <- foreach::getDoParRegistered() && foreach::getDoParWorkers() > 1L
+        # With parallel workers each MI call gets one OpenMP thread unless
+        # the caller says otherwise, so workers x threads <= cores.
+        inner <- if (par && is.null(threads)) 1L else threads
+        `%op%` <- if (par) foreach::`%dopar%` else foreach::`%do%`
+        rest <- foreach::foreach(b = 2:B, .packages = "clr") %op% {
+          r <- one_rep(b, hi, inner)
+          invisible(gc(verbose = FALSE))
+          r
+        }
+      }
+      reps <- c(list(r1), rest)
+      for (b in seq_len(B)) {
+        rep_counts[, b] <- reps[[b]]$cb
+        counts <- counts + reps[[b]]$cb
+        n_null <- n_null + reps[[b]]$n
+      }
+      rm(reps, rest, r1)
       # suf[k] = #{null in bins >= k}. A score s in bin k gets p from
       # #{null in bins >= k}: this counts the null values sharing s's bin
       # (some of which may lie below s), so the p-value is conservative by
@@ -446,6 +477,21 @@ ClrAttention <- R6::R6Class("ClrAttention",
       invisible(self)
     },
 
+    #' @description Free the large matrices held by this object (data, MI,
+    #'   scores, operator, trajectory, permutation null) and run a full garbage
+    #'   collection so the memory goes back to the OS now. The object is not
+    #'   usable afterwards. Call this when a fit is no longer needed inside a
+    #'   loop: R frees memory only when the collector runs, and the
+    #'   finalizer below runs only after a collection has already found the
+    #'   object unreachable, so it cannot release memory any earlier than
+    #'   rm() + gc() would.
+    #' @param gc run gc() after dropping the references (default TRUE).
+    release = function(gc = TRUE) {
+      private$.drop_all()
+      if (isTRUE(gc)) invisible(base::gc(verbose = FALSE, full = TRUE))
+      invisible(NULL)
+    },
+
     #' @description Summarize the pipeline state.
     print = function(...) {
       p <- private$params_
@@ -501,6 +547,19 @@ ClrAttention <- R6::R6Class("ClrAttention",
   private = list(
     data_ = NULL, mi_ = NULL, scores_ = NULL, operator_ = NULL,
     trajectory_ = NULL, threshold_ = NULL, params_ = NULL, null_ = NULL,
+
+    .drop_all = function() {
+      private$data_ <- NULL; private$mi_ <- NULL; private$scores_ <- NULL
+      private$operator_ <- NULL; private$trajectory_ <- NULL
+      private$threshold_ <- NULL; private$null_ <- NULL
+    },
+
+    # Destructor (R6 >= 2.4 calls a private finalize() when the object is
+    # garbage-collected, and at exit). Dropping the references here lets the
+    # matrices be reclaimed in the same collection even if something else
+    # still points at this object's environment (e.g. a closure). All
+    # memory is R-managed (no external pointers), so nothing else to free.
+    finalize = function() private$.drop_all(),
 
     # Row-normalize, give empty rows a self-loop, store, invalidate trajectory.
     .finish_operator = function(A, alpha, info) {

@@ -252,7 +252,7 @@ kernel.  The result is bit-identical to `mi_pair()`, which is checked in
 **Real-data run.**  `analysis/run_m3d_regulondb.R`, driven by
 `tools/run_m3d.sh`, does the following:
 
-- Computes edge-level precision-recall in the Faith 2007 style (every known
+- Computes edge-level precision-recall in the Faith, Hayete et al. 2007 style (every known
   TF × gene pair) for four configurations.
 - Selects edges by permutation.
 - Runs a Design-A depth sweep that scores per-TF regulon average precision

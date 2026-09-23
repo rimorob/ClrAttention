@@ -22,7 +22,7 @@ immediately, for three independent reasons.
 - **Neural attention by name (Bahdanau, Cho & Bengio 2014).** Neural
   attention under that name dates from 2014, and the transformer from 2017.
 
-CLR (Faith et al. 2007) postdates the first two and predates the third. A
+CLR (Faith, Hayete et al. 2007) postdates the first two and predates the third. A
 priority claim over all attention would be read as overreach and would
 distract from the results.
 
@@ -112,7 +112,7 @@ smoothing or fast weights.
 
 ## Sources
 
-- Faith et al. 2007, *PLoS Biology* 5:e8 (CLR).
+- Faith, Hayete et al. 2007, *PLoS Biology* 5:e8 (CLR; Faith and Hayete contributed equally).
 - Nadaraya 1964; Watson 1964 (kernel regression). Dive into Deep Learning,
   "Attention Pooling by Similarity":
   https://d2l.ai/chapter_attention-mechanisms-and-transformers/attention-pooling.html

@@ -23,19 +23,24 @@
 #
 # Usage (repo root):
 #   Rscript analysis/chips_bootstrap.R [--Bcluster 40] [--Brep 20]
-#       [--out results/chips_bootstrap] [--threads N] [--quick 0]
-# Results are appended per draw to draws.csv, so a partial run is usable.
+#       [--out results/chips_bootstrap] [--threads N] [--quick 0] [--workers W]
+# Draws run in parallel (foreach over local cores minus 2, capped by RAM; see
+# analysis/parallel.R). Each finished draw is written to draws/<draw>.csv at
+# once, so a partial run is usable and a restart skips finished draws.
+# Creating the file jobs/control/stop makes workers skip remaining draws.
 
 args <- commandArgs(trailingOnly = TRUE)
 opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
             Bcluster = 40L, Brep = 20L, out = "results/chips_bootstrap",
-            threads = NULL, quick = 0L, seed = 20260924L, alpha = 0.5)
-ints <- c("Bcluster", "Brep", "threads", "quick", "seed")
+            threads = NULL, quick = 0L, seed = 20260924L, alpha = 0.5,
+            workers = NULL, mem_gb = 3.5)
+ints <- c("Bcluster", "Brep", "threads", "quick", "seed", "workers")
 i <- 1L
 while (i <= length(args)) {
   key <- gsub("-", "_", sub("^--", "", args[i]))
   if (!key %in% names(opt)) stop("unknown argument: ", args[i])
-  opt[[key]] <- if (key %in% ints) as.integer(args[i + 1L]) else args[i + 1L]
+  opt[[key]] <- if (key %in% ints) as.integer(args[i + 1L]) else
+    if (key == "mem_gb") as.numeric(args[i + 1L]) else args[i + 1L]
   i <- i + 2L
 }
 dir.create(opt$out, recursive = TRUE, showWarnings = FALSE)
@@ -97,15 +102,22 @@ bench <- lapply(c(SC = "SC", all = "all"), function(ev) {
 ## ---- one full evaluation of a sample matrix -----------------------------
 Zs <- function(M) { Z <- M - rowMeans(M); s <- sqrt(rowSums(Z^2) / (ncol(Z) - 1))
                     s[s <= 0] <- 1; Z / s }
-attention <- function(A, ts) {
-  P <- Matrix::Matrix((1 - opt$alpha) * diag(G) + opt$alpha * A, sparse = TRUE)
-  out <- list(); Pt <- diag(G)
+# Attention mass (P^t + P^t')/2 of the lazy operator P = (1-a)I + aA at each
+# depth in ts, handed to fn(S, t) as soon as it exists (only P^t and one
+# output matrix are alive at a time). P is built sparse without forming the
+# dense (1-a)I + aA; values are identical to the dense construction.
+attention <- function(A, ts, fn) {
+  P <- Matrix::Diagonal(G, 1 - opt$alpha) +
+    opt$alpha * Matrix::Matrix(A, sparse = TRUE)
+  Pt <- NULL
   for (t in seq_len(max(ts))) {
-    Pt <- as.matrix(Pt %*% P)
-    if (t %in% ts) { S <- (Pt + t(Pt)) / 2; diag(S) <- 0; out[[as.character(t)]] <- S }
+    Pt <- if (is.null(Pt)) as.matrix(P) else as.matrix(Pt %*% P)
+    if (t %in% ts) { S <- Pt + t(Pt); S <- S / 2; diag(S) <- 0; fn(S, t); rm(S) }
+    par_release()
   }
-  out
+  invisible(NULL)
 }
+nthr <- function() if (is.null(opt$threads)) OMP_THREADS else opt$threads
 evaluate <- function(X, label) {
   t0 <- Sys.time()
   rng <- apply(X, 1, function(x) diff(range(x)))
@@ -113,36 +125,40 @@ evaluate <- function(X, label) {
     X[rng <= 0, ] <- X[rng <= 0, ] + matrix(stats::rnorm(sum(rng <= 0) * ncol(X), sd = 1e-9),
                                             sum(rng <= 0))
   }
-  Z <- Zs(X); R <- tcrossprod(Z) / (ncol(Z) - 1)
-  f <- ClrAttention$new(X)$estimate_mi(bins = "hg", transform = "none",
-                                       threads = opt$threads)
-  f$calibrate(method = "normal", combine = "stouffer")
-  M <- f$mi; diag(M) <- 0
-  par <- ClrAttention$new(X)$estimate_mi(bins = 10, transform = "none",
-                                         threads = opt$threads)$
-    calibrate(method = "normal", combine = "euclidean")$clr_scores
-  f$build_operator(alpha = opt$alpha, softmax_keff = 10, softmax_cap = 50L)
-  sa <- attention(f$operator, c(4, 8, 16))
-  Ar <- abs(R); diag(Ar) <- 0
-  f$set_operator(clr:::.topk_rows(Ar, 10L), alpha = opt$alpha, label = "pearson_top10")
-  pa <- attention(f$operator, 6)
-  S <- list(abs_pearson = abs(R), mi = M, clr_parity2007 = par,
-            clr_hg_stouffer = f$clr_scores,
-            soft10_t4 = sa[["4"]], soft10_t8 = sa[["8"]], soft10_t16 = sa[["16"]],
-            pearson_top10_t6 = pa[["6"]])
-  S <- lapply(S, function(s) { diag(s) <- 0; s })
+  # Each score matrix (G x G doubles, ~150 MB at G = 4297) is scored as soon
+  # as it exists and then dropped, keeping peak memory per worker low.
   rows <- list()
-  for (ev in names(bench)) {
-    b <- bench[[ev]]
-    for (m in names(S)) {
-      ap <- pr_summary(S[[m]][b$idx], b$pairs$label)[["aupr"]]
-      coh <- stats::median(regulon_coherence(S[[m]], b$reg, b$co, operon_of, genes),
+  score <- function(S, m) {
+    diag(S) <- 0
+    for (ev in names(bench)) {
+      b <- bench[[ev]]
+      ap <- pr_summary(S[b$idx], b$pairs$label)[["aupr"]]
+      coh <- stats::median(regulon_coherence(S, b$reg, b$co, operon_of, genes),
                            na.rm = TRUE)
-      rows[[length(rows) + 1L]] <- data.frame(draw = label, evidence = ev,
-                                              method = m, aupr = ap,
-                                              coherence = coh)
+      rows[[length(rows) + 1L]] <<- data.frame(draw = label, evidence = ev,
+                                               method = m, aupr = ap, coherence = coh)
     }
+    rm(S); par_release()   # collect now rather than when R's GC gets to it
   }
+  Z <- Zs(X); R <- tcrossprod(Z) / (ncol(Z) - 1); rm(Z)
+  score(abs(R), "abs_pearson")
+  Ar <- abs(R); diag(Ar) <- 0; rm(R)
+  Apear <- clr:::.topk_rows(Ar, 10L); rm(Ar)
+  par <- ClrAttention$new(X)$estimate_mi(bins = 10, transform = "none",
+                                         threads = nthr())
+  score(par$calibrate(method = "normal", combine = "euclidean")$clr_scores,
+        "clr_parity2007")
+  par$release(); rm(par)
+  f <- ClrAttention$new(X)$estimate_mi(bins = "hg", transform = "none",
+                                       threads = nthr())
+  score(f$mi, "mi")
+  f$calibrate(method = "normal", combine = "stouffer")
+  score(f$clr_scores, "clr_hg_stouffer")
+  f$build_operator(alpha = opt$alpha, softmax_keff = 10, softmax_cap = 50L)
+  attention(f$operator, c(4, 8, 16), function(S, t) score(S, paste0("soft10_t", t)))
+  f$set_operator(Apear, alpha = opt$alpha, label = "pearson_top10")
+  attention(f$operator, 6, function(S, t) score(S, "pearson_top10_t6"))
+  f$release(); rm(f, Apear); par_release()
   out <- do.call(rbind, rows)
   say(sprintf("%-14s N=%d  %.0f s  | SC AUPR: CLR %.4f  soft10_t8 %.4f  pearson_t6 %.4f",
               label, ncol(X), as.numeric(difftime(Sys.time(), t0, units = "secs")),
@@ -152,16 +168,12 @@ evaluate <- function(X, label) {
   out
 }
 draws_f <- file.path(opt$out, "draws.csv")
-append_rows <- function(d) utils::write.table(d, draws_f, sep = ",", row.names = FALSE,
-                                             col.names = !file.exists(draws_f),
-                                             append = file.exists(draws_f))
-done <- if (file.exists(draws_f)) unique(utils::read.csv(draws_f)$draw) else character()
+draws_dir <- file.path(opt$out, "draws")
+dir.create(draws_dir, showWarnings = FALSE)
+done <- unique(c(if (file.exists(draws_f)) unique(utils::read.csv(draws_f)$draw),
+          sub("\\.csv$", "", list.files(draws_dir, "\\.csv$"))))
 
-## ---- point estimates ---------------------------------------------------------
-for (pe in list(list("point_chips907", Xc), list("point_avg466", Xa)))
-  if (!pe[[1]] %in% done) append_rows(evaluate(pe[[2]], pe[[1]]))
-
-## ---- resampling ----------------------------------------------------------------
+## ---- task list: point estimates, then resampling draws ------------------------
 draw_cols <- function(mode) {
   ex <- names(chips_by_exp)
   pick <- if (mode == "replicate") ex else sample(ex, length(ex), replace = TRUE)
@@ -175,16 +187,47 @@ draw_cols <- function(mode) {
     c1
   }, "")
 }
+# Column sets are drawn in the master with the same per-draw seeds as the
+# earlier sequential version, so draws already on disk stay valid.
+tasks <- list(list(label = "point_chips907", set = "chips", cols = colnames(Xc), seed = opt$seed),
+              list(label = "point_avg466", set = "avg", cols = colnames(Xa), seed = opt$seed))
 for (mode in c("cluster", "replicate")) {
   B <- if (mode == "cluster") opt$Bcluster else opt$Brep
   for (b in seq_len(B)) {
-    lab <- sprintf("%s_%03d", mode, b)
-    set.seed(opt$seed + 1000L * (mode == "replicate") + b)
-    cols <- draw_cols(mode)          # drawn before any skip: seeds stay aligned
-    if (lab %in% done) next
-    append_rows(evaluate(Xc[, cols, drop = FALSE], lab))
+    sd_b <- opt$seed + 1000L * (mode == "replicate") + b
+    set.seed(sd_b)
+    tasks[[length(tasks) + 1L]] <- list(label = sprintf("%s_%03d", mode, b), set = "chips",
+                                        cols = draw_cols(mode), seed = sd_b)
   }
 }
+tasks <- Filter(function(t) !t$label %in% done, tasks)
+say(sprintf("%d draws already done; %d to run", length(done), length(tasks)))
+
+source(file.path(script_dir, "parallel.R"))
+if (length(tasks)) {
+  pc <- par_start(mem_gb = opt$mem_gb, workers = opt$workers, say = say)
+  st <- foreach(task = tasks, .inorder = FALSE, .errorhandling = "pass") %dopar% {
+    if (par_should_stop()) return("stopped")
+    set.seed(task$seed)
+    Xm <- if (task$set == "avg") Xa else Xc[, task$cols, drop = FALSE]
+    d <- evaluate(Xm, task$label); rm(Xm)
+    tmp <- file.path(draws_dir, paste0(task$label, ".csv.part"))
+    utils::write.csv(d, tmp, row.names = FALSE)
+    file.rename(tmp, file.path(draws_dir, paste0(task$label, ".csv")))  # atomic
+    par_release()
+    "ok"
+  }
+  par_stop(pc)
+  bad <- vapply(st, function(x) inherits(x, "error"), NA)
+  if (any(bad)) say("draws failed: ", paste(vapply(st[bad], conditionMessage, ""), collapse = " | "))
+  if (any(unlist(st[!bad]) == "stopped")) say("stop file seen: remaining draws skipped")
+}
+# Merge per-draw files into draws.csv (the single file the summary reads).
+parts <- list.files(draws_dir, "\\.csv$", full.names = TRUE)
+old <- if (file.exists(draws_f)) utils::read.csv(draws_f) else NULL
+new <- do.call(rbind, lapply(parts, utils::read.csv))
+all_d <- rbind(old, new[!new$draw %in% old$draw, ])
+utils::write.csv(all_d, draws_f, row.names = FALSE)
 
 ## ---- summary ---------------------------------------------------------------
 d <- utils::read.csv(draws_f)

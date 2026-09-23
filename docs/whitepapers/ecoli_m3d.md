@@ -58,7 +58,7 @@ Each bootstrap draw recomputes MI from scratch.  There are two schemes:
 
 *Results to be added:*  `results/chips_bootstrap/summary.csv`.
 
-## 5. Secondary:  TF-node edges (Faith 2007 convention)
+## 5. Secondary:  TF-node edges (Faith, Hayete et al. 2007 convention)
 
 *To be summarized from `tfnode_edge_pr_by_config.csv`.*  This convention uses the regulator's own mRNA as a stand-in for its activity.  It is reported for continuity with the 2007 paper.
 

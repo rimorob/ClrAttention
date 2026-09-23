@@ -583,3 +583,20 @@ It is not different from CLR, or is slightly worse, with all evidence.
 - Of the ingredients borrowed from attention, the softmax with a
   temperature matters most: the hard-thresholded FDR+top-k operator gives
   about half the pooled gain and no coherence gain.
+
+## D28. Parallel execution, JIT, memory release; co-first-author citation (2026-09-23)
+
+**Parallelism.**  Every resampling script now runs its independent fits with `foreach` on a `doParallel` PSOCK cluster (`analysis/parallel.R`).  The worker count is the number of physical cores minus 2 (kept free for the user), capped by RAM:  floor((0.8 × RAM − 1.5 GB) / peak GB per task).  The usable cores are divided among the workers as OpenMP threads for the MI kernel, so workers × threads never exceeds cores − 2.  PSOCK processes are used rather than forks:  forking a process whose OpenMP runtime is already running is unsafe with some runtimes, and PSOCK also runs on the Linux and Windows workstations.  The scripts covered are:
+
+- `chips_bootstrap.R`:  one task per draw, each written atomically to `draws/<draw>.csv`, so restarts skip finished draws;
+- `perturbation.R`:  all null draws and delete-P fits;
+- `beeline.R`:  one task per dataset × gene set;
+- `ClrAttention$select_threshold()`:  the permutation replicates use whatever `foreach` backend is registered (sequential when none is).
+
+**Reproducibility.**  Random draws are made in the master in the original order, so bootstrap column sets and delete-k subsets match the sequential version.  The chips bootstrap was verified bit-identical to the previous sequential script on a 400-gene test.  Permutation replicates in `select_threshold()` now each run under a seed drawn from the caller's stream, so the null is identical sequentially and in parallel.  It differs from the pre-D28 stream.  The synthetic HC unit test had asserted ≥ 4 of 5 true edges at B = 20.  Over 80 seeds that held in 37% of runs (old and new code alike), so it had been passing on a lucky stream.  It now uses B = 50 and asserts ≥ 3, which held in 40 of 40 seeds.
+
+**Byte-code JIT.**  R has compiled closures and loops at JIT level 3 by default since 3.4.  The scripts set `compiler::enableJIT(3)` explicitly in the master and in every worker, and the package declares `ByteCompile: true`.  The hot paths (MI in C++/OpenMP, and dense and sparse matrix products) are compiled code, so the JIT has little effect on run time.
+
+**Memory.**  `ClrAttention$release()` drops the data, MI, score, operator, trajectory and null matrices and runs a full `gc()`.  A private `finalize()` drops the same references when the object is collected.  That cannot free memory any earlier than R's own collection would, so the scripts call `release()` and `gc()` explicitly after each fit.  Score matrices are now scored as they are produced and then dropped, and the lazy operator is built sparse directly.  At G = 4,297 and N = 907, the measured peak RSS of one chips worker (Linux) fell from 4.7 GB to 3.2 GB.  Most of the difference came from collecting eagerly after each score matrix and from forcing glibc to return freed large blocks to the OS (`MALLOC_MMAP_THRESHOLD_`); by default glibc keeps them resident after `gc()`.  The chips script budgets 3.5 GB per worker, so the 32 GB Mac runs 6 workers and a 128 GB machine is limited by cores, not RAM.
+
+**Citation format.**  The CLR paper lists Faith and Hayete as equal contributors (PMC1764438 author notes:  "Contributed equally").  In-text citations are therefore "Faith, Hayete et al. 2007", which is the standard way to credit co-first authors.  M3D (Faith et al. 2008) has a single first author and is unchanged.

@@ -34,19 +34,21 @@
 # Usage (repo root):
 #   Rscript analysis/beeline.R [--beeline data/beeline] [--N 500,1000]
 #       [--datasets hESC,hHep,mDC,mESC,mHSC-E,mHSC-GM,mHSC-L]
-#       [--out results/beeline] [--threads N]
+#       [--out results/beeline] [--threads N] [--workers W] [--mem_gb 1.5]
+# The dataset x gene-set cases run in parallel (foreach over local cores
+# minus 2, capped by RAM; analysis/parallel.R), each under its own seed.
 
 args <- commandArgs(trailingOnly = TRUE)
 opt <- list(beeline = "data/beeline", N = "500,1000",
             datasets = "hESC,hHep,mDC,mESC,mHSC-E,mHSC-GM,mHSC-L",
             out = "results/beeline", threads = NULL, seed = 20260925L,
-            alpha = 0.5, tmax = 64L)
+            alpha = 0.5, tmax = 64L, workers = NULL, mem_gb = 1.5)
 i <- 1L
 while (i <= length(args)) {
   key <- gsub("-", "_", sub("^--", "", args[i]))
   if (!key %in% names(opt)) stop("unknown argument: ", args[i])
-  opt[[key]] <- if (key %in% c("threads", "seed", "tmax")) as.integer(args[i + 1L]) else
-    args[i + 1L]
+  opt[[key]] <- if (key %in% c("threads", "seed", "tmax", "workers")) as.integer(args[i + 1L]) else
+    if (key == "mem_gb") as.numeric(args[i + 1L]) else args[i + 1L]
   i <- i + 2L
 }
 dir.create(opt$out, recursive = TRUE, showWarnings = FALSE)
@@ -102,18 +104,20 @@ select_genes <- function(ds, N) {
 ## ---- helpers (same constructions as the E. coli study) -------------------
 Zs <- function(M) { Z <- M - rowMeans(M); s <- sqrt(rowSums(Z^2) / (ncol(Z) - 1))
                     s[s <= 0] <- 1; Z / s }
+OMP_THREADS <- NULL
+nthr <- function() if (is.null(opt$threads)) OMP_THREADS else opt$threads
 clr_fit <- function(X) {
   f <- ClrAttention$new(X)$estimate_mi(bins = "hg", transform = "none",
-                                       threads = opt$threads)
+                                       threads = nthr())
   f$calibrate(method = "normal", combine = "stouffer")
   f
 }
 att_mass <- function(A, ts) {
   G <- nrow(A)
-  P <- Matrix::Matrix((1 - opt$alpha) * diag(G) + opt$alpha * A, sparse = TRUE)
-  out <- list(); Pt <- diag(G)
+  P <- Matrix::Diagonal(G, 1 - opt$alpha) + opt$alpha * Matrix::Matrix(A, sparse = TRUE)
+  out <- list(); Pt <- NULL
   for (t in seq_len(max(ts))) {
-    Pt <- as.matrix(Pt %*% P)
+    Pt <- if (is.null(Pt)) as.matrix(P) else as.matrix(Pt %*% P)
     if (t %in% ts) { S <- (Pt + t(Pt)) / 2; diag(S) <- 0; out[[as.character(t)]] <- S }
   }
   out
@@ -191,53 +195,72 @@ comembership_truth <- function(S, genes, gt) {
   c(n_regulons = length(mem), comember_aupr_ratio = ps[["aupr"]] / mean(pairs$label))
 }
 
-## ---- main loop ---------------------------------------------------------------
-rows <- list(); crow <- list(); depths <- list()
-for (ds in strsplit(opt$datasets, ",")[[1]]) {
+## ---- main loop: one task per dataset x gene set, in parallel ----------------
+run_case <- function(ds, N) {
+  rows <- list(); crow <- list()
   ex <- utils::read.csv(file.path(expr_dir, ds, "ExpressionData.csv"),
                         row.names = 1, check.names = FALSE)
   ex <- as.matrix(ex)
   gts <- lapply(truths(ds), function(f) utils::read.csv(f, stringsAsFactors = FALSE))
-  for (N in as.integer(strsplit(opt$N, ",")[[1]])) {
-    sel <- select_genes(ds, N)
-    X <- ex[intersect(sel$genes, rownames(ex)), , drop = FALSE]
-    X <- X[apply(X, 1, function(x) diff(range(x))) > 0, , drop = FALSE]
-    genes <- rownames(X)
-    say(sprintf("%s TFs+%d: %d genes (%d TFs) x %d cells", ds, N, nrow(X),
-                sum(toupper(genes) %in% sel$tfs), ncol(X)))
-    Z <- Zs(X); R <- tcrossprod(Z) / (ncol(Z) - 1)
-    Rs <- stats::cor(t(X), method = "spearman")
-    f <- clr_fit(X); M <- f$mi; diag(M) <- 0
-    t_soft <- heldout_depth(X, function(Y) soft_op(clr_fit(Y)), "soft10")
-    t_pear <- heldout_depth(X, function(Y) pear_op(stats::cor(t(Y))), "pearson_top10")
-    depths[[length(depths) + 1L]] <- data.frame(dataset = ds, N = N,
-                                                t_soft10 = t_soft, t_pearson = t_pear)
-    S <- list(abs_pearson = abs(R), abs_spearman = abs(Rs),
-              partial_cor = partial_cor(Z), mi = M, clr = f$clr_scores)
-    S[[sprintf("clr_attention_soft10_t%d", t_soft)]] <- att_mass(soft_op(f), t_soft)[[1]]
-    S[[sprintf("pearson_attention_top10_t%d", t_pear)]] <- att_mass(pear_op(R), t_pear)[[1]]
-    S <- lapply(S, function(s) { s[is.na(s)] <- 0; diag(s) <- 0; s })
-    for (tn in names(gts)) for (m in names(S)) {
-      r <- score_truth(S[[m]], genes, NULL, gts[[tn]])
-      if (is.null(r)) next
-      rows[[length(rows) + 1L]] <- data.frame(dataset = ds, N = N, truth = tn,
-                                              method = sub("_t[0-9]+$", "", m),
-                                              depth = suppressWarnings(as.integer(sub("^.*_t", "", m))),
-                                              t(r))
-    }
-    for (m in names(S)) {
-      r <- comembership_truth(S[[m]], genes, gts$celltype_ChIP)
-      if (is.null(r)) next
-      crow[[length(crow) + 1L]] <- data.frame(dataset = ds, N = N,
-                                              method = sub("_t[0-9]+$", "", m), t(r))
-    }
-    res <- do.call(rbind, rows)
-    cur <- res[res$dataset == ds & res$N == N & res$truth == "celltype_ChIP", ]
-    for (k in seq_len(nrow(cur)))
-      say(sprintf("    %-28s AUPRC ratio %.3f  EPR %.3f  (celltype ChIP)",
-                  cur$method[k], cur$auprc_ratio[k], cur$epr[k]))
+  sel <- select_genes(ds, N)
+  X <- ex[intersect(sel$genes, rownames(ex)), , drop = FALSE]; rm(ex)
+  X <- X[apply(X, 1, function(x) diff(range(x))) > 0, , drop = FALSE]
+  genes <- rownames(X)
+  say(sprintf("%s TFs+%d: %d genes (%d TFs) x %d cells", ds, N, nrow(X),
+              sum(toupper(genes) %in% sel$tfs), ncol(X)))
+  Z <- Zs(X); R <- tcrossprod(Z) / (ncol(Z) - 1)
+  Rs <- stats::cor(t(X), method = "spearman")
+  f <- clr_fit(X); M <- f$mi; diag(M) <- 0
+  t_soft <- heldout_depth(X, function(Y) { g <- clr_fit(Y); A <- soft_op(g); g$release(FALSE); A },
+                          paste(ds, N, "soft10"))
+  t_pear <- heldout_depth(X, function(Y) pear_op(stats::cor(t(Y))), paste(ds, N, "pearson_top10"))
+  depth <- data.frame(dataset = ds, N = N, t_soft10 = t_soft, t_pearson = t_pear)
+  S <- list(abs_pearson = abs(R), abs_spearman = abs(Rs),
+            partial_cor = partial_cor(Z), mi = M, clr = f$clr_scores)
+  S[[sprintf("clr_attention_soft10_t%d", t_soft)]] <- att_mass(soft_op(f), t_soft)[[1]]
+  S[[sprintf("pearson_attention_top10_t%d", t_pear)]] <- att_mass(pear_op(R), t_pear)[[1]]
+  f$release(FALSE); rm(f, Z, R, Rs, M)
+  S <- lapply(S, function(s) { s[is.na(s)] <- 0; diag(s) <- 0; s })
+  for (tn in names(gts)) for (m in names(S)) {
+    r <- score_truth(S[[m]], genes, NULL, gts[[tn]])
+    if (is.null(r)) next
+    rows[[length(rows) + 1L]] <- data.frame(dataset = ds, N = N, truth = tn,
+                                            method = sub("_t[0-9]+$", "", m),
+                                            depth = suppressWarnings(as.integer(sub("^.*_t", "", m))),
+                                            t(r))
   }
+  for (m in names(S)) {
+    r <- comembership_truth(S[[m]], genes, gts$celltype_ChIP)
+    if (is.null(r)) next
+    crow[[length(crow) + 1L]] <- data.frame(dataset = ds, N = N,
+                                            method = sub("_t[0-9]+$", "", m), t(r))
+  }
+  res <- do.call(rbind, rows)
+  cur <- res[res$truth == "celltype_ChIP", ]
+  for (k in seq_len(nrow(cur)))
+    say(sprintf("    %s TFs+%d %-28s AUPRC ratio %.3f  EPR %.3f  (celltype ChIP)",
+                ds, N, cur$method[k], cur$auprc_ratio[k], cur$epr[k]))
+  rm(S); invisible(gc())
+  list(rows = res, crow = do.call(rbind, crow), depth = depth)
 }
+
+cases <- expand.grid(N = as.integer(strsplit(opt$N, ",")[[1]]),
+                     ds = strsplit(opt$datasets, ",")[[1]], stringsAsFactors = FALSE)
+source(file.path(script_dir, "parallel.R"))
+pc <- par_start(mem_gb = opt$mem_gb, workers = opt$workers, say = say)
+out <- foreach(ci = seq_len(nrow(cases)), .inorder = TRUE, .errorhandling = "pass") %dopar% {
+  if (par_should_stop()) return(NULL)
+  set.seed(opt$seed + ci)
+  run_case(cases$ds[ci], cases$N[ci])
+}
+par_stop(pc)
+bad <- vapply(out, function(x) inherits(x, "error"), NA)
+if (any(bad)) say("cases failed: ", paste(sprintf("%s/%d: %s", cases$ds[bad], cases$N[bad],
+                                                  vapply(out[bad], conditionMessage, "")),
+                                          collapse = " | "))
+out <- out[!bad & !vapply(out, is.null, NA)]
+rows <- lapply(out, `[[`, "rows"); crow <- lapply(out, `[[`, "crow")
+depths <- lapply(out, `[[`, "depth")
 res <- do.call(rbind, rows); utils::write.csv(res, file.path(opt$out, "tfnode_metrics.csv"), row.names = FALSE)
 cm <- do.call(rbind, crow); utils::write.csv(cm, file.path(opt$out, "comembership_metrics.csv"), row.names = FALSE)
 utils::write.csv(do.call(rbind, depths), file.path(opt$out, "heldout_depths.csv"), row.names = FALSE)

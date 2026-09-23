@@ -4,7 +4,7 @@
 
 ## 1. Summary
 
-CLR (context likelihood of relatedness; Faith et al. 2007) turns pairwise mutual information between genes into context-normalized scores.  For each gene, every other gene's MI is expressed as a z-score against that gene's own MI background, and the two directions are combined.  Read as a machine-learning operator, this is an attention score matrix:  each gene (query) receives a calibrated, data-dependent weight over every other gene (key), normalized within its own context.  CLR stopped at the scores.  It never used the rest of the attention machinery:  weight normalization with a temperature, aggregation, and depth.
+CLR (context likelihood of relatedness; Faith, Hayete et al. 2007) turns pairwise mutual information between genes into context-normalized scores.  For each gene, every other gene's MI is expressed as a z-score against that gene's own MI background, and the two directions are combined.  Read as a machine-learning operator, this is an attention score matrix:  each gene (query) receives a calibrated, data-dependent weight over every other gene (key), normalized within its own context.  CLR stopped at the scores.  It never used the rest of the attention machinery:  weight normalization with a temperature, aggregation, and depth.
 
 This project completes the operator.  The completed method has three stages:
 
@@ -72,7 +72,7 @@ Both work on synthetic data:  they restore a repressed target's correlation from
 
 Both are reported at strong/confirmed evidence and at all evidence.
 
-**TF-node benchmark (BEELINE, and E. coli as a secondary result).**  The Faith-2007 and BEELINE convention scores candidate (TF, gene) edges.  The metrics are AUPRC ratio and early precision ratio (EPR).
+**TF-node benchmark (BEELINE, and E. coli as a secondary result).**  The Faith, Hayete et al. (2007) and BEELINE convention scores candidate (TF, gene) edges.  The metrics are AUPRC ratio and early precision ratio (EPR).
 
 **Uncertainty.**  Three resampling schemes are used:
 
@@ -86,7 +86,7 @@ The influence of a perturbation P on gene g is how much g's network row changes 
 
 ## 8. Software
 
-This is the R package `clr` on the `accuracy-review` branch:  an Rcpp core with OpenMP, and a macOS build helper.  The analysis scripts are in `analysis/`:
+This is the R package `clr` on the `accuracy-review` branch:  an Rcpp core with OpenMP, and a macOS build helper.  Resampling fits run in parallel with `foreach` over the local cores minus two, with the worker count capped by RAM and the remaining cores given to OpenMP inside each worker (`analysis/parallel.R`; CITATION_LOG D28).  The analysis scripts are in `analysis/`:
 
 - `run_m3d_regulondb.R`
 - `followup.R`

@@ -14,7 +14,7 @@ command -v Rscript >/dev/null || die "R not found: install from https://cran.r-p
 echo "== R: $(Rscript -e 'cat(R.version.string, R.version$arch)')"
 echo "== macOS $(sw_vers -productVersion), $(uname -m); clang: $(clang --version | head -1)"
 
-Rscript -e 'for (p in c("R6","Rcpp","Matrix","testthat","pkgload")) if (!requireNamespace(p, quietly = TRUE)) install.packages(p, repos = "https://cloud.r-project.org")' \
+Rscript -e 'for (p in c("R6","Rcpp","Matrix","foreach","doParallel","testthat","pkgload")) if (!requireNamespace(p, quietly = TRUE)) install.packages(p, repos = "https://cloud.r-project.org")' \
   || die "installing R dependencies failed"
 
 # --- locate libomp -----------------------------------------------------------

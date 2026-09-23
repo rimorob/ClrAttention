@@ -32,7 +32,7 @@
 #     regulator class, for strong/confirmed ("SC") and all ("all") evidence;
 #   * per-regulon coherence AUROC (within-regulon pairs vs member-to-non-
 #     co-regulated pairs), summarized as the median over regulons.
-# SECONDARY (continuity with Faith et al. 2007): TF-node edge PR, where the TF's
+# SECONDARY (continuity with Faith, Hayete et al. 2007): TF-node edge PR, where the TF's
 # own mRNA stands in for its activity.
 #
 # Stages:
