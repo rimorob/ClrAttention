@@ -516,3 +516,70 @@ conditional values. The readouts are |cor| of the diffused profiles and
 the attention mass (P^t + P^t')/2. `operators.csv` reports each operator's
 density and its share of negatively correlated edges. Interpretation
 waits for bootstrap confidence intervals.
+
+## D27. Results: confidence intervals and depth chosen on held-out labs (466-experiment set, 2026-09-23)
+
+Produced by `analysis/followup.R`; outputs are in `results/avg_followup/`.
+
+**How depth was chosen.** The 466 experiments were split into two halves
+by experimenter (39 labs, 233 + 233 experiments). The operator was built
+on one half and scored by how well attention mass predicts the other
+half's top 1% of CLR pairs. RegulonDB was not used. The search was a
+geometric scan (t = 1, 2, 4, …, 128) followed by golden-section
+refinement. Every operator showed an interior optimum, and the two
+directions agreed:
+
+| Operator | t* (direction 1, direction 2) | Geometric mean |
+|---|---|---|
+| soft10 | 10, 7 | 8 |
+| fdr05_top10 | 8, 6 | 7 |
+| pearson_top10 (control) | 7, 5 | 6 |
+
+**Co-membership AUPR, strong/confirmed regulons.** Base rate 0.094.
+Intervals come from a paired delete-half jackknife over genes (100
+half-samples). Differences are against single-step HG-Stouffer CLR, which
+scores 0.136.
+
+| Method | Difference vs CLR [95% CI] |
+|---|---|
+| \|Pearson\| | −0.020 [−0.024, −0.016] |
+| Raw MI | −0.021 [−0.026, −0.016] |
+| 2007-parity CLR | −0.002 [−0.003, −0.001] |
+| **soft10 at t* = 8** | **+0.021 [+0.015, +0.027]** (0.157; +15% relative) |
+| fdr05_top10 at t* = 7 | +0.013 [+0.007, +0.018] |
+| pearson_top10 at t* = 6 | −0.001 [−0.005, +0.003] |
+
+With all evidence levels (base rate 0.120), soft10 at t* gains +0.007
+[+0.004, +0.011], fdr05_top10 at t* is at 0.000, and pearson_top10 at t*
+loses −0.012.
+
+**Per-regulon coherence, median AUROC.** Intervals come from a paired
+bootstrap over regulons (2000 resamples). CLR scores 0.597 on
+strong/confirmed regulons (n = 144). soft10 at t* = 8 scores 0.632:
++0.031 [+0.018, +0.046], with 69% of regulons improved (Wilcoxon
+p = 4e−4). The Pearson control at t* is lower than CLR: −0.014
+[−0.025, −0.003]. fdr05_top10 at t* is not different from CLR (+0.003).
+The all-evidence results are the same: soft10 gains +0.026
+[+0.015, +0.033] across 181 regulons.
+
+**Beyond the held-out depth.** Pooled AUPR keeps rising up to t ≈ 32
+(soft10 0.167), while regulon coherence peaks at t = 4–8 and then falls
+(0.553 at t = 128). The extra pooled gain at large t comes from the
+large, diffuse regulons, and costs the specific ones. The held-out
+criterion picks the depth where both metrics improve. That depth is the
+one to report.
+
+**Diffused-profile readout, fdr20.** The |cor| of diffused profiles gains
+at most +0.007 [+0.002, +0.011] (at t = 32, strong/confirmed evidence).
+It is not different from CLR, or is slightly worse, with all evidence.
+
+**Conclusion.**
+
+- Softmax attention over calibrated CLR scores, iterated to a depth chosen
+  on held-out labs, recovers regulons better than single-step CLR. The
+  gain is significant on both metrics and both evidence tiers.
+- The same construction on |Pearson| does not beat CLR. The gain
+  therefore depends on the CLR kernel, not on propagation alone.
+- Of the ingredients borrowed from attention, the softmax with a
+  temperature matters most: the hard-thresholded FDR+top-k operator gives
+  about half the pooled gain and no coherence gain.
