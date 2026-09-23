@@ -10,6 +10,9 @@
 #       [--primary none_hg (default: raw values, Hacine-Gharbi joint-histogram
 #        bin rule) | none_scott2d | none_median_scott | parity2007 | rank_fd | ...]
 #       [--bin-sweep 6,8,12,16]    (raw-value fixed-bin sensitivity; "" to skip)
+#       [--reuse results/<set>/primary_fit.rds]  skip the configuration sweep
+#        and the permutation null: recompute the primary MI/CLR (seconds) and
+#        rebuild the operator from the saved CLR threshold (deterministic).
 #
 # PRIMARY BENCHMARK (regulator-agnostic; see analysis/regulons.R): regulons of
 # every regulator type in RegulonDB -- TFs, sRNAs, small molecules (ppGpp),
@@ -29,7 +32,8 @@
 #      each scored by raw MI and by CLR; plus plain |Pearson| as a baseline
 #   3. permutation edge selection (BH, CLR null) on rank_fd; optional MI null
 #   4. Design-A depth sweep with the fixed operator: similarity of diffused
-#      profiles |cor(E_t)| and symmetrized attention mass (P^t + P^t') / 2
+#      profiles |cor(E_t)| and symmetrized attention mass (P^t + P^t') / 2;
+#      diffusion with raw, signed and conditional-expectation values
 #   5. artifacts (MI/CLR/edges/operator, parameters, seed, sessionInfo, timings)
 
 ## ---- arguments ---------------------------------------------------------------
@@ -38,7 +42,7 @@ opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
             set = "chips", B = 100L, threads = NULL, alpha = 0.5,
             depths = "0,1,2,3,5,8,12,20", min_size = 5L, max_size = 500L,
             quick = 0L, mi_null = FALSE, out = NULL, seed = 20260922L,
-            primary = "none_hg", bin_sweep = "6,8,12,16")
+            primary = "none_hg", bin_sweep = "6,8,12,16", reuse = "")
 int_opts <- c("B", "threads", "quick", "seed", "min_size", "max_size")
 i <- 1L
 while (i <= length(args)) {
@@ -232,6 +236,16 @@ if (!opt$primary %in% names(configs))
   tf_rows[[length(tf_rows) + 1L]] <- tfnode(Sg, "gaussian:clr")
   rm(r2, Mg, Sg); invisible(gc())
 }
+reuse <- NULL
+if (nzchar(opt$reuse)) {
+  reuse <- readRDS(opt$reuse)
+  stopifnot(identical(reuse$genes, genes),
+            identical(reuse$params$threshold$statistic, "clr"))
+  opt$primary <- reuse$options$primary
+  configs <- configs[opt$primary]
+  say("REUSE: ", opt$reuse, " (primary ", opt$primary, ", tau ",
+      format(reuse$params$threshold$tau, digits = 6), ")")
+}
 fit <- NULL
 for (nm in names(configs)) {
   cf <- configs[[nm]]
@@ -271,6 +285,9 @@ sel_eval <- function(E, label, tau) {
                tfnode_precision = selected_pr(E, if (ev == "SC") u_str else u_all)[["precision"]])
   }))
 }
+if (!is.null(reuse)) {
+  E_sel <- reuse$edges
+} else {
 set.seed(opt$seed)
 tic("select_threshold_clr", fit$select_threshold(B = opt$B, method = "fdr", q = 0.05,
                                                  threads = opt$threads,
@@ -289,9 +306,16 @@ if (opt$mi_null) {
 sel_tab <- do.call(rbind, sel_rows)
 wcsv(sel_tab, "selected_edges.csv")
 print(sel_tab, digits = 3, row.names = FALSE)
+}
 
 ## ---- 4. diffusion depth sweep (Design A: fixed operator) ------------------------
-fit$build_operator(alpha = opt$alpha)
+if (is.null(reuse)) fit$build_operator(alpha = opt$alpha) else {
+  fit$build_operator(tau = reuse$params$threshold$tau, alpha = opt$alpha)
+  E_now <- fit$clr_scores >= reuse$params$threshold$tau
+  diag(E_now) <- FALSE
+  if (!identical(unname(E_now), unname(reuse$edges)))
+    stop("reused threshold does not reproduce the saved edge set")
+}
 A <- Matrix::Matrix(fit$operator, sparse = TRUE)
 P <- (1 - opt$alpha) * Matrix::Diagonal(G) + opt$alpha * A
 say(sprintf("operator: %d off-diagonal nonzeros, %d isolated genes (self-loop), alpha %.2f",
@@ -322,6 +346,24 @@ for (t in 0:max(depths)) {
     effective_rank = { ev <- svd(Ez, nu = 0, nv = 0)$d^2; sum(ev)^2 / sum(ev^2) })
   rm(Ct); invisible(gc())
 }
+# Value transforms (the continuous W_V): same operator and readout, but the
+# message from gene j to gene i is sign(cor) * E_j ("signed") or the B-spline
+# conditional expectation E[z_i | z_j] applied to E_j ("conditional").
+for (vt in c("signed", "conditional")) {
+  tic(paste0("diffuse_", vt), fit$diffuse(steps = max(depths), values = vt))
+  tr <- fit$trajectory
+  for (t in depths[depths > 0]) {
+    Ez <- tr[[t + 1L]] - rowMeans(tr[[t + 1L]])
+    sdv <- sqrt(rowSums(Ez^2) / (ncol(Ez) - 1)); sdv[sdv <= 0] <- 1
+    Ez <- Ez / sdv
+    Ct <- abs(tcrossprod(Ez) / (ncol(Ez) - 1))
+    lab <- sprintf("depth%02d:abscor_%s", t, vt)
+    add_scores(score_all(Ct, lab)); headline(lab)
+    rm(Ct); invisible(gc())
+  }
+  fit$reset_diffusion(); rm(tr); invisible(gc())
+}
+
 cm_all <- do.call(rbind, cm_rows); coh_all <- do.call(rbind, coh_rows)
 dep_cm <- cm_all[grepl("^depth", cm_all$method), ]
 dep_coh <- coh_all[grepl("^depth", coh_all$method), ]
@@ -335,11 +377,11 @@ for (what in c("aupr", "coh")) {
   for (kind in c("abscor", "attention")) {
     if (what == "aupr") {
       d <- dep_cm[dep_cm$stratum == "all" & dep_cm$evidence == "SC" &
-                    grepl(kind, dep_cm$method), ]
+                    grepl(paste0(":", kind, "$"), dep_cm$method), ]
       y <- d$aupr
     } else {
       d <- dep_coh[dep_coh$class == "all" & dep_coh$evidence == "SC" &
-                     grepl(kind, dep_coh$method), ]
+                     grepl(paste0(":", kind, "$"), dep_coh$method), ]
       y <- d$median_auroc
     }
     tt <- as.integer(sub("^depth([0-9]+):.*$", "\\1", d$method))

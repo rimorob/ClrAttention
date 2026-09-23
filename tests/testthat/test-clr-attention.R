@@ -134,3 +134,27 @@ test_that("print() summarizes state", {
   fit$estimate_mi(bins = 10)
   expect_output(fit$print(), "MI:\\s+estimated")
 })
+
+test_that("value transforms: signed and conditional keep a repressed target's sign", {
+  set.seed(7); n <- 300; tfb <- rnorm(n)
+  X <- rbind(tfb, 2 * tfb + rnorm(n), -1.5 * tfb + rnorm(n),
+             matrix(rnorm(3 * n), 3))
+  f <- ClrAttention$new(X)$estimate_mi(threads = 1)$calibrate()$
+    build_operator(k = 2, alpha = 0.5)
+  f$diffuse(steps = 10, values = "raw")
+  expect_gt(cor(f$embedding[3, ], tfb), 0)          # raw flips the repressed gene
+  for (v in c("signed", "conditional")) {
+    f$diffuse(steps = 10, values = v)
+    expect_lt(cor(f$embedding[3, ], tfb), -0.8)
+    expect_equal(f$params$diffuse$values, v)
+  }
+})
+
+test_that("weights_at reproduces the MI estimator's basis and sums to 1", {
+  set.seed(2); z <- rnorm(200)
+  W <- clr:::cpp_weights_at(z, min(z), max(z), 3L, 9L)
+  expect_equal(unname(rowSums(W)), rep(1, 200), tolerance = 1e-12)
+  W2 <- clr:::cpp_weights_at(c(-100, 100), min(z), max(z), 3L, 9L)  # clamped
+  expect_equal(W2[1, ], W[which.min(z), ])
+  expect_equal(W2[2, ], W[which.max(z), ])
+})

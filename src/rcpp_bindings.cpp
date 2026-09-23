@@ -67,3 +67,15 @@ Rcpp::IntegerVector cpp_openmp_info() {
       Rcpp::Named("openmp_max_threads") = clr_core::openmp_max_threads(),
       Rcpp::Named("default_threads") = clr_core::default_num_threads());
 }
+
+// [[Rcpp::export]]
+Rcpp::NumericMatrix cpp_weights_at(Rcpp::NumericVector v, double xmin,
+                                   double xmax, int spline_order,
+                                   int num_bins) {
+  const std::size_t n = static_cast<std::size_t>(v.size());
+  // core layout [bin][n] row-major == R column-major n x num_bins
+  Rcpp::NumericMatrix out(static_cast<int>(n), num_bins);
+  clr_core::weights_at(v.begin(), n, xmin, xmax, spline_order, num_bins,
+                       out.begin());
+  return out;
+}

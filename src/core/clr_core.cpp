@@ -78,6 +78,24 @@ void x_to_z(const double *x, double *z, std::size_t n_samples, int spline_order,
   for (std::size_t s = 0; s < n_samples; ++s) z[s] = (x[s] - xmin) * scale;
 }
 
+void weights_at(const double *v, std::size_t n, double xmin, double xmax,
+                int spline_order, int num_bins, double *weights_out) {
+  if (!(xmax > xmin))
+    throw std::invalid_argument("weights_at: need xmax > xmin");
+  const std::vector<int> knots = spline_knots(num_bins, spline_order);
+  const double top = static_cast<double>(num_bins - spline_order + 1);
+  const double scale = top / (xmax - xmin);
+  for (std::size_t s = 0; s < n; ++s) {
+    double x = v[s];
+    if (x < xmin) x = xmin;          // clamp: values outside the fitted
+    if (x > xmax) x = xmax;          // range take the boundary basis
+    const double z = (x - xmin) * scale;
+    for (int b = 0; b < num_bins; ++b)
+      weights_out[static_cast<std::size_t>(b) * n + s] =
+          spline_blend(b, spline_order, knots.data(), z, num_bins);
+  }
+}
+
 void gene_weights(const double *x, std::size_t n_samples, int spline_order,
                   int num_bins, double *weights_out) {
   const std::vector<int> knots = spline_knots(num_bins, spline_order);

@@ -44,6 +44,14 @@ double spline_blend(int k, int t, const int *knots, double v, int n);
 void x_to_z(const double *x, double *z, std::size_t n_samples,
             int spline_order, int num_bins);
 
+// B-spline weights of arbitrary values v under the basis fitted to a gene
+// with range [xmin, xmax] (values outside are clamped to the range).
+// weights_out is [num_bins][n] row-major. With v = the gene itself and
+// (xmin, xmax) its own range this equals gene_weights(). Used to evaluate
+// the conditional-expectation value transform on diffused profiles.
+void weights_at(const double *v, std::size_t n, double xmin, double xmax,
+                int spline_order, int num_bins, double *weights_out);
+
 // Marginal B-spline weights for one gene: weights_out is [num_bins][n_samples]
 // row-major, i.e. weights_out[bin * n_samples + s].
 void gene_weights(const double *x, std::size_t n_samples, int spline_order,

@@ -48,10 +48,27 @@ BEGIN_RCPP
 END_RCPP
 }
 
+// cpp_weights_at
+Rcpp::NumericMatrix cpp_weights_at(Rcpp::NumericVector v, double xmin, double xmax, int spline_order, int num_bins);
+RcppExport SEXP _clr_cpp_weights_at(SEXP vSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP spline_orderSEXP, SEXP num_binsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type xmin(xminSEXP);
+    Rcpp::traits::input_parameter< double >::type xmax(xmaxSEXP);
+    Rcpp::traits::input_parameter< int >::type spline_order(spline_orderSEXP);
+    Rcpp::traits::input_parameter< int >::type num_bins(num_binsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_weights_at(v, xmin, xmax, spline_order, num_bins));
+    return rcpp_result_gen;
+END_RCPP
+}
+
 static const R_CallMethodDef CallEntries[] = {
     {"_clr_cpp_mi_matrix", (DL_FUNC) &_clr_cpp_mi_matrix, 4},
     {"_clr_cpp_clr_calibrate", (DL_FUNC) &_clr_cpp_clr_calibrate, 2},
     {"_clr_cpp_openmp_info", (DL_FUNC) &_clr_cpp_openmp_info, 0},
+    {"_clr_cpp_weights_at", (DL_FUNC) &_clr_cpp_weights_at, 5},
     {NULL, NULL, 0}
 };
 

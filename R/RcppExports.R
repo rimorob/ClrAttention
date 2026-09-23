@@ -13,3 +13,7 @@ cpp_clr_calibrate <- function(mi, combine) {
 cpp_openmp_info <- function() {
     .Call(`_clr_cpp_openmp_info`)
 }
+
+cpp_weights_at <- function(v, xmin, xmax, spline_order, num_bins) {
+    .Call(`_clr_cpp_weights_at`, v, xmin, xmax, spline_order, num_bins)
+}

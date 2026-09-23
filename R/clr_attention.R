@@ -315,23 +315,40 @@ ClrAttention <- R6::R6Class("ClrAttention",
       invisible(self)
     },
 
-    #' @description Iterate E <- ((1-alpha) I + alpha A_hat) E, caching the trajectory.
+    #' @description Diffuse expression through the attention operator,
+    #'   E_i <- (1-alpha) E_i + alpha * sum_j A_ij v_{j->i}(E_j), caching the
+    #'   trajectory.
     #' @param steps positive integer number of diffusion steps.
     #' @param standardize if TRUE (default), E^(0) is the row-standardized
-    #'   data (each gene centered and scaled to unit sd), so diffusion mixes
-    #'   expression *shapes*, not baseline levels or measurement scales.
-    #'   FALSE diffuses the raw matrix (the pre-2026-09-23 behavior).
-    #'   Note: MI is sign-blind, so anticorrelated neighbours still partially
-    #'   cancel under diffusion; see PORT_NOTES.md section 10.
-    diffuse = function(steps = 10, standardize = TRUE) {
+    #'   data, so diffusion mixes expression shapes, not levels or scales.
+    #'   Required (forced) for values = "signed" / "conditional".
+    #' @param values the value passed from attended gene j to gene i -- the
+    #'   continuous analogue of the transformer's W_V:
+    #'   "raw": v = E_j (linear diffusion; MI is sign-blind, so a repressed
+    #'   target and its repressor partially cancel);
+    #'   "signed": v = sign(cor(x_i, x_j)) E_j (fixes sign, still linear);
+    #'   "conditional": v = f_ij(E_j), where f_ij(u) = E[z_i | z_j = u] is the
+    #'   nonparametric regression of gene i on gene j read off the same
+    #'   B-spline basis the MI estimator uses (gene j's bin count and spline
+    #'   order): f_ij(u) = sum_b B_jb(u) mu_ijb with
+    #'   mu_ijb = sum_s B_jb(z_js) z_is / sum_s B_jb(z_js). It carries sign,
+    #'   non-monotone shape (e.g. quadratic dependence) and strength
+    #'   (f_ij is ~0 for weakly dependent pairs), with no learned parameters.
+    #'   Values are pair-specific (they depend on the query i as well as the
+    #'   key j), like edge-conditioned messages in graph networks. f_ij is
+    #'   fitted once on the data and re-applied to the diffused profiles at
+    #'   every step (values outside z_j's range are clamped to it).
+    diffuse = function(steps = 10, standardize = TRUE,
+                       values = c("raw", "signed", "conditional")) {
       private$.need(private$operator_, "build_operator()")
+      values <- match.arg(values)
       steps <- as.integer(steps)
       if (length(steps) != 1L || is.na(steps) || steps < 1L)
         stop("steps must be a positive integer")
+      if (values != "raw") standardize <- TRUE
       alpha <- private$params_$operator$alpha
-      G <- nrow(private$operator_)
-      P <- (1 - alpha) * diag(G) + alpha * private$operator_
-      traj <- vector("list", steps + 1L)
+      A <- private$operator_
+      G <- nrow(A)
       E0 <- private$data_
       if (isTRUE(standardize)) {
         mu <- rowMeans(E0)
@@ -339,11 +356,28 @@ ClrAttention <- R6::R6Class("ClrAttention",
         sdv[!(sdv > 0)] <- 1  # constant gene: centered only
         E0 <- (E0 - mu) / sdv
       }
+      traj <- vector("list", steps + 1L)
       traj[[1L]] <- E0
-      for (t in seq_len(steps)) traj[[t + 1L]] <- P %*% traj[[t]]
+      if (values == "raw") {
+        P <- (1 - alpha) * diag(G) + alpha * A
+        for (t in seq_len(steps)) traj[[t + 1L]] <- P %*% traj[[t]]
+      } else if (values == "signed") {
+        off <- A > 0 & row(A) != col(A)
+        R <- stats::cor(t(E0))
+        As <- A
+        As[off] <- A[off] * sign(R[off])
+        P <- (1 - alpha) * diag(G) + alpha * As
+        for (t in seq_len(steps)) traj[[t + 1L]] <- P %*% traj[[t]]
+      } else {
+        vm <- private$.value_model(E0)
+        for (t in seq_len(steps))
+          traj[[t + 1L]] <- (1 - alpha) * traj[[t]] +
+            alpha * private$.messages(traj[[t]], vm)
+      }
       private$trajectory_ <- traj
       private$params_$diffuse <- list(steps = steps,
-                                      standardize = isTRUE(standardize))
+                                      standardize = isTRUE(standardize),
+                                      values = values)
       invisible(self)
     },
 
@@ -408,6 +442,42 @@ ClrAttention <- R6::R6Class("ClrAttention",
       if (is.null(value))
         stop("not available yet: run $", stage, " first", call. = FALSE)
       value
+    },
+
+    # Conditional-expectation value model on standardized data Z:
+    # for every key gene j with out-edges (A[i, j] > 0, i != j), the basis
+    # range of z_j and, per attending query i, mu_ij = E[z_i | bin of z_j].
+    .value_model = function(Z) {
+      A <- private$operator_
+      G <- nrow(A)
+      nb <- private$params_$mi$bins_used
+      k <- as.integer(private$params_$mi$spline_order)
+      keys <- lapply(seq_len(G), function(j) {
+        q <- which(A[, j] > 0 & seq_len(G) != j)
+        if (!length(q)) return(NULL)
+        z <- Z[j, ]
+        lo <- min(z); hi <- max(z)
+        if (!(hi > lo)) return(NULL)
+        W <- cpp_weights_at(z, lo, hi, k, nb[j])        # N x nb_j
+        den <- colSums(W)
+        num <- crossprod(W, t(Z[q, , drop = FALSE]))    # nb_j x |q|
+        mu <- num / ifelse(den > 1e-12, den, Inf)       # empty bin -> 0
+        list(j = j, q = q, w = A[q, j], lo = lo, hi = hi, nb = nb[j],
+             mu = mu)
+      })
+      list(keys = keys[!vapply(keys, is.null, NA)], k = k,
+           self = diag(A))
+    },
+
+    # Messages sum_j A_ij f_ij(E_j) for all i (G x N); self-loops pass E_i.
+    .messages = function(E, vm) {
+      M <- E * vm$self
+      for (key in vm$keys) {
+        W <- cpp_weights_at(E[key$j, ], key$lo, key$hi, vm$k, key$nb)
+        pred <- W %*% key$mu                              # N x |q|
+        M[key$q, ] <- M[key$q, ] + t(pred) * key$w
+      }
+      M
     }
   )
 )

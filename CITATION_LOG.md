@@ -355,7 +355,7 @@ with different bins_i × bins_j still mixes different null distributions.
   (max |Δ| = 0 on 200 genes) and 5–20× faster. Memory drops from
   O(G·N·bins) to O(G·N·order).
 
-## Open: sign blindness of diffusion (the missing W_V)
+## Sign blindness of diffusion (the missing W_V): implemented 2026-09-23 as `diffuse(values = ...)`, see D24
 
 MI is sign-agnostic, but diffusion averages raw profiles. A repressor and
 its target therefore partially cancel: after five steps in the synthetic
@@ -432,3 +432,36 @@ that run's results. Scott-2d, the historical median-Scott rule and fixed 6,
 8, 10, 12 and 16 bins are reported as sensitivity analyses. They are not
 used to pick the rule after the fact.
 *Refs: `hacinegharbi2012`, `scott1979`, `daub2004`.*
+
+## D24. Value transforms for diffusion: signed and conditional-expectation [joint]
+
+This implements the W_V proposal. `diffuse()` now takes one of three
+values:
+
+- `values = "raw"` passes E_j, the previous behaviour.
+- `values = "signed"` passes sign(cor_ij)·E_j.
+- `values = "conditional"` passes f_ij(E_j), where
+  f_ij(u) = E[z_i | z_j = u].
+
+f_ij is the nonparametric regression of gene i on gene j. It is read off
+the same B-spline basis the MI estimator uses: gene j's bin count and
+spline order, with `weights_at()` exported from the C++ core. f_ij is
+fitted once on the data and re-applied to the diffused profiles at every
+step. Values outside z_j's range are clamped to it. The messages are
+pair-specific, which makes this edge-conditioned message passing. No
+parameters are learned.
+
+**Synthetic check (12 genes, top-3 operator, 10 steps).** The table gives
+the correlation of each diffused target with its true driver.
+
+| Target | raw | signed | conditional | t = 0 |
+|---|---|---|---|---|
+| Repressed target (g7 vs tfb) | +0.78 (flipped) | −0.95 | −0.97 | −0.83 |
+| Quadratic target (g2 vs tfa²) | 0.26 | 0.25 | 0.51 | 0.90 |
+
+**M3D, 1,500-gene quick run.** Only 2 of 3,032 selected edges are
+negatively correlated. Signed diffusion is therefore identical to raw
+diffusion to 4 decimals, and conditional diffusion is slightly below raw
+(co-membership AUPR on strong/confirmed evidence 0.192 vs 0.196 at t = 8).
+Sign cancellation is not what limits diffusion on this benchmark with this
+operator. Results on the full compendium are pending.
