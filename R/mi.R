@@ -3,8 +3,10 @@
 #' B-spline smoothed mutual information between all gene pairs
 #'
 #' @param data numeric matrix, genes x samples (rows = genes).
-#' @param bins "median_scott" (default: Scott's rule per gene, median count
-#'   used for every gene -- the historical practice), "median_fd",
+#' @param bins "hg" (default: one common count chosen for the JOINT
+#'   histogram, Hacine-Gharbi rule at rho = 0; 9 at N = 907), "median_scott"
+#'   (Scott's rule per gene, median count for every gene -- the historical
+#'   practice), "median_scott2d", "median_fd",
 #'   "median_sturges", or "fd", "scott", "sturges" for per-gene adaptive bin
 #'   counts, or a single integer for a fixed count on every gene
 #'   (10 reproduces the historical default).
@@ -22,7 +24,7 @@
 #' @return symmetric G x G MI matrix (bits). The diagonal holds each gene's
 #'   self-MI and is zeroed by [clr_calibrate()].
 #' @export
-bspline_mi <- function(data, bins = "median_scott", spline_order = 3,
+bspline_mi <- function(data, bins = "hg", spline_order = 3,
                        threads = NULL, transform = c("none", "rank")) {
   transform <- match.arg(transform)
   if (!is.matrix(data) || !is.numeric(data))

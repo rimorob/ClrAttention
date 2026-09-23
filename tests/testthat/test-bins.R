@@ -60,3 +60,13 @@ test_that("median_* rules give one common count equal to the per-gene median", {
                                          threads = 1)
   expect_length(unique(fit$params$mi$bins_used), 1L)
 })
+
+test_that("2-D-aware bin rules: hg depends only on N; scott2d uses N^(-1/4)", {
+  set.seed(5)
+  X <- matrix(rnorm(20 * 907), 20)
+  expect_equal(unique(bins_for_genes(X, "hg")), 9L)
+  expect_equal(unique(bins_for_genes(X[, 1:466], "hg")), 7L)
+  b2 <- unique(bins_for_genes(X, "median_scott2d"))
+  expect_length(b2, 1L)
+  expect_lt(b2, unique(bins_for_genes(X, "median_scott")))
+})

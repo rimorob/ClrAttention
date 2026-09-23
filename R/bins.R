@@ -41,7 +41,10 @@ fd_bins <- function(x, rule = c("fd", "scott", "sturges"),
 #' @param data numeric matrix, genes x samples.
 #' @param bins "fd" | "scott" | "sturges" (per-gene adaptive);
 #'   "median_fd" | "median_scott" | "median_sturges" (per-gene rule, then the
-#'   median count used for every gene -- the historical practice); a single
+#'   median count used for every gene -- the historical practice);
+#'   "median_scott2d" (Scott's d = 2 rule, h = 3.5 sd N^(-1/4), median over
+#'   genes); "hg" (Hacine-Gharbi joint-histogram rule at rho = 0; depends
+#'   only on N); a single
 #'   integer >= 2 used for every gene (historical parity mode), or an integer
 #'   vector with one count per gene (used verbatim).
 #' @param min_bins,max_bins clamp range applied to adaptive counts only.
@@ -49,6 +52,28 @@ fd_bins <- function(x, rule = c("fd", "scott", "sturges"),
 #' @export
 bins_for_genes <- function(data, bins = "fd", min_bins = 5, max_bins = 50) {
   G <- nrow(data)
+  if (identical(bins, "hg")) {
+    # Hacine-Gharbi & Ravier-type joint rule for MI (Hacine-Gharbi et al. 2012,
+    # Pattern Recognit. Lett. 33:1302), evaluated at rho = 0, i.e. under the
+    # independence null every pair is tested against:
+    #   B = round( sqrt( (1 + sqrt(1 + 24 N)) / 2 ) )
+    # Chosen for the 2-D (joint) histogram, not for either marginal: at
+    # N = 907 it gives 9 bins per axis (81 cells, ~11 points per cell)
+    # versus 33 per axis (1,089 cells, < 1 point per cell) from 1-D FD.
+    N <- ncol(data)
+    return(rep(as.integer(max(min_bins, round(sqrt((1 + sqrt(1 + 24 * N)) / 2)))), G))
+  }
+  if (identical(bins, "median_scott2d")) {
+    # Scott's multivariate normal-reference rule for a d = 2 histogram:
+    # h = 3.5 sd N^(-1/(d+2)) = 3.5 sd N^(-1/4) per axis; median over genes.
+    N <- ncol(data)
+    per <- apply(data, 1L, function(x) {
+      h <- 3.5 * stats::sd(x) * N^(-1 / 4)
+      if (!is.finite(h) || h <= 0) NA_real_ else ceiling(diff(range(x)) / h)
+    })
+    b <- as.integer(round(stats::median(per, na.rm = TRUE)))
+    return(rep(as.integer(min(max(b, min_bins), max_bins)), G))
+  }
   if (is.character(bins) && startsWith(bins, "median_")) {
     # Historical CLR practice (user, 2026-09-23): estimate each gene's own
     # optimal count, then use the MEDIAN for every gene, so all pairs share

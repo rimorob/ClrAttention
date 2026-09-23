@@ -81,9 +81,11 @@ test_that("new pipeline (FD bins + Stouffer) does not regress vs parity", {
 })
 
 test_that("permutation HC threshold keeps true edges and sparsifies", {
+  # Selection machinery test on the rank/FD estimator (exact pooled MI null);
+  # 12 genes x 300 samples is too small to test the default estimator here.
   d <- synthetic_clr_data()
   fit <- ClrAttention$new(d$X)$
-    estimate_mi(threads = 1)$calibrate()$
+    estimate_mi(bins = "fd", transform = "rank", threads = 1)$calibrate()$
     select_threshold(B = 20, method = "hc", threads = 1)
   expect_true(is.finite(fit$threshold) && fit$threshold > 0)
   expect_equal(fit$params$threshold$method, "hc")
@@ -103,7 +105,7 @@ test_that("FDR threshold on the MI null selects the planted edges (small G)", {
   # at G = 200 below.
   d <- synthetic_clr_data()
   fit <- ClrAttention$new(d$X)$
-    estimate_mi(threads = 1)$calibrate()$
+    estimate_mi(bins = "fd", transform = "rank", threads = 1)$calibrate()$
     select_threshold(B = 20, statistic = "mi", threads = 1)
   expect_equal(fit$params$threshold$method, "fdr")
   ut <- upper.tri(d$truth)

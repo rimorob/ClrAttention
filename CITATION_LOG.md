@@ -399,3 +399,36 @@ which the recovered sources implemented as `calcNumBins`.
 and 33 with FD. The historical "6–10 bins" corresponds to the smaller N of
 2007-era datasets. Whether 21 bins beats a fixed 10 at N = 907 is measured
 by the `none_median_scott` configuration of the M3D run.
+
+## D23. The bin count is chosen for the 2-D (joint) histogram, and `hg` is the default [joint]
+
+The user objected to 21–33 bins per axis at N = 907. At 33 bins the joint
+table has 1,089 cells for 907 points, fewer than one point per cell. The
+bin budget belongs to the joint histogram, because MI's variance and bias
+come from H(X,Y). The user recalled that Daub et al. used about 6 bins.
+
+Two rules for the joint histogram are implemented:
+
+- **Scott's multivariate normal-reference rule** (`median_scott2d`).
+  For d = 2, h = 3.5·sd·N^(−1/(d+2)) = 3.5·sd·N^(−1/4). The count comes out
+  at 12 at N = 907 and 9 at N = 466, as the median over M3D genes.
+- **Hacine-Gharbi et al. (2012)'s low-bias rule** (`hg`). This rule is
+  derived specifically for histogram MI. It is evaluated at ρ = 0 so that
+  every pair shares one discretization, and it is exact for the null every
+  pair is tested against: B = round(√((1 + √(1 + 24N))/2)). That gives 9
+  bins at N = 907 and 7 at N = 466.
+
+The formula is quoted from memory of the paper and of López de Prado's
+treatment of it. It must be checked against the paper before publication.
+
+**Why this does not change the bias argument of D17 and D22.** B-spline
+order 3 spreads each point over 3 × 3 cells, which lowers variance compared
+with a hard histogram. The rules are therefore, if anything, conservative
+for this estimator.
+
+**Default.** `hg` is now the default. It is also the pre-registered
+primary configuration of the M3D run, so the choice is fixed before seeing
+that run's results. Scott-2d, the historical median-Scott rule and fixed 6,
+8, 10, 12 and 16 bins are reported as sensitivity analyses. They are not
+used to pick the rule after the fact.
+*Refs: `hacinegharbi2012`, `scott1979`, `daub2004`.*

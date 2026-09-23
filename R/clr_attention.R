@@ -36,7 +36,7 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #' @param threads OpenMP threads (NULL = cores - 2).
     #' @param transform "none" (default; MI on raw values) or "rank" (empirical copula);
     #'   see [bspline_mi()].
-    estimate_mi = function(bins = "median_scott", spline_order = 3,
+    estimate_mi = function(bins = "hg", spline_order = 3,
                            threads = NULL, transform = "none") {
       private$mi_ <- bspline_mi(private$data_, bins = bins,
                                 spline_order = spline_order, threads = threads,
@@ -137,6 +137,12 @@ ClrAttention <- R6::R6Class("ClrAttention",
                 "; use B >= ", ceiling(1 / hc_level - 1), call. = FALSE)
       G <- nrow(private$data_)
       if (G < 4L) stop("select_threshold() needs at least 4 genes")
+      if (statistic == "mi" && !identical(private$params_$mi$transform, "rank"))
+        warning("statistic = \"mi\" without transform = \"rank\": the null ",
+                "distribution of B-spline MI depends on the two marginal ",
+                "shapes, so a pooled MI null is not exact per pair (skewed ",
+                "or heavy-tailed genes get anti-conservative p-values)",
+                call. = FALSE)
       if (statistic == "mi" && length(unique(private$params_$mi$bins_used)) > 1L)
         warning("statistic = \"mi\" with unequal per-gene bin counts: the ",
                 "pooled MI null is not exact per pair (MI bias depends on ",

@@ -7,9 +7,9 @@
 #       [--set chips|avg] [--B 100] [--threads N] [--alpha 0.5] \
 #       [--depths 0,1,2,3,5,8,12,20] [--min-size 5] [--max-size 500] \
 #       [--quick 600] [--mi-null] [--out results/<set>]
-#       [--primary none_median_scott (default; historical median-of-per-gene rule,
-#        Scott ~ Wand zero-stage) | rank_fd | none_median_fd | parity2007 | ...]
-#       [--bin-sweep 8,12,16,20]   (rank-transform sensitivity; "" to skip)
+#       [--primary none_hg (default: raw values, Hacine-Gharbi joint-histogram
+#        bin rule) | none_scott2d | none_median_scott | parity2007 | rank_fd | ...]
+#       [--bin-sweep 6,8,12,16]    (raw-value fixed-bin sensitivity; "" to skip)
 #
 # PRIMARY BENCHMARK (regulator-agnostic; see analysis/regulons.R): regulons of
 # every regulator type in RegulonDB -- TFs, sRNAs, small molecules (ppGpp),
@@ -38,7 +38,7 @@ opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
             set = "chips", B = 100L, threads = NULL, alpha = 0.5,
             depths = "0,1,2,3,5,8,12,20", min_size = 5L, max_size = 500L,
             quick = 0L, mi_null = FALSE, out = NULL, seed = 20260922L,
-            primary = "none_median_scott", bin_sweep = "8,12,16,20")
+            primary = "none_hg", bin_sweep = "6,8,12,16")
 int_opts <- c("B", "threads", "quick", "seed", "min_size", "max_size")
 i <- 1L
 while (i <= length(args)) {
@@ -209,12 +209,15 @@ configs <- list(
   # historical practice: per-gene optimal count, median used for all genes
   none_median_fd    = list(transform = "none", bins = "median_fd", combine = "euclidean"),
   none_median_scott = list(transform = "none", bins = "median_scott", combine = "euclidean"),
+  # 2-D-aware counts: the budget is the joint histogram, not the marginal
+  none_scott2d      = list(transform = "none", bins = "median_scott2d", combine = "euclidean"),
+  none_hg           = list(transform = "none", bins = "hg", combine = "euclidean"),
   rank_fd           = list(transform = "rank", bins = "fd", combine = "euclidean"),
   rank_fd_st        = list(transform = "rank", bins = "fd", combine = "stouffer")
 )
 sweep <- if (nzchar(opt$bin_sweep)) as.integer(strsplit(opt$bin_sweep, ",")[[1]]) else integer()
 for (nb in sweep)
-  configs[[sprintf("rank_b%02d", nb)]] <- list(transform = "rank", bins = nb,
+  configs[[sprintf("none_b%02d", nb)]] <- list(transform = "none", bins = nb,
                                                 combine = "euclidean")
 if (!opt$primary %in% names(configs))
   stop("--primary must be one of: ", paste(names(configs), collapse = ", "))
