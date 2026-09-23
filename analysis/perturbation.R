@@ -197,6 +197,25 @@ rm(fits); invisible(gc())
 
 ## ---- scores and evaluation ---------------------------------------------------
 qn <- function(x) stats::qnorm((rank(x) - 0.5) / length(x))
+# Variance-controlled AUROC (added after the first full run, 2026-09-23):
+# gene variance alone, which ignores the perturbation, reached median AUROC
+# 0.65 and beat differential expression in 14/15 perturbations, because
+# regulon members are more variable than other genes. The stratified AUROC
+# compares targets only with non-targets in the same gene-variance decile
+# (pooled Mann-Whitney U over strata / pooled n1*n0), so a score that only
+# tracks variance gets 0.5.
+var_decile <- cut(rank(apply(X, 1, stats::var), ties.method = "first"),
+                  10, labels = FALSE)
+strat_auroc <- function(s, y, strata) {
+  U <- 0; D <- 0
+  for (h in unique(strata)) {
+    i <- strata == h; n1 <- sum(y[i] == 1); n0 <- sum(y[i] == 0)
+    if (!n1 || !n0) next
+    r <- rank(s[i]); U <- U + sum(r[y[i] == 1]) - n1 * (n1 + 1) / 2
+    D <- D + as.numeric(n1) * n0
+  }
+  if (D > 0) U / D else NA_real_
+}
 res <- list(); scores_out <- list()
 mu_ref <- rowMeans(X)
 for (k in names(groups)) {
@@ -214,10 +233,12 @@ for (k in names(groups)) {
   tr <- truth[[k]]; use <- !tr$exclude
   for (m in names(sc)) {
     ps <- pr_summary(sc[[m]][use], tr$label[use])
+    auroc_vs <- strat_auroc(sc[[m]][use], tr$label[use], var_decile[use])
     top100 <- order(-sc[[m]][use])[1:100]
     res[[length(res) + 1L]] <- data.frame(perturbation = k, k = length(cols),
                                           n_targets = sum(tr$label[use]),
                                           method = m, auroc = ps[["auroc"]],
+                                          auroc_var_strat = auroc_vs,
                                           aupr_ratio = ps[["aupr"]] / mean(tr$label[use]),
                                           # Cosgrove et al. 2008 (SSEM-Lasso on M3D)
                                           # report sensitivity among the top 100 genes
@@ -233,8 +254,9 @@ res <- do.call(rbind, res)
 utils::write.csv(res, file.path(opt$out, "perturbation_metrics.csv"), row.names = FALSE)
 saveRDS(list(scores = scores_out, genes = genes, groups = groups),
         file.path(opt$out, "perturbation_scores.rds"))
-de_ref <- res[res$method == "differential_expression", c("perturbation", "auroc", "aupr_ratio")]
-names(de_ref)[2:3] <- c("auroc_de", "apr_de")
+de_ref <- res[res$method == "differential_expression",
+              c("perturbation", "auroc", "aupr_ratio", "auroc_var_strat")]
+names(de_ref)[2:4] <- c("auroc_de", "apr_de", "avs_de")
 m <- merge(res, de_ref)
 summ <- do.call(rbind, lapply(split(m, m$method), function(x) data.frame(
   method = x$method[1], n = nrow(x), median_auroc = stats::median(x$auroc),
@@ -242,7 +264,11 @@ summ <- do.call(rbind, lapply(split(m, m$method), function(x) data.frame(
   mean_sens_top100 = mean(x$sens_top100),
   wins_vs_de_auroc = sum(x$auroc > x$auroc_de),
   wilcoxon_p_vs_de = if (all(x$auroc == x$auroc_de)) NA_real_ else
-    suppressWarnings(stats::wilcox.test(x$auroc, x$auroc_de, paired = TRUE)$p.value))))
+    suppressWarnings(stats::wilcox.test(x$auroc, x$auroc_de, paired = TRUE)$p.value),
+  median_auroc_var_strat = stats::median(x$auroc_var_strat),
+  wins_vs_de_var_strat = sum(x$auroc_var_strat > x$avs_de),
+  wilcoxon_p_vs_de_var_strat = if (all(x$auroc_var_strat == x$avs_de)) NA_real_ else
+    suppressWarnings(stats::wilcox.test(x$auroc_var_strat, x$avs_de, paired = TRUE)$p.value))))
 summ <- summ[order(-summ$median_auroc), ]
 utils::write.csv(summ, file.path(opt$out, "summary.csv"), row.names = FALSE)
 say("summary over perturbations (AUROC; paired vs differential expression):")
@@ -251,4 +277,9 @@ for (j in seq_len(nrow(summ)))
               summ$method[j], summ$median_auroc[j], summ$median_aupr_ratio[j],
               summ$mean_sens_top100[j],
               summ$wins_vs_de_auroc[j], summ$n[j], summ$wilcoxon_p_vs_de[j]))
+say("variance-stratified AUROC (targets vs non-targets of similar variance):")
+for (j in seq_len(nrow(summ)))
+  say(sprintf("  %-28s median %.3f  wins vs DE %d/%d  p = %.3g", summ$method[j],
+              summ$median_auroc_var_strat[j], summ$wins_vs_de_var_strat[j], summ$n[j],
+              summ$wilcoxon_p_vs_de_var_strat[j]))
 say("done")
