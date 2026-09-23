@@ -96,7 +96,26 @@ With all evidence levels, `soft10` gains +0.007 [+0.005, +0.010] AUPR and +0.014
 
 **This run exposes a confound, and it is not yet a positive result.**  Gene variance knows nothing about the perturbation, yet it beats every score.  Regulon members are simply more variable than other genes, so any score correlated with variance gets credit.  The network influence scores beat differential expression, but they may partly be tracking variance too.  The perturbation-specific cases are encouraging:  CLR-attention influence exceeds gene variance for LexA/SOS (0.73 against 0.55), HU (0.83 against 0.75) and AppY (0.90 against 0.82).  Across the board, however, the variance prior wins.  Sensitivity among the top 100 genes is low for every method (at most 0.07).
 
-**Next run (queued):**  100 null draws per k, plus a variance-stratified AUROC.  That AUROC compares targets only with non-targets in the same gene-variance decile, so a score that merely tracks variance gets 0.5.  That comparison decides whether network influence carries perturbation-specific information.
+**Variance-controlled run (100 null draws per k).**  The stratified AUROC compares targets only with non-targets in the same gene-variance decile, so a score that merely tracks variance gets 0.5.
+
+| Score | Median AUROC, raw | Median AUROC, variance-stratified | Wins vs DE (stratified) | Paired p vs DE (stratified) |
+|---|---|---|---|---|
+| CLR-attention influence | 0.572 | **0.573** | 13/15 | 0.010 |
+| CLR influence | 0.569 | 0.553 | 12/15 | 0.073 |
+| DE + CLR-attention (Stouffer) | 0.552 | 0.539 | 12/15 | 0.026 |
+| \|Pearson\| influence | 0.543 | 0.537 | 8/15 | 0.56 |
+| Gene variance | 0.646 | 0.523 | 8/15 | 1.0 |
+| Differential expression | 0.519 | 0.516 | — | — |
+
+**Verdict.**  The variance prior's advantage was entirely the confound:  once variance is held fixed it drops to 0.52.  CLR-attention influence keeps its advantage (0.573), and it beats differential expression in 13 of 15 perturbations (p = 0.010).  The network influence therefore carries perturbation-specific information beyond gene variance.  The effect is modest, and it is concentrated in a few regulators:
+
+- HU:  0.82 against 0.56 for DE.
+- AppY:  0.77 against 0.19.
+- LexA/SOS:  0.68 against 0.59.
+- RyhB:  0.76 against 0.73.
+- ArcA:  0.63 against 0.53.
+
+It fails for ppGpp (0.42), CRP (0.43) and SoxS (0.46).  ppGpp and CRP are diffuse, global regulators, and the diffuse ppGpp regulon also resists attention in the co-membership benchmark.  CLR-attention influence beats CLR influence in 10 of 15 perturbations (median difference +0.015), but that difference is not significant (p = 0.13).  |Pearson| influence adds nothing over DE, so, as in the regulon benchmark, the signal needs the CLR kernel.  Sensitivity among the top 100 genes stays low for every method (at most 0.07).  That is well below the SSEM-Lasso sensitivities reported by Cosgrove et al. (2008), although their gold standard and gene universe differ.  A direct re-run of SSEM-Lasso is needed before comparing.
 
 ## 7. Limitations
 
