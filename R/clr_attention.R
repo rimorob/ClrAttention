@@ -34,10 +34,10 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #' @param bins "fd" | "scott" | "sturges" (per-gene adaptive) or a fixed integer.
     #' @param spline_order 2 or 3.
     #' @param threads OpenMP threads (NULL = cores - 2).
-    #' @param transform "rank" (default; empirical copula) or "none" (historical);
+    #' @param transform "none" (default; MI on raw values) or "rank" (empirical copula);
     #'   see [bspline_mi()].
-    estimate_mi = function(bins = "fd", spline_order = 3, threads = NULL,
-                           transform = "rank") {
+    estimate_mi = function(bins = "median_scott", spline_order = 3,
+                           threads = NULL, transform = "none") {
       private$mi_ <- bspline_mi(private$data_, bins = bins,
                                 spline_order = spline_order, threads = threads,
                                 transform = transform)

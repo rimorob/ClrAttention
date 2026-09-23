@@ -233,12 +233,15 @@ test_that("default CLR null stays sparse under a global confounder; MI null does
   set.seed(1)
   a$select_threshold(B = 10, threads = 2)            # default: FDR, CLR null
   E <- a$edges
+  frac_clr <- sum(E) / (G * (G - 1))
   expect_equal(a$params$threshold$statistic, "clr")
   expect_gt(sum(E & truth) / sum(E), 0.9)            # precise
   expect_gt(sum(E & truth) / sum(truth), 0.6)        # and substantive recall
   set.seed(1)
   a$select_threshold(B = 10, statistic = "mi", threads = 2)
-  expect_gt(sum(a$edges) / (G * (G - 1)), 0.2)       # MI null: "everything"
+  frac_mi <- sum(a$edges) / (G * (G - 1))
+  expect_gt(frac_mi, 0.1)                            # MI null: "everything"
+  expect_gt(frac_mi, 5 * frac_clr)
 })
 
 test_that("BH cutoff keeps every member of a tied rejected block", {

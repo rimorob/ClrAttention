@@ -42,8 +42,9 @@ test_that("per-gene bin vectors pass through and shuffles reuse observed bins", 
   expect_identical(fit$params$mi$bins_used, b)
   expect_equal(bspline_mi(X, bins = b, transform = "none", threads = 1),
                fit$mi)
-  # default rank transform: bins are fitted on the ranks, i.e. uniform
-  fr <- ClrAttention$new(X)$estimate_mi(bins = "fd", threads = 1)
+  # rank transform: bins are fitted on the ranks, i.e. uniform
+  fr <- ClrAttention$new(X)$estimate_mi(bins = "fd", transform = "rank",
+                                        threads = 1)
   expect_identical(fr$params$mi$bins_used,
                    bins_for_genes(t(apply(X, 1, rank)), "fd"))
 })

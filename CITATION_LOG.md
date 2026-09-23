@@ -365,3 +365,37 @@ proposed here is value_{j→i} = E[x_i | x_j], read off the B-spline joint
 histogram that MI already computes. It would handle negative and
 non-monotone links (such as the quadratic edge) without needing "meanings".
 Not implemented; flagged for a design decision.
+
+## D22. The default MI is back on raw values, with one common bin count taken as the median of per-gene Scott counts [user]
+
+D17 is **reversed for the default**. The rank (copula) transform stays
+available as `transform = "rank"`.
+
+**The genome-wide result that decided it.** On the full M3D compendium
+(4,297 genes × 907 arrays), scored by co-membership AUPR on the
+strong/confirmed RegulonDB regulator-agnostic benchmark (base rate 0.094),
+CLR on raw values beat CLR on ranks:
+
+| Setting | CLR AUPR |
+|---|---|
+| Raw values, 10 common bins | 0.134 |
+| Raw values, per-gene FD bins | 0.129 |
+| Ranks, 10 bins | 0.127 |
+
+This matches the user's long-standing experience that MI on raw values
+outperforms the copula transform on average. D17's synthetic evidence was
+built from monotone distortions, which favour the rank transform by
+construction, and should not have decided a default.
+
+**What D17 got right, and what is kept.** The real defect was that
+per-gene bin counts differed between genes. The fix kept from D17 is a
+common bin count for every gene. The historical rule, as the user
+reports it, is to compute each gene's optimal count and use the median
+for all genes, with spline order 3. `bins = "median_scott"` is the
+default. Scott's constant of 3.49 is the same as Wand's zero-stage rule,
+which the recovered sources implemented as `calcNumBins`.
+
+**Bin counts on M3D.** The median rule gives 21 bins at N = 907 with Scott
+and 33 with FD. The historical "6–10 bins" corresponds to the smaller N of
+2007-era datasets. Whether 21 bins beats a fixed 10 at N = 907 is measured
+by the `none_median_scott` configuration of the M3D run.

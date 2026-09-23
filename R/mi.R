@@ -3,14 +3,16 @@
 #' B-spline smoothed mutual information between all gene pairs
 #'
 #' @param data numeric matrix, genes x samples (rows = genes).
-#' @param bins "fd" (default), "scott", "sturges" for per-gene adaptive bin
+#' @param bins "median_scott" (default: Scott's rule per gene, median count
+#'   used for every gene -- the historical practice), "median_fd",
+#'   "median_sturges", or "fd", "scott", "sturges" for per-gene adaptive bin
 #'   counts, or a single integer for a fixed count on every gene
 #'   (10 reproduces the historical default).
 #' @param spline_order B-spline order, 2 or 3 (historical default 3).
 #' @param threads OpenMP thread count for the gene-pair loop. NULL (default)
 #'   uses the core default: machine cores minus 2 (floored at 1). Must be a
 #'   positive integer if given.
-#' @param transform "rank" (default) or "none" (historical parity): "rank" replaces each
+#' @param transform "none" (default: MI on raw values) or "rank": "rank" replaces each
 #'   gene by its within-gene ranks (average ties) before binning, i.e.
 #'   estimate MI on the empirical copula. MI is invariant to monotone
 #'   transforms, so this changes only the estimator, not the estimand; it
@@ -20,8 +22,8 @@
 #' @return symmetric G x G MI matrix (bits). The diagonal holds each gene's
 #'   self-MI and is zeroed by [clr_calibrate()].
 #' @export
-bspline_mi <- function(data, bins = "fd", spline_order = 3, threads = NULL,
-                       transform = c("rank", "none")) {
+bspline_mi <- function(data, bins = "median_scott", spline_order = 3,
+                       threads = NULL, transform = c("none", "rank")) {
   transform <- match.arg(transform)
   if (!is.matrix(data) || !is.numeric(data))
     stop("data must be a numeric matrix (genes x samples)")
