@@ -37,7 +37,13 @@ test_that("per-gene bin vectors pass through and shuffles reuse observed bins", 
   b <- bins_for_genes(X, "fd")
   expect_identical(bins_for_genes(X, b), b)
   expect_error(bins_for_genes(X, c(10L, 1L, 10L, 10L)), ">= 2")
-  fit <- ClrAttention$new(X)$estimate_mi(bins = "fd", threads = 1)
+  fit <- ClrAttention$new(X)$estimate_mi(bins = "fd", transform = "none",
+                                         threads = 1)
   expect_identical(fit$params$mi$bins_used, b)
-  expect_equal(bspline_mi(X, bins = b, threads = 1), fit$mi)
+  expect_equal(bspline_mi(X, bins = b, transform = "none", threads = 1),
+               fit$mi)
+  # default rank transform: bins are fitted on the ranks, i.e. uniform
+  fr <- ClrAttention$new(X)$estimate_mi(bins = "fd", threads = 1)
+  expect_identical(fr$params$mi$bins_used,
+                   bins_for_genes(t(apply(X, 1, rank)), "fd"))
 })

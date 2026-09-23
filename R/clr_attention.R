@@ -34,10 +34,10 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #' @param bins "fd" | "scott" | "sturges" (per-gene adaptive) or a fixed integer.
     #' @param spline_order 2 or 3.
     #' @param threads OpenMP threads (NULL = cores - 2).
-    #' @param transform "none" (historical) or "rank" (empirical copula);
+    #' @param transform "rank" (default; empirical copula) or "none" (historical);
     #'   see [bspline_mi()].
     estimate_mi = function(bins = "fd", spline_order = 3, threads = NULL,
-                           transform = "none") {
+                           transform = "rank") {
       private$mi_ <- bspline_mi(private$data_, bins = bins,
                                 spline_order = spline_order, threads = threads,
                                 transform = transform)
@@ -73,13 +73,15 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #' MI + CLR scores with the fitted settings, and pools the null scores in
     #' a streaming histogram (null matrices are never kept). P-values come
     #' from the pooled empirical null -- no parametric fit. The cutoff is
-    #' chosen by Tukey's higher criticism ("hc", default) or the
-    #' Benjamini-Hochberg FDR procedure ("fdr", level q). Each gene then keeps
+    #' chosen by the Benjamini-Hochberg FDR procedure ("fdr", level q,
+    #' default) or permutation-calibrated higher criticism ("hc"). Each gene
+    #' then keeps
     #' however many connections survive: per-gene degree adapts, no k to tune.
     #'
     #' Uses R's RNG: call set.seed() for reproducibility.
     #' @param B number of permutation bootstraps (default 100).
-    #' @param method "hc" (default) or "fdr".
+    #' @param method "fdr" (default; Benjamini-Hochberg at level q) or "hc"
+    #'   (permutation-calibrated higher criticism).
     #' @param q FDR level, used only with method = "fdr".
     #' @param threads thread count for the bootstrap MI builds (NULL = default).
     #' @param hc_alpha0 HC search range: only the top hc_alpha0 * M pairs are
@@ -91,9 +93,23 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #'   is selected (tau = Inf). The asymptotic sqrt(2 log log M) bound is
     #'   NOT used as a gate: it is the typical size of null HC*, not a
     #'   significance cutoff (~25% of null HC* exceed it at M ~ 2000).
-    select_threshold = function(B = 100, method = c("hc", "fdr"), q = 0.05,
+    #' @param statistic which statistic the permutation null is built for.
+    #'   "mi" (default): edges are selected by the significance of their raw
+    #'   MI; CLR scores remain the attention weights of the selected edges.
+    #'   With the rank transform and a common bin count every pair has the
+    #'   same MI null, so the pooled null is the exact per-pair null. "clr":
+    #'   the null is built on CLR scores (the 2026-09-22 design). CLR scores
+    #'   are NOT pivotal across observed and permuted data: in observed data
+    #'   a gene's own neighbours inflate its row background and compress its
+    #'   z-scores, while permuted rows are pure noise, so the CLR null is
+    #'   conservative to the point of selecting nothing when modules are
+    #'   large relative to G (24-gene toy: true-edge CLR median 2.3 vs null
+    #'   per-replicate max 4.4, while raw MI separates perfectly).
+    select_threshold = function(B = 100, method = c("fdr", "hc"), q = 0.05,
                                 threads = NULL, hc_alpha0 = 0.1,
-                                hc_level = 0.05) {
+                                hc_level = 0.05,
+                                statistic = c("mi", "clr")) {
+      statistic <- match.arg(statistic)
       private$.need(private$mi_, "estimate_mi()")
       private$.need(private$scores_, "calibrate()")
       method <- match.arg(method)
@@ -115,7 +131,13 @@ ClrAttention <- R6::R6Class("ClrAttention",
                 "; use B >= ", ceiling(1 / hc_level - 1), call. = FALSE)
       G <- nrow(private$data_)
       if (G < 4L) stop("select_threshold() needs at least 4 genes")
-      if (!identical(private$params_$calibrate$method, "normal"))
+      if (statistic == "mi" && length(unique(private$params_$mi$bins_used)) > 1L)
+        warning("statistic = \"mi\" with unequal per-gene bin counts: the ",
+                "pooled MI null is not exact per pair (MI bias depends on ",
+                "bins_i x bins_j); use transform = \"rank\" or a fixed bin ",
+                "count", call. = FALSE)
+      if (statistic == "clr" &&
+          !identical(private$params_$calibrate$method, "normal"))
         stop('select_threshold() requires calibrate(method = "normal"): ',
              "kde scores are non-positive log-probabilities and rayleigh ",
              "scores live in [0, 1]; the streaming null assumes z-type scores")
@@ -136,12 +158,12 @@ ClrAttention <- R6::R6Class("ClrAttention",
       for (b in seq_len(B)) {
         Xp <- t(apply(X, 1L, sample))
         dimnames(Xp) <- dimnames(X)
-        Sb <- clr_calibrate(
-          bspline_mi(Xp, bins = mi_p$bins_used,
-                     spline_order = mi_p$spline_order,
-                     threads = threads, transform = mi_p$transform),
-          method = cal_p$method, combine = cal_p$combine)
-        v <- Sb[ut]
+        Mb <- bspline_mi(Xp, bins = mi_p$bins_used,
+                         spline_order = mi_p$spline_order,
+                         threads = threads, transform = mi_p$transform)
+        v <- if (statistic == "mi") Mb[ut] else
+          clr_calibrate(Mb, method = cal_p$method,
+                        combine = cal_p$combine)[ut]
         if (is.null(hi)) {
           hi <- max(1e-8, 1.25 * max(v))
           w <- hi / nbins
@@ -168,7 +190,7 @@ ClrAttention <- R6::R6Class("ClrAttention",
         (1 + suf[idx]) / (1 + n_null)
       }
 
-      s_obs <- private$scores_[ut]
+      s_obs <- if (statistic == "mi") private$mi_[ut] else private$scores_[ut]
       hc_info <- NULL
       if (method == "hc") {
         idx_obs <- as.integer(s_obs / w) + 1L
@@ -206,6 +228,7 @@ ClrAttention <- R6::R6Class("ClrAttention",
       private$threshold_ <- tau
       private$operator_ <- private$trajectory_ <- NULL
       private$params_$threshold <- list(B = B, method = method, q = q,
+                                       statistic = statistic,
                                        tau = tau, n_null = n_null,
                                        hc = hc_info)
       invisible(self)
@@ -219,10 +242,13 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #' @param alpha diffusion weight in (0, 1].
     build_operator = function(k = 50, tau = NULL, alpha = 0.5) {
       private$.need(private$scores_, "calibrate()")
-      if (is.null(tau)) tau <- private$threshold_
       S <- private$scores_
       G <- nrow(S)
-      if (!is.null(tau)) {
+      selected <- NULL
+      if (is.null(tau) && !is.null(private$threshold_)) {
+        selected <- self$edges    # permutation-selected edge set
+        A <- S * selected
+      } else if (!is.null(tau)) {
         if (!is.numeric(tau) || length(tau) != 1L || is.na(tau) || tau < 0)
           stop("tau must be a single non-negative number")
         A <- S * (S >= tau)
@@ -255,8 +281,13 @@ ClrAttention <- R6::R6Class("ClrAttention",
         rownames(A) <- colnames(A) <- rownames(S)
       }
       private$operator_ <- A
-      private$params_$operator <- list(k = if (is.null(tau)) k else NULL,
-                                       tau = tau, alpha = alpha)
+      private$params_$operator <- list(
+        k = if (is.null(tau) && is.null(selected)) k else NULL,
+        tau = if (!is.null(selected)) private$threshold_ else tau,
+        selection = if (!is.null(selected))
+          private$params_$threshold$statistic else if (!is.null(tau))
+          "clr_tau" else "top_k",
+        alpha = alpha)
       private$trajectory_ <- NULL
       invisible(self)
     },
@@ -323,6 +354,17 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #'   (after select_threshold()).
     threshold = function() private$.need(private$threshold_,
                                          "select_threshold()"),
+    #' @field edges logical G x G matrix of permutation-selected pairs
+    #'   (symmetric, FALSE diagonal): MI >= threshold for statistic = "mi",
+    #'   CLR >= threshold for statistic = "clr".
+    edges = function() {
+      tau <- private$.need(private$threshold_, "select_threshold()")
+      st <- private$params_$threshold$statistic
+      V <- if (identical(st, "mi")) private$mi_ else private$scores_
+      E <- V >= tau
+      diag(E) <- FALSE
+      E
+    },
     #' @field operator the row-stochastic attention operator (after build_operator()).
     operator = function() private$.need(private$operator_, "build_operator()"),
     #' @field embedding the diffused expression matrix (after diffuse()).
@@ -354,14 +396,18 @@ ClrAttention <- R6::R6Class("ClrAttention",
 # Candidate cutoffs are bin lower edges. Keeping bins >= k keeps
 # i_k = #{scores in bins >= k} pairs, whose largest p-value is
 # p_k = (1 + suf[k]) / (1 + n_null). HC(k) = sqrt(M)(i_k/M - p_k) /
-# sqrt(p_k(1 - p_k)), maximized over i_k <= alpha0 * M and p_k >= 1/M (HC+,
-# which stops a single extreme score from dominating). Evaluating at bin
-# edges treats tied scores as one block, never splitting them.
+# sqrt(p_k(1 - p_k)), maximized over i_k <= max(alpha0 * M, 10). The HC+
+# floor p_k >= 1/M is NOT applied: with a permutation null the p-value
+# resolution is 1/(B*M) << 1/M, so the floor would discard exactly the
+# strongest edges (all of them, when M is small); the extreme-p blow-up it
+# guards against is instead absorbed by the leave-one-out permutation
+# calibration of HC*, whose null replicates blow up the same way.
+# Evaluating at bin edges treats tied scores as one block.
 # Returns list(hc_star, k): the maximum and the bin index attaining it.
 .hc_binned <- function(obs_counts, suf, n_null, M, alpha0) {
   i_k <- rev(cumsum(rev(obs_counts)))
   p_k <- (1 + suf) / (1 + n_null)
-  ok <- i_k >= 1 & i_k <= alpha0 * M & p_k >= 1 / M & p_k < 1
+  ok <- i_k >= 1 & i_k <= max(alpha0 * M, 10) & p_k < 1
   if (!any(ok)) return(list(hc_star = -Inf, k = NA_integer_))
   hc <- rep(-Inf, length(i_k))
   hc[ok] <- sqrt(M) * (i_k[ok] / M - p_k[ok]) / sqrt(p_k[ok] * (1 - p_k[ok]))

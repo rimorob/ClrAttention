@@ -39,6 +39,13 @@ synthetic_clr_data <- function(seed = 7, n = 300) {
   list(X = X, truth = truth, modules = list(1:4, 5:7, 8:12))
 }
 
+# 1 for pairs inside a planted regulatory module (TF + its targets).
+same_module <- function(d) {
+  lab <- integer(12)
+  lab[1:4] <- 1L; lab[5:7] <- 2L; lab[8:12] <- 3:7
+  outer(lab, lab, "==") * 1
+}
+
 # AUROC of a symmetric score matrix against a 0/1 adjacency, via the
 # Mann-Whitney U statistic. Upper triangle only (undirected pairs).
 pair_auroc <- function(scores, labels) {
@@ -53,7 +60,7 @@ pair_auroc <- function(scores, labels) {
 test_that("historical-parity CLR recovers the planted nonlinear network", {
   d <- synthetic_clr_data()
   fit <- ClrAttention$new(d$X)$
-    estimate_mi(bins = 10, threads = 1)$
+    estimate_mi(bins = 10, transform = "none", threads = 1)$
     calibrate(method = "normal", combine = "euclidean")
   # Observed 1.000 across seeds; 0.95 leaves wide margin for platform noise.
   expect_gt(pair_auroc(fit$clr_scores, d$truth), 0.95)
@@ -62,10 +69,10 @@ test_that("historical-parity CLR recovers the planted nonlinear network", {
 test_that("new pipeline (FD bins + Stouffer) does not regress vs parity", {
   d <- synthetic_clr_data()
   old <- ClrAttention$new(d$X)$
-    estimate_mi(bins = 10, threads = 1)$
+    estimate_mi(bins = 10, transform = "none", threads = 1)$
     calibrate(method = "normal", combine = "euclidean")
   new <- ClrAttention$new(d$X)$
-    estimate_mi(bins = "fd", threads = 1)$
+    estimate_mi(bins = "fd", transform = "none", threads = 1)$
     calibrate(method = "normal", combine = "stouffer")
   a_old <- pair_auroc(old$clr_scores, d$truth)
   a_new <- pair_auroc(new$clr_scores, d$truth)
@@ -76,55 +83,87 @@ test_that("new pipeline (FD bins + Stouffer) does not regress vs parity", {
 test_that("permutation HC threshold keeps true edges and sparsifies", {
   d <- synthetic_clr_data()
   fit <- ClrAttention$new(d$X)$
-    estimate_mi(bins = 10, threads = 1)$
-    calibrate(method = "normal", combine = "euclidean")$
+    estimate_mi(threads = 1)$calibrate()$
     select_threshold(B = 20, method = "hc", threads = 1)
-  tau <- fit$threshold
-  expect_true(is.finite(tau) && tau > 0)
+  expect_true(is.finite(fit$threshold) && fit$threshold > 0)
   expect_equal(fit$params$threshold$method, "hc")
+  expect_equal(fit$params$threshold$statistic, "mi")
   expect_equal(fit$params$threshold$B, 20)
-  S <- fit$clr_scores
-  ut <- upper.tri(S)
-  kept <- S[ut] >= tau
-  expect_lte(sum(kept), 10)                      # sparse: 4 of 66 observed
-  expect_gte(sum(kept[d$truth[ut] == 1]), 4)     # 4 of 5 true edges observed
+  ut <- upper.tri(d$truth)
+  kept <- fit$edges[ut]
+  # MI selects dependence, so co-regulated sibling pairs (3-4, 6-7) are
+  # legitimate selections; false positives are pairs across modules.
+  expect_lte(sum(kept[same_module(d)[ut] == 0]), 1)
+  expect_gte(sum(kept[d$truth[ut] == 1]), 4)     # >= 4 of 5 true edges
 })
 
-test_that("FDR threshold is a valid alternative selector", {
+test_that("FDR threshold (default) selects the planted edges", {
   d <- synthetic_clr_data()
   fit <- ClrAttention$new(d$X)$
-    estimate_mi(bins = 10, threads = 1)$
-    calibrate(method = "normal", combine = "euclidean")$
-    select_threshold(B = 20, method = "fdr", q = 0.05, threads = 1)
-  tau <- fit$threshold
-  expect_true(is.finite(tau) && tau > 0)
-  S <- fit$clr_scores
-  ut <- upper.tri(S)
-  expect_gte(sum((S[ut] >= tau)[d$truth[ut] == 1]), 4)
+    estimate_mi(threads = 1)$calibrate()$
+    select_threshold(B = 20, threads = 1)
+  expect_equal(fit$params$threshold$method, "fdr")
+  ut <- upper.tri(d$truth)
+  expect_gte(sum(fit$edges[ut][d$truth[ut] == 1]), 4)
+  expect_lte(sum(fit$edges[ut][same_module(d)[ut] == 0]), 2)
 })
 
-test_that("build_operator() picks up the selected threshold automatically", {
+test_that("statistic = 'clr' still works on the parity pipeline", {
   d <- synthetic_clr_data()
   fit <- ClrAttention$new(d$X)$
-    estimate_mi(bins = 10, threads = 1)$
+    estimate_mi(bins = 10, transform = "none", threads = 1)$
     calibrate(method = "normal", combine = "euclidean")$
-    select_threshold(B = 20, method = "hc", threads = 1)$
+    select_threshold(B = 20, statistic = "clr", threads = 1)
+  S <- fit$clr_scores
+  expect_identical(fit$edges, S >= fit$threshold & row(S) != col(S))
+  ut <- upper.tri(S)
+  expect_gte(sum(fit$edges[ut][d$truth[ut] == 1]), 4)
+})
+
+test_that("MI-statistic null recovers large modules the CLR null misses", {
+  # 24 genes, three planted modules of 8/7/6: modules are large relative to
+  # G, so CLR row backgrounds are dominated by the module itself and CLR
+  # scores are compressed below the (pure-noise) permuted CLR null.
+  set.seed(7)
+  n <- 100
+  X <- matrix(rnorm(24 * n), 24)
+  mods <- list(1:8, 9:15, 16:21)
+  for (m in mods) {
+    f <- rnorm(n)
+    for (g in m) X[g, ] <- 0.85 * f + sqrt(1 - 0.85^2) * X[g, ]
+  }
+  lab <- c(rep(1, 8), rep(2, 7), rep(3, 6), 4:6)
+  truth <- outer(lab, lab, "==") & !diag(24)
+  a <- ClrAttention$new(X)$estimate_mi(threads = 1)$calibrate()
+  a$select_threshold(B = 20, statistic = "clr", threads = 1)
+  n_clr <- sum(a$edges)
+  a$select_threshold(B = 20, statistic = "mi", threads = 1)
+  E <- a$edges
+  expect_gt(sum(E & truth), 0.8 * sum(truth))
+  expect_lte(sum(E & !truth) / sum(E), 0.10)  # BH at q = 0.05: FDP ~ q
+  expect_lt(n_clr, sum(E))
+})
+
+test_that("build_operator() picks up the selected edge set automatically", {
+  d <- synthetic_clr_data()
+  fit <- ClrAttention$new(d$X)$
+    estimate_mi(threads = 1)$calibrate()$
+    select_threshold(B = 20, threads = 1)$
     build_operator(alpha = 0.5)
   op <- fit$operator
   S <- fit$clr_scores
   off <- row(op) != col(op)
-  expect_equal(sum(op[off] > 0), sum(S[off] >= fit$threshold))
-  rs <- rowSums(op)
-  expect_true(all(abs(rs - 1) < 1e-12))
-  # genes with no surviving edge carry exactly a self-loop
-  iso <- rowSums(S >= fit$threshold & off) == 0
+  expect_identical(op[off] > 0, (fit$edges & S > 0)[off])
+  expect_true(all(abs(rowSums(op) - 1) < 1e-12))
+  iso <- rowSums(fit$edges & S > 0) == 0   # no weighted edge -> self-loop
   expect_true(all(diag(op)[iso] == 1))
+  expect_equal(fit$params$operator$selection, "mi")
 })
 
 test_that("threshold needs select_threshold() first", {
   d <- synthetic_clr_data()
   fit <- ClrAttention$new(d$X)$
-    estimate_mi(bins = 10, threads = 1)$
+    estimate_mi(bins = 10, transform = "none", threads = 1)$
     calibrate(method = "normal", combine = "euclidean")
   expect_error(fit$threshold, "select_threshold")
 })
@@ -132,7 +171,7 @@ test_that("threshold needs select_threshold() first", {
 test_that("attention diffusion aggregates genes by planted module", {
   d <- synthetic_clr_data()
   fit <- ClrAttention$new(d$X)$
-    estimate_mi(bins = "fd", threads = 1)$
+    estimate_mi(bins = "fd", transform = "none", threads = 1)$
     calibrate(method = "normal", combine = "stouffer")$
     build_operator(k = 4, alpha = 0.5)$
     diffuse(steps = 5)

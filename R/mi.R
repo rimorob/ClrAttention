@@ -10,7 +10,7 @@
 #' @param threads OpenMP thread count for the gene-pair loop. NULL (default)
 #'   uses the core default: machine cores minus 2 (floored at 1). Must be a
 #'   positive integer if given.
-#' @param transform "none" (default; historical) or "rank": replace each
+#' @param transform "rank" (default) or "none" (historical parity): "rank" replaces each
 #'   gene by its within-gene ranks (average ties) before binning, i.e.
 #'   estimate MI on the empirical copula. MI is invariant to monotone
 #'   transforms, so this changes only the estimator, not the estimand; it
@@ -21,7 +21,7 @@
 #'   self-MI and is zeroed by [clr_calibrate()].
 #' @export
 bspline_mi <- function(data, bins = "fd", spline_order = 3, threads = NULL,
-                       transform = c("none", "rank")) {
+                       transform = c("rank", "none")) {
   transform <- match.arg(transform)
   if (!is.matrix(data) || !is.numeric(data))
     stop("data must be a numeric matrix (genes x samples)")
