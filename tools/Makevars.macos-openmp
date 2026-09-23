@@ -1,0 +1,6 @@
+# Project-local Makevars for macOS (Apple clang ships without OpenMP).
+# Used via R_MAKEVARS_USER by tools/setup_mac.sh, so ~/.R/Makevars is never
+# touched. Requires `brew install libomp` (Apple Silicon prefix below; for
+# Intel Homebrew replace /opt/homebrew with /usr/local).
+CPPFLAGS += -Xclang -fopenmp -I/opt/homebrew/opt/libomp/include
+LDFLAGS += -L/opt/homebrew/opt/libomp/lib -lomp

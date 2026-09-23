@@ -9,3 +9,7 @@ cpp_clr_calibrate <- function(mi, combine) {
     .Call(`_clr_cpp_clr_calibrate`, mi, combine)
 }
 
+
+cpp_openmp_info <- function() {
+    .Call(`_clr_cpp_openmp_info`)
+}

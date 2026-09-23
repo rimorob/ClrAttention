@@ -11,3 +11,5 @@ src/**/*.o
 .Rproj.user/
 *~
 .DS_Store
+data/
+results/

@@ -87,7 +87,7 @@ test_that("permutation HC threshold keeps true edges and sparsifies", {
     select_threshold(B = 20, method = "hc", threads = 1)
   expect_true(is.finite(fit$threshold) && fit$threshold > 0)
   expect_equal(fit$params$threshold$method, "hc")
-  expect_equal(fit$params$threshold$statistic, "mi")
+  expect_equal(fit$params$threshold$statistic, "clr")
   expect_equal(fit$params$threshold$B, 20)
   ut <- upper.tri(d$truth)
   kept <- fit$edges[ut]
@@ -97,11 +97,14 @@ test_that("permutation HC threshold keeps true edges and sparsifies", {
   expect_gte(sum(kept[d$truth[ut] == 1]), 4)     # >= 4 of 5 true edges
 })
 
-test_that("FDR threshold (default) selects the planted edges", {
+test_that("FDR threshold on the MI null selects the planted edges (small G)", {
+  # 12 genes is far below the regime CLR's context null is built for, so
+  # this small-G unit test uses the MI null; the CLR-null default is tested
+  # at G = 200 below.
   d <- synthetic_clr_data()
   fit <- ClrAttention$new(d$X)$
     estimate_mi(threads = 1)$calibrate()$
-    select_threshold(B = 20, threads = 1)
+    select_threshold(B = 20, statistic = "mi", threads = 1)
   expect_equal(fit$params$threshold$method, "fdr")
   ut <- upper.tri(d$truth)
   expect_gte(sum(fit$edges[ut][d$truth[ut] == 1]), 4)
@@ -148,7 +151,7 @@ test_that("build_operator() picks up the selected edge set automatically", {
   d <- synthetic_clr_data()
   fit <- ClrAttention$new(d$X)$
     estimate_mi(threads = 1)$calibrate()$
-    select_threshold(B = 20, threads = 1)$
+    select_threshold(B = 20, statistic = "mi", threads = 1)$
     build_operator(alpha = 0.5)
   op <- fit$operator
   S <- fit$clr_scores
@@ -210,4 +213,30 @@ test_that("rank transform makes MI invariant to monotone distortions", {
   a <- bspline_mi(d$X, bins = "fd", transform = "rank", threads = 1)
   b <- bspline_mi(X2, bins = "fd", transform = "rank", threads = 1)
   expect_equal(a, b)
+})
+
+test_that("default CLR null stays sparse under a global confounder; MI null does not", {
+  # 200 genes x 907 samples, ten planted 8-gene modules, plus a global factor
+  # loading every gene (growth-rate-like program). Selection must answer
+  # "exceptional relative to each gene's background", not "any dependence".
+  set.seed(3)
+  n <- 907; G <- 200
+  X <- matrix(rnorm(G * n), G)
+  lab <- c(rep(1:10, each = 8), 11:(10 + G - 80))
+  for (m in 1:10) {
+    f <- rnorm(n)
+    for (i in which(lab == m)) X[i, ] <- 0.5 * f + sqrt(0.75) * X[i, ]
+  }
+  X <- X + 0.35 * matrix(rnorm(n), G, n, byrow = TRUE)
+  truth <- outer(lab, lab, "==") & !diag(G)
+  a <- ClrAttention$new(X)$estimate_mi(threads = 2)$calibrate()
+  set.seed(1)
+  a$select_threshold(B = 10, threads = 2)            # default: FDR, CLR null
+  E <- a$edges
+  expect_equal(a$params$threshold$statistic, "clr")
+  expect_gt(sum(E & truth) / sum(E), 0.9)            # precise
+  expect_gt(sum(E & truth) / sum(truth), 0.6)        # and substantive recall
+  set.seed(1)
+  a$select_threshold(B = 10, statistic = "mi", threads = 2)
+  expect_gt(sum(a$edges) / (G * (G - 1)), 0.2)       # MI null: "everything"
 })

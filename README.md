@@ -72,6 +72,24 @@ are estimated once; only the diffusion depth `t` varies. Outputs
 while bridge-gene affiliation entropy rises monotonically — diffusion
 gradually reveals mixed membership.
 
+## Real data: M3D E. coli x RegulonDB (macOS, Apple Silicon)
+
+```sh
+tools/setup_mac.sh     # deps, OpenMP build via libomp (project-local Makevars),
+                       # M3D download, test suite
+# put the RegulonDB TF->gene file (NetworkRegulatorGene.tsv) in data/, then
+tools/run_m3d.sh data/NetworkRegulatorGene.tsv 100
+```
+
+Outputs go to `results/chips/` (907 arrays) and `results/avg/` (466
+replicate-averaged experiments):
+
+- `edge_pr_by_config.csv`
+- `selected_edges.csv`
+- `depth_sweep.csv` and `depth_sweep.png`
+- `primary_fit.rds`
+- `run.log` and `timings.csv`
+
 ## Run the tests
 
 ```r
@@ -89,6 +107,19 @@ R CMD build . && R CMD check clr_*.tar.gz --no-manual
 | `docs/diffusion_depth_design_review.md` | design review for the fixed-MI diffusion experiment |
 | `references.bib`, `CITATION_LOG.md` | citation index: one BibTeX entry + one justification paragraph per citable technical decision |
 | `PORT_NOTES.md` | notes on porting the original MATLAB/C CLR sources |
+
+## Defaults (after the 2026-09-23 accuracy review)
+
+- MI is computed on within-gene ranks, with Freedman–Diaconis bins on the
+  ranks, which gives equal bins for every gene.
+- Edges are selected by BH at q = 0.05 against a permutation null on CLR
+  scores.
+- Genes with no edge keep a self-loop.
+- Diffusion starts from row-standardized profiles.
+
+For historical 2007 parity, use
+`estimate_mi(bins = 10, transform = "none")`.  PORT_NOTES.md section 10
+and CITATION_LOG.md entries D17–D21 give the reasons for each change.
 
 ## Status notes
 

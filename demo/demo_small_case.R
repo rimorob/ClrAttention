@@ -44,7 +44,11 @@ for (m in planted) {
 
 ## ---- 2. CLR attention pipeline ----
 att <- ClrAttention$new(X)
-att$estimate_mi()$calibrate()$select_threshold(B = 100)$build_operator()
+# 24 genes with 6-8-gene modules is far below the regime CLR's context null
+# is built for (a gene's own module dominates its row background, so the CLR
+# permutation null selects nothing here); the toy therefore uses the MI null.
+# Real compendia use the default CLR null (see ?ClrAttention select_threshold).
+att$estimate_mi()$calibrate()$select_threshold(B = 100, statistic = "mi")$build_operator()
 op <- att$operator
 cat("threshold:", att$threshold, " mean degree:", mean(rowSums(op > 0)), "\n")
 

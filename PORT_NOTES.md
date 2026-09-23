@@ -185,10 +185,76 @@ data-driven attention threshold, per user-approved design:
   level q). Bonferroni was rejected as too conservative for attention.
 - Each gene keeps however many connections survive: per-gene degree
   adapts, no k. `build_operator()` uses the selected threshold when tau is
-  NULL; tau = Inf (FDR with no discoveries) yields an empty operator, which
-  the (1-alpha)I residual handles gracefully.
+  NULL; tau = Inf (FDR with no discoveries) yields an empty operator.
+  **Corrected 2026-09-23:** the (1-alpha)I residual did *not* handle this
+  gracefully -- isolated genes decayed as (1-alpha)^t. Genes with no
+  selected edge now carry a self-loop (section 10).
 - Cost is ~B MI builds; embarrassingly parallel across bootstraps only
   via threads within each build. Uses R's RNG (set.seed for repro).
 - Enshrined in tests/testthat/test-synthetic.R: on the 12-gene planted
   network (B=20), HC keeps 4/5 true edges with 0 false positives of 66
   pairs; FDR keeps 5/5 true + 1 FP.
+
+## 10. Accuracy review (2026-09-23)
+
+The review was independent: a separate QC agent reproduced every defect.
+Scripts are in `validation/` and the reasoning is in `CITATION_LOG.md`,
+entries D17 to D21.
+
+**The estimator is correct.**  The B-spline MI estimator matches an
+independent `splines::splineDesign` implementation of Daub et al. 2004 to
+within 3e-15.
+
+**Defaults that changed**
+
+| Setting | Old default | New default |
+|---|---|---|
+| MI transform | none (raw values) | `transform = "rank"` (empirical copula) |
+| Bins | FD on raw values | FD computed on the ranks, which gives equal bins for every gene |
+| Threshold method | `hc` | `method = "fdr"` (BH, q = 0.05) |
+
+Two further changes accompany these.  HC is now calibrated against
+leave-one-out permutation HC* (arguments `hc_alpha0`, `hc_level`).
+`diffuse(standardize = TRUE)` is the new default.  To reproduce the 2007
+results, use `transform = "none", bins = 10`.
+
+**The permutation null.**  The default is `statistic = "clr"`.
+`statistic = "mi"` is an option intended for small or confounder-free data.
+Section 9's shuffles are unchanged apart from the following:
+
+- They reuse the observed per-gene bin vector (`params$mi$bins_used`) and
+  transform.
+- P-values count the null values in the observed score's own bin.
+- One histogram is kept per replicate, which the HC gate needs.
+- `hi` is set from the first replicate's maximum, with no floor of 10;
+  observed scores above it are compared against the overflow count.
+- The new `$edges` binding gives the selected pair set.
+
+**Operator and diffusion**
+
+- A row with no selected edges gets a self-loop, so every row of P is
+  stochastic.
+- E^(0) is the row-standardized data.
+- Sign blindness (anticorrelated neighbours cancel) is still open; see the
+  W_V note at the end of `CITATION_LOG.md`.
+
+**Robustness**
+
+- Constant genes are rejected in R, and the C++ core throws on them.
+- `clr_openmp_info()` reports whether the build is parallel. Apple clang
+  without libomp builds serially; `tools/setup_mac.sh` handles this.
+
+**Performance.**  `mi_pair_sparse()` and `SparseWeights` are the production
+kernel.  The result is bit-identical to `mi_pair()`, which is checked in
+`test_core.cpp`, and 5-20x faster.  Memory drops to O(G·N·order).  The dense
+`mi_pair()` stays as the reference seam.
+
+**Real-data run.**  `analysis/run_m3d_regulondb.R`, driven by
+`tools/run_m3d.sh`, does the following:
+
+- Computes edge-level precision-recall in the Faith 2007 style (every known
+  TF × gene pair) for four configurations.
+- Selects edges by permutation.
+- Runs a Design-A depth sweep that scores per-TF regulon average precision
+  from attention mass P^t and from the correlation of diffused profiles.
+- Saves artifacts following section 9 of the design review.

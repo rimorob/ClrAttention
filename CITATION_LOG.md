@@ -237,3 +237,120 @@ to "how many modes are signal before the representation is noise," which is
 what the depth-diagnosis statistic must operationalize to stop diffusion
 before oversmoothing. Confirmed with the user 2026-09-22.
 *Refs: `donohotanner2009`, `gavishdonoho2014`, `horn1965`.*
+
+---
+
+# Accuracy review, 2026-09-23
+
+The entries below record the decisions taken in the accuracy review that
+preceded the M3D x RegulonDB run. Each was motivated by a defect that was
+confirmed empirically. The scripts are in `validation/` and the regression
+tests are in `tests/testthat/`. Where an entry changes an earlier decision,
+the earlier entry is left as written and the change is recorded here.
+
+## D17. Rank (empirical-copula) transform before MI; FD bins computed on the ranks [joint]
+
+Each gene is replaced by its within-gene ranks before B-spline MI
+estimation. Mutual information is invariant to strictly monotone
+transformations of either variable, so the transform leaves the quantity
+being estimated unchanged and changes only the estimator. It also gives
+every gene the same (uniform) marginal, which removes a confirmed bias
+pathway in the D4 design. Freedman–Diaconis on raw values gives
+heavy-tailed genes many bins: the median was 23 bins for Gaussian genes and
+50, the clamp, for t3 and lognormal genes. The finite-sample upward bias of
+MI grows with bins_i × bins_j: at N = 907 the null MI was 0.012 bits with
+10 bins, 0.09 with 25 and 0.32 with 50. That bias survived CLR calibration
+(Spearman correlation 0.48 between null CLR score and bins_i × bins_j), so
+heavy-tailed genes became false hubs. Freedman–Diaconis applied to the ranks
+gives ⌈N^(1/3)⌉-type counts that are identical across genes (10 at N = 907).
+On a synthetic with M3D-like N = 907, with monotone heavy-tail distortions,
+the edge AUPR was 0.24 for raw values with FD bins, 0.57 for raw values with
+10 bins (2007 parity) and 0.955 for ranks with FD bins. The
+Gaussian-copula MI literature makes the same argument: separate the
+marginals from the dependence. Historical parity remains available as
+`transform = "none", bins = 10`. **Default changed with user approval.**
+*Ref: `ince2017`.*
+
+## D18. Benjamini–Hochberg is the default threshold; HC is permutation-calibrated [assistant, user-delegated]
+
+The earlier HC implementation (D9) selected noise. On 60 independent genes
+it kept 11–32% of pairs, and the sqrt(2 log log M) guard fired in only 1 of
+6 runs, because that bound is the typical size of the null HC*, not a
+significance cutoff. The rewrite makes four changes:
+
+- HC is evaluated at the edges of the histogram bins, so tied scores are
+  never split.
+- The search is restricted to i ≤ max(α0·M, 10), with α0 = 0.1.
+- HC* is gated against the (1 − level) quantile of leave-one-out HC* values
+  computed from the B permutation replicates. Each replicate is scored
+  against the pool of the other B − 1 replicates.
+- The HC+ floor p ≥ 1/M is dropped: with permutation p-values it removes
+  exactly the strongest edges, and the calibration already absorbs the
+  extreme-p blow-up the floor guarded against.
+
+On 20 pure-noise runs, calibrated HC selected any edge 0–10% of the time,
+consistent with the nominal 5%. BH at q = 0.05 found slightly more true
+edges at a similar false-positive count, so BH is the default. The user
+delegated this choice. Donoho & Jin (2008) is the right citation for
+using HC as a *threshold*; Donoho & Jin (2004) covers detection.
+*Refs: `donohojin2008`, `benjaminihochberg1995`.*
+
+## D19. The permutation null stays on CLR scores; the MI null is an option only [user]
+
+For one iteration the null was moved to raw MI, because CLR scores are not
+exactly comparable between observed and permuted data. In a 24-gene toy
+with 6–8-gene modules, a gene's own module inflated its row background, so
+true-edge CLR scores (median 2.3) fell below the null per-replicate maximum
+(4.4) and nothing was selected. The user pointed out that the selection has
+to answer "exceptional relative to each gene's background", which is
+CLR's contribution. With a global confounder that answer is the only usable
+one. In a synthetic with a global factor (loading 0.35), BH on the MI null
+kept 45% of pairs at precision 0.03, while BH on the CLR null kept 1.2% at
+precision 0.99. The CLR null is the default. The small-G compression is
+documented as a limitation of the regime and is not treated as a reason to
+switch statistics. If the permutation null misbehaves at compendium scale,
+the principled refinement is an empirical null fitted to the central bulk of
+the observed CLR scores, which is not implemented. *Ref: `efron2004`.*
+
+## D20. The permutation replicates reuse the observed per-gene bin counts [user]
+
+`estimate_mi()` records the bin vector it actually used, and every
+permutation replicate reuses it verbatim, together with the spline order
+and the transform. Because FD depends only on the IQR and the range, which a
+permutation preserves, the replicates already reproduced the same counts.
+The change makes that guarantee explicit and independent of the binning
+rule. It does not fix D17's bias on its own: pooling nulls across pairs
+with different bins_i × bins_j still mixes different null distributions.
+
+## D21. Correctness fixes with no methodological choice [assistant]
+
+- **Constant genes.** A constant gene divided by zero in `x_to_z`. MI then
+  became H(Y) against every other gene, so the gene became the top hub.
+  Constant genes are now rejected in both R and the C++ core.
+- **Isolated genes.** Genes with no selected edge now get a self-loop.
+  Previously their row of P was (1 − α)e_i, so they decayed as (1 − α)^t,
+  and tau = Inf zeroed the whole embedding.
+- **Standardization.** `diffuse()` row-standardizes E^(0) by default, so
+  diffusion mixes expression shapes rather than baseline levels.
+- **Histogram p-values.** These now count the null values that share the
+  observed score's bin. The earlier code was anti-conservative by up to one
+  bin.
+- **Calibration guard.** `select_threshold(statistic = "clr")` refuses KDE
+  and Rayleigh calibrations. KDE scores are ≤ 0 and put every null value in
+  one bin.
+- **Sparse kernel.** Each sample has at most `spline_order` nonzero
+  B-spline weights. The joint histogram now accumulates only those, in the
+  same sample order, so the result is bit-identical to the dense kernel
+  (max |Δ| = 0 on 200 genes) and 5–20× faster. Memory drops from
+  O(G·N·bins) to O(G·N·order).
+
+## Open: sign blindness of diffusion (the missing W_V)
+
+MI is sign-agnostic, but diffusion averages raw profiles. A repressor and
+its target therefore partially cancel: after five steps in the synthetic
+test, g7 (−1.5·tfb) correlated +0.78 with tfb. Transformer attention avoids
+this through a learned value projection W_V. The continuous analogue
+proposed here is value_{j→i} = E[x_i | x_j], read off the B-spline joint
+histogram that MI already computes. It would handle negative and
+non-monotone links (such as the quadratic edge) without needing "meanings".
+Not implemented; flagged for a design decision.

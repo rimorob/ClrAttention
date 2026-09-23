@@ -94,21 +94,25 @@ ClrAttention <- R6::R6Class("ClrAttention",
     #'   NOT used as a gate: it is the typical size of null HC*, not a
     #'   significance cutoff (~25% of null HC* exceed it at M ~ 2000).
     #' @param statistic which statistic the permutation null is built for.
-    #'   "mi" (default): edges are selected by the significance of their raw
-    #'   MI; CLR scores remain the attention weights of the selected edges.
-    #'   With the rank transform and a common bin count every pair has the
-    #'   same MI null, so the pooled null is the exact per-pair null. "clr":
-    #'   the null is built on CLR scores (the 2026-09-22 design). CLR scores
-    #'   are NOT pivotal across observed and permuted data: in observed data
-    #'   a gene's own neighbours inflate its row background and compress its
-    #'   z-scores, while permuted rows are pure noise, so the CLR null is
-    #'   conservative to the point of selecting nothing when modules are
-    #'   large relative to G (24-gene toy: true-edge CLR median 2.3 vs null
-    #'   per-replicate max 4.4, while raw MI separates perfectly).
+    #'   "clr" (default): edges are selected on their CLR score, i.e. on
+    #'   being exceptional *relative to each gene's own background*. This is
+    #'   what makes the selection robust to global dependence (growth-rate or
+    #'   batch programs that touch every gene): on a synthetic with a global
+    #'   factor (loading 0.35), BH on the CLR null kept 1.2% of pairs at
+    #'   precision 0.99, while BH on the MI null kept 45% at precision 0.03.
+    #'   Caveat: CLR scores are not exactly pivotal between observed and
+    #'   permuted data. When modules are large relative to G (toy data), a
+    #'   gene's own module inflates its row background and the CLR null
+    #'   becomes conservative, possibly selecting nothing; this is a small-G
+    #'   artifact, not the regime CLR was designed for.
+    #'   "mi": the null is built on raw MI (CLR remains the attention weight).
+    #'   Exact per pair under the rank transform with equal bins, but it tests
+    #'   "any dependence", which in real compendia is true of most pairs;
+    #'   use only for small or confounder-free data.
     select_threshold = function(B = 100, method = c("fdr", "hc"), q = 0.05,
                                 threads = NULL, hc_alpha0 = 0.1,
                                 hc_level = 0.05,
-                                statistic = c("mi", "clr")) {
+                                statistic = c("clr", "mi")) {
       statistic <- match.arg(statistic)
       private$.need(private$mi_, "estimate_mi()")
       private$.need(private$scores_, "calibrate()")

@@ -176,6 +176,14 @@ double mi_pair_sparse(const SparseWeights &wx, const SparseWeights &wy,
   return hx + hy - H;
 }
 
+int openmp_max_threads() {
+#ifdef _OPENMP
+  return omp_get_max_threads();
+#else
+  return 0;
+#endif
+}
+
 int default_num_threads() {
   const unsigned hc = std::thread::hardware_concurrency();
   if (hc <= 3) return 1;  // tiny machines (or unknown): stay serial

@@ -60,3 +60,10 @@ Rcpp::NumericMatrix cpp_clr_calibrate(Rcpp::NumericMatrix mi, int combine) {
       res(i, j) = out[static_cast<std::size_t>(i) * G + j];
   return res;
 }
+
+// [[Rcpp::export]]
+Rcpp::IntegerVector cpp_openmp_info() {
+  return Rcpp::IntegerVector::create(
+      Rcpp::Named("openmp_max_threads") = clr_core::openmp_max_threads(),
+      Rcpp::Named("default_threads") = clr_core::default_num_threads());
+}

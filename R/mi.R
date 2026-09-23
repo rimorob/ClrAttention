@@ -65,3 +65,11 @@ bspline_mi <- function(data, bins = "fd", spline_order = 3, threads = NULL,
   dimnames(out) <- dimnames(data)
   out
 }
+
+#' Report whether the compiled core is parallel
+#'
+#' @return named integer vector: openmp_max_threads (0 if the package was
+#'   built without OpenMP, e.g. by Apple clang without libomp) and
+#'   default_threads (what bspline_mi(threads = NULL) uses).
+#' @export
+clr_openmp_info <- function() cpp_openmp_info()

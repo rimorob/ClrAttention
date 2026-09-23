@@ -106,6 +106,11 @@ void mi_matrix(const double *data, std::size_t n_vars, std::size_t n_samples,
 // core (not the bindings) so R, Python, and CUDA-adjacent callers share it.
 int default_num_threads();
 
+// Threads OpenMP would use by default, or 0 if the core was compiled
+// without OpenMP (e.g. Apple clang without libomp): lets callers verify
+// that a build is actually parallel.
+int openmp_max_threads();
+
 // ---------------------------------------------------------------------------
 // CLR calibration (ported from clr.m, method == 'normal')
 // ---------------------------------------------------------------------------
