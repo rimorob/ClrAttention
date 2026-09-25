@@ -87,7 +87,41 @@ truths <- function(ds) {
   out <- list(celltype_ChIP = file.path(d, ct), nonspecific_ChIP = file.path(d, ns),
               STRING = file.path(d, "STRING-network.csv"))
   if (ds == "mESC") out$LOFGOF <- file.path(d, "mESC-lofgof-network.csv")
+  # Evidence-filtered STRING (analysis/beeline_truths.R), when built.
+  dd <- file.path(root, "Networks_derived", sp)
+  der <- c(STRING_regulatory = "STRING-regulatory.csv", STRING_curated = "STRING-curated.csv")
+  for (k in names(der))
+    if (file.exists(file.path(dd, der[[k]]))) out[[k]] <- file.path(dd, der[[k]])
   out
+}
+
+# Graded ChIP-seq (tools/get_chipatlas.R): for each TF with a ChIP-Atlas table,
+# the Spearman correlation between the TF's row of a score matrix and its
+# binding scores (MACS2, +/- 1 kb of the TSS; 0 where no peak), over all other
+# selected genes. Two binding sources: experiments in matching cell types
+# ("celltype") and the average over all experiments ("all"). Computed within
+# each TF, because TFs differ in antibody quality and peak-score scale.
+chip_dir <- file.path("data", "chipatlas")
+graded_chip <- function(S, genes, ds) {
+  g <- if (species(ds) == "human") "hg38" else "mm10"
+  key <- if (grepl("^mHSC", ds)) "mHSC" else ds
+  up <- toupper(genes); out <- list()
+  for (ti in which(file.exists(file.path(chip_dir, g, paste0(up, ".tsv"))))) {
+    tb <- utils::read.delim(file.path(chip_dir, g, paste0(up[ti], ".tsv")), stringsAsFactors = FALSE)
+    for (src in c("celltype", "all")) {
+      col <- if (src == "all") "all" else key
+      if (!col %in% names(tb) || all(is.na(tb[[col]]))) next
+      b <- numeric(length(genes)); hit <- match(up, tb$gene)
+      b[!is.na(hit)] <- tb[[col]][hit[!is.na(hit)]]; b[is.na(b)] <- 0
+      keep <- seq_along(genes) != ti
+      if (sum(b[keep] > 0) < 20) next
+      for (m in names(S))
+        out[[length(out) + 1L]] <- data.frame(tf = up[ti], source = src,
+          method = sub("_t[0-9]+$", "", m), n_bound = sum(b[keep] > 0),
+          rho = suppressWarnings(stats::cor(S[[m]][ti, keep], b[keep], method = "spearman")))
+    }
+  }
+  do.call(rbind, out)
 }
 
 select_genes <- function(ds, N) {
@@ -235,13 +269,28 @@ run_case <- function(ds, N) {
     crow[[length(crow) + 1L]] <- data.frame(dataset = ds, N = N,
                                             method = sub("_t[0-9]+$", "", m), t(r))
   }
+  gr <- graded_chip(S, genes, ds)
+  if (!is.null(gr)) gr <- cbind(dataset = ds, N = N, gr)
+  # Depth diagnostic (never used to choose t): CLR attention at fixed depths.
+  drow <- list()
+  Sd <- att_mass(soft_op(clr_fit(X)), c(1, 2, 4, 8, 16))
+  for (tt in names(Sd)) {
+    Sx <- Sd[[tt]]; Sx[is.na(Sx)] <- 0; diag(Sx) <- 0
+    for (tn in names(gts)) {
+      r <- score_truth(Sx, genes, NULL, gts[[tn]])
+      if (!is.null(r)) drow[[length(drow) + 1L]] <- data.frame(dataset = ds, N = N, truth = tn,
+                                                               depth = as.integer(tt), t(r))
+    }
+  }
+  rm(Sd)
   res <- do.call(rbind, rows)
   cur <- res[res$truth == "celltype_ChIP", ]
   for (k in seq_len(nrow(cur)))
     say(sprintf("    %s TFs+%d %-28s AUPRC ratio %.3f  EPR %.3f  (celltype ChIP)",
                 ds, N, cur$method[k], cur$auprc_ratio[k], cur$epr[k]))
   rm(S); invisible(gc())
-  list(rows = res, crow = do.call(rbind, crow), depth = depth)
+  list(rows = res, crow = do.call(rbind, crow), depth = depth, graded = gr,
+       diag = do.call(rbind, drow))
 }
 
 cases <- expand.grid(N = as.integer(strsplit(opt$N, ",")[[1]]),
@@ -261,6 +310,27 @@ if (any(bad)) say("cases failed: ", paste(sprintf("%s/%d: %s", cases$ds[bad], ca
 out <- out[!bad & !vapply(out, is.null, NA)]
 rows <- lapply(out, `[[`, "rows"); crow <- lapply(out, `[[`, "crow")
 depths <- lapply(out, `[[`, "depth")
+graded <- do.call(rbind, lapply(out, `[[`, "graded"))
+diagd <- do.call(rbind, lapply(out, `[[`, "diag"))
+if (!is.null(diagd)) utils::write.csv(diagd, file.path(opt$out, "diag_depths.csv"), row.names = FALSE)
+if (!is.null(graded)) {
+  utils::write.csv(graded, file.path(opt$out, "graded_chip.csv"), row.names = FALSE)
+  ref <- graded[graded$method == "clr", c("dataset", "N", "tf", "source", "rho")]
+  names(ref)[5] <- "rho_clr"
+  gm <- merge(graded, ref)
+  for (src in c("celltype", "all")) {
+    x0 <- gm[gm$source == src, ]
+    if (!nrow(x0)) next
+    say(sprintf("graded ChIP-seq (%s experiments): per-TF Spearman rho, median over %d TF x case",
+                src, nrow(x0[x0$method == "clr", ])))
+    for (m in unique(x0$method)) {
+      x <- x0[x0$method == m & !is.na(x0$rho), ]
+      say(sprintf("   %-26s median rho %+.3f  rho > 0 in %.0f%%  beats CLR in %.0f%%  (Wilcoxon vs CLR p = %.2g)",
+                  m, stats::median(x$rho), 100 * mean(x$rho > 0), 100 * mean(x$rho > x$rho_clr),
+                  if (m == "clr") NA_real_ else suppressWarnings(stats::wilcox.test(x$rho, x$rho_clr, paired = TRUE)$p.value)))
+    }
+  }
+}
 res <- do.call(rbind, rows); utils::write.csv(res, file.path(opt$out, "tfnode_metrics.csv"), row.names = FALSE)
 cm <- do.call(rbind, crow); utils::write.csv(cm, file.path(opt$out, "comembership_metrics.csv"), row.names = FALSE)
 utils::write.csv(do.call(rbind, depths), file.path(opt$out, "heldout_depths.csv"), row.names = FALSE)

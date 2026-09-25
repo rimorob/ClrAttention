@@ -41,8 +41,8 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
             B = 30L, out = "results/perturbation", threads = NULL,
             quick = 0L, seed = 20260926L, alpha = 0.5, t_att = 8L,
-            workers = NULL, mem_gb = 4)
-ints <- c("B", "threads", "quick", "seed", "t_att", "workers")
+            workers = NULL, mem_gb = 4, reuse = 0L)
+ints <- c("B", "threads", "quick", "seed", "t_att", "workers", "reuse")
 i <- 1L
 while (i <= length(args)) {
   key <- gsub("-", "_", sub("^--", "", args[i]))
@@ -155,6 +155,14 @@ networks <- function(cols) {
 influence <- function(full, part) vapply(names(full), function(m)
   sqrt(rowMeans((full[[m]] - part[[m]])^2)), numeric(G))
 
+fits_f <- file.path(opt$out, "fits.rds")
+if (opt$reuse > 0L && file.exists(fits_f)) {
+  # --reuse 1: evaluation-only rerun on the stored influence fits.
+  fz <- readRDS(fits_f)
+  stopifnot(identical(fz$genes, genes), identical(fz$groups, groups), fz$B == opt$B)
+  null <- fz$null; pert_I <- fz$pert_I
+  say("reusing stored fits: ", fits_f)
+} else {
 t0 <- Sys.time()
 full <- networks(E)
 say(sprintf("full networks built in %.0f s", as.numeric(difftime(Sys.time(), t0, units = "secs"))))
@@ -194,6 +202,9 @@ for (k in ks) {
 pert_I <- stats::setNames(fits[kind == "pert"],
                           vapply(tasks[kind == "pert"], `[[`, "", "g"))
 rm(fits); invisible(gc())
+saveRDS(list(null = null, pert_I = pert_I, genes = genes, groups = groups, B = opt$B,
+             seed = opt$seed, t_att = opt$t_att), fits_f)
+}
 
 ## ---- scores and evaluation ---------------------------------------------------
 qn <- function(x) stats::qnorm((rank(x) - 0.5) / length(x))
@@ -206,6 +217,11 @@ qn <- function(x) stats::qnorm((rank(x) - 0.5) / length(x))
 # tracks variance gets 0.5.
 var_decile <- cut(rank(apply(X, 1, stats::var), ties.method = "first"),
                   10, labels = FALSE)
+# Refinement (2026-09-24): the perturbation's own experiments add to its
+# targets' variance, so deciles over all experiments over-correct. The
+# primary stratified AUROC uses variance over the other experiments only.
+decile_without <- function(cols) cut(rank(apply(X[, setdiff(E, cols), drop = FALSE], 1, stats::var),
+                                          ties.method = "first"), 10, labels = FALSE)
 strat_auroc <- function(s, y, strata) {
   U <- 0; D <- 0
   for (h in unique(strata)) {
@@ -221,6 +237,7 @@ mu_ref <- rowMeans(X)
 for (k in names(groups)) {
   cols <- groups[[k]]
   ref <- setdiff(E, cols)
+  dec_k <- decile_without(cols)
   mu <- rowMeans(X[, ref]); sdv <- apply(X[, ref], 1, stats::sd); sdv[sdv <= 0] <- 1
   de <- rowMeans(abs((X[, cols, drop = FALSE] - mu) / sdv))
   I <- pert_I[[k]]
@@ -233,12 +250,14 @@ for (k in names(groups)) {
   tr <- truth[[k]]; use <- !tr$exclude
   for (m in names(sc)) {
     ps <- pr_summary(sc[[m]][use], tr$label[use])
-    auroc_vs <- strat_auroc(sc[[m]][use], tr$label[use], var_decile[use])
+    auroc_vs <- strat_auroc(sc[[m]][use], tr$label[use], dec_k[use])
+    auroc_vs_all <- strat_auroc(sc[[m]][use], tr$label[use], var_decile[use])
     top100 <- order(-sc[[m]][use])[1:100]
     res[[length(res) + 1L]] <- data.frame(perturbation = k, k = length(cols),
                                           n_targets = sum(tr$label[use]),
                                           method = m, auroc = ps[["auroc"]],
                                           auroc_var_strat = auroc_vs,
+                                          auroc_var_strat_allexp = auroc_vs_all,
                                           aupr_ratio = ps[["aupr"]] / mean(tr$label[use]),
                                           # Cosgrove et al. 2008 (SSEM-Lasso on M3D)
                                           # report sensitivity among the top 100 genes
@@ -277,7 +296,7 @@ for (j in seq_len(nrow(summ)))
               summ$method[j], summ$median_auroc[j], summ$median_aupr_ratio[j],
               summ$mean_sens_top100[j],
               summ$wins_vs_de_auroc[j], summ$n[j], summ$wilcoxon_p_vs_de[j]))
-say("variance-stratified AUROC (targets vs non-targets of similar variance):")
+say("variance-stratified AUROC (targets vs non-targets of similar variance, variance computed without the perturbation's experiments):")
 for (j in seq_len(nrow(summ)))
   say(sprintf("  %-28s median %.3f  wins vs DE %d/%d  p = %.3g", summ$method[j],
               summ$median_auroc_var_strat[j], summ$wins_vs_de_var_strat[j], summ$n[j],

@@ -602,3 +602,20 @@ It is not different from CLR, or is slightly worse, with all evidence.
 **Citation format.**  The CLR paper lists Faith and Hayete as equal contributors (PMC1764438 author notes:  "Contributed equally").  In-text citations are therefore "Faith, Hayete et al. 2007", which is the standard way to credit co-first authors.  M3D (Faith et al. 2008) has a single first author and is unchanged.
 
 **Addendum (Linux workstation, hyper-threading).**  `tools/setup_linux.sh` sets up the dual-socket Xeon (Ubuntu); it was tested end to end on Ubuntu 24.04.  The RAM left to the user is now given in GB:  `CLR_RESERVE_RAM_GB`, defaulting to max(6 GB, 15% of RAM).  The per-worker budget for the chips run is 3.3 GB, against a measured peak of 3.28 GB.  On 128 GB with 19–20 GB reserved, that allows 32 workers, more than the 26 usable physical cores.  (An earlier note put the Xeon at about 28 workers.  That figure came from budgeting 80% of RAM at 3.5 GB per worker, which was needlessly conservative.)  With `CLR_HT=1`, workers may therefore occupy hyper-threads up to the RAM limit, and any spare hyper-threads go to the MI kernel's OpenMP threads.  `tools/bench_ht.sh` measures draws per hour for 26 workers on physical cores against 32 workers with hyper-threading.  Each plan runs exactly two full rounds, and the results are checked to be identical.  The default stays at physical cores until that benchmark shows a gain.
+
+## D29. Refined BEELINE truths, graded ChIP-seq, depth diagnostic, perturbation variance control (2026-09-24)
+
+Motivated by the first BEELINE results.  There, the cell-type ChIP-seq truth labelled 30–55% of all (TF, gene) pairs as positive in five of the seven datasets, and every method scored at chance.  STRING mixes co-expression evidence, which is correlation by another name, into the truth.
+
+- **Graded ChIP-seq** (`tools/get_chipatlas.R`).  ChIP-Atlas target-gene tables give, for each TF, the MACS2 score of the strongest peak within ±1 kb of each gene's TSS, per experiment.  Experiments are matched to each BEELINE dataset by cell-type label (rules fixed in advance and listed in the script), and the average over all experiments is kept as a second source.  The metric is the Spearman correlation between the TF's row of a score matrix and its binding scores, computed within each TF, because TFs differ in antibody quality and score scale.  Methods are compared by paired Wilcoxon tests over TFs.  Binding strength is not regulation:  this measures whether a network tracks occupancy.
+- **Evidence-filtered STRING** (`analysis/beeline_truths.R`).
+  - `STRING_regulatory`:  STRING v11.0 actions with mode "expression" (transcriptional regulation), directional, TF acting, score ≥ 400.  v11.0 is the last release that published actions, and the action evidence itself includes text mining.
+  - `STRING_curated`:  STRING v12.0 edges with experimental or database channel ≥ 400.  This removes edges supported only by co-expression, text mining or genomic context, and orients them TF → gene.  It is still functional association, not regulation.
+- **Depth diagnostic.**  CLR attention is scored at t = 1, 2, 4, 8 and 16 against every truth (`diag_depths.csv`).  This is never used to choose t.
+- **Perturbation variance control.**  Gene variance is now computed without the perturbation's own experiments, because those experiments inflate their targets' variance and the all-experiment version over-corrects.  The all-experiment version is kept as `auroc_var_strat_allexp`.  Influence fits are saved (`fits.rds`, reused with `--reuse 1`), so future evaluation changes need no refitting.
+- **Compute-constrained choices** are tracked in `docs/COMPUTE_CONSTRAINTS.md`, to be reverted when the workstation is available.  Full gene context for BEELINE is deferred until then.
+
+First look (cloud smoke test, mESC and hHep TFs+500 only, not a result):
+
+- Graded ChIP correlations are near zero for every method:  median per-TF ρ is −0.003 to +0.034 with cell-type-matched experiments.
+- On `STRING_regulatory` (339–412 edges, density 0.2–0.3%), CLR's EPR is 6.1–9.7× random, against 5.1–8.8× for CLR attention.
