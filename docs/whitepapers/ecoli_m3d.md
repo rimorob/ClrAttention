@@ -64,7 +64,25 @@ With all evidence levels, `soft10` gains +0.007 [+0.005, +0.010] AUPR and +0.014
 
 ## 5. Secondary:  TF-node edges (Faith, Hayete et al. 2007 convention)
 
-*To be summarized from `tfnode_edge_pr_by_config.csv`.*  This convention uses the regulator's own mRNA as a stand-in for its activity.  It is reported for continuity with the 2007 paper.
+This benchmark asks whether a TF directly regulates a gene, which is the same question BEELINE asks.  A candidate edge is a (TF gene, other gene) pair, scored with the TF's own mRNA as a stand-in for its activity.  It is positive if RegulonDB lists the interaction.  At strong/confirmed evidence there are 199 TFs and 3,971 positives among 835,203 pairs, a base rate of 0.48%.  Depths are a diagnostic scan (`analysis/tfnode_attention.R`), and none of them was chosen on this benchmark.
+
+| Method | Pooled AUPR (× random) | Median per-TF AUROC | TFs where it beats CLR |
+|---|---|---|---|
+| CLR | **6.75** | 0.595 | — |
+| \|Pearson\| | 3.74 | 0.596 | 68/149 |
+| Raw MI | 3.42 | 0.592 | 59/149 |
+| `soft10` at t = 2 | 4.11 | 0.575 | 85/149 |
+| `soft10` at t = 4 | 4.65 | **0.642** | 91/149 |
+| `soft10` at t = 8 (held-out t*) | 5.15 | 0.623 | 86/149 |
+| `soft10` at t = 16 | 4.31 | 0.601 | 76/149 |
+| `pearson_top10` at t = 6 | 4.07 | 0.535 | 61/149 |
+
+**Reading.**  The two metrics disagree, and the disagreement is informative:
+
+- **Pooled AUPR is dominated by the top of the ranking**, the strongest few hundred edges.  There, single-step CLR wins clearly (6.75× random against 5.15× at t = 8).  Propagation dilutes the sharpest direct edges.
+- **Per-TF AUROC scores each TF's whole row.**  There, attention at t = 4–8 is better (0.62–0.64 against 0.60, and better than CLR for 86–91 of 149 TFs).  Propagation helps rank a TF's weaker, lower-ranked targets that CLR places near the middle.
+
+This is consistent with BEELINE:  its AUPRC ratio is also top-heavy, and there attention lost to CLR.  The emerging picture is that single-step CLR is the better *edge detector*, while attention is the better *target-set ranker*.  That matches its gains on regulon co-membership and coherence.  The results use the 466-experiment set at strong/confirmed evidence; all-evidence results show the same pattern.
 
 ## 6. Perturbation-target identification (running)
 
