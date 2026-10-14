@@ -178,7 +178,21 @@ partial_cor <- function(Z) {
 # criterion = AUPR for the other half's top-1% CLR pairs. The criterion pairs
 # are those among the scored genes `sgenes` (all genes when there is no wider
 # context); the operator and the CLR target are built on the whole context.
-heldout_depth <- function(X, make_A, label, sgenes = rownames(X)) {
+# CLR-NS (added 2026-10-14 after analysis/beeline_blom_test.R): CLR on |r| of
+# normal scores. Each gene is Blom-transformed with average ranks for ties
+# (every zero gets the same score; deterministic), then CLR (Stouffer)
+# calibrates |Pearson r| of the scores. On BEELINE's gene sets it beat CLR on
+# raw B-spline MI in 57 of 72 case x truth combinations.
+blom_avg <- function(X) {
+  n <- ncol(X)
+  t(apply(X, 1, function(x) stats::qnorm((rank(x, ties.method = "average") - 3 / 8) / (n + 1 / 4))))
+}
+ns_clr <- function(X) {
+  r <- abs(stats::cor(t(blom_avg(X)))); r[is.na(r)] <- 0; diag(r) <- 0
+  clr_calibrate(r, method = "normal", combine = "stouffer")
+}
+clr_scores_of <- function(Y) { f <- clr_fit(Y); s <- f$clr_scores; f$release(FALSE); s }
+heldout_depth <- function(X, make_A, label, sgenes = rownames(X), target_fn = clr_scores_of) {
   grid <- 2L^(0:floor(log2(opt$tmax)))
   cells <- sample(ncol(X)); h <- split(cells, rep(1:2, length.out = length(cells)))
   best <- integer(0)
@@ -186,11 +200,11 @@ heldout_depth <- function(X, make_A, label, sgenes = rownames(X)) {
     tr <- X[, h[[d]]]; te <- X[, h[[3 - d]]]
     keep <- apply(tr, 1, function(x) diff(range(x))) > 0 &
       apply(te, 1, function(x) diff(range(x))) > 0
-    fte <- clr_fit(te[keep, ])
+    Cte <- target_fn(te[keep, ])
     si <- which(rownames(X)[keep] %in% sgenes)
     ut <- upper.tri(matrix(0, length(si), length(si)))
-    sv <- fte$clr_scores[si, si][ut]; target <- as.integer(sv >= stats::quantile(sv, 0.99))
-    fte$release(FALSE); rm(fte, sv)
+    sv <- Cte[si, si][ut]; target <- as.integer(sv >= stats::quantile(sv, 0.99))
+    rm(Cte, sv)
     A <- make_A(tr[keep, ]); rm(tr, te)
     all_t <- sort(unique(c(grid, 3L, 5L, 6L, 7L, 10L, 12L)))
     crit <- stats::setNames(numeric(length(all_t)), all_t)
@@ -280,8 +294,12 @@ run_case <- function(ds, Ns) {
   t_soft <- heldout_depth(X, function(Y) { g <- clr_fit(Y); A <- soft_op(g); g$release(FALSE); A },
                           paste(tag, "soft10"), sg)
   t_pear <- heldout_depth(X, function(Y) pear_op(stats::cor(t(Y))), paste(tag, "pearson_top10"), sg)
+  # CLR-NS attention: its own operator and its own held-out target
+  t_ns <- heldout_depth(X, function(Y) clr:::.softmax_rows(ns_clr(Y), keff = 10, cap = 50L),
+                        paste(tag, "ns_soft10"), sg, target_fn = ns_clr)
   depth <- data.frame(dataset = ds, N = paste(Ns, collapse = "/"), context = opt$context,
-                      n_fit_genes = nrow(X), t_soft10 = t_soft, t_pearson = t_pear)
+                      n_fit_genes = nrow(X), t_soft10 = t_soft, t_pearson = t_pear,
+                      t_ns_soft10 = t_ns)
   # every score matrix is cut to the scored genes as soon as it exists
   cut <- function(s) { s <- s[si, si, drop = FALSE]; s[is.na(s)] <- 0; diag(s) <- 0; s }
   S <- list(abs_pearson = cut(abs(R)),
@@ -295,6 +313,10 @@ run_case <- function(ds, Ns) {
     if (t %in% c(1, 2, 4, 8, 16)) Sdiag[[as.character(t)]] <<- cut(St)
   })
   S[[sprintf("pearson_attention_top10_t%d", t_pear)]] <- cut(att_mass(pear_op(R), t_pear)[[1]])
+  Cns <- ns_clr(X); S$clr_ns <- cut(Cns)
+  S[[sprintf("clr_ns_attention_soft10_t%d", t_ns)]] <-
+    cut(att_mass(clr:::.softmax_rows(Cns, keff = 10, cap = 50L), t_ns)[[1]])
+  rm(Cns)
   f$release(FALSE); rm(f, R, X); invisible(gc(verbose = FALSE))
   for (N in Ns) {
     gN <- sg[sg %in% sels[[as.character(N)]]$genes]

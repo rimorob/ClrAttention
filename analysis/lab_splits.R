@@ -13,7 +13,16 @@
 #   - per split, t* = geometric mean of the two directions' argmax; per
 #     operator, the reported depth is the median t* over splits;
 #   - operators: soft10 at softmax caps 50 (the default), 100, 200 and no cap
-#     (every positive CLR score), and the pearson_top10 control.
+#     (every positive CLR score), and the pearson_top10 control;
+#   - kernel ablation (added 2026-10-14; select with --ops): the same softmax
+#     (keff 10, cap 50) on other score matrices --
+#       soft10_clr_absr    CLR (Stouffer) on |Pearson r|
+#       soft10_clr_ns      CLR on |r| of normal scores (Blom, average ties)
+#       soft10_absr_noclr  raw |r|, no CLR calibration
+#       soft10_mi_noclr    raw B-spline MI, no CLR calibration
+#     For these, the held-out target is the top 1% of the SAME score matrix
+#     computed on the test half (for soft10 and its caps that is CLR on MI,
+#     as before; pearson_top10 keeps the CLR-on-MI target of followup.R).
 # Then each operator is scored against RegulonDB on the full data at its
 # median t* and at the earlier t = 8, with the followup.R intervals: paired
 # delete-half jackknife over genes (pooled co-membership AUPR) and paired
@@ -121,8 +130,25 @@ build_fit <- function(Xm) {
 cap_of <- function(op) switch(op, soft10 = 50L, soft10_cap100 = 100L,
                               soft10_cap200 = 200L, soft10_capall = .Machine$integer.max,
                               NA_integer_)
+blom_avg <- function(Xm) {
+  n <- ncol(Xm)
+  t(apply(Xm, 1, function(x) stats::qnorm((rank(x, ties.method = "average") - 3 / 8) / (n + 1 / 4))))
+}
+abs_r <- function(Xm) { r <- abs(stats::cor(t(Xm))); r[is.na(r)] <- 0; diag(r) <- 0; r }
+calib <- function(M) clr_calibrate(M, method = "normal", combine = "stouffer")
+ablation_ops <- c("soft10_clr_absr", "soft10_clr_ns", "soft10_absr_noclr", "soft10_mi_noclr")
+# Score matrix the softmax is applied to (and the held-out target is taken from).
+base_scores <- function(f, Xm, op) switch(op,
+  soft10_clr_absr = calib(abs_r(Xm)), soft10_clr_ns = calib(abs_r(blom_avg(Xm))),
+  soft10_absr_noclr = abs_r(Xm), soft10_mi_noclr = { m <- f$mi; diag(m) <- 0; m },
+  f$clr_scores)
 # Attention matrix A (rows sum to 1) for an operator on a fit and its |Pearson|.
 make_A <- function(f, Xm, op) {
+  if (op %in% ablation_ops) {
+    A <- clr:::.softmax_rows(base_scores(f, Xm, op), keff = 10, cap = 50L)
+    empty <- rowSums(A) == 0; A[cbind(which(empty), which(empty))] <- 1   # self-loop
+    return(A)
+  }
   if (startsWith(op, "soft10")) {
     f$build_operator(alpha = opt$alpha, softmax_keff = 10, softmax_cap = cap_of(op))
     return(f$operator)
@@ -165,8 +191,13 @@ run_split <- function(si) {
   for (dir in 1:2) {
     tr <- dir; te <- 3L - dir
     sv <- fits[[te]]$clr_scores[ut]
-    target <- as.integer(sv >= stats::quantile(sv, 1 - opt$target_frac)); rm(sv)
+    target_clr <- as.integer(sv >= stats::quantile(sv, 1 - opt$target_frac)); rm(sv)
     for (op in ops) {
+      target <- target_clr
+      if (op %in% ablation_ops) {
+        sv <- base_scores(fits[[te]], X[, h == te], op)[ut]
+        target <- as.integer(sv >= stats::quantile(sv, 1 - opt$target_frac)); rm(sv)
+      }
       A <- make_A(fits[[tr]], X[, h == tr], op)
       P <- lazy_P(A); rm(A)
       crit <- numeric(opt$tmax)

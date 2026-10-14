@@ -5,9 +5,10 @@
 #      criterion of beeline.R; reports the distribution of t*;
 #   B. nested cell bootstrap: B draws of cells with replacement per case; in
 #      every draw the depth is re-selected on one random halving of the
-#      draw's cells, then |Pearson|, raw MI, CLR, CLR attention (soft10) and
-#      |Pearson| attention (pearson_top10), each attention at the draw's t*,
-#      are scored against every ground truth (AUPRC ratio, EPR).
+#      draw's cells, then |Pearson|, raw MI, CLR, CLR attention (soft10),
+#      |Pearson| attention (pearson_top10), CLR-NS (CLR on |r| of normal
+#      scores, see beeline.R) and CLR-NS attention, each attention at the
+#      draw's own t*, are scored against every ground truth (AUPRC ratio, EPR).
 # Differences against CLR are paired within draw. Per case: percentile
 # intervals. Across cases: in every draw index b, the median over cases of
 # the difference (each case resampled independently), giving an interval for
@@ -154,6 +155,15 @@ att_walk <- function(A, ts, fn) {
 }
 soft_op <- function(f) { f$build_operator(alpha = opt$alpha, softmax_keff = 10, softmax_cap = 50L)
                          f$operator }
+# CLR-NS: CLR on |r| of normal scores (Blom, average ranks for ties); see beeline.R
+blom_avg <- function(X) {
+  n <- ncol(X)
+  t(apply(X, 1, function(x) stats::qnorm((rank(x, ties.method = "average") - 3 / 8) / (n + 1 / 4))))
+}
+ns_clr <- function(X) {
+  r <- abs(stats::cor(t(blom_avg(X)))); r[is.na(r)] <- 0; diag(r) <- 0
+  clr_calibrate(r, method = "normal", combine = "stouffer")
+}
 pear_op <- function(Y) { Ar <- abs(stats::cor(t(Y))); Ar[is.na(Ar)] <- 0; diag(Ar) <- 0
                          clr:::.topk_rows(Ar, 10L) }
 grid_t <- sort(unique(c(2L^(0:floor(log2(opt$tmax))), 3L, 5L, 6L, 7L, 10L, 12L)))
@@ -168,10 +178,14 @@ halving_depths <- function(X, si) {
     fte <- clr_fit(te[keep, ])
     sk <- which(which(keep) %in% si)                # scored genes among kept
     ut <- upper.tri(matrix(0, length(sk), length(sk)))
-    sv <- fte$clr_scores[sk, sk][ut]; target <- as.integer(sv >= stats::quantile(sv, 0.99))
+    sv <- fte$clr_scores[sk, sk][ut]; target_mi <- as.integer(sv >= stats::quantile(sv, 0.99))
     fte$release(FALSE)
-    for (op in c("soft10", "pearson_top10")) {
+    sv <- ns_clr(te[keep, ])[sk, sk][ut]; target_ns <- as.integer(sv >= stats::quantile(sv, 0.99))
+    for (op in c("soft10", "pearson_top10", "ns_soft10")) {
+      # each CLR operator is judged against its own CLR in the other half
+      target <- if (op == "ns_soft10") target_ns else target_mi
       A <- if (op == "soft10") { g <- clr_fit(tr[keep, ]); a <- soft_op(g); g$release(FALSE); a } else
+        if (op == "ns_soft10") clr:::.softmax_rows(ns_clr(tr[keep, ]), keff = 10, cap = 50L) else
         pear_op(tr[keep, ])
       crit <- stats::setNames(numeric(length(grid_t)), grid_t)
       att_walk(A, grid_t, function(S, t) crit[[as.character(t)]] <<- ap_fast(S[sk, sk][ut], target))
@@ -211,6 +225,9 @@ run_task <- function(tk) {
   att_walk(soft_op(f), tsel[["soft10"]], function(S, t) add(S, "clr_attention_soft10", t))
   f$release(FALSE)
   att_walk(pear_op(X), tsel[["pearson_top10"]], function(S, t) add(S, "pearson_attention_top10", t))
+  Cns <- ns_clr(X); add(Cns, "clr_ns", NA)
+  att_walk(clr:::.softmax_rows(Cns, keff = 10, cap = 50L), tsel[["ns_soft10"]],
+           function(S, t) add(S, "clr_ns_attention_soft10", t))
   cbind(case = tk$case, kind = "boot", b = tk$b, do.call(rbind, rows))
 }
 tasks <- list()
