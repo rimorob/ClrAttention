@@ -249,7 +249,7 @@ tsplit <- do.call(rbind, lapply(split(ts, list(ts$split, ts$operator), drop = TR
 tsum <- do.call(rbind, lapply(split(tsplit, tsplit$operator), function(x) {
   y <- ts[ts$operator == x$operator[1], ]
   data.frame(operator = x$operator[1], n_splits = nrow(x),
-             t_median = as.integer(stats::median(x$t_star)),
+             t_median = as.integer(round(stats::median(x$t_star))),   # round, do not truncate a .5 median
              t_q25 = stats::quantile(x$t_star, 0.25, names = FALSE),
              t_q75 = stats::quantile(x$t_star, 0.75, names = FALSE),
              t_min = min(x$t_star), t_max = max(x$t_star),

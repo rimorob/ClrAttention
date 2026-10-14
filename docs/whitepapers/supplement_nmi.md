@@ -109,7 +109,24 @@ The context normalization, and the attention built on it, help in every case.
 
 ## Supplementary Note 4 | Depth selection
 
-[pending: distribution of t* over 50 random laboratory splits; the held-out criterion at every t = 1–64; the softmax candidate cap (50, 100, 200, none); job 060.]
+Experiments of the 466-experiment M3D set were split 50 times at random into two halves by laboratory (39 labs; labs never straddle halves; half sizes 203–264 experiments).  In each split and direction, the held-out criterion was evaluated at every depth t = 1–64; t* per split is the geometric mean of the two directions' optima, and the reported depth is the median over splits (`analysis/lab_splits.R`; recomputed independently from the saved curves).
+
+**Supplementary Table 3 | Held-out depth and softmax candidate cap.**  SC = strong/confirmed evidence; intervals are paired delete-half gene jackknife (AUPR) and regulon bootstrap (coherence) relative to CLR.
+
+| Operator | Median t* (IQR; range) | Criterion within 1% of max | Δ AUPR vs CLR, SC | Δ coherence, SC | Δ AUPR, all evidence |
+|---|---|---|---|---|---|
+| soft10, cap 50 (default) | 9 (9–10; 8–11) | t = 7–11 | +0.022 [+0.017, +0.027] | +0.031 [+0.019, +0.043] | +0.009 [+0.005, +0.012] |
+| soft10, cap 100 | 9 (9–10; 6–11) | t = 7–12 | +0.022 [+0.017, +0.026] | +0.033 [+0.023, +0.042] | +0.009 [+0.005, +0.013] |
+| soft10, cap 200 | 9 (8–10; 5–11) | t = 6–12 | +0.020 [+0.016, +0.025] | +0.030 [+0.024, +0.044] | +0.009 [+0.005, +0.013] |
+| soft10, no cap | 5 (4–7; 3–9) | t = 2.5–10 | +0.012 [+0.008, +0.016] | +0.030 [+0.021, +0.035] | +0.005 [+0.001, +0.008] |
+| pearson_top10 (control) | 6 (5–6; 5–6) | t = 5–6 | — | — | — |
+
+**Notes.**
+
+- **Direction-level spread.**  The split-level range for soft10 (8–11) is over geometric means; individual directions range from 6 to 14, and in 17 of 50 splits the two directions differ by more than 2.
+- **The uncapped softmax** has a bimodal depth (3–5 in 35 splits, 7–9 in 13).  With every positive score in the softmax, weight leaks to many weak neighbours and multi-step paths blur sooner.
+- **The held-out depth is conservative.**  Pooled RegulonDB AUPR on the full data keeps rising past t* and peaks near t = 27 (SC), while coherence peaks at t = 4–8.  The criterion never sees RegulonDB, and it should not be read as benchmark-optimal.
+- **The pearson_top10 control** is tuned against the same CLR-on-MI target, a criterion it does not share; its depth is therefore not optimized on its own terms.  The kernel ablation (Supplementary Note 3) uses each operator's own target.
 
 ## Supplementary Note 5 | Nested bootstrap
 
