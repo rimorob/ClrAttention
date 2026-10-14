@@ -38,17 +38,31 @@ invisible(compiler::enableJIT(3L))
   b / 1024^3
 }
 
+# Linux: distinct (physical id, core id) pairs in /proc/cpuinfo. R's
+# detectCores(logical = FALSE) can return the logical count there (56 on the
+# dual E5-2690 v4 workstation, which has 28 physical cores). NA elsewhere.
+.par_linux_physical_cores <- function() {
+  if (Sys.info()[["sysname"]] != "Linux") return(NA_integer_)
+  x <- tryCatch(readLines("/proc/cpuinfo"), error = function(e) character())
+  val <- function(key) sub(".*:\\s*", "", grep(paste0("^", key, "\\s*:"), x, value = TRUE))
+  pid <- val("physical id"); cid <- val("core id")
+  if (!length(cid) || length(pid) != length(cid)) return(NA_integer_)
+  length(unique(paste(pid, cid)))
+}
+
 # Physical cores where the OS reports them (hyper-threads do not add
 # floating-point throughput to this workload), otherwise logical cores.
 .par_cores <- function() {
-  n <- suppressWarnings(parallel::detectCores(logical = FALSE))
+  n <- .par_linux_physical_cores()
+  if (is.na(n)) n <- suppressWarnings(parallel::detectCores(logical = FALSE))
   if (is.na(n) || n < 1L) n <- parallel::detectCores(logical = TRUE)
   if (is.na(n) || n < 1L) 1L else as.integer(n)
 }
 
 # Hardware threads per physical core (2 with Intel Hyper-Threading / SMT on).
 .par_threads_per_core <- function() {
-  p <- suppressWarnings(parallel::detectCores(logical = FALSE))
+  p <- .par_linux_physical_cores()
+  if (is.na(p)) p <- suppressWarnings(parallel::detectCores(logical = FALSE))
   l <- parallel::detectCores(logical = TRUE)
   if (is.na(p) || is.na(l) || p < 1L) 1L else max(1L, as.integer(l %/% p))
 }
