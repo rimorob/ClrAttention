@@ -28,9 +28,31 @@
 # rpoS -> sigma38 and recA -> LexA/SOS). The perturbed genes themselves are
 # excluded from scoring.
 #
+# Matched null (--null lab, COMPUTE_CONSTRAINTS item 7): instead of k
+# experiments drawn uniformly from all experiments (one null per k, shared by
+# the perturbations with that k), each perturbation gets its own null in which
+# the removed experiments come from the same labs as its own: for each lab
+# holding n_l of P's experiments, n_l of that lab's OTHER experiments are
+# removed. This separates "P matters" from "removing any k experiments of
+# this lab matters". A lab with fewer than 10 distinct possible subsets
+# (choose(others, n_l) < 10, e.g. a lab whose only experiments are P's)
+# cannot support a matched null; its n_l are then drawn from all non-P
+# experiments, and the matched share of each null is logged and saved.
+#
+# SSEM-Lasso (--ssem 1, COMPUTE_CONSTRAINTS item 14): our re-implementation of
+# the network filter of Cosgrove, Zhou, Gardner & Kolaczyk (2008). For each
+# perturbation, every gene is regressed on all other genes by the lasso
+# (glmnet, lambda by 5-fold CV, lambda.min) on the experiments that do not
+# involve the perturbation (rows standardized on those experiments). In the
+# perturbation's own experiments, a gene's score is the mean absolute
+# residual of the network prediction divided by its training residual SD:
+# expression changes the network cannot explain mark direct targets. Scored
+# with the same truth, gene universe and metrics as the other methods; with
+# --reuse 1 it runs on stored influence fits. Needs the glmnet package.
+#
 # Usage (repo root):
-#   Rscript analysis/perturbation.R [--B 30] [--out results/perturbation]
-#       [--threads N] [--quick 0] [--workers W] [--mem_gb 4]
+#   Rscript analysis/perturbation.R [--B 30] [--out results/perturbation] [--ssem 0]
+#       [--null random|lab] [--threads N] [--quick 0] [--workers W] [--mem_gb 4]
 # The null draws and the per-perturbation fits run in parallel (foreach over
 # local cores minus 2, capped by RAM; analysis/parallel.R). The delete-k
 # subsets are drawn in the master in the original order, so they match the
@@ -41,8 +63,8 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(m3d = "data/E_coli_v4_Build_6", rdb = "data/RegulonDBExtract",
             B = 30L, out = "results/perturbation", threads = NULL,
             quick = 0L, seed = 20260926L, alpha = 0.5, t_att = 8L,
-            workers = NULL, mem_gb = 4, reuse = 0L)
-ints <- c("B", "threads", "quick", "seed", "t_att", "workers", "reuse")
+            workers = NULL, mem_gb = 4, reuse = 0L, null = "random", ssem = 0L)
+ints <- c("B", "threads", "quick", "seed", "t_att", "workers", "reuse", "ssem")
 i <- 1L
 while (i <= length(args)) {
   key <- gsub("-", "_", sub("^--", "", args[i]))
@@ -115,13 +137,47 @@ truth <- lapply(names(groups), function(k) {
 names(truth) <- names(groups)
 ok <- vapply(truth, function(t) sum(t$label[!t$exclude]) >= 5, NA)
 groups <- groups[ok]; truth <- truth[ok]
+stopifnot(opt$null %in% c("random", "lab"))
+null_key <- function(g) if (opt$null == "lab") g else as.character(length(groups[[g]]))
+if (opt$null == "lab") {
+  desc <- utils::read.delim(file.path(opt$m3d, paste0(base, ".experiment_descriptions")),
+                            stringsAsFactors = FALSE)
+  exper <- sub("^.*experimenter:([^,]*).*$", "\\1", desc$description)
+  exper[!grepl("experimenter:", desc$description)] <- NA
+  lab <- tapply(exper, desc$experiment_name, function(v) v[!is.na(v)][1])[E]
+  lab[is.na(lab)] <- paste0("unknown_", which(is.na(lab)))
+  rm(desc, exper)
+  # Per group: labs that can be matched (>= 10 distinct subsets) and how many.
+  match_plan <- lapply(groups, function(cols) {
+    nl <- table(lab[cols])
+    pool <- lapply(names(nl), function(l) setdiff(E[lab == l], cols))
+    ok_l <- mapply(function(p, n) choose(length(p), n) >= 10, pool, as.integer(nl))
+    list(n = as.integer(nl), pool = pool, matched = ok_l, labs = names(nl),
+         others = setdiff(E, cols))
+  })
+  matched_sample <- function(g) {
+    mp <- match_plan[[g]]; out <- character(0)
+    for (j in seq_along(mp$n)) if (mp$matched[j]) out <- c(out, sample(mp$pool[[j]], mp$n[j]))
+    short <- sum(mp$n[!mp$matched])
+    if (short) out <- c(out, sample(setdiff(mp$others, out), short))
+    out
+  }
+  match_info <- data.frame(perturbation = names(groups), k = lengths(groups),
+    matched_share = vapply(match_plan, function(mp) sum(mp$n[mp$matched]) / sum(mp$n), 0),
+    labs = vapply(match_plan, function(mp) paste(sprintf("%s:%d/%d%s", mp$labs, mp$n,
+      lengths(mp$pool), ifelse(mp$matched, "", "(unmatched)")), collapse = "; "), ""))
+  utils::write.csv(match_info, file.path(opt$out, "matched_null_plan.csv"), row.names = FALSE)
+}
 say(sprintf("%d genes x %d experiments; %d perturbation groups with >= 5 mapped targets:",
             G, length(E), length(groups)))
 for (k in names(groups))
-  say(sprintf("   %-26s k = %d experiments (%s); %d targets on array", k,
+  say(sprintf("   %-26s k = %d experiments (%s); %d targets on array%s", k,
               length(groups[[k]]),
               paste(unique(pg$type[pg$experiment_name %in% groups[[k]]]), collapse = "/"),
-              sum(truth[[k]]$label)))
+              sum(truth[[k]]$label),
+              if (opt$null == "lab") sprintf("; lab-matched null share %.0f%% [%s]",
+                100 * match_info$matched_share[match_info$perturbation == k],
+                match_info$labs[match_info$perturbation == k]) else ""))
 
 ## ---- networks ------------------------------------------------------------
 Zs <- function(M) { Z <- M - rowMeans(M); s <- sqrt(rowSums(Z^2) / (ncol(Z) - 1))
@@ -159,7 +215,8 @@ fits_f <- file.path(opt$out, "fits.rds")
 if (opt$reuse > 0L && file.exists(fits_f)) {
   # --reuse 1: evaluation-only rerun on the stored influence fits.
   fz <- readRDS(fits_f)
-  stopifnot(identical(fz$genes, genes), identical(fz$groups, groups), fz$B == opt$B)
+  stopifnot(identical(fz$genes, genes), identical(fz$groups, groups), fz$B == opt$B,
+            identical(fz$null_type %||% "random", opt$null))
   null <- fz$null; pert_I <- fz$pert_I
   say("reusing stored fits: ", fits_f)
 } else {
@@ -169,16 +226,16 @@ say(sprintf("full networks built in %.0f s", as.numeric(difftime(Sys.time(), t0,
 
 # Task list: B random delete-k draws per k (drawn here, in the original
 # order), then one delete-P fit per perturbation group.
-ks <- sort(unique(lengths(groups)))
+ks <- if (opt$null == "lab") names(groups) else sort(unique(lengths(groups)))
 tasks <- list()
 for (k in ks) for (b in seq_len(opt$B))
   tasks[[length(tasks) + 1L]] <- list(kind = "null", k = k, b = b,
-                                      keep = setdiff(E, sample(E, k)))
+    keep = setdiff(E, if (opt$null == "lab") matched_sample(k) else sample(E, k)))
 for (g in names(groups))
   tasks[[length(tasks) + 1L]] <- list(kind = "pert", g = g,
                                       keep = setdiff(E, groups[[g]]))
-say(sprintf("%d network fits (%d null draws for k in {%s}, %d perturbations)",
-            length(tasks), opt$B * length(ks), paste(ks, collapse = ","),
+say(sprintf("%d network fits (%d %s null draws for {%s}, %d perturbations)",
+            length(tasks), opt$B * length(ks), opt$null, paste(ks, collapse = ","),
             length(groups)))
 source(file.path(script_dir, "parallel.R"))
 pc <- par_start(mem_gb = opt$mem_gb, workers = opt$workers, say = say)
@@ -194,7 +251,8 @@ say(sprintf("fits done in %.0f s", as.numeric(difftime(Sys.time(), t0, units = "
 kind <- vapply(tasks, `[[`, "", "kind")
 null <- list()
 for (k in ks) {
-  sel <- which(kind == "null" & vapply(tasks, function(t) if (is.null(t$k)) NA_integer_ else t$k, 0L) == k)
+  sel <- which(kind == "null" & vapply(tasks, function(t) if (is.null(t$k)) NA_character_ else
+    as.character(t$k), "") == as.character(k))
   arr <- array(NA_real_, c(G, length(full), opt$B), dimnames = list(genes, names(full), NULL))
   for (j in seq_along(sel)) arr[, , j] <- fits[[sel[j]]]
   null[[as.character(k)]] <- arr
@@ -203,7 +261,48 @@ pert_I <- stats::setNames(fits[kind == "pert"],
                           vapply(tasks[kind == "pert"], `[[`, "", "g"))
 rm(fits); invisible(gc())
 saveRDS(list(null = null, pert_I = pert_I, genes = genes, groups = groups, B = opt$B,
-             seed = opt$seed, t_att = opt$t_att), fits_f)
+             seed = opt$seed, t_att = opt$t_att, null_type = opt$null), fits_f)
+}
+
+## ---- SSEM-Lasso network filter (optional) ----------------------------------------
+ssem <- NULL
+if (opt$ssem > 0L) {
+  ssem_f <- file.path(opt$out, "ssem_scores.rds")
+  if (file.exists(ssem_f)) {
+    ssem <- readRDS(ssem_f); stopifnot(identical(ssem$genes, genes)); ssem <- ssem$scores
+    say("reusing SSEM-Lasso scores: ", ssem_f)
+  } else {
+    chunks <- split(seq_len(G), ceiling(seq_len(G) / 50))
+    stasks <- list()
+    for (g in names(groups)) for (ch in chunks) stasks[[length(stasks) + 1L]] <- list(g = g, ix = ch)
+    say(sprintf("SSEM-Lasso: %d genes x %d perturbations (%d tasks)", G, length(groups), length(stasks)))
+    if (!exists("par_start")) source(file.path(script_dir, "parallel.R"))
+    pc <- par_start(mem_gb = 2, workers = opt$workers, say = say)
+    t0 <- Sys.time()
+    sres <- foreach(tk = stasks, ti = seq_along(stasks), .packages = "glmnet",
+                    .errorhandling = "stop") %dopar% {
+      if (par_should_stop()) stop("stop file present")
+      set.seed(opt$seed + 7L * ti)
+      cols <- groups[[tk$g]]; tr <- setdiff(E, cols)
+      mu <- rowMeans(X[, tr]); sdv <- apply(X[, tr], 1, stats::sd); sdv[sdv <= 0] <- 1
+      Xs <- (X - mu) / sdv
+      xtr <- t(Xs[, tr]); xp <- t(Xs[, cols, drop = FALSE])
+      vapply(tk$ix, function(g) {
+        fit <- glmnet::cv.glmnet(xtr[, -g], xtr[, g], nfolds = 5, alpha = 1)
+        rtr <- xtr[, g] - as.numeric(stats::predict(fit, xtr[, -g], s = "lambda.min"))
+        rp <- xp[, g] - as.numeric(stats::predict(fit, xp[, -g, drop = FALSE], s = "lambda.min"))
+        mean(abs(rp)) / max(stats::sd(rtr), 1e-8)
+      }, numeric(1))
+    }
+    par_stop(pc)
+    say(sprintf("SSEM-Lasso done in %.0f s", as.numeric(difftime(Sys.time(), t0, units = "secs"))))
+    ssem <- lapply(stats::setNames(names(groups), names(groups)), function(g) {
+      v <- numeric(G)
+      for (j in which(vapply(stasks, `[[`, "", "g") == g)) v[stasks[[j]]$ix] <- sres[[j]]
+      v
+    })
+    saveRDS(list(scores = ssem, genes = genes), ssem_f)
+  }
 }
 
 ## ---- scores and evaluation ---------------------------------------------------
@@ -241,12 +340,13 @@ for (k in names(groups)) {
   mu <- rowMeans(X[, ref]); sdv <- apply(X[, ref], 1, stats::sd); sdv[sdv <= 0] <- 1
   de <- rowMeans(abs((X[, cols, drop = FALSE] - mu) / sdv))
   I <- pert_I[[k]]
-  nl <- null[[as.character(length(cols))]]
+  nl <- null[[null_key(k)]]
   zI <- (I - apply(nl, c(1, 2), mean)) / pmax(apply(nl, c(1, 2), stats::sd), 1e-12)
   sc <- list(differential_expression = de, gene_variance = apply(X, 1, stats::var),
              influence_pearson = zI[, "pearson"], influence_clr = zI[, "clr"],
              influence_clr_attention = zI[, "clr_attention"])
   sc$combined_de_clr_attention <- (qn(de) + qn(zI[, "clr_attention"])) / sqrt(2)
+  if (!is.null(ssem)) sc$ssem_lasso <- ssem[[k]]
   tr <- truth[[k]]; use <- !tr$exclude
   for (m in names(sc)) {
     ps <- pr_summary(sc[[m]][use], tr$label[use])

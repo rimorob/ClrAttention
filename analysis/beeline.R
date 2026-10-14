@@ -35,6 +35,7 @@
 #   Rscript analysis/beeline.R [--beeline data/beeline] [--N 500,1000]
 #       [--datasets hESC,hHep,mDC,mESC,mHSC-E,mHSC-GM,mHSC-L]
 #       [--out results/beeline] [--threads N] [--workers W] [--mem_gb 1.5]
+#       [--context none|<K>|all]
 # The dataset x gene-set cases run in parallel (foreach over local cores
 # minus 2, capped by RAM; analysis/parallel.R), each under its own seed.
 
@@ -42,7 +43,7 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(beeline = "data/beeline", N = "500,1000",
             datasets = "hESC,hHep,mDC,mESC,mHSC-E,mHSC-GM,mHSC-L",
             out = "results/beeline", threads = NULL, seed = 20260925L,
-            alpha = 0.5, tmax = 64L, workers = NULL, mem_gb = 1.5)
+            alpha = 0.5, tmax = 64L, workers = NULL, mem_gb = 1.5, context = "none")
 i <- 1L
 while (i <= length(args)) {
   key <- gsub("-", "_", sub("^--", "", args[i]))
@@ -146,15 +147,20 @@ clr_fit <- function(X) {
   f$calibrate(method = "normal", combine = "stouffer")
   f
 }
-att_mass <- function(A, ts) {
+# fn(S, t) with attention mass S = (P^t + P^t')/2 at each depth in ts, one
+# at a time (only P^t and S are alive), so wide gene contexts fit in memory.
+att_walk <- function(A, ts, fn) {
   G <- nrow(A)
   P <- Matrix::Diagonal(G, 1 - opt$alpha) + opt$alpha * Matrix::Matrix(A, sparse = TRUE)
-  out <- list(); Pt <- NULL
+  rm(A); Pt <- NULL
   for (t in seq_len(max(ts))) {
     Pt <- if (is.null(Pt)) as.matrix(P) else as.matrix(Pt %*% P)
-    if (t %in% ts) { S <- (Pt + t(Pt)) / 2; diag(S) <- 0; out[[as.character(t)]] <- S }
+    if (t %in% ts) { S <- (Pt + t(Pt)) / 2; diag(S) <- 0; fn(S, t); rm(S) }
   }
-  out
+  invisible(NULL)
+}
+att_mass <- function(A, ts) {
+  out <- list(); att_walk(A, ts, function(S, t) out[[as.character(t)]] <<- S); out
 }
 soft_op <- function(f) { f$build_operator(alpha = opt$alpha, softmax_keff = 10,
                                           softmax_cap = 50L); f$operator }
@@ -169,8 +175,10 @@ partial_cor <- function(Z) {
 }
 
 # Held-out depth: split cells into random halves; operator on one half,
-# criterion = AUPR for the other half's top-1% CLR pairs.
-heldout_depth <- function(X, make_A, label) {
+# criterion = AUPR for the other half's top-1% CLR pairs. The criterion pairs
+# are those among the scored genes `sgenes` (all genes when there is no wider
+# context); the operator and the CLR target are built on the whole context.
+heldout_depth <- function(X, make_A, label, sgenes = rownames(X)) {
   grid <- 2L^(0:floor(log2(opt$tmax)))
   cells <- sample(ncol(X)); h <- split(cells, rep(1:2, length.out = length(cells)))
   best <- integer(0)
@@ -178,12 +186,16 @@ heldout_depth <- function(X, make_A, label) {
     tr <- X[, h[[d]]]; te <- X[, h[[3 - d]]]
     keep <- apply(tr, 1, function(x) diff(range(x))) > 0 &
       apply(te, 1, function(x) diff(range(x))) > 0
-    fte <- clr_fit(te[keep, ]); ut <- upper.tri(fte$clr_scores)
-    sv <- fte$clr_scores[ut]; target <- as.integer(sv >= stats::quantile(sv, 0.99))
-    A <- make_A(tr[keep, ])
+    fte <- clr_fit(te[keep, ])
+    si <- which(rownames(X)[keep] %in% sgenes)
+    ut <- upper.tri(matrix(0, length(si), length(si)))
+    sv <- fte$clr_scores[si, si][ut]; target <- as.integer(sv >= stats::quantile(sv, 0.99))
+    fte$release(FALSE); rm(fte, sv)
+    A <- make_A(tr[keep, ]); rm(tr, te)
     all_t <- sort(unique(c(grid, 3L, 5L, 6L, 7L, 10L, 12L)))
-    Sm <- att_mass(A, all_t)
-    crit <- vapply(Sm, function(S) pr_summary(S[ut], target)[["aupr"]], numeric(1))
+    crit <- stats::setNames(numeric(length(all_t)), all_t)
+    att_walk(A, all_t, function(S, t) crit[[as.character(t)]] <<- ap_fast(S[si, si][ut], target))
+    rm(A); invisible(gc(verbose = FALSE))
     best <- c(best, as.integer(names(crit)[which.max(crit)]))
   }
   t <- as.integer(round(exp(mean(log(best)))))
@@ -229,82 +241,115 @@ comembership_truth <- function(S, genes, gt) {
   c(n_regulons = length(mem), comember_aupr_ratio = ps[["aupr"]] / mean(pairs$label))
 }
 
-## ---- main loop: one task per dataset x gene set, in parallel ----------------
-run_case <- function(ds, N) {
-  rows <- list(); crow <- list()
+## ---- main loop: one task per dataset (x gene set), in parallel ---------------
+# Gene context (--context, COMPUTE_CONSTRAINTS item 9): "none" builds CLR and
+# the operators on BEELINE's selected genes only (BEELINE's protocol; one
+# task per dataset x gene set). A number K builds them on the K most variable
+# expressed genes (GeneOrdering.csv variance) plus the selected genes; "all"
+# on every expressed gene (non-zero in >= 1% of cells). Scoring is always on
+# the selected genes, so only each gene's CLR background and the attention
+# paths change. With a context, one fit per dataset serves both gene sets.
+context_genes <- function(ex, ds, score_genes) {
+  expressed <- rownames(ex)[rowMeans(ex > 0) >= 0.01]
+  if (opt$context == "all") return(union(score_genes, expressed))
+  go <- utils::read.csv(file.path(expr_dir, ds, "GeneOrdering.csv"),
+                        stringsAsFactors = FALSE, check.names = FALSE)
+  names(go)[1] <- "gene"
+  go <- go[go$gene %in% expressed, ]
+  union(score_genes, utils::head(go$gene[order(-go$Variance)], as.integer(opt$context)))
+}
+run_case <- function(ds, Ns) {
+  rows <- list(); crow <- list(); grs <- list(); drow <- list()
   ex <- utils::read.csv(file.path(expr_dir, ds, "ExpressionData.csv"),
                         row.names = 1, check.names = FALSE)
   ex <- as.matrix(ex)
   gts <- lapply(truths(ds), function(f) utils::read.csv(f, stringsAsFactors = FALSE))
-  sel <- select_genes(ds, N)
-  X <- ex[intersect(sel$genes, rownames(ex)), , drop = FALSE]; rm(ex)
+  sels <- stats::setNames(lapply(Ns, function(N) select_genes(ds, N)), Ns)
+  score_genes <- unique(unlist(lapply(sels, `[[`, "genes")))
+  fit_genes <- if (opt$context == "none") score_genes else context_genes(ex, ds, score_genes)
+  X <- ex[intersect(fit_genes, rownames(ex)), , drop = FALSE]; rm(ex)
   X <- X[apply(X, 1, function(x) diff(range(x))) > 0, , drop = FALSE]
   genes <- rownames(X)
-  say(sprintf("%s TFs+%d: %d genes (%d TFs) x %d cells", ds, N, nrow(X),
-              sum(toupper(genes) %in% sel$tfs), ncol(X)))
+  sg <- genes[genes %in% score_genes]            # scored genes, in fit order
+  si <- match(sg, genes)
+  tag <- paste0(ds, " TFs+", paste(Ns, collapse = "/"))
+  say(sprintf("%s: fit on %d genes (context %s), scored on %d genes x %d cells",
+              tag, nrow(X), opt$context, length(sg), ncol(X)))
   Z <- Zs(X); R <- tcrossprod(Z) / (ncol(Z) - 1)
-  Rs <- stats::cor(t(X), method = "spearman")
   f <- clr_fit(X); M <- f$mi; diag(M) <- 0
   t_soft <- heldout_depth(X, function(Y) { g <- clr_fit(Y); A <- soft_op(g); g$release(FALSE); A },
-                          paste(ds, N, "soft10"))
-  t_pear <- heldout_depth(X, function(Y) pear_op(stats::cor(t(Y))), paste(ds, N, "pearson_top10"))
-  depth <- data.frame(dataset = ds, N = N, t_soft10 = t_soft, t_pearson = t_pear)
-  S <- list(abs_pearson = abs(R), abs_spearman = abs(Rs),
-            partial_cor = partial_cor(Z), mi = M, clr = f$clr_scores)
-  S[[sprintf("clr_attention_soft10_t%d", t_soft)]] <- att_mass(soft_op(f), t_soft)[[1]]
-  S[[sprintf("pearson_attention_top10_t%d", t_pear)]] <- att_mass(pear_op(R), t_pear)[[1]]
-  f$release(FALSE); rm(f, Z, R, Rs, M)
-  S <- lapply(S, function(s) { s[is.na(s)] <- 0; diag(s) <- 0; s })
-  for (tn in names(gts)) for (m in names(S)) {
-    r <- score_truth(S[[m]], genes, NULL, gts[[tn]])
-    if (is.null(r)) next
-    rows[[length(rows) + 1L]] <- data.frame(dataset = ds, N = N, truth = tn,
-                                            method = sub("_t[0-9]+$", "", m),
-                                            depth = suppressWarnings(as.integer(sub("^.*_t", "", m))),
-                                            t(r))
-  }
-  for (m in names(S)) {
-    r <- comembership_truth(S[[m]], genes, gts$celltype_ChIP)
-    if (is.null(r)) next
-    crow[[length(crow) + 1L]] <- data.frame(dataset = ds, N = N,
-                                            method = sub("_t[0-9]+$", "", m), t(r))
-  }
-  gr <- graded_chip(S, genes, ds)
-  if (!is.null(gr)) gr <- cbind(dataset = ds, N = N, gr)
-  # Depth diagnostic (never used to choose t): CLR attention at fixed depths.
-  drow <- list()
-  Sd <- att_mass(soft_op(clr_fit(X)), c(1, 2, 4, 8, 16))
-  for (tt in names(Sd)) {
-    Sx <- Sd[[tt]]; Sx[is.na(Sx)] <- 0; diag(Sx) <- 0
-    for (tn in names(gts)) {
-      r <- score_truth(Sx, genes, NULL, gts[[tn]])
+                          paste(tag, "soft10"), sg)
+  t_pear <- heldout_depth(X, function(Y) pear_op(stats::cor(t(Y))), paste(tag, "pearson_top10"), sg)
+  depth <- data.frame(dataset = ds, N = paste(Ns, collapse = "/"), context = opt$context,
+                      n_fit_genes = nrow(X), t_soft10 = t_soft, t_pearson = t_pear)
+  # every score matrix is cut to the scored genes as soon as it exists
+  cut <- function(s) { s <- s[si, si, drop = FALSE]; s[is.na(s)] <- 0; diag(s) <- 0; s }
+  S <- list(abs_pearson = cut(abs(R)),
+            abs_spearman = cut(abs(stats::cor(t(X), method = "spearman"))),
+            partial_cor = cut(partial_cor(Z)), mi = cut(M), clr = cut(f$clr_scores))
+  rm(Z, M); invisible(gc(verbose = FALSE))
+  # Depth diagnostic (never used to choose t) shares the walk with t*.
+  Sdiag <- list()
+  att_walk(soft_op(f), sort(unique(c(1, 2, 4, 8, 16, t_soft))), function(St, t) {
+    if (t == t_soft) S[[sprintf("clr_attention_soft10_t%d", t_soft)]] <<- cut(St)
+    if (t %in% c(1, 2, 4, 8, 16)) Sdiag[[as.character(t)]] <<- cut(St)
+  })
+  S[[sprintf("pearson_attention_top10_t%d", t_pear)]] <- cut(att_mass(pear_op(R), t_pear)[[1]])
+  f$release(FALSE); rm(f, R, X); invisible(gc(verbose = FALSE))
+  for (N in Ns) {
+    gN <- sg[sg %in% sels[[as.character(N)]]$genes]
+    ix <- match(gN, sg)
+    SN <- lapply(S, function(s) s[ix, ix, drop = FALSE])
+    for (tn in names(gts)) for (m in names(SN)) {
+      r <- score_truth(SN[[m]], gN, NULL, gts[[tn]])
+      if (is.null(r)) next
+      rows[[length(rows) + 1L]] <- data.frame(dataset = ds, N = N, truth = tn,
+                                              method = sub("_t[0-9]+$", "", m),
+                                              depth = suppressWarnings(as.integer(sub("^.*_t", "", m))),
+                                              t(r))
+    }
+    for (m in names(SN)) {
+      r <- comembership_truth(SN[[m]], gN, gts$celltype_ChIP)
+      if (is.null(r)) next
+      crow[[length(crow) + 1L]] <- data.frame(dataset = ds, N = N,
+                                              method = sub("_t[0-9]+$", "", m), t(r))
+    }
+    gr <- graded_chip(SN, gN, ds)
+    if (!is.null(gr)) grs[[length(grs) + 1L]] <- cbind(dataset = ds, N = N, gr)
+    for (tt in names(Sdiag)) for (tn in names(gts)) {
+      r <- score_truth(Sdiag[[tt]][ix, ix, drop = FALSE], gN, NULL, gts[[tn]])
       if (!is.null(r)) drow[[length(drow) + 1L]] <- data.frame(dataset = ds, N = N, truth = tn,
                                                                depth = as.integer(tt), t(r))
     }
   }
-  rm(Sd)
   res <- do.call(rbind, rows)
   cur <- res[res$truth == "celltype_ChIP", ]
   for (k in seq_len(nrow(cur)))
     say(sprintf("    %s TFs+%d %-28s AUPRC ratio %.3f  EPR %.3f  (celltype ChIP)",
-                ds, N, cur$method[k], cur$auprc_ratio[k], cur$epr[k]))
-  rm(S); invisible(gc())
-  list(rows = res, crow = do.call(rbind, crow), depth = depth, graded = gr,
+                ds, cur$N[k], cur$method[k], cur$auprc_ratio[k], cur$epr[k]))
+  rm(S, Sdiag); invisible(gc())
+  list(rows = res, crow = do.call(rbind, crow), depth = depth, graded = do.call(rbind, grs),
        diag = do.call(rbind, drow))
 }
 
-cases <- expand.grid(N = as.integer(strsplit(opt$N, ",")[[1]]),
-                     ds = strsplit(opt$datasets, ",")[[1]], stringsAsFactors = FALSE)
+Ns_all <- as.integer(strsplit(opt$N, ",")[[1]])
+dss <- strsplit(opt$datasets, ",")[[1]]
+cases <- if (opt$context == "none") {
+  g <- expand.grid(N = Ns_all, ds = dss, stringsAsFactors = FALSE)
+  lapply(seq_len(nrow(g)), function(k) list(ds = g$ds[k], Ns = g$N[k]))
+} else lapply(dss, function(d) list(ds = d, Ns = Ns_all))
 source(file.path(script_dir, "parallel.R"))
 pc <- par_start(mem_gb = opt$mem_gb, workers = opt$workers, say = say)
-out <- foreach(ci = seq_len(nrow(cases)), .inorder = TRUE, .errorhandling = "pass") %dopar% {
+out <- foreach(ci = seq_along(cases), .inorder = TRUE, .errorhandling = "pass") %dopar% {
   if (par_should_stop()) return(NULL)
   set.seed(opt$seed + ci)
-  run_case(cases$ds[ci], cases$N[ci])
+  run_case(cases[[ci]]$ds, cases[[ci]]$Ns)
 }
 par_stop(pc)
 bad <- vapply(out, function(x) inherits(x, "error"), NA)
-if (any(bad)) say("cases failed: ", paste(sprintf("%s/%d: %s", cases$ds[bad], cases$N[bad],
+if (any(bad)) say("cases failed: ", paste(sprintf("%s/%s: %s",
+                                                  vapply(cases[bad], `[[`, "", "ds"),
+                                                  vapply(cases[bad], function(x) paste(x$Ns, collapse = "/"), ""),
                                                   vapply(out[bad], conditionMessage, "")),
                                           collapse = " | "))
 out <- out[!bad & !vapply(out, is.null, NA)]
