@@ -6,7 +6,7 @@
 
 ## Abstract
 
-Attention weights each element of a set by its normalized compatibility with every other element.  The idea predates neural networks; kernel regression and fast-weight programmers are earlier instances.  In computational biology, context likelihood of relatedness (CLR), a 2007 gene-network method still in wide use, was arguably the first attention operator to become a standard tool.  CLR computes attention scores from data alone, z-scoring each gene's dependence on every other gene against that gene's own background, but never used them as attention.  Here we bring back to CLR the advances attention research made in language modelling:  a temperature-controlled softmax, iterated attention, and depth chosen on held-out laboratories.  On *Escherichia coli*, regulon recovery improves by 15% and per-regulon coherence rises, robustly across 1,000 resamplings of experiments.  The gain requires CLR's context normalization, not a particular dependence measure.  The estimated attention also identifies perturbation targets beyond differential expression.
+Attention weights each element of a set by its normalized compatibility with every other element.  The idea predates neural networks; kernel regression and fast-weight programmers are earlier instances.  In computational biology, context likelihood of relatedness (CLR), a 2007 method that remains a standard for de novo gene-network inference, was arguably the first attention operator in wide use.  CLR computes attention scores from data alone, z-scoring each gene's dependence on every other gene against that gene's own background, but never used them as attention.  Here we bring back to CLR the advances attention research made in language modelling:  a temperature-controlled softmax, iterated attention, and depth chosen on held-out laboratories.  On *Escherichia coli*, regulon recovery improves by 15% and per-regulon coherence rises, robustly across 1,000 resamplings of experiments.  The gain requires CLR's context normalization, not a particular dependence measure.  The estimated attention also identifies perturbation targets beyond differential expression.
 
 ---
 
@@ -25,7 +25,12 @@ Context likelihood of relatedness (CLR; Faith, Hayete et al. 2007) infers gene r
 
 That last step is what made CLR work.  A gene that is weakly dependent on everything is not a hub, and a modest dependence that stands out from a gene's background is a candidate regulatory link.
 
-CLR became a standard tool.  It was one of the "well-established off-the-shelf" methods benchmarked in the DREAM5 network-inference challenge, and a component of several of that challenge's ensemble predictors (Marbach et al. 2012).  It has remained in routine use for nearly two decades.  On the single-cell benchmark we use here it is the strongest of the methods we evaluated.  It is not the best method on every benchmark:  in DREAM5, newer methods such as tree ensembles outperformed it.  To our knowledge, CLR is the first attention-style operator to be widely adopted in computational biology.
+CLR became a standard tool for *de novo* network inference, that is, inference from expression data alone without prior knowledge.  Methods that add informative priors, such as known pathways, binding motifs or curated interactions, can outperform it, but they answer a different question.  Among methods that start from expression alone, CLR has remained a standard reference for nearly two decades:
+
+- it was one of the "well-established off-the-shelf" methods benchmarked in the DREAM5 network-inference challenge, and a component of several of that challenge's ensemble predictors (Marbach et al. 2012);
+- on the single-cell benchmark we use here, it is the strongest of the methods we evaluated.
+
+It is not the top scorer on every benchmark.  In DREAM5, tree-ensemble and other newer expression-only methods scored higher.  But its simplicity, speed and stability across data types have kept it the usual baseline.  To our knowledge, CLR is the first attention-style operator to be widely adopted in computational biology.
 
 CLR, however, stopped at the scores.  It ranked them as edges and never applied the rest of attention:  a temperature-controlled normalization, aggregation, or depth.  Over the same two decades, attention research in natural-language processing turned those components into a mature toolkit.  The aim of this work is to bring that toolkit back to the setting where CLR has proved durable, and to measure what each component adds.
 
