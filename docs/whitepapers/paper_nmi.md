@@ -6,7 +6,7 @@
 
 ## Abstract
 
-Attention mechanisms weight each element of a set by its normalized compatibility with every other element.  In neural networks those compatibilities are learned.  Here we show that context likelihood of relatedness (CLR), a 2007 gene-network method, computes attention scores from data alone:  each gene's statistical dependence on every other gene, z-scored against that gene's own background.  CLR never used these scores as attention.  Completing it with a temperature-controlled softmax and iterated attention, with depth chosen on held-out laboratories, improves recovery of *Escherichia coli* regulons by 15% and raises per-regulon coherence, robustly across 1,000 resamplings of experiments.  Ablations show that it requires the per-gene context normalization, whereas the choice of dependence measure matters little.  The same estimated attention identifies the targets of perturbed regulators beyond differential expression once gene variance is controlled, a task on which learned attention from single-cell foundation models has not beaten trivial baselines.
+Attention weights each element of a set by its normalized compatibility with every other element.  The idea predates neural networks; kernel regression and fast-weight programmers are earlier instances.  In computational biology, context likelihood of relatedness (CLR), a 2007 gene-network method still in wide use, was arguably the first attention operator to become a standard tool.  CLR computes attention scores from data alone, z-scoring each gene's dependence on every other gene against that gene's own background, but never used them as attention.  Here we bring back to CLR the advances attention research made in language modelling:  a temperature-controlled softmax, iterated attention, and depth chosen on held-out laboratories.  On *Escherichia coli*, regulon recovery improves by 15% and per-regulon coherence rises, robustly across 1,000 resamplings of experiments.  The gain requires CLR's context normalization, not a particular dependence measure.  The estimated attention also identifies perturbation targets beyond differential expression.
 
 ---
 
@@ -14,7 +14,7 @@ Attention mechanisms weight each element of a set by its normalized compatibilit
 
 Attention is now the dominant way that machine-learning models relate the elements of a set.  For each query, a compatibility with every key is computed, normalized across keys (usually by a softmax with a temperature), and used to aggregate values.  Stacking or iterating the operation lets information flow along multi-step paths.  In transformers, the compatibilities are dot products of learned embeddings, and the network learns what to attend to from large corpora.
 
-The pattern is older than its neural form.  Kernel regression (Nadaraya 1964; Watson 1964) weights observations by normalized similarity to a query, and fast-weight programmers (Schmidhuber 1991) are formally equivalent to linear attention (Schlag et al. 2021).  We point out a third, independent instance from computational biology, one that differs from both in an instructive way.
+The pattern is older than its neural form, and we make no claim that CLR invented it.  Kernel regression (Nadaraya 1964; Watson 1964) weights observations by their normalized similarity to a query and has been a standard statistical tool for decades.  Fast-weight programmers (Schmidhuber 1991) are formally equivalent to linear attention (Schlag et al. 2021).  Our claim is narrower.  In computational biology, attention entered everyday practice through a different door, years before neural attention (Bahdanau et al. 2014; Vaswani et al. 2017).
 
 Context likelihood of relatedness (CLR; Faith, Hayete et al. 2007) infers gene regulatory networks from expression compendia.  For every gene it estimates the mutual information (MI) with every other gene, then expresses each value as a z-score against the distribution of that gene's MI with all genes.  In attention terms:
 
@@ -23,7 +23,11 @@ Context likelihood of relatedness (CLR; Faith, Hayete et al. 2007) infers gene r
 - the compatibility is an *estimated* statistical dependence, not a learned dot product;
 - the normalization is per query, against the query's own context.
 
-That last step is what made CLR work.  A gene that is weakly dependent on everything is not a hub, and a modest dependence that stands out from a gene's background is a candidate regulatory link.  CLR, however, stopped at the scores.  It ranked them as edges and never applied the rest of attention:  a temperature-controlled normalization, aggregation, or depth.
+That last step is what made CLR work.  A gene that is weakly dependent on everything is not a hub, and a modest dependence that stands out from a gene's background is a candidate regulatory link.
+
+CLR became a standard tool.  It was one of the "well-established off-the-shelf" methods benchmarked in the DREAM5 network-inference challenge, and a component of several of that challenge's ensemble predictors (Marbach et al. 2012).  It has remained in routine use for nearly two decades.  On the single-cell benchmark we use here it is the strongest of the methods we evaluated.  It is not the best method on every benchmark:  in DREAM5, newer methods such as tree ensembles outperformed it.  To our knowledge, CLR is the first attention-style operator to be widely adopted in computational biology.
+
+CLR, however, stopped at the scores.  It ranked them as edges and never applied the rest of attention:  a temperature-controlled normalization, aggregation, or depth.  Over the same two decades, attention research in natural-language processing turned those components into a mature toolkit.  The aim of this work is to bring that toolkit back to the setting where CLR has proved durable, and to measure what each component adds.
 
 Here we complete the operator and ask what each component contributes.  Three findings stand out:
 
@@ -242,4 +246,4 @@ The gains are modest in absolute terms:  about 0.02 AUPR, 15% relative.  They ar
 
 ## References (working list)
 
-Bahdanau, Cho & Bengio 2014; Cosgrove et al. 2008, *Bioinformatics*; Cowen et al. 2017, *Nat. Rev. Genet.*; Daub et al. 2004, *BMC Bioinformatics*; Faith, Hayete et al. 2007, *PLoS Biol.*; Faith et al. 2008, *Nucleic Acids Res.* (M3D); Hacine-Gharbi et al. 2012; Kendiukhov 2026, *BMC Genomics*; Kondor & Lafferty 2002, *ICML*; Nadaraya 1964; Pratapa et al. 2020, *Nat. Methods*; Schlag, Irie & Schmidhuber 2021, *ICML*; Schmidhuber 1991; Vaswani et al. 2017; Watson 1964; Zhou & Schölkopf 2004.
+Bahdanau, Cho & Bengio 2014; Cosgrove et al. 2008, *Bioinformatics*; Cowen et al. 2017, *Nat. Rev. Genet.*; Daub et al. 2004, *BMC Bioinformatics*; Faith, Hayete et al. 2007, *PLoS Biol.*; Faith et al. 2008, *Nucleic Acids Res.* (M3D); Hacine-Gharbi et al. 2012; Kendiukhov 2026, *BMC Genomics*; Kondor & Lafferty 2002, *ICML*; Marbach et al. 2012, *Nat. Methods* (DREAM5); Nadaraya 1964; Pratapa et al. 2020, *Nat. Methods*; Schlag, Irie & Schmidhuber 2021, *ICML*; Schmidhuber 1991; Vaswani et al. 2017; Watson 1964; Zhou & Schölkopf 2004.
