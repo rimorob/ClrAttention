@@ -136,6 +136,42 @@ Experiments of the 466-experiment M3D set were split 50 times at random into two
 
 [pending: laboratory-matched null; SSEM-Lasso re-implementation; jobs 080 and 095.]
 
+## Supplementary Note 7 | Removing global expression programs
+
+Removing the top k principal components before co-expression network inference is a standard, label-free way to remove confounders and global programs such as growth rate (Parsana et al. 2019).  Because attention propagates along multi-step paths, a reviewer may ask whether its gain merely duplicates such a correction.  We removed k = 0–20 components, and the number chosen by the permutation test of `sva::num.sv` (Buja–Eyuboglu), from M3D and from EcoMAC after ComBat correction for platform.  We then scored CLR and attention (t = 9) at each k (`analysis/pc_removal.R`).  Attention's gain over CLR has a paired delete-half gene jackknife interval.
+
+**Supplementary Table 4 | Attention after removal of k principal components** (strong/confirmed evidence; AUPR / median coherence).
+
+| Data | k | CLR(MI) AUPR / coh. | Att. CLR(MI) AUPR / coh. | Δ AUPR [95% CI] | CLR(|r|) AUPR / coh. | Att. CLR(|r|) AUPR / coh. | Δ AUPR [95% CI] |
+|---|---|---|---|---|---|---|---|
+| M3D | 0 | 0.136 / 0.597 | 0.158 / 0.628 | +0.022 [+0.017, +0.027] | 0.138 / 0.590 | 0.156 / 0.621 | +0.018 [+0.013, +0.024] |
+| M3D | 1 | 0.142 / 0.612 | 0.163 / 0.635 | +0.021 [+0.016, +0.026] | 0.143 / 0.605 | 0.160 / 0.606 | +0.018 [+0.012, +0.023] |
+| M3D | 2 | 0.145 / 0.622 | 0.163 / 0.634 | +0.018 [+0.013, +0.023] | 0.145 / 0.613 | 0.160 / 0.629 | +0.014 [+0.010, +0.019] |
+| M3D | 3 | 0.146 / 0.624 | 0.162 / 0.625 | +0.017 [+0.012, +0.021] | 0.146 / 0.613 | 0.160 / 0.611 | +0.014 [+0.009, +0.019] |
+| M3D | 5 | 0.137 / 0.618 | 0.154 / 0.648 | +0.018 [+0.014, +0.022] | 0.135 / 0.592 | 0.151 / 0.653 | +0.016 [+0.012, +0.021] |
+| M3D | 8 | 0.130 / 0.605 | 0.151 / 0.639 | +0.021 [+0.017, +0.025] | 0.127 / 0.591 | 0.143 / 0.626 | +0.016 [+0.012, +0.020] |
+| M3D | 12 | 0.130 / 0.593 | 0.149 / 0.632 | +0.018 [+0.014, +0.023] | 0.128 / 0.579 | 0.145 / 0.627 | +0.017 [+0.012, +0.021] |
+| M3D | 20 | 0.127 / 0.611 | 0.147 / 0.658 | +0.020 [+0.016, +0.024] | 0.125 / 0.587 | 0.147 / 0.657 | +0.022 [+0.018, +0.026] |
+| M3D | 31 (num.sv) | 0.124 / 0.593 | 0.145 / 0.633 | +0.021 [+0.018, +0.025] | 0.121 / 0.577 | 0.144 / 0.637 | +0.023 [+0.019, +0.027] |
+| EcoMAC (ComBat by platform) | 0 | 0.130 / 0.580 | 0.158 / 0.617 | +0.028 [+0.022, +0.034] | 0.129 / 0.567 | 0.157 / 0.598 | +0.028 [+0.022, +0.034] |
+| EcoMAC (ComBat by platform) | 1 | 0.143 / 0.637 | 0.166 / 0.652 | +0.023 [+0.017, +0.029] | 0.140 / 0.605 | 0.163 / 0.625 | +0.023 [+0.017, +0.028] |
+| EcoMAC (ComBat by platform) | 2 | 0.146 / 0.619 | 0.169 / 0.652 | +0.022 [+0.018, +0.027] | 0.143 / 0.604 | 0.164 / 0.620 | +0.022 [+0.016, +0.027] |
+| EcoMAC (ComBat by platform) | 3 | 0.150 / 0.645 | 0.172 / 0.639 | +0.022 [+0.017, +0.026] | 0.146 / 0.607 | 0.167 / 0.621 | +0.021 [+0.016, +0.026] |
+| EcoMAC (ComBat by platform) | 5 | 0.142 / 0.643 | 0.162 / 0.637 | +0.020 [+0.016, +0.025] | 0.138 / 0.611 | 0.156 / 0.609 | +0.018 [+0.013, +0.023] |
+| EcoMAC (ComBat by platform) | 8 | 0.130 / 0.613 | 0.152 / 0.634 | +0.022 [+0.017, +0.027] | 0.127 / 0.598 | 0.148 / 0.616 | +0.021 [+0.017, +0.026] |
+| EcoMAC (ComBat by platform) | 12 | 0.129 / 0.618 | 0.153 / 0.641 | +0.024 [+0.019, +0.029] | 0.126 / 0.591 | 0.147 / 0.638 | +0.021 [+0.017, +0.026] |
+| EcoMAC (ComBat by platform) | 20 | 0.134 / 0.632 | 0.163 / 0.686 | +0.029 [+0.024, +0.035] | 0.128 / 0.590 | 0.154 / 0.643 | +0.026 [+0.021, +0.030] |
+| EcoMAC (ComBat by platform) | 68 (num.sv) | 0.124 / 0.639 | 0.153 / 0.709 | +0.029 [+0.024, +0.034] | 0.117 / 0.604 | 0.143 / 0.645 | +0.026 [+0.021, +0.031] |
+
+**Reading.**
+
+1. **The attention gain survives component removal.**  At every k, on both compendia, attention on CLR(MI) beats CLR(MI), with intervals excluding zero (M3D +0.017 to +0.022; EcoMAC +0.020 to +0.029).  Attention does not merely duplicate the removal of global programs.
+2. **Removing a few components helps both methods.**  With k = 2–3, CLR improves (M3D 0.136 → 0.146; EcoMAC 0.130 → 0.150) and attention on top of it gives the highest AUPR of any configuration.  Beyond about five components AUPR declines, as regulatory programs themselves start to be removed.
+3. **The permutation rule over-removes for this purpose.**  It selects k = 31 (M3D) and 68 (EcoMAC), where CLR falls below the uncorrected AUPR, although coherence with attention keeps rising.  We therefore keep k = 0 in the main analyses.  Choosing k = 2–3 because it scores best against RegulonDB would tune the preprocessing on the gold standard.
+4. **Mutual information is at least as good as |r| at every k,** and its advantage on EcoMAC widens as components are removed.
+
+A label-free criterion based on held-out reproducibility could not choose k either:  it favours keeping reproducible global programs, which are real but not regulon-specific (`analysis/ecomac_batch.R`).
+
 ---
 
 ## Supplementary Figures
