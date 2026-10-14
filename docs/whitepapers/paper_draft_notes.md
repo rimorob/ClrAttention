@@ -1,6 +1,6 @@
 # CLR was an attention mechanism: completing it with softmax, aggregation and depth improves regulon recovery
 
-*Quick draft, 2026-10-14.  It assembles the findings logs (`methods.md`, `ecoli_m3d.md`, `beeline.md`) and the runs finished on crayon up to 2026-10-14 08:30.  Every number is provisional until the QC pass; numbers marked ⏳ will change when the queued full-scale analyses finish (section 8).*
+*Working notes behind the manuscript (`paper_nmi.md`, Nature Machine Intelligence format): full findings tables, the running-analysis queue and the journal assessment. Quick draft, 2026-10-14.  It assembles the findings logs (`methods.md`, `ecoli_m3d.md`, `beeline.md`) and the runs finished on crayon up to 2026-10-14 08:30.  Every number is provisional until the QC pass; numbers marked ⏳ will change when the queued full-scale analyses finish (section 8).*
 
 ---
 
