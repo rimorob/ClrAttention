@@ -10,7 +10,7 @@ kill_tree() {
   for c in $(pgrep -P "$p"); do kill_tree "$c"; done
   kill -TERM "$p" 2>/dev/null
 }
-pids=$(pgrep -f "bash jobs/running/")
+pids=$(pgrep -f "bash ${JOBS_ROOT:-jobs}/running/")
 [ -z "$pids" ] && { echo "no running job"; exit 0; }
 for p in $pids; do echo "killing job tree $p: $(ps -o args= -p "$p")"; kill_tree "$p"; done
 sleep 3

@@ -33,7 +33,13 @@ export R_LIBS_USER="$(Rscript -e 'cat(path.expand(Sys.getenv("R_LIBS_USER")))')"
 mkdir -p "$R_LIBS_USER"
 Rscript -e 'lib <- Sys.getenv("R_LIBS_USER"); .libPaths(c(lib, .libPaths())); for (p in c("R6","Rcpp","Matrix","foreach","doParallel","testthat","pkgload")) if (!requireNamespace(p, quietly = TRUE)) install.packages(p, lib = lib, repos = "https://cloud.r-project.org", Ncpus = 8)' \
   || die "installing R dependencies failed"
-R CMD INSTALL --preclean -l "$R_LIBS_USER" "$ROOT" || die "package build failed"
+# Build from a temporary copy: this checkout may be a cloud-synced folder shared
+# with the Mac, and an in-place build would write Linux object files into it.
+BUILD=$(mktemp -d)
+tar -C "$ROOT" --exclude=./data --exclude=./results --exclude=./jobs --exclude=./jobs_pc \
+    --exclude=./.git --exclude='*.o' --exclude='*.so' --exclude='*.bundle' -cf - . | tar -C "$BUILD" -xf -
+R CMD INSTALL --preclean -l "$R_LIBS_USER" "$BUILD" || die "package build failed"
+rm -rf "$BUILD"
 Rscript -e '.libPaths(c(Sys.getenv("R_LIBS_USER"), .libPaths())); library(clr); print(clr_openmp_info()); cat("BLAS:", extSoftVersion()[["BLAS"]], "\n")'
 
 mkdir -p data

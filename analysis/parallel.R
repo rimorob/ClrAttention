@@ -53,7 +53,7 @@ invisible(compiler::enableJIT(3L))
   if (is.na(p) || is.na(l) || p < 1L) 1L else max(1L, as.integer(l %/% p))
 }
 
-par_stop_file <- function() file.path("jobs", "control", "stop")
+par_stop_file <- function() file.path(Sys.getenv("JOBS_ROOT", "jobs"), "control", "stop")
 par_should_stop <- function() file.exists(par_stop_file())
 
 # Start the backend. mem_gb = peak RAM of one task (measured); the worker
