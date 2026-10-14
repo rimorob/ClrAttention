@@ -18,7 +18,7 @@ On the *E. coli* M3D compendium (466 experiments) scored against RegulonDB, the 
 
 Three controls show where the gain comes from:
 
-- The identical construction on correlation gives no gain, so the gain requires the calibrated MI kernel.
+- The gain requires CLR's context normalization, not MI as such.  The same propagation without CLR calibration loses most of the gain (section 3.6), while CLR on correlation works as well as CLR on MI in bulk data.
 - A hard-thresholded operator gains less, so the softmax matters.
 - Coherence peaks at intermediate depth, so depth trades sharpness against reach.
 
@@ -42,7 +42,7 @@ CLR's estimated, calibrated attention needs no training corpus or embeddings, an
 
 **Relation to network propagation.**  Iterated attention through a lazy operator is a random walk on a graph.  It is mathematically related to diffusion kernels (Kondor & Lafferty 2002) and to label propagation (Zhou & Schölkopf 2004), and network propagation is a known "universal amplifier" in genomics (Cowen et al. 2017).  We accept this.  The contribution is not propagation itself.  It is:
 
-1. the kernel:  calibrated, context-normalized MI, which beats the same propagation on correlation;
+1. the kernel:  context-normalized (CLR) dependence scores.  The same softmax propagation on uncalibrated scores loses most of the gain.  Whether the dependence is MI or correlation matters little in bulk data (section 3.6);
 2. the attention design choices:  the softmax temperature, set by an effective neighbour count;
 3. a label-free, held-out procedure for choosing depth.
 
@@ -107,7 +107,7 @@ Every draw recomputes MI, CLR and attention from scratch.  The cluster draws (n 
 **Reading.**
 
 - The gain is not an artefact of pseudo-replication or of a few influential experiments.
-- It needs the CLR kernel:  propagation on correlation is flat on AUPR and costs coherence.
+- It needs CLR calibration:  hard top-10 propagation on raw correlation is flat on AUPR and costs coherence (section 3.6 separates calibration from softmax).
 - ⏳ These intervals hold t fixed.  The nested bootstrap, which re-selects t inside each of 1,000 draws, will give intervals for "attention at the depth the procedure would choose".
 
 ### 3.3 Sensitivity analyses that did not change the conclusion
@@ -137,6 +137,29 @@ Under the 2007 convention, candidate edges are (TF gene, gene) pairs scored by t
 | `pearson_top10`, t = 6 | 4.07 | 0.535 | 61/149 |
 
 Single-step CLR is the better *edge detector* at the top of the ranking.  Attention is the better *target-set ranker* across each TF's whole row.  That matches its gains on co-membership and coherence.  ⏳ The nested bootstrap adds intervals to both metrics.
+
+### 3.6 What the gain needs:  context normalization, not MI (preliminary)
+
+**Ablation on the 466 experiments.**  This is a point estimate at t = 8 on strong/confirmed evidence.  ⏳ Job 065 repeats it with each kernel's own held-out t* over 20 lab splits, with jackknife intervals.
+
+| Operator | Co-membership AUPR | Median coherence |
+|---|---|---|
+| CLR on B-spline MI (no attention) | 0.136 | 0.597 |
+| CLR on \|r\| (no attention) | 0.138 | 0.590 |
+| CLR on \|r\| of normal scores (no attention) | 0.133 | 0.591 |
+| Softmax attention on raw \|r\|, **no CLR** | 0.143 | 0.586 |
+| Softmax attention on raw MI, **no CLR** | 0.143 | 0.583 |
+| Softmax attention on CLR(\|r\|) | 0.155 | 0.622 |
+| Softmax attention on CLR(normal-score \|r\|) | 0.157 | 0.626 |
+| **Softmax attention on CLR(MI)** (`soft10`) | **0.157** | **0.632** |
+
+**Reading.**
+
+- **Propagation alone** buys about a third of the AUPR gain, and it *lowers* coherence.
+- **The rest of the AUPR gain, and all of the coherence gain,** appears only when the softmax acts on context-normalized scores.
+- **MI against correlation:**  the underlying dependence measure barely matters in this compendium, where 99% of selected edges are positively correlated.
+
+This sharpens the paper's thesis:  CLR's per-gene context normalization is the attention-score step, and attention needs it.  It also weakens any claim that the MI estimator itself is essential.
 
 ---
 
@@ -204,6 +227,21 @@ Single-step CLR is the better *edge detector* at the top of the ranking.  Attent
    - It is worse on full STRING, whose co-expression channel rewards direct correlation.
    - It wins against CLR in 28% of cases.
 3. **The cell-type ChIP truth and graded binding are at chance for every method.**  The median per-TF ρ with binding strength is between −0.04 and +0.02.  Binding is not regulation, and these truths cannot separate the methods.
+
+**Zero inflation and the dependence measure (small test, `analysis/beeline_blom_test.R`).**  Single-cell matrices are zero-inflated; in BEELINE's selected genes 11–38% of entries are zero, and far more in wider gene sets.  We gave each gene normal scores (Blom, (rank − 3/8)/(n + 1/4)) and recalibrated.  Results over 72 case × truth combinations:
+
+| Variant | ΔAUPRC ratio vs current CLR | Wins | p |
+|---|---|---|---|
+| CLR on \|r\| of normal scores, average ranks for ties ("CLR-NS") | **+0.115** | 57/72 | 1×10⁻⁶ |
+| Same, ties broken at random (mean of 10 draws) | +0.071 | 50/72 | 0.002 |
+| Same, ties broken at random (one draw) | +0.053 | 49/72 | 0.005 |
+| CLR on B-spline MI of normal scores | +0.021 | 46/72 | 0.42 |
+| CLR on Gaussian MI, −½ log(1 − r²), of normal scores | +0.013 | 37/72 | 0.40 |
+
+- **On single-cell data, CLR does not need MI.**  CLR on correlation of normal scores is the best CLR we have tested.
+- **Random tie-breaking is noisy** for truths with few edges, so average ranks are preferred.
+- **Attention on CLR-NS** helps on regulatory STRING (2.17 against 1.74) and ties on non-specific ChIP.  It loses on full STRING, whose co-expression channel rewards direct correlation.
+- **Status:**  these are point estimates, at depths chosen for raw CLR.  The queued runs add CLR-NS with its own held-out depth, in wider gene contexts and with bootstrap intervals.
 
 **Caveat this draft must resolve ⏳.**  BEELINE builds every network on 500–1,500 selected genes, 30–60% of them TFs.  CLR's calibration is background-dependent:  each gene's MI is judged against its distribution over *all other genes*.  A thin, TF-heavy background handicaps CLR, and with it the attention built on CLR.  The queued runs rebuild CLR on the 5,000 most variable genes and on all expressed genes (up to about 18,000), still scoring only BEELINE's gene sets.  A nested cell bootstrap then gives intervals.  The single-cell conclusion should wait for these runs.
 
