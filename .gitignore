@@ -18,3 +18,5 @@ tools/.Makevars.generated
 results_install.log
 jobs/
 data
+jobs_pc/
+runner_pc.out
