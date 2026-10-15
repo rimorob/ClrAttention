@@ -43,7 +43,8 @@ corum_sets <- function(genes, min_size = 3L, max_size = 200L, path = "data/human
   .as_sets(rep(nm, lengths(parts)), unlist(parts), genes, min_size, max_size, "complex")
 }
 response_sets <- function(genes, z_min = 0.5, min_size = 10L, max_size = 100L, p_max = 1e-3,
-                          path = "data/perturbseq/K562_essential_normalized_bulk_01.h5ad") {
+                          path = "data/perturbseq/K562_essential_normalized_bulk_01.h5ad",
+                          use = NULL) {   # use: knockdown ids (gene_transcript) allowed as modules
   rd <- function(p) rhdf5::h5read(path, p)
   cat_of <- function(grp, field) {                    # anndata categorical, old or new layout
     x <- rd(paste0(grp, "/", field))
@@ -53,10 +54,10 @@ response_sets <- function(genes, z_min = 0.5, min_size = 10L, max_size = 100L, p
   }
   Z <- rd("X")                                        # genes x knockdowns
   vg <- cat_of("/var", "gene_name")
-  pert <- as.character(rd("/obs/gene_transcript"))
+  pert <- cat_of("/obs", "gene_transcript")
   target <- vapply(strsplit(pert, "_"), `[`, "", 2)
   pval <- as.numeric(rd("/obs/energy_test_p_value"))
-  keep <- which(pval < p_max)
+  keep <- which(pval < p_max & (is.null(use) | pert %in% use))
   gi <- match(toupper(vg), toupper(genes))
   m <- list()
   for (j in keep) {
