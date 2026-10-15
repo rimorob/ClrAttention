@@ -35,7 +35,7 @@
 #   Rscript analysis/beeline.R [--beeline data/beeline] [--N 500,1000]
 #       [--datasets hESC,hHep,mDC,mESC,mHSC-E,mHSC-GM,mHSC-L]
 #       [--out results/beeline] [--threads N] [--workers W] [--mem_gb 1.5]
-#       [--context none|<K>|all]
+#       [--context none|<K>|all|driven]
 # The dataset x gene-set cases run in parallel (foreach over local cores
 # minus 2, capped by RAM; analysis/parallel.R), each under its own seed.
 
@@ -260,12 +260,18 @@ comembership_truth <- function(S, genes, gt) {
 # the operators on BEELINE's selected genes only (BEELINE's protocol; one
 # task per dataset x gene set). A number K builds them on the K most variable
 # expressed genes (GeneOrdering.csv variance) plus the selected genes; "all"
-# on every expressed gene (non-zero in >= 1% of cells). Scoring is always on
+# on every expressed gene (non-zero in >= 1% of cells); "driven" on expressed
+# genes that are multimodal or PC-driven (analysis/gene_filters.R; variance
+# ranking drops well-expressed genes). Scoring is always on
 # the selected genes, so only each gene's CLR background and the attention
 # paths change. With a context, one fit per dataset serves both gene sets.
 context_genes <- function(ex, ds, score_genes) {
   expressed <- rownames(ex)[rowMeans(ex > 0) >= 0.01]
   if (opt$context == "all") return(union(score_genes, expressed))
+  if (opt$context == "driven") {     # analysis/gene_filters.R: multimodal or PC-driven (BIC)
+    source(file.path(script_dir, "gene_filters.R"), local = TRUE)
+    return(union(score_genes, driven_genes(ex[expressed, , drop = FALSE], rule = "bic")))
+  }
   go <- utils::read.csv(file.path(expr_dir, ds, "GeneOrdering.csv"),
                         stringsAsFactors = FALSE, check.names = FALSE)
   names(go)[1] <- "gene"
