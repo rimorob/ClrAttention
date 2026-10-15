@@ -216,6 +216,32 @@ Removing the top k principal components before co-expression network inference i
 
 A label-free criterion based on held-out reproducibility could not choose k either:  it favours keeping reproducible global programs, which are real but not regulon-specific (`analysis/ecomac_batch.R`).
 
+## Supplementary Note 8 | The top principal components are sigma-factor and growth programs
+
+Removing the first two or three principal components improves both CLR and attention on M3D (Supplementary Note 7), so it matters what those components contain.  For each of the first five components of the 466-experiment compendium, we asked how well the absolute gene loading separates the members of a regulon from all other genes (AUROC; two-sided Mann–Whitney test, Benjamini–Hochberg adjusted; `analysis/pc_regulons.R`).  An AUROC of 0.5 means no association.
+
+**Supplementary Table 8 | Regulons on the top principal components** (AUROC of |loading|; * BH-adjusted P < 0.05; all evidence levels; percentage of variance explained in the header).
+
+| Gene set | n | PC1 (24.4%) | PC2 (9.6%) | PC3 (7.9%) | PC4 (6.6%) | PC5 (4.3%) |
+|---|---|---|---|---|---|---|
+| Ribosomal proteins (growth rate) | 54 | 0.98* | 0.22* | 0.64* | 0.46 | 0.42 |
+| σ28 (flagella, motility) | 73 | 0.55 | 0.80* | 0.82* | 0.66* | 0.45 |
+| FlhDC (flagellar master regulator) | 92 | 0.47 | 0.72* | 0.67* | 0.69* | 0.39* |
+| σ38 / σS (stationary phase, stress) | 331 | 0.64* | 0.56* | 0.63* | 0.58* | 0.59* |
+| Fis (growth phase) | 188 | 0.64* | 0.55* | 0.52 | 0.69* | 0.62* |
+| ArcA (respiration) | 232 | 0.60* | 0.59* | 0.54 | 0.64* | 0.67* |
+| σ70 (housekeeping) | 1596 | 0.56* | 0.55* | 0.54* | 0.62* | 0.60* |
+| σ32 (heat shock) | 146 | 0.53 | 0.45 | 0.50 | 0.50 | 0.46 |
+| σ24 (envelope stress) | 128 | 0.54 | 0.44* | 0.56* | 0.46 | 0.50 |
+| σ54 (nitrogen) | 136 | 0.48 | 0.44* | 0.37* | 0.48 | 0.53 |
+| CRP (carbon catabolite) | 551 | 0.51 | 0.50 | 0.50 | 0.63* | 0.54* |
+
+**PC1 (24% of variance) is growth rate.**  Ribosomal-protein genes separate almost perfectly (AUROC 0.98).  The experiments at the two extremes are 15–24 h biofilms on one side and early time points of rapidly growing cultures on the other.  The σS regulon (0.64) and Fis (0.64), whose levels track growth phase, lie along the same axis.
+
+**PC2 and PC3 are motility and stationary phase.**  The flagellar σ28 regulon and its master regulator FlhDC load strongly on both (σ28 0.80 and 0.82; FlhDC 0.72 and 0.67).  PC3 is anchored by dilution time courses into stationary phase and by σS (rpoS) experiments, and σS loads on it as well (0.63).  The end of PC2 opposite the motility genes is formed by experiments from a single overexpression series grown in 96-well plates, so this component mixes biology with a laboratory-specific culture condition.  The heat-shock (σ32), envelope-stress (σ24) and nitrogen (σ54) sigmulons show no enrichment, and neither do most specific transcription-factor regulons.
+
+**Implication.**  Bacterial expression variance is dominated by a few condition-specific programs, chiefly growth rate and the sigma-factor responses that accompany it (σS for stationary phase and stress, σ28 for motility).  Removing the top components therefore deletes genuine regulatory biology, not technical noise.  It helps the co-membership benchmark because these large, diffuse programs create many co-expressed pairs outside any specific regulon, and those pairs dilute the precision of regulon recovery.  Their removal is therefore a choice about which biology to emphasize, not a correction.  We keep all components in the main analyses.  Attention's gain over CLR persists after removal (Supplementary Note 7), so it is not explained by these global programs.  Whether the same holds in organisms without sigma-factor-dominated transcription is a question for human data [pending].
+
 ---
 
 ## Supplementary Figures
