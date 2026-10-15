@@ -105,7 +105,24 @@ The context normalization, and the attention built on it, help in every case.
 
 ## Supplementary Note 3 | Component ablation with held-out depth
 
-[pending: each of softmax on CLR(MI), CLR(|r|), CLR-NS, raw |r| and raw MI at its own held-out depth over 20 laboratory splits, with jackknife intervals; `analysis/lab_splits.R`, job 065.]
+Each operator applies the same softmax (10 effective neighbours, 50 candidates) to a different score matrix.  Its depth is chosen by its own held-out criterion over 20 random laboratory splits:  how well attention on one half of the laboratories reproduces the top 1% of the *same* score matrix computed on the other half (`analysis/lab_splits.R --ops ...`).  Intervals are paired delete-half gene jackknife (AUPR, ±1.96 SE) and regulon bootstrap (coherence) relative to CLR on MI without attention.
+
+**Supplementary Table 5 | Component ablation at held-out depths** (466 experiments; SC = strong/confirmed evidence).
+
+| Scores fed to the softmax | Context-normalized | t* | AUPR, SC | Δ AUPR, SC | Coherence, SC | Δ coherence, SC | Δ AUPR, all evidence |
+|---|---|---|---|---|---|---|---|
+| CLR scores ranked directly | yes | — | 0.136 | — | 0.597 | — | — |
+| Raw \|r\|, no CLR | no | 8 | 0.143 | +0.008 [+0.003, +0.012] | 0.586 | +0.005 [−0.004, +0.017] | −0.005 [−0.010, −0.001] |
+| Raw mutual information, no CLR | no | 6 | 0.143 | +0.007 [+0.001, +0.012] | 0.585 | +0.007 [−0.008, +0.018] | −0.002 [−0.007, +0.002] |
+| CLR on \|r\| | yes | 7 | 0.153 | +0.017 [+0.011, +0.024] | 0.620 | +0.030 [+0.015, +0.044] | +0.002 [−0.003, +0.006] |
+| CLR on \|r\| of normal scores | yes | 5 | 0.151 | +0.015 [+0.009, +0.021] | 0.632 | +0.032 [+0.018, +0.043] | +0.002 [−0.002, +0.006] |
+| CLR on mutual information | yes | 9 | 0.158 | +0.022 [+0.016, +0.028] | 0.628 | +0.031 [+0.019, +0.044] | +0.009 [+0.005, +0.012] |
+
+**Notes.**
+
+- **The criteria differ by operator.**  Each t* is self-consistent, so the depths are internally valid but criterion values cannot be compared across operators.  These intervals do not include the uncertainty of choosing t*.
+- **At all evidence levels,** only attention on CLR(MI) keeps a significant AUPR gain at its own t*.  At t = 8, CLR on normal-score |r| is also significant (+0.005; +0.001 to +0.010).  Raw |r| without CLR is significantly *below* CLR.
+- **Coherence at all evidence levels** stays significant for all three context-normalized kernels.
 
 ## Supplementary Note 4 | Depth selection
 
@@ -130,11 +147,38 @@ Experiments of the 466-experiment M3D set were split 50 times at random into two
 
 ## Supplementary Note 5 | Nested bootstrap
 
-[pending: 1,000 cluster draws with t re-selected per draw, including the TF-node metrics; job 070.]
+Each of 1,000 cluster draws (466 experiments resampled with replacement, one replicate array per occurrence; the same draws as the fixed-depth bootstrap, identical to within 10⁻¹² for shared methods) repeats the full procedure.  The draw's laboratories are split at random, t is selected on that split from t = 1–32, 40, 48, 56, 64, and attention is scored at the draw's own t* (`analysis/nested_bootstrap.R`).  No selected depth reached 32.
+
+**Supplementary Table 6 | Nested bootstrap** (differences from CLR within draw; mean and 2.5–97.5% percentiles over 1,000 draws).
+
+| Evidence | Method | Depth | Δ co-membership AUPR | Δ coherence | Δ TF-node AUPR (× random) | Δ median per-TF AUROC |
+|---|---|---|---|---|---|---|
+| SC | Attention, own t* | median 10 (8–12) | +0.022 [+0.019, +0.026] | +0.026 [+0.008, +0.045] | −1.71 [−2.16, −1.27] | +0.027 [−0.010, +0.061] |
+| SC | Attention, t = 8 | 8 | +0.020 [+0.018, +0.023] | +0.028 [+0.010, +0.046] | −1.67 [−2.11, −1.25] | +0.031 [−0.004, +0.065] |
+| SC | pearson_top10, own t* | 6 | −0.002 [−0.006, +0.001] | −0.026 [−0.046, −0.005] | −2.48 [−3.00, −1.97] | −0.039 [−0.079, +0.008] |
+| All | Attention, own t* | median 10 | +0.009 [+0.006, +0.012] | +0.011 [−0.004, +0.025] | −1.10 [−1.39, −0.84] | +0.018 [−0.009, +0.046] |
+
+Attention at its own depth exceeded CLR on SC co-membership AUPR in all 1,000 draws.  The per-TF AUROC column is a difference of medians across transcription factors, not a median of per-factor differences.
 
 ## Supplementary Note 6 | Perturbation targets
 
-[pending: laboratory-matched null; SSEM-Lasso re-implementation; jobs 080 and 095.]
+Influence scores are calibrated against null removals of the same number of experiments.  Three nulls answer different questions:
+
+- **Random (500 draws per k):**  removals uniform over all experiments.  This can attribute laboratory effects to the perturbation.
+- **Laboratory-matched (500 per perturbation):**  for each laboratory holding n of the perturbation's experiments, n of that laboratory's other experiments are removed.  Laboratories with fewer than 10 possible subsets fall back to all experiments.  Matching was complete for 10 of 15 perturbations and partial for RyhB (0%), HU (7%), Fis (20%), FNR (50%) and σ38 (56%).
+- **Laboratory-matched excluding perturbation experiments** [pending, job 089]:  as above, with every experiment of any perturbation group excluded from the pools.
+
+**Supplementary Table 7 | Variance-stratified AUROC of attention-based influence against differential expression** (15 perturbations).
+
+| Null | Median AUROC | Beats DE | Paired Wilcoxon P |
+|---|---|---|---|
+| Random | 0.572 | 12/15 | 0.015 |
+| Laboratory-matched | 0.550 | 9/15 | 0.095 |
+| Laboratory-matched, excluding perturbation experiments | [pending] | | |
+
+Differential expression scores 0.516 under every null.  The laboratory-matched null is conservative.  In the Covert laboratory, 10 of the 12 other experiments are knockouts of related regulators (ArcA, FNR, AppY) with overlapping regulons, so the null removes related biology as well as the laboratory effect.  AppY z-scores under the two nulls correlate at only r = 0.48, and the null rests on 19–74 distinct subsets for several groups.  Among the 10 fully matched groups the median falls from 0.571 to 0.544.
+
+[pending: SSEM-Lasso (Cosgrove et al. 2008) re-implementation on the same perturbations, job 095.]
 
 ## Supplementary Note 7 | Removing global expression programs
 
