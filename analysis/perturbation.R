@@ -38,6 +38,12 @@
 # (choose(others, n_l) < 10, e.g. a lab whose only experiments are P's)
 # cannot support a matched null; its n_l are then drawn from all non-P
 # experiments, and the matched share of each null is logged and saved.
+# --null lab_nopert (added after QC, 2026-10-15): as "lab", but the matched
+# pools exclude every experiment that belongs to ANY perturbation group. In
+# the Covert lab, 10 of the 12 other experiments are knockouts of related
+# regulators (ArcA, FNR, AppY) with overlapping regulons, so the "lab" null
+# also removes related biology and is conservative; this version controls
+# the lab effect without that confound.
 #
 # SSEM-Lasso (--ssem 1, COMPUTE_CONSTRAINTS item 14): our re-implementation of
 # the network filter of Cosgrove, Zhou, Gardner & Kolaczyk (2008). For each
@@ -137,9 +143,10 @@ truth <- lapply(names(groups), function(k) {
 names(truth) <- names(groups)
 ok <- vapply(truth, function(t) sum(t$label[!t$exclude]) >= 5, NA)
 groups <- groups[ok]; truth <- truth[ok]
-stopifnot(opt$null %in% c("random", "lab"))
-null_key <- function(g) if (opt$null == "lab") g else as.character(length(groups[[g]]))
-if (opt$null == "lab") {
+stopifnot(opt$null %in% c("random", "lab", "lab_nopert"))
+null_key <- function(g) if (opt$null != "random") g else as.character(length(groups[[g]]))
+if (opt$null != "random") {
+  in_any_group <- unique(unlist(groups))
   desc <- utils::read.delim(file.path(opt$m3d, paste0(base, ".experiment_descriptions")),
                             stringsAsFactors = FALSE)
   exper <- sub("^.*experimenter:([^,]*).*$", "\\1", desc$description)
@@ -150,10 +157,11 @@ if (opt$null == "lab") {
   # Per group: labs that can be matched (>= 10 distinct subsets) and how many.
   match_plan <- lapply(groups, function(cols) {
     nl <- table(lab[cols])
-    pool <- lapply(names(nl), function(l) setdiff(E[lab == l], cols))
+    pool <- lapply(names(nl), function(l) setdiff(E[lab == l],
+      if (opt$null == "lab_nopert") in_any_group else cols))
     ok_l <- mapply(function(p, n) choose(length(p), n) >= 10, pool, as.integer(nl))
     list(n = as.integer(nl), pool = pool, matched = ok_l, labs = names(nl),
-         others = setdiff(E, cols))
+         others = setdiff(E, if (opt$null == "lab_nopert") in_any_group else cols))
   })
   matched_sample <- function(g) {
     mp <- match_plan[[g]]; out <- character(0)
@@ -175,7 +183,7 @@ for (k in names(groups))
               length(groups[[k]]),
               paste(unique(pg$type[pg$experiment_name %in% groups[[k]]]), collapse = "/"),
               sum(truth[[k]]$label),
-              if (opt$null == "lab") sprintf("; lab-matched null share %.0f%% [%s]",
+              if (opt$null != "random") sprintf("; lab-matched null share %.0f%% [%s]",
                 100 * match_info$matched_share[match_info$perturbation == k],
                 match_info$labs[match_info$perturbation == k]) else ""))
 
@@ -226,11 +234,11 @@ say(sprintf("full networks built in %.0f s", as.numeric(difftime(Sys.time(), t0,
 
 # Task list: B random delete-k draws per k (drawn here, in the original
 # order), then one delete-P fit per perturbation group.
-ks <- if (opt$null == "lab") names(groups) else sort(unique(lengths(groups)))
+ks <- if (opt$null != "random") names(groups) else sort(unique(lengths(groups)))
 tasks <- list()
 for (k in ks) for (b in seq_len(opt$B))
   tasks[[length(tasks) + 1L]] <- list(kind = "null", k = k, b = b,
-    keep = setdiff(E, if (opt$null == "lab") matched_sample(k) else sample(E, k)))
+    keep = setdiff(E, if (opt$null != "random") matched_sample(k) else sample(E, k)))
 for (g in names(groups))
   tasks[[length(tasks) + 1L]] <- list(kind = "pert", g = g,
                                       keep = setdiff(E, groups[[g]]))
