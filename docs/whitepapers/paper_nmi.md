@@ -67,6 +67,10 @@ Each t* is self-consistent, chosen by how well an operator reproduces its own sc
 
 On this single-platform compendium the dependence measure mattered little:  CLR on correlation performed like CLR on mutual information, consistent with 99% of selected relationships being positive and monotone.  Heterogeneous data behave differently.  On EcoMAC (Carrera et al. 2014), which pools 2,198 arrays from two Affymetrix platforms and other sources, platform offsets bend pairwise relationships into composite shapes that mutual information registers and correlation largely misses.  Without batch correction CLR on mutual information gives higher regulon coherence than CLR on correlation, and it keeps a smaller advantage after per-platform correction; attention helps in every configuration (Supplementary Note 1).
 
+### Shapley values rank the components
+
+To summarize which components carry the gain, we switched six of them on and off in all 64 combinations and computed exact Shapley values for each metric (Fig. 3; `analysis/shapley.R`).  The six are the dependence measure, the binning rule, context normalization, the softmax, depth, and removal of two global principal components.  For co-membership AUPR, depth contributes most (+0.018), followed by context normalization (+0.013) and the removal of global components (+0.012).  For coherence, context normalization contributes most (+0.025), and depth contributes nothing on average.  Depth hurts coherence when it acts on uncalibrated scores and helps when it acts on CLR scores with a softmax, so its average contribution is near zero.  Correspondingly, removing the softmax from the full model costs the most coherence (−0.043).  Mutual information and the common binning rule contribute little on this single-platform compendium.
+
 ### CLR remains the better detector of direct edges
 
 Regulon co-membership asks which genes are regulated together.  The benchmark of the original CLR study asks instead whether gene X is a direct target of transcription factor Y, scored using Y's own mRNA as a proxy for its activity (199 transcription factors, 3,971 positives, positive rate 0.48%).  On this task CLR wins clearly.  Its pooled AUPR, which is dominated by the strongest few hundred edges, is 6.75 times random against 5.15 for attention at t* = 8, and the nested bootstrap confirms the gap (attention minus CLR, −1.71 times random; −2.16 to −1.27).  Propagation dilutes the sharpest direct dependences.  The median of each transcription factor's ranking of all its candidate targets favours attention in point estimate (per-factor AUROC 0.623 against 0.595), but the difference between the two medians is not significant across draws (+0.027; −0.010 to +0.061; attention better for 56% of factors).  Single-step CLR should therefore be preferred for nominating direct regulatory edges, and attention for recovering co-regulated programs.
@@ -125,7 +129,9 @@ Several limitations apply.  RegulonDB evidence derives in part from expression s
 
 **Fig. 2 | Depth.**  Co-membership AUPR and regulon coherence against depth t for attention on CLR, attention on uncalibrated scores, and hard-threshold propagation.  The held-out t* distribution over laboratory splits is overlaid.
 
-**Fig. 3 | Robustness.**  Differences from CLR with 95% intervals under the gene jackknife, regulon bootstrap, cluster and replicate bootstraps, and nested bootstrap.
+**Fig. 3 | Component contributions.**  (a, b) Shapley waterfalls from the most performant configuration to the |r| baseline for co-membership AUPR and regulon coherence (M3D, strong/confirmed evidence), with 95% intervals from the gene jackknife and the regulon bootstrap.  (c) Loss when each component is removed from the full model.  Removal of two global components was chosen after inspecting Supplementary Note 7 and is not part of the main pipeline.  `figures/fig_shapley_SC.png`.
+
+**Fig. 3b (to be renumbered) | Robustness.**  Differences from CLR with 95% intervals under the gene jackknife, regulon bootstrap, cluster and replicate bootstraps, and nested bootstrap.
 
 **Fig. 4 | Edge detection against target ranking.**  Pooled TF→target AUPR and per-TF AUROC for CLR and attention across depths.
 
