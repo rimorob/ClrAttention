@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 namespace clr_core {
@@ -136,5 +137,64 @@ int openmp_max_threads();
 // NaNs poison every downstream stage; a constant MI row carries no signal.
 void clr_calibrate(const double *mi, std::size_t n_vars, Combine combine,
                    double *scores_out);
+
+// ---------------------------------------------------------------------------
+// Packed (tiled) MI -> CLR for large gene sets   (clr_packed.cpp)
+// ---------------------------------------------------------------------------
+//
+// Storage: the strict upper triangle, rows concatenated. Pair (i, j), i < j,
+// lives at packed_offset(i, n) + (j - i - 1) with
+// packed_offset(i, n) = i * n - i * (i + 1) / 2. The diagonal is not stored
+// (CLR zeroes it). A band of consecutive rows [a, b) is ONE contiguous slice,
+// the band primitive of the original miSubMarix(fromCol, toCol) in
+// InfoKit2.c: each thread computes its band's MI and writes it straight into
+// its own slice -- no per-band matrices, no copies, no locking.
+// Memory: n (n - 1) / 2 values of T (float in production: 0.65 GB at
+// n = 18,000, against 2.6 GB for ONE dense double matrix).
+inline std::size_t packed_size(std::size_t n) { return n * (n - 1) / 2; }
+inline std::size_t packed_offset(std::size_t i, std::size_t n) {
+  return i * n - i * (i + 1) / 2;
+}
+inline std::size_t packed_index(std::size_t i, std::size_t j, std::size_t n) {
+  if (i > j) std::swap(i, j);                       // requires i != j
+  return packed_offset(i, n) + (j - i - 1);
+}
+
+// Band start rows (size n_bands + 1, last element n) such that every band
+// holds (nearly) the same number of pairs (equal upper-triangle area).
+std::vector<std::size_t> equal_area_bands(std::size_t n, std::size_t n_bands);
+
+// MI of every pair i < j into `out` (packed, packed_size(n_vars) values).
+// Same weights, kernel and values as mi_matrix() (bit-identical for
+// T = double); T = float stores single precision. Bands of equal area are
+// distributed over OpenMP threads (dynamic schedule).
+template <typename T>
+void mi_packed(const double *data, std::size_t n_vars, std::size_t n_samples,
+               const int *bins_per_var, int spline_order, T *out,
+               int n_threads = 0);
+
+// CLR calibration IN PLACE on a packed MI triangle; same definition as
+// clr_calibrate() (diagonal counted as 0 in each row's mean and sd, sample
+// sd, negatives clipped, Euclidean or Stouffer combination). Row sums are
+// accumulated over partners in ascending index order -- the dense row order
+// -- so for T = double the scores are bit-identical to clr_calibrate().
+// Statistics are accumulated in double for T = float.
+template <typename T>
+void clr_calibrate_packed(T *packed, std::size_t n_vars, Combine combine);
+
+// Readers.
+// Dense symmetric n x n (row-major), diagonal 0.
+template <typename T>
+void packed_to_dense(const T *packed, std::size_t n, double *out);
+// Block on genes idx[0..m) (0-based), m x m row-major, diagonal 0.
+template <typename T>
+void packed_block(const T *packed, std::size_t n, const std::size_t *idx,
+                  std::size_t m, double *out);
+// Per row: the k largest POSITIVE scores (ties: lower index first, the order
+// of R's order(decreasing = TRUE)); idx_out/val_out are n x k row-major,
+// padded with -1 / 0 when a row has fewer than k positive scores.
+template <typename T>
+void packed_topk(const T *packed, std::size_t n, std::size_t k, int *idx_out,
+                 double *val_out);
 
 }  // namespace clr_core
