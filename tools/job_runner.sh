@@ -9,7 +9,9 @@
 # It also starts the control channel for the same root (tools/control_runner.sh),
 # which runs <root>/control/*.sh immediately, e.g. to stop the current job:
 #     cp tools/kill_running_job.sh <root>/control/
-# A job file is run only once it has been unchanged for 30 s, so a file still
+# The queue is rescanned after every job (name order = priority, including
+# jobs added while another was running). A job file is run only once it has
+# been unchanged for 30 s, so a file still
 # arriving through cloud sync is not run half-written.
 # SECURITY: anything placed in <root>/queue/*.sh is executed as you. Only this
 # repo folder is watched.
@@ -32,6 +34,7 @@ while true; do
     rc=$?
     mv "$ROOT/running/$b.sh" "$ROOT/done/$b.sh"
     echo "$(date '+%F %T') END $b rc=$rc" >> "$ROOT/runner.log"
+    break   # rescan the queue after every job, so jobs added meanwhile run in name order
   done
   date '+%F %T' > "$ROOT/heartbeat"
   sleep 20
