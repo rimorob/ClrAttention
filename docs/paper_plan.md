@@ -1,74 +1,118 @@
-# Paper plan
+# Paper plan and results checklist
 
-*Living document, started 2026-10-16. Axes of advance, the evidence for each, gaps, and the analyses that close them. Status marks: ✅ established and QC-checked, 🟡 partial or mixed, ⏳ running or queued, ❌ not started. Detailed numbers are in `docs/whitepapers/` (manuscript, supplement, working notes) and `results/`.*
+*Living document, started 2026-10-16. Organized by theme; every analysis we try gets a line, including the ones that did not work. Numbers are headline values. Details are in `docs/whitepapers/paper.md`, `supplement.md` and `paper_draft_notes.md`, and in `results/`.*
 
-## 1. Two papers
+**Legend:** ✅ worked, ❌ did not work (kept as a reported negative), ⚠️ mixed or weaker than hoped, ⏳ running or queued, ☐ not started. "QC" marks results checked by an independent reviewer agent.
 
-The work splits naturally into two papers with different questions, data and baselines.
+## Two papers
 
 | | Paper 1: completed CLR attention | Paper 2: differential CLR for perturbation targets |
 |---|---|---|
-| Question | Does completing CLR as attention (softmax, depth, held-out depth) recover regulatory programs better, why, and at what resolution? | Which genes does a perturbation rewire? Targets as genes whose CLR context changes between conditions. |
-| Core method | Calibrated CLR scores -> softmax attention -> iterated attention; final variación: a multiscale depth sweep that recovers overlapping modules from fine to coarse until a label-free quality collapses. | Differential CLR: delete-k influence (current), change in CLR z-variance (Hayete 2006, `rankClrCluster.m`), Blom-calibrated differential correlation and Klotz row/column scale tests (DiffClr, 2022). |
-| Data | M3D and EcoMAC (E. coli); human Perturb-seq pseudobulk compendia (K562 essential, K562 genome-wide, RPE1); BEELINE as a secondary single-cell test. | M3D perturbation groups (15); Perturb-seq K562 genome-wide and RPE1 at single-cell level (knockdown cells against control cells), thousands of knockdowns. |
-| Truth | RegulonDB; DoRothEA, CollecTRI, CORUM, knockdown-response modules. | Regulons of the perturbed regulator; knockdown-response sets held out from network building. |
-| Baselines | CLR, correlation, MI, GENIE3/GRNBoost2, PIDC, Markov stability; learned attention (scGPT/Geneformer) if feasible. | Differential expression, gene variance, SSEM-Lasso (Cosgrove et al. 2008), foundation-model attention (Kendiukhov 2026 setting). |
-| Target venue | Nature Machine Intelligence if the multiscale variación and competitive baselines land; otherwise Nature Communications or Genome Biology. | Genome Biology, Nature Methods or Cell Systems. |
+| Question | Does completing CLR as attention recover regulatory programs better, why, and at what resolution? | Which genes does a perturbation rewire? Targets are genes whose CLR context changes between conditions. |
+| Data | M3D, EcoMAC; human Perturb-seq pseudobulk compendia; BEELINE (secondary) | M3D perturbation groups; Perturb-seq single cells (knockdown cells against controls) |
+| Target venue | Nature Machine Intelligence if the multiscale variación and competitive baselines land, otherwise Nature Communications or Genome Biology | Genome Biology, Nature Methods or Cell Systems |
 
-Moving perturbation targets to Paper 2 also removes Paper 1's weakest claim (it does not survive the laboratory-matched null cleanly) and gives that question the data it needs (single-cell knockdowns with direct contrasts).
+---
 
-## 2. Paper 1: axes of advance
+## Paper 1
 
-| Axis | Claim | Evidence so far | Status | Gap / next step |
-|---|---|---|---|---|
-| A. Improvement over CLR | Completing CLR as attention improves regulon recovery. | M3D: co-membership AUPR +0.022 [+0.019, +0.026], attention ahead in 1,000 of 1,000 nested-bootstrap draws; coherence +0.026 [+0.008, +0.045]. EcoMAC: +0.032 AUPR (+27%). | ✅ (bacteria) | Human compendia (axis F). |
-| B. Mechanism | The gain needs CLR's per-gene context normalization, not a particular dependence measure. | Kernel ablation at held-out depths: softmax on uncalibrated scores gets about a third of the AUPR gain and no coherence gain. Shapley over six components: depth +0.018 and CLR +0.013 (AUPR); CLR +0.025 (coherence). | ✅ | — |
-| C. Robustness | The gain is not an artefact. | 50 lab splits (t* = 9, flat optimum); caps 50/100/200; nested bootstrap; survives removal of global components (Supplementary Note 7); top components are growth, motility and σS programs (Note 8). | ✅ | Blocked tests where combinations share datasets. |
-| D. Modularity and resolution (final variación) | Depth is a resolution parameter: shallow attention resolves complexes and specific regulons, deep attention union regulons and pathways; a depth sweep recovers overlapping modules at every scale. | Hints: operons gain sharply at t = 2; coherence peaks at t = 4-8 while pooled AUPR keeps rising to about t = 27; attention helps TF regulons and hurts complexes in K562. | ⏳ | Granularity sweep (0873, today). If confirmed: build the multiscale algorithm (modules tracked across t, overlaps, birth/death scales, label-free collapse criterion) on `find_modules()` / `ModuleTester`; compare with Markov stability. |
-| E. Performance against competitors | Training-free calibrated attention is competitive with the best de novo methods. | None yet. | ❌ | GENIE3/GRNBoost2, PIDC (and ARACNE as the MI classic) on M3D, EcoMAC and the K562 compendium, same truths. Foundation-model attention on a shared task if feasible. |
-| F. Bacteria and human | The result transfers to human regulation. | K562 essential compendium: attention beats CLR on DoRothEA and CollecTRI (+0.008/+0.009 AUPR, significant) but loses on CORUM complexes. K562 genome-wide and RPE1 rerunning (MI methods failed on missing values). | 🟡 ⏳ | 0871/0872 today; QC. Frame complexes against regulons through axis D. |
-| G. Perturbation diversity | Inference power comes from the diversity of network states sampled, not from sample count. | Single-condition K562 control cells (10,691 cells) scored about as well as the essential-gene compendium on literature truths, which cuts against the simple version of the claim. BEELINE: wider gene contexts add nothing on single-cell data. | 🟡 | Proper test: learning curves of AUPR against the number and diversity (labs, condition types, perturbation classes) of experiments, at fixed sample count, on M3D, EcoMAC and K562 genome-wide. |
-| H. Dependence measure | MI matters where data are heterogeneous; rank-based correlation where counts are zero-inflated. | EcoMAC: MI registers platform mixtures ("Christmas trees", 8.4% of pairs above the Gaussian MI curve) and keeps a coherence edge after correction. BEELINE: CLR-NS beats MI-CLR in every gene context. | ✅ (supplement) | — |
-| I. Scalability | The method scales to genome-wide human compendia. | Packed, band-parallel MI -> CLR in the C++ core (from the original `miSubMarix`): 5x lower peak memory at 8,563 genes, bit-identical in double precision. | ✅ | Use it for the genome-wide runs; report memory and time. |
-| J. History and framing | CLR was the first attention operator widely used in computational biology, and the standard de novo baseline. | Manuscript introduction (DREAM5 context, de novo vs prior-informed and regression-based methods). | ✅ | Jim Collins's review. |
+### 1. Completing CLR as attention (M3D, E. coli)
 
-### Paper 1 figure plan
+- [x] ✅ Softmax attention plus depth beats CLR on regulon co-membership: +0.021 AUPR (one lab split), +0.022 [+0.017, +0.027] over 50 lab splits. QC
+- [x] ✅ Nested bootstrap, depth re-selected in each of 1,000 draws: +0.022 [+0.019, +0.026], ahead in 1,000/1,000 draws; coherence +0.026 [+0.008, +0.045]. QC
+- [x] ✅ Replicate-aware bootstrap on 907 chips (cluster 1,000 and replicate 200 draws): +0.020 [+0.018, +0.023].
+- [x] ✅ Held-out depth is stable: median t* = 9 over 50 splits, criterion flat within 1% for t = 7-11. QC
+- [x] ✅ Softmax candidate cap does not drive the result (caps 50/100/200 equal; no cap gains less AUPR). QC
+- [x] ⚠️ All-evidence coherence gain is not significant in the nested bootstrap (+0.011 [-0.004, +0.025]). QC
+- [x] ❌ Hard-thresholded FDR operator alone: 62-77% of genes isolated, unusable for propagation.
+- [x] ❌ FDR graph plus top-10 neighbours (hard selection): +0.013 AUPR, no coherence gain.
+- [ ] ⏳ FDR operators inside the chips bootstrap, per-draw null B = 100 (job 100).
+- [ ] ☐ Repeat the core result on EcoMAC with held-out depth and bootstrap intervals (point estimate: +0.032 AUPR).
 
-1. CLR as attention: the components and their transformer counterparts.
-2. Main result and depth (M3D, EcoMAC), with held-out depth distribution.
-3. Shapley decomposition (done: `fig_shapley_SC`).
-4. Resolution: best depth rises from fine to coarse truths; the multiscale module atlas (axis D).
-5. Competitors on bacterial and human compendia (axis E).
-6. Human transfer and perturbation diversity (axes F, G).
+### 2. Mechanism: which components matter
 
-## 3. Paper 2: differential CLR for perturbation targets
+- [x] ✅ Context normalization is essential: softmax on uncalibrated |r| or MI gets about a third of the AUPR gain and no coherence gain (kernel ablation at held-out depths). QC
+- [x] ✅ Shapley decomposition over six components: depth +0.018 and CLR +0.013 (AUPR); CLR +0.025 (coherence); removing the softmax costs most coherence (-0.043).
+- [x] ✅ Stouffer and Euclidean combination equivalent (Spearman 0.993).
+- [x] ✅ Common low-bias bins beat per-gene Freedman-Diaconis bins (small).
+- [x] ✅ CLR-score permutation null stays sparse under global confounders where an MI null does not.
+- [x] ✅ Permutation null of B = 100 is enough (B = 1,000 gives the same edge sets).
+- [x] ❌ Value transforms (signed value, conditional-expectation W_V): work on synthetic data, no gain on real data.
+- [x] ❌ Diffused-profile readout |cor(P^t Z)|: little gain (best +0.007).
+- [x] ❌ Rank (copula) transform before MI on bulk data: slightly worse.
 
-**What exists.**
+### 3. Robustness and confounders
 
-- Delete-k influence scores on M3D with random and laboratory-matched nulls. Attention-based influence beats differential expression after variance stratification: 0.572, 12/15, p = 0.015 under the random null. Under the laboratory-matched null this drops to 0.550, p = 0.095, and that null is conservative. The null excluding perturbation experiments (089) is running, and SSEM-Lasso is queued.
-- Your 2006 z-variance method (`rankClrCluster.m`, `zMIvar.m` in `data/CLR versions/CLR.zip`): ranks genes by the change in their CLR z-score variance with and without the test experiments.
-- DiffClr (2022, `~/iCloud/Documents/History/Prototypes/DiffClr`):
-  - `dCLR.R`: Blom-calibrated row and column z-scores of the correlation difference between conditions, Stouffer-combined, with BH p-values and module discovery (Horn, clustering);
-  - `diffClr.R`: per-pair Klotz scale tests on row and column correlation profiles, Stouffer-combined;
-  - `glmBased.R`: interaction-model alternative.
+- [x] ✅ Attention gain survives removal of 0-20 global principal components (M3D +0.017 to +0.022; EcoMAC +0.020 to +0.029).
+- [x] ✅ The top components are biology, not noise: growth rate (ribosomal proteins, AUROC 0.98), motility (σ28, FlhDC) and σS stationary phase.
+- [x] ❌ `sva::num.sv` to choose how many components to remove: over-removes (k = 31 and 68).
+- [x] ❌ Held-out reproducibility as the criterion for batch correction or k: always prefers keeping reproducible global programs.
+- [ ] ☐ Blocked (per-dataset) tests wherever several comparisons share one dataset.
 
-**What it needs.**
+### 4. Modularity and resolution (the final variación)
 
-1. **Port and unify** influence, z-variance, dCLR and Klotz diffCLR as one R module with a shared interface (condition A cells or experiments against condition B), using the packed CLR path for scale.
-2. **Data with direct contrasts:** Perturb-seq K562 genome-wide and RPE1 single cells, knockdown cells against controls. For TF knockdowns, the truth is the TF's DoRothEA or CollecTRI targets. For all knockdowns, it's held-out response sets.
-3. **Baselines:** differential expression (the Kendiukhov 2026 trivial baseline), SSEM-Lasso, and foundation-model attention.
-4. **Evaluation:** variance-stratified AUROC (as now), top-100 sensitivity, laboratory- or batch-matched nulls, and scaling to thousands of knockdowns.
+- [x] ✅ Hints: operons gain sharply at t = 2; coherence peaks at t = 4-8 while pooled AUPR rises to about t = 27; attention helps TF regulons and hurts complexes in K562.
+- [ ] ⏳ Granularity sweep: does the best depth rise from fine to coarse truths (operons → TF regulons → sigmulons; CORUM → response modules → DoRothEA → CollecTRI)? (job 0873)
+- [ ] ☐ Multiscale algorithm: overlapping modules tracked across t, birth and death scales, label-free collapse criterion; built on `find_modules()` / `ModuleTester`.
+- [ ] ☐ Comparison with Markov stability (PyGenStability) on the same operators.
 
-## 4. Priorities (next two weeks)
+### 5. Performance against competitors
 
-1. Finish today's queue: lab null without perturbation experiments (089), K562 genome-wide and RPE1 compendia, granularity sweep. QC each.
-2. Competitor baselines (axis E): GENIE3/GRNBoost2, PIDC, ARACNE on M3D, EcoMAC, K562.
-3. If the granularity sweep supports it: the multiscale algorithm (axis D), the main bet for Nature Machine Intelligence.
-4. Perturbation-diversity learning curves (axis G).
-5. Paper 2 groundwork: port the differential-CLR family and set up the single-cell knockdown contrasts.
+- [ ] ⏳ GENIE3, GRNBoost2 and PIDC on M3D, EcoMAC and the K562 compendium, same truths (being set up).
+- [ ] ☐ ARACNE (the classic MI method).
+- [ ] ☐ Learned attention from scGPT or Geneformer on a shared task.
 
-## 5. Decisions for the authors
+### 6. Bacteria to human
 
-- Confirm the two-paper split and the venue strategy.
-- Whether foundation-model attention comparisons (scGPT/Geneformer) are worth the engineering for Paper 1, Paper 2, or both.
-- Whether the single-cell BEELINE results stay as a supplementary section of Paper 1 (current recommendation) or move to Paper 2.
+- [x] ✅ K562 essential perturbation compendium: attention beats CLR on DoRothEA and CollecTRI (+0.008/+0.009 AUPR, significant).
+- [x] ❌ Attention on CORUM complexes: -0.041 AUPR (fine structure; see theme 4).
+- [ ] ⏳ K562 genome-wide and RPE1 compendia (rerun after a missing-value fix; jobs 0871, 0872).
+- [x] ✅ BEELINE: CLR is the strongest of the methods tested (median AUPRC ratio 1.58).
+- [x] ✅ Normal-score correlation (CLR-NS) beats MI-based CLR on single-cell data in every gene context (+0.07 to +0.12). QC
+- [x] ❌ Attention adds nothing over CLR-NS on BEELINE. QC
+- [x] ❌ Wider gene contexts on BEELINE (5,000 genes, all expressed, driven genes): no gain; one dataset drives a nominal loss. QC
+- [x] ✅ Driven-gene filter (multimodal or PC-driven) beats variance ranking, which drops well-expressed genes.
+- [x] ❌ Random tie-breaking for normal scores: too noisy on small truths; average ranks preferred.
+- [x] ❌ Pearson residuals: no better than log-normalization for single-cell co-expression.
+
+### 7. Perturbation diversity
+
+- [x] ⚠️ Single-condition K562 control cells scored about as well as the essential compendium on literature truths: cuts against the simple version of the claim.
+- [ ] ☐ Learning curves: AUPR against the number and the diversity (labs, condition types, perturbation classes) of experiments at fixed sample count (M3D, EcoMAC, K562 genome-wide).
+
+### 8. Dependence measure and batch effects (supplement)
+
+- [x] ✅ EcoMAC platform mixtures ("Christmas trees"): 8.4% of gene pairs carry far more MI than their correlation implies, against 0.2-0.3% in single-platform data.
+- [x] ⚠️ MI against correlation on uncorrected multi-platform data: MI wins on coherence only, not AUPR.
+- [x] ✅ ComBat or centring by platform helps both measures more than switching measure; MI keeps a coherence edge after correction.
+- [x] ✅ One clean platform (Genome 2.0, 735 arrays) beats all 2,198 arrays pooled: quality over quantity.
+- [x] ✅ MI and correlation interchangeable on single-platform M3D.
+
+### 9. Scale and engineering
+
+- [x] ✅ Packed, band-parallel MI → CLR (from the original `miSubMarix`): 5x lower peak memory at 8,563 genes, bit-identical in double precision.
+- [x] ✅ Attention walks restricted to scored genes; memory-lean BEELINE pipeline; BLAS threads per worker.
+- [ ] ☐ Use the packed path for genome-wide runs and report memory and time.
+
+### 10. Framing
+
+- [x] ✅ CLR as the first attention operator widely used in computational biology; standard de novo, unsupervised baseline (DREAM5 context; prior-informed and regression methods distinguished).
+- [ ] ☐ Review by Jim Collins.
+
+---
+
+## Paper 2: differential CLR for perturbation targets
+
+- [x] ✅ Variance confound identified and controlled (variance-stratified AUROC, variance computed without the perturbation's experiments).
+- [x] ⚠️ Attention-based influence against differential expression: 0.572, 12/15, p = 0.015 under the random null; 0.550, 9/15, p = 0.095 under the laboratory-matched null (conservative: it removes related knockouts). QC
+- [ ] ⏳ Laboratory-matched null excluding perturbation experiments (job 089).
+- [ ] ⏳ SSEM-Lasso re-implementation (job 095).
+- [ ] ☐ Port the differential-CLR family into one module: delete-k influence, z-variance (Hayete 2006, `rankClrCluster.m`), Blom-calibrated differential correlation and Klotz scale tests (DiffClr 2022).
+- [ ] ☐ Perturb-seq single-cell contrasts (knockdown cells against controls), thousands of knockdowns; TF knockdowns scored against DoRothEA/CollecTRI targets.
+- [ ] ☐ Baselines: differential expression, SSEM-Lasso, foundation-model attention.
+
+## Decisions for the authors
+
+- [ ] Confirm the two-paper split and venues.
+- [ ] Foundation-model attention comparisons: worth the engineering, and for which paper?
+- [ ] BEELINE single-cell results: supplementary section of Paper 1 (recommended) or Paper 2?
