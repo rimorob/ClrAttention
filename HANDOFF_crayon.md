@@ -46,3 +46,7 @@ All five original jobs finished.  The remaining COMPUTE_CONSTRAINTS analyses wer
 - **White papers.**  Update them with `beeline_v2`, `perturbation_B100v2` and the extended chips bootstrap, then with the full-scale runs as they finish.
 - **Results through git.**  `results/` is git-ignored.  Commit result summaries, not the large `.rds` fits, and push from crayon.
 - **Validation.**  Have a separate QC agent that did not produce the analysis check each new result before it goes into a white paper.
+
+## Model choice (agreed with the user, 2026-10-16)
+
+Opus at high effort for analysis design, result interpretation, independent QC reviews and paper writing; Opus at medium as the default; Sonnet for routine work (queue babysitting, status tables, plotting from a settled spec, boilerplate scripts, mechanical ports of designed code). Apply the same split when spawning subagents.
