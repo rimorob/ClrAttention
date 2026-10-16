@@ -115,8 +115,11 @@ par_start <- function(mem_gb, workers = NULL, reserve = 2L, reserve_ram_gb = NUL
               pl$reserve_ram_gb, mem_gb, W, omp,
               if (pl$tpc > 1L) sprintf(" [hyper-threading: %d threads/core]", pl$tpc) else "",
               compiler::enableJIT(-1L)))
-  Sys.setenv(OMP_NUM_THREADS = omp, VECLIB_MAXIMUM_THREADS = 1,
-             OPENBLAS_NUM_THREADS = 1, MKL_NUM_THREADS = 1,
+  # BLAS gets the same per-worker thread share as OpenMP (workers x threads
+  # never exceeds the usable hardware threads): 1-2 threads when there are
+  # many workers, many threads when memory limits a job to a few workers.
+  Sys.setenv(OMP_NUM_THREADS = omp, VECLIB_MAXIMUM_THREADS = omp,
+             OPENBLAS_NUM_THREADS = omp, MKL_NUM_THREADS = omp,
              # glibc (Linux): serve every allocation >= 1 MB with mmap so a
              # freed matrix goes straight back to the OS. By default glibc
              # raises this threshold after the first large free, and later
@@ -126,8 +129,8 @@ par_start <- function(mem_gb, workers = NULL, reserve = 2L, reserve_ram_gb = NUL
              MALLOC_MMAP_THRESHOLD_ = 1048576, MALLOC_TRIM_THRESHOLD_ = 1048576)
   cl <- parallel::makePSOCKcluster(W, outfile = "")
   parallel::clusterCall(cl, function(omp) {
-    Sys.setenv(OMP_NUM_THREADS = omp, VECLIB_MAXIMUM_THREADS = 1,
-               OPENBLAS_NUM_THREADS = 1, MKL_NUM_THREADS = 1)
+    Sys.setenv(OMP_NUM_THREADS = omp, VECLIB_MAXIMUM_THREADS = omp,
+               OPENBLAS_NUM_THREADS = omp, MKL_NUM_THREADS = omp)
     invisible(compiler::enableJIT(3L))
     suppressPackageStartupMessages({ library(clr); library(Matrix) })
     NULL
