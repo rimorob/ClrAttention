@@ -149,18 +149,32 @@ clr_fit <- function(X) {
 }
 # fn(S, t) with attention mass S = (P^t + P^t')/2 at each depth in ts, one
 # at a time (only P^t and S are alive), so wide gene contexts fit in memory.
-att_walk <- function(A, ts, fn) {
+# fn(S, t) with attention mass S = (P^t + P^t')/2 at each depth in ts, one at
+# a time. With cols (the scored genes) only the block P^t[cols, cols] is
+# needed: M_t = P M_{t-1} with M_0 = I[, cols] gives P^t[, cols] in G x |cols|
+# memory instead of G x G, and S = (M_t[cols, ] + t(M_t[cols, ]))/2 is then
+# |cols| x |cols| (equal to the full computation cut to cols, up to rounding).
+att_walk <- function(A, ts, fn, cols = NULL) {
   G <- nrow(A)
   P <- Matrix::Diagonal(G, 1 - opt$alpha) + opt$alpha * Matrix::Matrix(A, sparse = TRUE)
-  rm(A); Pt <- NULL
-  for (t in seq_len(max(ts))) {
-    Pt <- if (is.null(Pt)) as.matrix(P) else as.matrix(Pt %*% P)
-    if (t %in% ts) { S <- (Pt + t(Pt)) / 2; diag(S) <- 0; fn(S, t); rm(S) }
+  rm(A)
+  if (is.null(cols)) {
+    Pt <- NULL
+    for (t in seq_len(max(ts))) {
+      Pt <- if (is.null(Pt)) as.matrix(P) else as.matrix(Pt %*% P)
+      if (t %in% ts) { S <- (Pt + t(Pt)) / 2; diag(S) <- 0; fn(S, t); rm(S) }
+    }
+  } else {
+    M <- matrix(0, G, length(cols)); M[cbind(cols, seq_along(cols))] <- 1
+    for (t in seq_len(max(ts))) {
+      M <- as.matrix(P %*% M)
+      if (t %in% ts) { B <- M[cols, , drop = FALSE]; S <- (B + t(B)) / 2; diag(S) <- 0; fn(S, t); rm(S, B) }
+    }
   }
   invisible(NULL)
 }
-att_mass <- function(A, ts) {
-  out <- list(); att_walk(A, ts, function(S, t) out[[as.character(t)]] <<- S); out
+att_mass <- function(A, ts, cols = NULL) {
+  out <- list(); att_walk(A, ts, function(S, t) out[[as.character(t)]] <<- S, cols); out
 }
 soft_op <- function(f) { f$build_operator(alpha = opt$alpha, softmax_keff = 10,
                                           softmax_cap = 50L); f$operator }
@@ -213,7 +227,7 @@ heldout_depth <- function(X, make_A, label, sgenes = rownames(X), target_fn = cl
     A <- make_A(tr[keep, ]); rm(tr, te)
     all_t <- sort(unique(c(grid, 3L, 5L, 6L, 7L, 10L, 12L)))
     crit <- stats::setNames(numeric(length(all_t)), all_t)
-    att_walk(A, all_t, function(S, t) crit[[as.character(t)]] <<- ap_fast(S[si, si][ut], target))
+    att_walk(A, all_t, function(S, t) crit[[as.character(t)]] <<- ap_fast(S[ut], target), cols = si)
     rm(A); invisible(gc(verbose = FALSE))
     best <- c(best, as.integer(names(crit)[which.max(crit)]))
   }
@@ -315,6 +329,7 @@ run_case <- function(ds, Ns) {
                       t_ns_soft10 = t_ns)
   # every score matrix is cut to the scored genes as soon as it exists
   cut <- function(s) { s <- s[si, si, drop = FALSE]; s[is.na(s)] <- 0; diag(s) <- 0; s }
+  tidy <- function(s) { s[is.na(s)] <- 0; diag(s) <- 0; s }     # already on the scored genes
   free <- function() invisible(gc(verbose = FALSE))
   S <- list()
   R <- tcrossprod(Zs(X)) / (ncol(X) - 1)
@@ -327,15 +342,15 @@ run_case <- function(ds, Ns) {
   # Depth diagnostic (never used to choose t) shares the walk with t*.
   Sdiag <- list()
   att_walk(soft_op(f), sort(unique(c(1, 2, 4, 8, 16, t_soft))), function(St, t) {
-    if (t == t_soft) S[[sprintf("clr_attention_soft10_t%d", t_soft)]] <<- cut(St)
-    if (t %in% c(1, 2, 4, 8, 16)) Sdiag[[as.character(t)]] <<- cut(St)
-  })
+    if (t == t_soft) S[[sprintf("clr_attention_soft10_t%d", t_soft)]] <<- tidy(St)
+    if (t %in% c(1, 2, 4, 8, 16)) Sdiag[[as.character(t)]] <<- tidy(St)
+  }, cols = si)
   f$release(FALSE); rm(f); free()
-  S[[sprintf("pearson_attention_top10_t%d", t_pear)]] <- cut(att_mass(as.matrix(A_pear), t_pear)[[1]])
+  S[[sprintf("pearson_attention_top10_t%d", t_pear)]] <- tidy(att_mass(as.matrix(A_pear), t_pear, cols = si)[[1]])
   rm(A_pear); free()
   Cns <- ns_clr(X); S$clr_ns <- cut(Cns)
   S[[sprintf("clr_ns_attention_soft10_t%d", t_ns)]] <-
-    cut(att_mass(clr:::.softmax_rows(Cns, keff = 10, cap = 50L), t_ns)[[1]])
+    tidy(att_mass(clr:::.softmax_rows(Cns, keff = 10, cap = 50L), t_ns, cols = si)[[1]])
   rm(Cns)
   rm(X); free()
   for (N in Ns) {
