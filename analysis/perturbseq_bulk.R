@@ -59,7 +59,13 @@ ok <- pval < opt$p_max & !grepl("non-targeting", pert)
 K <- pert[ok]; K <- K[sample(length(K))]
 A <- sort(K[seq_len(floor(length(K) / 2))]); B <- setdiff(K, A)
 X <- Z[, A]; rm(Z); invisible(gc())
+# Missing values (present in the genome-wide K562 and RPE1 files): drop genes
+# missing in more than 1% of the profiles, set the rest to 0 (no change from
+# control cells).
+nf <- !is.finite(X); bad_gene <- rowMeans(nf) > 0.01
+X <- X[!bad_gene, , drop = FALSE]; n_imp <- sum(!is.finite(X)); X[!is.finite(X)] <- 0
 X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]; genes <- rownames(X); G <- length(genes)
+say(sprintf("non-finite values: %d genes dropped (> 1%% missing), %d values set to 0", sum(bad_gene), n_imp))
 say(sprintf("%d profiles; %d with a significant phenotype (p < %g): %d for networks (A), %d for response modules (B); %d genes",
             length(pert), length(K), opt$p_max, length(A), length(B), G))
 
