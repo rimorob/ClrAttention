@@ -6,7 +6,7 @@
 #   E. coli (M3D, 466 experiments; RegulonDB, all evidence):
 #     operons (finest; same-operon pairs are the positives here)
 #     TF regulons (single-TF; operon pairs excluded, as in the main benchmark)
-#     sigmulons (coarsest; operon pairs excluded)
+#     sigmulons (coarsest; operon pairs excluded; without sigma70 and sigmaS)
 #   K562 (Perturb-seq essential compendium, network half A as in
 #   perturbseq_bulk.R, same seed):
 #     CORUM complexes < knockdown-response modules (half B) < DoRothEA A-B
@@ -53,8 +53,10 @@ operon_of <- build_operon_map("data/RegulonDBExtract", to_bn)
 reg_all <- make_regulons(rtab, genes, conf_keep = c("C", "S", "W", "?"), max_size = 2000)
 pick <- function(keep) list(members = reg_all$members[keep], class = reg_all$class[keep])
 tf_reg <- pick(reg_all$class == "TF" & lengths(reg_all$members) <= 500 & lengths(reg_all$members) >= 5)
+# Sigmulons without the two global ones: sigma70 (housekeeping, 1,596 genes, 37%) and
+# sigmaS/sigma38 (general stress, 331 genes): sigma32, sigma54, sigma24, sigma28, sigma19.
 sig_reg <- pick(reg_all$class == "sigma" & lengths(reg_all$members) >= 5 &
-                  lengths(reg_all$members) <= 500)    # sigma70 (housekeeping, ~1,600 genes) would make most pairs positive
+                  !names(reg_all$members) %in% c("sigma:sigma70", "sigma:sigma38"))
 op <- operon_of[names(operon_of) %in% genes]
 op_sets <- lapply(split(match(names(op), genes), op), unique); op_sets <- op_sets[lengths(op_sets) >= 2]
 op_reg <- list(members = op_sets, class = stats::setNames(rep("operon", length(op_sets)), names(op_sets)))
