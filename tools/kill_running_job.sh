@@ -12,8 +12,18 @@ kill_tree() {
 }
 pids=$(pgrep -f "bash ${JOBS_ROOT:-jobs}/running/")
 [ -z "$pids" ] && { echo "no running job"; exit 0; }
+# PSOCK workers are separate R processes, not children of the job. Note the
+# ports their masters (R processes in this job's tree) listen on, and later
+# kill only the workers connected to those ports: other jobs' workers (a
+# second job lane) must survive.
+tree() { local p=$1 c; echo "$p"; for c in $(pgrep -P "$p"); do tree "$c"; done; }
+ports=""
+for p in $pids; do for q in $(tree "$p"); do
+  ports="$ports $(ss -ltnpH 2>/dev/null | grep "pid=$q," | awk '{n = split($4, a, ":"); print a[n]}')"
+done; done
 for p in $pids; do echo "killing job tree $p: $(ps -o args= -p "$p")"; kill_tree "$p"; done
 sleep 3
-# PSOCK workers are separate R processes; kill any orphans still serving.
-pkill -f "parallel:::.workRSOCK|parallel:::.slaveRSOCK" 2>/dev/null && echo "killed leftover PSOCK workers"
+for port in $ports; do
+  pkill -f "parallel:::.workRSOCK.*PORT=$port( |$)" 2>/dev/null && echo "killed leftover PSOCK workers of port $port"
+done
 exit 0

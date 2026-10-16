@@ -172,7 +172,8 @@ run_method <- function(m) {
       e <- utils::read.delim(outf, stringsAsFactors = FALSE)
       sym_max(edges_to_matrix(e$TF, e$target, e$importance)) },
     pidc = { outf <- file.path(opt$out, "pidc_edges.tsv")
-      st <- system2(path.expand(opt$julia), c("+1.6", paste0("--threads=", opt$workers), "tools/pidc.jl", tsv, outf),   # NetworkInference.jl needs Julia 1.6
+      # NetworkInference.jl needs Julia 1.6 and runs single-threaded (it crashes with --threads)
+      st <- system2(path.expand(opt$julia), c("+1.6", "tools/pidc.jl", tsv, outf),
                     stdout = TRUE, stderr = TRUE)
       say("pidc: ", utils::tail(st, 1))
       e <- utils::read.delim(outf, header = FALSE, stringsAsFactors = FALSE)
