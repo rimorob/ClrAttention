@@ -164,7 +164,7 @@ fit$mi; fit$clr_scores; fit$operator; fit$embedding; fit$trajectory; fit$params
 - R-level parity check against historical MATLAB `clr` outputs on a small
   fixture (needs MATLAB or Octave run of the recovered code).
 
-- **Tiled MI -> CLR for large gene sets (planned, 2026-10-16).**  One float32
+- **Tiled MI -> CLR for large gene sets (implemented 2026-10-16: `src/core/clr_packed.cpp`, `R/packed.R`; R API `clr_packed()`, `clr_packed_topk()`, `clr_packed_block()`, `softmax_operator()`).**  Measured on the K562 essential Perturb-seq compendium (8,563 genes x 707 profiles, 12 threads): peak memory 3.77 GB (dense MI + CLR + softmax operator) against 0.76 GB packed, 53 s against 47 s; attention operators identical in sparsity pattern and equal to 8e-7.  Design:  One float32
   buffer holding the packed upper triangle (G(G-1)/2 values; 0.65 GB at
   G = 18,000 against 2.6 GB for one dense double matrix).  Packed column by
   column, each band fromCol..toCol of the original `miSubMarix` (InfoKit2.c in
