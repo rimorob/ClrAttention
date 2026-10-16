@@ -35,12 +35,12 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(dataset = "m3d", methods = "genie3,grnboost2,pidc", t = 9L, workers = 24L, out = NULL,
             jack = 100L, seed = 20261016L, alpha = 0.5, ntrees = 1000L, quick = 0L,
             python = "~/venvs/clr-baselines/bin/python", julia = "~/.juliaup/bin/julia",
-            gene_subset = "none")
+            gene_subset = "none", export_only = 0L)
 i <- 1L
 while (i <= length(args)) {
   key <- sub("^--", "", args[i]); if (!key %in% names(opt)) stop("unknown argument: ", args[i])
   v <- args[i + 1L]
-  opt[[key]] <- if (key %in% c("t", "workers", "jack", "seed", "ntrees", "quick")) as.integer(v) else v
+  opt[[key]] <- if (key %in% c("t", "workers", "jack", "seed", "ntrees", "quick", "export_only")) as.integer(v) else v
   i <- i + 2L
 }
 if (is.null(opt$out)) opt$out <- file.path("results", paste0("baselines_", opt$dataset))
@@ -112,6 +112,12 @@ if (opt$dataset %in% c("m3d", "ecomac")) {
   U <- NULL
 } else stop("unknown dataset: ", opt$dataset)
 say(sprintf("%s: %d genes x %d samples", opt$dataset, G, ncol(X)))
+# --export_only 1: write the input matrix and stop (the PIDC lane runs Julia
+# directly on it, outside R, and the main lane scores the edges later).
+tsv <- file.path(opt$out, "expression.tsv")
+if (!file.exists(tsv)) utils::write.table(data.frame(gene = genes, X, check.names = FALSE), tsv, sep = "\t",
+                                          quote = FALSE, row.names = FALSE)
+if (opt$export_only == 1L) { say("exported ", tsv); quit(save = "no") }
 set.seed(opt$seed)
 halves <- lapply(bench, function(b) lapply(seq_len(opt$jack), function(r) {
   keep <- sample(b$pairs$genes_in, floor(length(b$pairs$genes_in) / 2))
@@ -153,9 +159,6 @@ E$attention <- evaluate((Pt + t(Pt)) / 2); rm(P, Pt); f$release(); invisible(gc(
 say("references scored")
 
 ## ---- baselines ---------------------------------------------------------------------------
-tsv <- file.path(opt$out, "expression.tsv")
-if (!file.exists(tsv)) utils::write.table(data.frame(gene = genes, X, check.names = FALSE), tsv, sep = "\t",
-                                          quote = FALSE, row.names = FALSE)
 run_method <- function(m) {
   rdsf <- file.path(opt$out, paste0(m, "_scores.rds"))
   if (file.exists(rdsf)) { say(m, ": reusing ", rdsf); return(readRDS(rdsf)) }
@@ -172,10 +175,11 @@ run_method <- function(m) {
       e <- utils::read.delim(outf, stringsAsFactors = FALSE)
       sym_max(edges_to_matrix(e$TF, e$target, e$importance)) },
     pidc = { outf <- file.path(opt$out, "pidc_edges.tsv")
-      # NetworkInference.jl needs Julia 1.6 and runs single-threaded (it crashes with --threads)
-      st <- system2(path.expand(opt$julia), c("+1.6", "tools/pidc.jl", tsv, outf),
-                    stdout = TRUE, stderr = TRUE)
-      say("pidc: ", utils::tail(st, 1))
+      if (!file.exists(outf)) {
+        # Normally produced by the PIDC lane (Julia launched directly, not from
+        # R: NetworkInference.jl on Julia 1.6 segfaults when started from R).
+        stop("PIDC edges not found: ", outf, " (run tools/pidc.jl on ", tsv, " first)")
+      }
       e <- utils::read.delim(outf, header = FALSE, stringsAsFactors = FALSE)
       sym_max(edges_to_matrix(e[[1]], e[[2]], e[[3]])) },
     stop("unknown method ", m))
