@@ -165,13 +165,18 @@ att_mass <- function(A, ts) {
 soft_op <- function(f) { f$build_operator(alpha = opt$alpha, softmax_keff = 10,
                                           softmax_cap = 50L); f$operator }
 pear_op <- function(R) { Ar <- abs(R); diag(Ar) <- 0; clr:::.topk_rows(Ar, 10L) }
+# |partial correlation| from a ridge-shrunk precision matrix. Written so that
+# at most two G x G matrices are alive at once (no identity matrix for the
+# ridge, no outer product); values equal -Om_ij / sqrt(Om_ii Om_jj) up to
+# floating-point rounding.
 partial_cor <- function(Z) {
   C <- tcrossprod(Z) / (ncol(Z) - 1)
   lam <- 0.1 * mean(diag(C))                  # fixed ridge (not tuned on truth)
-  Om <- solve(C + lam * diag(nrow(C)))
+  diag(C) <- diag(C) + lam
+  Om <- solve(C); rm(C)
   d <- sqrt(diag(Om))
-  P <- -Om / outer(d, d); diag(P) <- 0
-  abs(P)
+  Om <- Om / d; Om <- t(Om) / d; Om <- abs(Om); diag(Om) <- 0
+  Om
 }
 
 # Held-out depth: split cells into random halves; operator on one half,
@@ -295,8 +300,10 @@ run_case <- function(ds, Ns) {
   tag <- paste0(ds, " TFs+", paste(Ns, collapse = "/"))
   say(sprintf("%s: fit on %d genes (context %s), scored on %d genes x %d cells",
               tag, nrow(X), opt$context, length(sg), ncol(X)))
-  Z <- Zs(X); R <- tcrossprod(Z) / (ncol(Z) - 1)
-  f <- clr_fit(X); M <- f$mi; diag(M) <- 0
+  # Memory: the held-out depth searches run first, before any full score
+  # matrix exists (they draw the same random numbers in the same order as
+  # before, so results are unchanged); afterwards every G x G score matrix is
+  # built, cut to the scored genes and freed one at a time.
   t_soft <- heldout_depth(X, function(Y) { g <- clr_fit(Y); A <- soft_op(g); g$release(FALSE); A },
                           paste(tag, "soft10"), sg)
   t_pear <- heldout_depth(X, function(Y) pear_op(stats::cor(t(Y))), paste(tag, "pearson_top10"), sg)
@@ -308,22 +315,29 @@ run_case <- function(ds, Ns) {
                       t_ns_soft10 = t_ns)
   # every score matrix is cut to the scored genes as soon as it exists
   cut <- function(s) { s <- s[si, si, drop = FALSE]; s[is.na(s)] <- 0; diag(s) <- 0; s }
-  S <- list(abs_pearson = cut(abs(R)),
-            abs_spearman = cut(abs(stats::cor(t(X), method = "spearman"))),
-            partial_cor = cut(partial_cor(Z)), mi = cut(M), clr = cut(f$clr_scores))
-  rm(Z, M); invisible(gc(verbose = FALSE))
+  free <- function() invisible(gc(verbose = FALSE))
+  S <- list()
+  R <- tcrossprod(Zs(X)) / (ncol(X) - 1)
+  S$abs_pearson <- cut(abs(R))
+  A_pear <- Matrix::Matrix(pear_op(R), sparse = TRUE); rm(R); free()     # 10 non-zeros per row
+  S$abs_spearman <- cut(abs(stats::cor(t(X), method = "spearman"))); free()
+  S$partial_cor <- cut(partial_cor(Zs(X))); free()
+  f <- clr_fit(X)
+  S$mi <- cut(f$mi); S$clr <- cut(f$clr_scores); free()
   # Depth diagnostic (never used to choose t) shares the walk with t*.
   Sdiag <- list()
   att_walk(soft_op(f), sort(unique(c(1, 2, 4, 8, 16, t_soft))), function(St, t) {
     if (t == t_soft) S[[sprintf("clr_attention_soft10_t%d", t_soft)]] <<- cut(St)
     if (t %in% c(1, 2, 4, 8, 16)) Sdiag[[as.character(t)]] <<- cut(St)
   })
-  S[[sprintf("pearson_attention_top10_t%d", t_pear)]] <- cut(att_mass(pear_op(R), t_pear)[[1]])
+  f$release(FALSE); rm(f); free()
+  S[[sprintf("pearson_attention_top10_t%d", t_pear)]] <- cut(att_mass(as.matrix(A_pear), t_pear)[[1]])
+  rm(A_pear); free()
   Cns <- ns_clr(X); S$clr_ns <- cut(Cns)
   S[[sprintf("clr_ns_attention_soft10_t%d", t_ns)]] <-
     cut(att_mass(clr:::.softmax_rows(Cns, keff = 10, cap = 50L), t_ns)[[1]])
   rm(Cns)
-  f$release(FALSE); rm(f, R, X); invisible(gc(verbose = FALSE))
+  rm(X); free()
   for (N in Ns) {
     gN <- sg[sg %in% sels[[as.character(N)]]$genes]
     ix <- match(gN, sg)
@@ -368,12 +382,15 @@ cases <- if (opt$context == "none") {
 } else lapply(dss, function(d) list(ds = d, Ns = Ns_all))
 source(file.path(script_dir, "parallel.R"))
 pc <- par_start(mem_gb = opt$mem_gb, workers = opt$workers, say = say)
-out <- foreach(ci = seq_along(cases), .inorder = TRUE, .errorhandling = "pass") %dopar% {
+case_size <- vapply(cases, function(k) file.size(file.path(expr_dir, k$ds, "ExpressionData.csv")), 0)
+run_order <- order(-case_size)            # largest first, so no big case starts last
+out <- foreach(ci = run_order, .inorder = TRUE, .errorhandling = "pass") %dopar% {
   if (par_should_stop()) return(NULL)
   set.seed(opt$seed + ci)
   run_case(cases[[ci]]$ds, cases[[ci]]$Ns)
 }
 par_stop(pc)
+out[run_order] <- out                     # back to case order
 bad <- vapply(out, function(x) inherits(x, "error"), NA)
 if (any(bad)) say("cases failed: ", paste(sprintf("%s/%s: %s",
                                                   vapply(cases[bad], `[[`, "", "ds"),
