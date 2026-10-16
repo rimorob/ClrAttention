@@ -56,7 +56,9 @@
 - [ ] ☐ Hub-bias check: score the degree baseline π_i + π_j against the truths; the pooled AUPR rise to t ≈ 27 could partly be convergence to hubs.
 - [ ] ☐ Pilot (no bootstrap): trace(P^t) and its log-slope on a log-spaced t grid, for keff ∈ {3, 5, 10}. Plateaus = regimes, plateau height = module count. Stop here if there are no plateaus.
 - [ ] ☐ Multiscale algorithm (label-free; design review 2026-10-16): per-gene module size k_i(t) = G·π_i / P^t_ii (no global k); membership by lift P^t_ij / π_j with a lowest-conductance sweep cut; regimes by kernel change-point detection on log-slopes over 50 lab half-splits; overlapping modules = consensus sweep-cut sets reproduced in ≥ 70% of splits; collapse when trace(P^t) − 1 < 1 or reproducibility reaches a rewired-operator null. Track births and deaths with `ModuleTester`.
-- [ ] ☐ Per-gene keff from CLR local FDR (keff_i = Σ_j (1 − lfdr_ij)): learns the attention width per gene instead of keff = 10.
+- [x] ❌ Smarter keff, reviewed before running (2026-10-16): one global temperature on CLR z gives a bimodal width split (29% of rows < 3 partners, 16% near-uniform) tracking the top score, not regulon breadth, and loses on held-out data; per-gene local-FDR keff fails its assumptions (point mass at 0, heavy tail, dependent rows); held-out selection of keff is biased toward wide attention (keff 25 > 10 > 3 on one split), echoing the batch-correction negative.
+- [ ] ☐ Width as a resolution axis: keff ∈ {3, 5, 10, 25} × t surface, preregistered; truths only at the end, stratified by granularity (prediction: small keff wins on operons/CORUM, large on sigmulons/CollecTRI). keff = 10 stays the headline.
+- [ ] ☐ Multi-head attention (the NLP advance): average the walks built at keff = 3, 10 and 30 (multiscale SNE / heads at different temperatures); no width selection. Preregistered against keff = 10 with paired jackknife, Holm-corrected, on M3D, EcoMAC and K562.
 - [ ] ☐ Comparison with Markov stability (PyGenStability) on the same operators.
 
 ### 5. Performance against competitors
