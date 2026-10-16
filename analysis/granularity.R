@@ -14,9 +14,10 @@
 # Prediction if depth sets resolution: argmax t increases from fine to coarse.
 #
 # Usage (repo root):  Rscript analysis/granularity.R [--tmax 32] [--out results/granularity]
+#                       [--reuse_k562 results/granularity_with_sigS]   (E. coli only; K562 rows from that run)
 
 args <- commandArgs(trailingOnly = TRUE)
-opt <- list(tmax = 32L, out = "results/granularity", alpha = 0.5, seed = 20261015L, p_max = 1e-3,
+opt <- list(tmax = 32L, out = "results/granularity", reuse_k562 = "", alpha = 0.5, seed = 20261015L, p_max = 1e-3,
             h5 = "data/perturbseq/K562_essential_normalized_bulk_01.h5ad")
 i <- 1L
 while (i <= length(args)) { k <- sub("^--", "", args[i]); opt[[k]] <- if (k == "tmax") as.integer(args[i + 1L]) else args[i + 1L]; i <- i + 2L }
@@ -70,6 +71,11 @@ f <- ClrAttention$new(X)$estimate_mi(bins = "hg", transform = "none")$calibrate(
 res_e <- sweep(f$clr_scores, bench_e, genes, operon_of, "E. coli M3D"); f$release(); rm(f, X); invisible(gc())
 
 ## ---- K562 compendium -------------------------------------------------------------------
+if (nzchar(opt$reuse_k562)) {
+  res_h <- utils::read.csv(file.path(opt$reuse_k562, "granularity_curves.csv"), check.names = FALSE)
+  res_h <- res_h[startsWith(res_h$data, "K562"), setdiff(names(res_h), "aupr_ratio")]
+  say("K562 curves reused from ", opt$reuse_k562, " (", nrow(res_h), " rows)")
+} else {
 set.seed(opt$seed)                       # same split as perturbseq_bulk.R
 rd <- function(p) rhdf5::h5read(opt$h5, p)
 cat_of <- function(grp, field) { x <- rd(paste0(grp, "/", field))
@@ -93,6 +99,7 @@ for (nm in names(bench_h)) say(sprintf("K562 %s: %d sets, base rate %.4f", nm,
   length(bench_h[[nm]]$reg$members), mean(bench_h[[nm]]$pairs$label)))
 fh <- ClrAttention$new(Xh)$estimate_mi(bins = "hg", transform = "none")$calibrate(method = "normal", combine = "stouffer")
 res_h <- sweep(fh$clr_scores, bench_h, hgenes, none, "K562 essential compendium")
+}
 
 res <- rbind(res_e, res_h); res$aupr_ratio <- res$aupr / res$base_rate
 utils::write.csv(res, file.path(opt$out, "granularity_curves.csv"), row.names = FALSE)
