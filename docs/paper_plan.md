@@ -53,7 +53,10 @@
 
 - [x] ✅ Hints: operons gain sharply at t = 2; coherence peaks at t = 4-8 while pooled AUPR rises to about t = 27; attention helps TF regulons and hurts complexes in K562.
 - [ ] ⏳ Granularity sweep: does the best depth rise from fine to coarse truths (operons → TF regulons → sigmulons; CORUM → response modules → DoRothEA → CollecTRI)? (job 0873)
-- [ ] ☐ Multiscale algorithm: overlapping modules tracked across t, birth and death scales, label-free collapse criterion; built on `find_modules()` / `ModuleTester`.
+- [ ] ☐ Hub-bias check: score the degree baseline π_i + π_j against the truths; the pooled AUPR rise to t ≈ 27 could partly be convergence to hubs.
+- [ ] ☐ Pilot (no bootstrap): trace(P^t) and its log-slope on a log-spaced t grid, for keff ∈ {3, 5, 10}. Plateaus = regimes, plateau height = module count. Stop here if there are no plateaus.
+- [ ] ☐ Multiscale algorithm (label-free; design review 2026-10-16): per-gene module size k_i(t) = G·π_i / P^t_ii (no global k); membership by lift P^t_ij / π_j with a lowest-conductance sweep cut; regimes by kernel change-point detection on log-slopes over 50 lab half-splits; overlapping modules = consensus sweep-cut sets reproduced in ≥ 70% of splits; collapse when trace(P^t) − 1 < 1 or reproducibility reaches a rewired-operator null. Track births and deaths with `ModuleTester`.
+- [ ] ☐ Per-gene keff from CLR local FDR (keff_i = Σ_j (1 − lfdr_ij)): learns the attention width per gene instead of keff = 10.
 - [ ] ☐ Comparison with Markov stability (PyGenStability) on the same operators.
 
 ### 5. Performance against competitors
