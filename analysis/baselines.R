@@ -22,13 +22,20 @@
 #           significant knockdowns (seed as perturbseq_bulk.R)
 #
 # Usage (repo root):
+# --gene_subset truths (k562ess): every method is run on the genes covered by
+#   at least one literature truth (DoRothEA A-C, CollecTRI, CORUM; 5,761 of
+#   8,563), the same input for all methods. PIDC's cost grows with the cube of
+#   the gene count (about 5.5 days single-threaded on all genes, about 40 h on
+#   this subset), so the like-for-like comparison with PIDC uses this subset.
+#
 #   Rscript analysis/baselines.R --dataset m3d [--methods genie3,grnboost2,pidc]
 #       [--t 9] [--workers 24] [--out results/baselines_m3d]
 
 args <- commandArgs(trailingOnly = TRUE)
 opt <- list(dataset = "m3d", methods = "genie3,grnboost2,pidc", t = 9L, workers = 24L, out = NULL,
             jack = 100L, seed = 20261016L, alpha = 0.5, ntrees = 1000L, quick = 0L,
-            python = "~/venvs/clr-baselines/bin/python", julia = "~/.juliaup/bin/julia")
+            python = "~/venvs/clr-baselines/bin/python", julia = "~/.juliaup/bin/julia",
+            gene_subset = "none")
 i <- 1L
 while (i <= length(args)) {
   key <- sub("^--", "", args[i]); if (!key %in% names(opt)) stop("unknown argument: ", args[i])
@@ -90,6 +97,12 @@ if (opt$dataset %in% c("m3d", "ecomac")) {
   A <- sort(K[seq_len(floor(length(K) / 2))]); B <- setdiff(K, A)
   X <- Z[, A]; rm(Z); X[!is.finite(X)] <- 0
   X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
+  if (opt$gene_subset == "truths") {
+    g0 <- rownames(X)
+    lit <- Reduce(union, lapply(list(dorothea_sets(g0, c("A", "B", "C")), collectri_sets(g0), corum_sets(g0)),
+                                function(s) unique(unlist(s$members))))
+    X <- X[sort(lit), ]
+  }
   if (opt$quick > 0L) { v <- apply(X, 1, stats::var); X <- X[sort(order(-v)[seq_len(opt$quick)]), ] }
   genes <- rownames(X); G <- length(genes)
   tr <- list(DoRothEA_AB = dorothea_sets(genes), DoRothEA_ABC = dorothea_sets(genes, c("A", "B", "C")),
