@@ -164,20 +164,20 @@ fit$mi; fit$clr_scores; fit$operator; fit$embedding; fit$trajectory; fit$params
 - R-level parity check against historical MATLAB `clr` outputs on a small
   fixture (needs MATLAB or Octave run of the recovered code).
 
-- **Tiled MI -> CLR for large gene sets (planned, 2026-10-16).**  Reuse the band
-  primitive of the original `miSubMarix(fromCol, toCol)` in `InfoKit2.c` (CLR.zip
-  working copy, `data/CLR versions/`; byte-identical algorithm files in CLR_1.1):
-  weights only for genes >= fromCol, MI for columns fromCol..toCol against every
-  later gene.  Port it as `mi_band()` writing into a band-sized buffer (the 2006
-  code allocated a full G x G float array per band).  Two-pass streaming CLR:
+- **Tiled MI -> CLR for large gene sets (planned, 2026-10-16).**  One float32
+  buffer holding the packed upper triangle (G(G-1)/2 values; 0.65 GB at
+  G = 18,000 against 2.6 GB for one dense double matrix).  Packed column by
+  column, each band fromCol..toCol of the original `miSubMarix` (InfoKit2.c in
+  `data/CLR versions/CLR.zip`) is one contiguous slice: each OpenMP thread
+  computes its band's MI as a vector and writes it straight into its own slice
+  (no per-band matrices, no copies, no locking).  Bands sized to equal
+  triangle area; the old Perl/SGE scheduler is not used.  CLR in place:
   pass 1 accumulates each gene's MI sum and sum of squares from both sides of
-  every pair (row background mean/sd without the full matrix); pass 2 recomputes
-  bands, converts to Stouffer CLR on the fly and keeps each gene's top-k (softmax
-  cap) plus the scored-gene block.  Memory O(G x (k + scored)); MI computed twice.
-  Balance OpenMP threads by equal upper-triangle area (arithmetic only; the old
-  Perl/SGE scheduler is not used).  Acceptance test: identical CLR scores and
-  operator to the full computation.
-
+  every pair; pass 2 overwrites each MI value with its Stouffer score from the
+  two genes' statistics (MI computed once).  Readers take each gene's top-k
+  (softmax cap), the scored-gene block, or expand to a dense symmetric matrix
+  only when a caller needs it.  Acceptance test: identical CLR scores and
+  operator to the current full computation.
 ## 9. Permutation threshold selection (new, 2026-09-22)
 
 `ClrAttention$select_threshold()` replaces the hand-tuned k/tau with a
