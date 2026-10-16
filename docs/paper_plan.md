@@ -58,7 +58,8 @@
 
 ### 5. Performance against competitors
 
-- [ ] ⏳ GENIE3, GRNBoost2 and PIDC on M3D, EcoMAC and the K562 compendium, same truths (being set up).
+- [ ] ⏳ GENIE3 and GRNBoost2 on M3D, EcoMAC and the K562 compendium, same truths, every gene a candidate regulator (jobs 0874-0876, after the granularity sweep).
+- [ ] ⏳ PIDC on the same three datasets (second job lane, single-threaded: about 7 h each for M3D and EcoMAC, about 40 h for K562).
 - [ ] ☐ ARACNE (the classic MI method).
 - [ ] ☐ Learned attention from scGPT or Geneformer on a shared task.
 
