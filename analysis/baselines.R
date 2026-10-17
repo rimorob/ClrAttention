@@ -170,7 +170,15 @@ E$clr <- evaluate(f$clr_scores)
 f$build_operator(alpha = opt$alpha, softmax_keff = 10, softmax_cap = 50L)
 P <- Matrix::Diagonal(G, 1 - opt$alpha) + opt$alpha * Matrix::Matrix(f$operator, sparse = TRUE)
 Pt <- as.matrix(P); for (s in seq_len(opt$t - 1L)) Pt <- as.matrix(Pt %*% P)
-E$attention <- evaluate((Pt + t(Pt)) / 2); rm(P, Pt); f$release(); invisible(gc())
+St <- (Pt + t(Pt)) / 2; rm(Pt)
+E$attention <- evaluate(St)
+# Hub diagnostics (secondary; outside the Holm families): the walk converges to
+# its stationary distribution pi, so deep attention partly ranks pairs by
+# pi_i + pi_j. "hub" scores that alone; "attention_dehub" divides it out.
+pi <- rep(1 / G, G); eps <- 1e-3
+for (it in 1:20000) { q <- (1 - eps) * as.numeric(pi %*% P) + eps / G; if (sum(abs(q - pi)) < 1e-13) break; pi <- q }
+H <- outer(q, q, "+"); E$hub <- evaluate(H); E$attention_dehub <- evaluate(St / H)
+rm(P, St, H); f$release(); invisible(gc())
 say("references scored")
 
 ## ---- baselines ---------------------------------------------------------------------------

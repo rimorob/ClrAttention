@@ -149,6 +149,8 @@ for (k in unique(paste(pr$run, pr$truth, sep = "|"))) {
   }
 }
 res <- do.call(rbind, rows)
+# hub diagnostics (hub, attention_dehub) are reported but are not in the Holm families
+res$family[!res$comparator %in% c("abs_pearson", "clr", "genie3", "grnboost2", "pidc")] <- "diagnostic (no Holm family)"
 res$p_mean_holm <- NA_real_; res$p_median_holm <- NA_real_
 for (f in names(families)) { s <- res$family == f
   if (!any(s)) next
