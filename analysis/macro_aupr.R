@@ -9,12 +9,17 @@
 #   - comparisons only within one run (one results directory), so every
 #     method is paired with the attention matrix of the same run; duplicated
 #     (run, method, truth, regulon) rows stop the script
-#   - primary: per-regulon paired difference dAP = AP(comparator) - AP(attention);
-#     mean (regulon bootstrap, BCa interval, p by inverting the BCa interval)
-#     and median (Wilcoxon signed rank); share of regulons where attention
-#     wins, and share tied
-#   - overlap-aware sensitivity: bootstrap over connected groups of regulons
-#     (linked when member Jaccard > 0.2), percentile interval
+#   - primary: per-regulon paired difference dAP = AP(comparator) - AP(attention),
+#     mean and median. Regulons overlap (CRP members recur in many), so the
+#     PRIMARY inference respects overlap groups: interval for the mean from a
+#     bootstrap over overlap groups (percentile); p for mean and median from a
+#     sign-flip permutation test flipping whole groups (B draws). Secondary,
+#     treating regulons as independent: BCa interval (p by inverting it) and
+#     Wilcoxon signed rank. Share of regulons where attention wins, and tied.
+#   - overlap groups: connected components of regulons linked when member
+#     Jaccard > 0.2; if the largest component holds > 30% of the regulons,
+#     complete linkage instead (every pair in a group has Jaccard >= 0.2);
+#     the rule used and the largest group size are logged
 #   - levels as (AP - b) / (1 - b), b = the regulon's base rate
 #   - strata: size 5-9 / 10-24 / 25-99 / >= 100; class (TF vs sigma)
 #   - pair-weighted means of per-regulon AP, weights n_pos^gamma, gamma 0..1
@@ -78,15 +83,26 @@ boot_mean <- function(d) {
     p <- hi }
   c(lo = lohi[1], hi = lohi[2], p = p)
 }
-groups_of <- function(run, truth, regs) {                        # connected components, member Jaccard > threshold
+groups_of <- function(run, truth, regs) {
   m <- mem[mem$run == run & mem$truth == truth, ]; m <- m[match(regs, m$regulon), ]
-  sets <- strsplit(m$members, ";", fixed = TRUE); n <- length(sets); g <- seq_len(n)
-  find <- function(x) { while (g[x] != x) x <- g[x]; x }
+  sets <- strsplit(m$members, ";", fixed = TRUE); n <- length(sets)
+  if (n < 2) return(list(g = seq_len(n), rule = "single", largest = n))
+  J <- matrix(0, n, n)
   for (a in seq_len(n - 1L)) for (b in (a + 1L):n) {
     inter <- length(intersect(sets[[a]], sets[[b]]))
-    if (inter && inter / length(union(sets[[a]], sets[[b]])) > opt$jaccard) { ra <- find(a); rb <- find(b); if (ra != rb) g[rb] <- ra }
-  }
-  vapply(seq_len(n), find, 0L)
+    if (inter) J[a, b] <- J[b, a] <- inter / length(union(sets[[a]], sets[[b]])) }
+  g <- seq_len(n); find <- function(x) { while (g[x] != x) x <- g[x]; x }
+  for (a in seq_len(n - 1L)) for (b in (a + 1L):n) if (J[a, b] > opt$jaccard) { ra <- find(a); rb <- find(b); if (ra != rb) g[rb] <- ra }
+  g <- vapply(seq_len(n), find, 0L); rule <- "connected components"
+  if (max(table(g)) > 0.3 * n) {
+    D <- stats::as.dist(1 - J); g <- stats::cutree(stats::hclust(D, "complete"), h = 1 - opt$jaccard - 1e-12)
+    rule <- "complete linkage" }
+  list(g = as.integer(factor(g)), rule = rule, largest = max(table(g)))
+}
+signflip_p <- function(d, grp, f) {                              # flip whole overlap groups
+  T0 <- abs(f(d)); u <- unique(grp); idx <- match(grp, u)
+  hits <- sum(replicate(opt$B, abs(f(d * sample(c(-1, 1), length(u), TRUE)[idx])) >= T0 - 1e-12))
+  (1 + hits) / (opt$B + 1)
 }
 cluster_ci <- function(d, grp) {
   if (length(unique(grp)) < 5) return(c(NA, NA))
@@ -106,17 +122,20 @@ for (k in unique(paste(pr$run, pr$truth, sep = "|"))) {
       median_fold = stats::median(y$ap / y$base_rate), median_nonzero = stats::median(y$nonzero)) }
   att <- x[x$method == "attention", ]
   if (!nrow(att)) next
-  grp_all <- groups_of(rn, tr, att$regulon)
+  go <- groups_of(rn, tr, att$regulon); grp_all <- go$g
+  say(sprintf("%s %s: %d regulons, %d overlap groups (%s), largest %d", rn, tr, nrow(att), length(unique(grp_all)), go$rule, go$largest))
   for (m in setdiff(unique(x$method), "attention")) {
     y <- x[x$method == m, ]; j <- match(att$regulon, y$regulon); ok <- !is.na(j)
     a <- att[ok, ]; d <- y$ap[j[ok]] - a$ap                     # comparator - attention
     bm <- boot_mean(d); cc <- cluster_ci(d, grp_all[ok])
+    pm <- signflip_p(d, grp_all[ok], mean); pmed <- signflip_p(d, grp_all[ok], stats::median)
     noop <- a$frac_same_operon <= 0.5; bn <- boot_mean(d[noop])
     rows[[length(rows) + 1L]] <- data.frame(family = family_of(rn), run = rn, dataset = ds, truth = tr, comparator = m,
       n_regulons = length(d), n_overlap_groups = length(unique(grp_all[ok])),
-      mean_d = mean(d), mean_lo = bm[["lo"]], mean_hi = bm[["hi"]], p_mean = bm[["p"]],
-      mean_lo_overlap = cc[1], mean_hi_overlap = cc[2],
-      median_d = stats::median(d), p_median = wil(d), attention_wins = mean(d < 0), tied = mean(d == 0),
+      mean_d = mean(d), mean_lo = cc[1], mean_hi = cc[2], p_mean = pm,
+      median_d = stats::median(d), p_median = pmed,
+      mean_lo_bca_indep = bm[["lo"]], mean_hi_bca_indep = bm[["hi"]], p_mean_bca_indep = bm[["p"]], p_median_wilcoxon_indep = wil(d),
+      attention_wins = mean(d < 0), tied = mean(d == 0),
       n_no_operon_dominated = sum(noop), mean_d_noop = mean(d[noop]), mean_lo_noop = bn[["lo"]], mean_hi_noop = bn[["hi"]],
       median_d_noop = stats::median(d[noop]), p_median_noop = wil(d[noop]))
     for (b in levels(pr$size_bin)) { s <- a$size_bin == b
@@ -141,9 +160,9 @@ utils::write.csv(do.call(rbind, levels), file.path(opt$out, "macro_levels.csv"),
 utils::write.csv(do.call(rbind, strata), file.path(opt$out, "macro_strata.csv"), row.names = FALSE)
 utils::write.csv(do.call(rbind, gam), file.path(opt$out, "macro_pair_weighted.csv"), row.names = FALSE)
 
-say("comparator - attention, per-regulon AP (negative = attention better); Holm within the fixed families")
+say("comparator - attention, per-regulon AP (negative = attention better); interval and p respect regulon overlap; Holm within the fixed families")
 for (k in seq_len(nrow(res))) with(res[k, ], say(sprintf(
-  "%-36s %-12s %-10s n=%3d  mean %+.4f [%+.4f, %+.4f] (overlap groups [%+.4f, %+.4f]) p_holm %.3g | median %+.4f p_holm %.3g | attention wins %.0f%%, tied %.0f%%",
-  run, truth, comparator, n_regulons, mean_d, mean_lo, mean_hi, mean_lo_overlap, mean_hi_overlap, p_mean_holm,
+  "%-36s %-12s %-10s n=%3d  mean %+.4f [%+.4f, %+.4f] (independent BCa [%+.4f, %+.4f]) p_holm %.3g | median %+.4f p_holm %.3g | attention wins %.0f%%, tied %.0f%%",
+  run, truth, comparator, n_regulons, mean_d, mean_lo, mean_hi, mean_lo_bca_indep, mean_hi_bca_indep, p_mean_holm,
   median_d, p_median_holm, 100 * attention_wins, 100 * tied)))
 say("done")
