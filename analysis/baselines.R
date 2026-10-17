@@ -97,6 +97,9 @@ if (opt$dataset %in% c("m3d", "ecomac")) {
   A <- sort(K[seq_len(floor(length(K) / 2))]); B <- setdiff(K, A)
   X <- Z[, A]; rm(Z); X[!is.finite(X)] <- 0
   X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
+  dup <- rownames(X) %in% rownames(X)[duplicated(rownames(X))]   # ambiguous symbols (e.g. HSPA14, TBCE): drop all copies
+  if (any(dup)) { say(sprintf("dropped %d rows with duplicated gene names: %s", sum(dup),
+                              paste(unique(rownames(X)[dup]), collapse = ", "))); X <- X[!dup, ] }
   if (opt$gene_subset == "truths") {
     g0 <- rownames(X)
     lit <- Reduce(union, lapply(list(dorothea_sets(g0, c("A", "B", "C")), collectri_sets(g0), corum_sets(g0)),
