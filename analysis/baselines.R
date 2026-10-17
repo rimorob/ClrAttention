@@ -35,12 +35,12 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(dataset = "m3d", methods = "genie3,grnboost2,pidc", t = 9L, workers = 24L, out = NULL,
             jack = 100L, seed = 20261016L, alpha = 0.5, ntrees = 1000L, quick = 0L,
             python = "~/venvs/clr-baselines/bin/python", julia = "~/.juliaup/bin/julia",
-            gene_subset = "none", export_only = 0L)
+            gene_subset = "none", export_only = 0L, jack_reg = 50L)
 i <- 1L
 while (i <= length(args)) {
   key <- sub("^--", "", args[i]); if (!key %in% names(opt)) stop("unknown argument: ", args[i])
   v <- args[i + 1L]
-  opt[[key]] <- if (key %in% c("t", "workers", "jack", "seed", "ntrees", "quick", "export_only")) as.integer(v) else v
+  opt[[key]] <- if (key %in% c("t", "workers", "jack", "seed", "ntrees", "quick", "export_only", "jack_reg")) as.integer(v) else v
   i <- i + 2L
 }
 if (is.null(opt$out)) opt$out <- file.path("results", paste0("baselines_", opt$dataset))
@@ -126,6 +126,13 @@ halves <- lapply(bench, function(b) lapply(seq_len(opt$jack), function(r) {
   keep <- sample(b$pairs$genes_in, floor(length(b$pairs$genes_in) / 2))
   inh <- logical(G); inh[keep] <- TRUE; which(inh[b$pairs$i] & inh[b$pairs$j]) }))
 
+# gene-jackknife replicates for the per-regulon (macro) statistics: the same
+# kept-gene subsets for every method; delete 20% (primary) and 50% (check)
+gene_keep <- list()
+for (ds in c("d20", "d50")) for (r in seq_len(opt$jack_reg)) {
+  k <- logical(G); k[sample(G, G - round(c(d20 = 0.2, d50 = 0.5)[[ds]] * G))] <- TRUE
+  gene_keep[[paste0(ds, "_", r)]] <- k }
+
 ## ---- scoring ---------------------------------------------------------------------------
 per_tf_median_auroc <- function(S, u) stats::median(vapply(names(u$targets), function(tn) {
   t <- as.integer(tn); y <- integer(G); y[unique(u$targets[[tn]])] <- 1L; y[t] <- NA
@@ -139,7 +146,11 @@ evaluate <- function(S) {
     out <- list(aupr = ap_fast(sc, b$pairs$label),
                 jack = vapply(halves[[nm]], function(ix) ap_fast(sc[ix], b$pairs$label[ix]), 0),
                 coherence = stats::median(regulon_coherence(S, b$reg, b$co, b$operon, genes), na.rm = TRUE),
-                per_regulon = regulon_ap_table(S, b$reg, b$co, b$operon, genes))
+                per_regulon = regulon_ap_table(S, b$reg, b$co, b$operon, genes),
+                per_regulon_jack = do.call(rbind, parallel::mclapply(names(gene_keep), function(r) {
+                  x <- regulon_ap_table(S, b$reg, b$co, b$operon, genes, min_pos = 3L, keep = gene_keep[[r]])
+                  data.frame(design = sub("_[0-9]+$", "", r), rep = r, regulon = x$regulon, n_pos = x$n_pos, ap = x$ap)
+                }, mc.cores = min(8L, opt$workers))))
     if (!is.null(U) && nm %in% names(U)) { u <- U[[nm]]
       out$tf_aupr_ratio <- ap_fast(S[cbind(u$i, u$j)], u$label) / mean(u$label)
       out$tf_auroc_median <- per_tf_median_auroc(S, u) }
@@ -215,6 +226,9 @@ pr <- do.call(rbind, lapply(names(E), function(m) do.call(rbind, lapply(names(be
   cbind(run = basename(opt$out), dataset = opt$dataset, method = m, truth = nm, E[[m]][[nm]]$per_regulon,
         stringsAsFactors = FALSE)))))
 utils::write.csv(pr, file.path(opt$out, "per_regulon.csv"), row.names = FALSE)
+prj <- do.call(rbind, lapply(names(E), function(m) do.call(rbind, lapply(names(bench), function(nm)
+  cbind(run = basename(opt$out), method = m, truth = nm, E[[m]][[nm]]$per_regulon_jack, stringsAsFactors = FALSE)))))
+utils::write.csv(prj, file.path(opt$out, "per_regulon_jack.csv"), row.names = FALSE)
 # members of each regulon (gene indices into this run's genes), for the overlap-aware bootstrap
 rm_tab <- do.call(rbind, lapply(names(bench), function(nm) { r <- bench[[nm]]$reg
   rn <- names(r$members); if (is.null(rn)) rn <- as.character(seq_along(r$members))

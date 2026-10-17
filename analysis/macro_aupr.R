@@ -1,25 +1,23 @@
 #!/usr/bin/env Rscript
 # Macro-averaged per-regulon AP: every regulon counts once, next to the pooled
-# (micro) co-membership AUPR that large regulons dominate. Reads the
-# per_regulon.csv and regulon_members.csv tables written by analysis/baselines.R.
-# Definition fixed with the statistics reviewer before scoring (docs/paper_plan.md, theme 5):
+# (micro) co-membership AUPR that large regulons dominate. Reads per_regulon.csv
+# and per_regulon_jack.csv written by analysis/baselines.R. Definition fixed
+# with the statistics reviewer before scoring (docs/paper_plan.md, theme 5):
 #   - candidates as regulon_coherence(); AP with ties broken in expectation;
-#     regulons with >= 10 positive (non-same-operon) pairs (so CORUM complexes
-#     of 3-4 genes drop out); exclusions depend on the truth only
-#   - comparisons only within one run (one results directory), so every
-#     method is paired with the attention matrix of the same run; duplicated
-#     (run, method, truth, regulon) rows stop the script
-#   - primary: per-regulon paired difference dAP = AP(comparator) - AP(attention),
-#     mean and median. Regulons overlap (CRP members recur in many), so the
-#     PRIMARY inference respects overlap groups: interval for the mean from a
-#     bootstrap over overlap groups (percentile); p for mean and median from a
-#     sign-flip permutation test flipping whole groups (B draws). Secondary,
-#     treating regulons as independent: BCa interval (p by inverting it) and
-#     Wilcoxon signed rank. Share of regulons where attention wins, and tied.
-#   - overlap groups: connected components of regulons linked when member
-#     Jaccard > 0.2; if the largest component holds > 30% of the regulons,
-#     complete linkage instead (every pair in a group has Jaccard >= 0.2);
-#     the rule used and the largest group size are logged
+#     regulons with >= 10 positive (non-same-operon) pairs in the full data
+#     (so CORUM complexes of 3-4 genes drop out); the set depends on the truth
+#     only. A gene in several regulons counts in each (no merging).
+#   - comparisons only within one run (one results directory); duplicated
+#     (run, method, truth, regulon) rows or missing inputs stop the script
+#   - per-regulon paired difference dAP = AP(comparator) - AP(attention);
+#     mean and median over regulons. Two sources of uncertainty, both required:
+#       regulons: BCa bootstrap over regulons for the mean (p by inverting the
+#                 interval); Wilcoxon signed rank for the median
+#       genes:    delete-d gene jackknife with the regulon set fixed, d = 20% of
+#                 genes (primary; variance factor (n - d)/d = 4), regulons
+#                 scored in a replicate when they keep >= 3 positive pairs;
+#                 d = 50% as a check (SE ratio flagged if off by > 25%)
+#     A difference counts only if both intervals exclude 0; Holm on the larger p.
 #   - levels as (AP - b) / (1 - b), b = the regulon's base rate
 #   - strata: size 5-9 / 10-24 / 25-99 / >= 100; class (TF vs sigma)
 #   - pair-weighted means of per-regulon AP, weights n_pos^gamma, gamma 0..1
@@ -40,11 +38,10 @@
 args <- commandArgs(trailingOnly = TRUE)
 opt <- list(dirs = paste("results/baselines_m3d", "results/baselines_ecomac", "results/baselines_k562ess_genie3",
                          "results/baselines_k562ess_truthgenes_genie3", sep = ","),
-            out = "results/macro_aupr", B = 10000L, seed = 20261017L, jaccard = 0.2)
+            out = "results/macro_aupr", B = 10000L, seed = 20261017L)
 i <- 1L
 while (i <= length(args)) { k <- sub("^--", "", args[i])
-  opt[[k]] <- if (k %in% c("B", "seed")) as.integer(args[i + 1L]) else if (k == "jaccard") as.numeric(args[i + 1L]) else args[i + 1L]
-  i <- i + 2L }
+  opt[[k]] <- if (k %in% c("B", "seed")) as.integer(args[i + 1L]) else args[i + 1L]; i <- i + 2L }
 dir.create(opt$out, recursive = TRUE, showWarnings = FALSE)
 logf <- file.path(opt$out, "macro_aupr.log")
 say <- function(...) { m <- paste0(...); cat(m, "\n"); cat(m, "\n", file = logf, append = TRUE) }
@@ -59,11 +56,11 @@ family_of <- function(run) { f <- names(families)[vapply(families, function(x) r
   if (length(f)) f else "other (no Holm family)" }
 
 dirs <- strsplit(opt$dirs, ",")[[1]]
-f1 <- file.path(dirs, "per_regulon.csv"); f2 <- file.path(dirs, "regulon_members.csv")
+f1 <- file.path(dirs, "per_regulon.csv"); f2 <- file.path(dirs, "per_regulon_jack.csv")
 miss <- c(f1, f2)[!file.exists(c(f1, f2))]
 if (length(miss)) stop("missing input: ", paste(miss, collapse = ", "))
 pr <- do.call(rbind, lapply(f1, utils::read.csv, stringsAsFactors = FALSE))
-mem <- do.call(rbind, lapply(f2, utils::read.csv, stringsAsFactors = FALSE))
+pj <- do.call(rbind, lapply(f2, utils::read.csv, stringsAsFactors = FALSE))
 key <- paste(pr$run, pr$method, pr$truth, pr$regulon)
 if (anyDuplicated(key)) stop("duplicated (run, method, truth, regulon) rows: ", paste(utils::head(unique(key[duplicated(key)])), collapse = "; "))
 pr <- pr[!is.na(pr$ap), ]
@@ -83,34 +80,18 @@ boot_mean <- function(d) {
     p <- hi }
   c(lo = lohi[1], hi = lohi[2], p = p)
 }
-groups_of <- function(run, truth, regs) {
-  m <- mem[mem$run == run & mem$truth == truth, ]; m <- m[match(regs, m$regulon), ]
-  sets <- strsplit(m$members, ";", fixed = TRUE); n <- length(sets)
-  if (n < 2) return(list(g = seq_len(n), rule = "single", largest = n))
-  J <- matrix(0, n, n)
-  for (a in seq_len(n - 1L)) for (b in (a + 1L):n) {
-    inter <- length(intersect(sets[[a]], sets[[b]]))
-    if (inter) J[a, b] <- J[b, a] <- inter / length(union(sets[[a]], sets[[b]])) }
-  g <- seq_len(n); find <- function(x) { while (g[x] != x) x <- g[x]; x }
-  for (a in seq_len(n - 1L)) for (b in (a + 1L):n) if (J[a, b] > opt$jaccard) { ra <- find(a); rb <- find(b); if (ra != rb) g[rb] <- ra }
-  g <- vapply(seq_len(n), find, 0L); rule <- "connected components"
-  if (max(table(g)) > 0.3 * n) {
-    D <- stats::as.dist(1 - J); g <- stats::cutree(stats::hclust(D, "complete"), h = 1 - opt$jaccard - 1e-12)
-    rule <- "complete linkage" }
-  list(g = as.integer(factor(g)), rule = rule, largest = max(table(g)))
-}
-signflip_p <- function(d, grp, f) {                              # flip whole overlap groups
-  T0 <- abs(f(d)); u <- unique(grp); idx <- match(grp, u)
-  hits <- sum(replicate(opt$B, abs(f(d * sample(c(-1, 1), length(u), TRUE)[idx])) >= T0 - 1e-12))
-  (1 + hits) / (opt$B + 1)
-}
-cluster_ci <- function(d, grp) {
-  if (length(unique(grp)) < 5) return(c(NA, NA))
-  sp <- split(d, grp); s <- vapply(sp, sum, 0); n <- lengths(sp)
-  bt <- replicate(opt$B, { k <- sample(length(sp), replace = TRUE); sum(s[k]) / sum(n[k]) })
-  stats::quantile(bt, c(0.025, 0.975), names = FALSE)
-}
 wil <- function(d) if (sum(d != 0) >= 5) stats::wilcox.test(d, exact = FALSE)$p.value else NA_real_
+# delete-d gene jackknife of a statistic f over the per-regulon differences;
+# regulon set fixed to `regs`; returns SE and the share of (regulon, replicate) cells skipped
+gene_jack <- function(jc, ja, regs, design, f) {
+  factor <- c(d20 = 0.8 / 0.2, d50 = 1)[[design]]
+  jc <- jc[jc$design == design & jc$regulon %in% regs, ]; ja <- ja[ja$design == design & ja$regulon %in% regs, ]
+  m <- merge(jc[, c("rep", "regulon", "ap")], ja[, c("rep", "regulon", "ap")], by = c("rep", "regulon"), suffixes = c(".c", ".a"))
+  m <- m[!is.na(m$ap.c) & !is.na(m$ap.a), ]
+  th <- vapply(split(m$ap.c - m$ap.a, m$rep), f, 0)
+  c(se = sqrt(factor * mean((th - mean(th))^2)), skipped = 1 - nrow(m) / (length(regs) * length(unique(jc$rep))))
+}
+zp <- function(est, se) if (is.finite(se) && se > 0) 2 * stats::pnorm(-abs(est) / se) else NA_real_
 
 rows <- list(); strata <- list(); gam <- list(); levels <- list()
 for (k in unique(paste(pr$run, pr$truth, sep = "|"))) {
@@ -122,19 +103,25 @@ for (k in unique(paste(pr$run, pr$truth, sep = "|"))) {
       median_fold = stats::median(y$ap / y$base_rate), median_nonzero = stats::median(y$nonzero)) }
   att <- x[x$method == "attention", ]
   if (!nrow(att)) next
-  go <- groups_of(rn, tr, att$regulon); grp_all <- go$g
-  say(sprintf("%s %s: %d regulons, %d overlap groups (%s), largest %d", rn, tr, nrow(att), length(unique(grp_all)), go$rule, go$largest))
+  pjr <- pj[pj$run == rn & pj$truth == tr, ]; ja <- pjr[pjr$method == "attention", ]
   for (m in setdiff(unique(x$method), "attention")) {
     y <- x[x$method == m, ]; j <- match(att$regulon, y$regulon); ok <- !is.na(j)
     a <- att[ok, ]; d <- y$ap[j[ok]] - a$ap                     # comparator - attention
-    bm <- boot_mean(d); cc <- cluster_ci(d, grp_all[ok])
-    pm <- signflip_p(d, grp_all[ok], mean); pmed <- signflip_p(d, grp_all[ok], stats::median)
+    jc <- pjr[pjr$method == m, ]
+    bm <- boot_mean(d); pw <- wil(d)
+    jm20 <- gene_jack(jc, ja, a$regulon, "d20", mean); jm50 <- gene_jack(jc, ja, a$regulon, "d50", mean)
+    jd20 <- gene_jack(jc, ja, a$regulon, "d20", stats::median)
+    pjm <- zp(mean(d), jm20[["se"]]); pjd <- zp(stats::median(d), jd20[["se"]])
     noop <- a$frac_same_operon <= 0.5; bn <- boot_mean(d[noop])
     rows[[length(rows) + 1L]] <- data.frame(family = family_of(rn), run = rn, dataset = ds, truth = tr, comparator = m,
-      n_regulons = length(d), n_overlap_groups = length(unique(grp_all[ok])),
-      mean_d = mean(d), mean_lo = cc[1], mean_hi = cc[2], p_mean = pm,
-      median_d = stats::median(d), p_median = pmed,
-      mean_lo_bca_indep = bm[["lo"]], mean_hi_bca_indep = bm[["hi"]], p_mean_bca_indep = bm[["p"]], p_median_wilcoxon_indep = wil(d),
+      n_regulons = length(d),
+      mean_d = mean(d), mean_lo_regulons = bm[["lo"]], mean_hi_regulons = bm[["hi"]], p_mean_regulons = bm[["p"]],
+      mean_lo_genes = mean(d) - 1.96 * jm20[["se"]], mean_hi_genes = mean(d) + 1.96 * jm20[["se"]], p_mean_genes = pjm,
+      p_mean = max(bm[["p"]], pjm),
+      median_d = stats::median(d), p_median_regulons = pw,
+      median_lo_genes = stats::median(d) - 1.96 * jd20[["se"]], median_hi_genes = stats::median(d) + 1.96 * jd20[["se"]],
+      p_median_genes = pjd, p_median = max(pw, pjd),
+      jack_se_ratio_d50_d20 = jm50[["se"]] / jm20[["se"]], jack_skipped_d20 = jm20[["skipped"]],
       attention_wins = mean(d < 0), tied = mean(d == 0),
       n_no_operon_dominated = sum(noop), mean_d_noop = mean(d[noop]), mean_lo_noop = bn[["lo"]], mean_hi_noop = bn[["hi"]],
       median_d_noop = stats::median(d[noop]), p_median_noop = wil(d[noop]))
@@ -155,14 +142,15 @@ for (f in names(families)) { s <- res$family == f
   if (!any(s)) next
   ph <- stats::p.adjust(c(res$p_mean[s], res$p_median[s]), "holm", n = families[[f]]$n)
   res$p_mean_holm[s] <- ph[seq_len(sum(s))]; res$p_median_holm[s] <- ph[sum(s) + seq_len(sum(s))] }
+res$jack_unstable <- abs(res$jack_se_ratio_d50_d20 - 1) > 0.25
 utils::write.csv(res, file.path(opt$out, "macro_vs_attention.csv"), row.names = FALSE)
 utils::write.csv(do.call(rbind, levels), file.path(opt$out, "macro_levels.csv"), row.names = FALSE)
 utils::write.csv(do.call(rbind, strata), file.path(opt$out, "macro_strata.csv"), row.names = FALSE)
 utils::write.csv(do.call(rbind, gam), file.path(opt$out, "macro_pair_weighted.csv"), row.names = FALSE)
 
-say("comparator - attention, per-regulon AP (negative = attention better); interval and p respect regulon overlap; Holm within the fixed families")
+say("comparator - attention, per-regulon AP (negative = attention better); both regulon and gene intervals shown; Holm on the larger p")
 for (k in seq_len(nrow(res))) with(res[k, ], say(sprintf(
-  "%-36s %-12s %-10s n=%3d  mean %+.4f [%+.4f, %+.4f] (independent BCa [%+.4f, %+.4f]) p_holm %.3g | median %+.4f p_holm %.3g | attention wins %.0f%%, tied %.0f%%",
-  run, truth, comparator, n_regulons, mean_d, mean_lo, mean_hi, mean_lo_bca_indep, mean_hi_bca_indep, p_mean_holm,
-  median_d, p_median_holm, 100 * attention_wins, 100 * tied)))
+  "%-36s %-12s %-10s n=%3d  mean %+.4f regulons [%+.4f, %+.4f] genes [%+.4f, %+.4f] p_holm %.3g | median %+.4f p_holm %.3g | attention wins %.0f%%, tied %.0f%%%s",
+  run, truth, comparator, n_regulons, mean_d, mean_lo_regulons, mean_hi_regulons, mean_lo_genes, mean_hi_genes, p_mean_holm,
+  median_d, p_median_holm, 100 * attention_wins, 100 * tied, if (isTRUE(jack_unstable)) "  [gene jackknife unstable: d50/d20 SE ratio off by > 25%]" else "")))
 say("done")

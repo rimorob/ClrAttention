@@ -243,16 +243,20 @@ ap_expected <- function(score, label) {
 # Returns one row per regulon: size, positives, negatives, base rate, the
 # fraction of member pairs that are same-operon, AP (ties in expectation), and
 # the fraction of candidate pairs with a nonzero score.
-regulon_ap_table <- function(S, reg, co, operon_of, genes, min_pos = 10L) {
+# keep: optional logical over genes (gene-jackknife replicate): members and
+# partners restricted to kept genes; use a smaller min_pos there.
+regulon_ap_table <- function(S, reg, co, operon_of, genes, min_pos = 10L, keep = NULL) {
   op <- operon_of[genes]
   nm <- names(reg$members); if (is.null(nm)) nm <- as.character(seq_along(reg$members))
   cl <- if (is.null(reg$class)) rep(NA_character_, length(nm)) else unname(as.character(reg$class))
   do.call(rbind, lapply(seq_along(reg$members), function(k) {
-    m <- reg$members[[k]]
+    m <- reg$members[[k]]; if (!is.null(keep)) m <- m[keep[m]]
     same_m <- outer(op[m], op[m], "=="); ut <- upper.tri(same_m)
     w <- S[m, m][ut & (is.na(same_m) | !same_m)]
     ok_b <- !co[m, , drop = FALSE]; same_b <- outer(op[m], op, "==")
-    b <- S[m, , drop = FALSE][ok_b & (is.na(same_b) | !same_b)]
+    ok_b <- ok_b & (is.na(same_b) | !same_b)
+    if (!is.null(keep)) ok_b <- ok_b & rep(keep, each = length(m))
+    b <- S[m, , drop = FALSE][ok_b]
     n1 <- length(w); n0 <- length(b)
     data.frame(regulon = nm[k], class = cl[k], size = length(m), n_pos = n1, n_neg = n0,
                base_rate = if (n1 + n0) n1 / (n1 + n0) else NA_real_,
