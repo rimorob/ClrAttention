@@ -1,96 +1,149 @@
 #!/usr/bin/env Rscript
 # Macro-averaged per-regulon AP: every regulon counts once, next to the pooled
 # (micro) co-membership AUPR that large regulons dominate. Reads the
-# per_regulon.csv tables written by analysis/baselines.R. Definition fixed
-# with the statistics reviewer before scoring (docs/paper_plan.md, theme 5):
+# per_regulon.csv and regulon_members.csv tables written by analysis/baselines.R.
+# Definition fixed with the statistics reviewer before scoring (docs/paper_plan.md, theme 5):
 #   - candidates as regulon_coherence(); AP with ties broken in expectation;
-#     regulons with >= 10 positive (non-same-operon) pairs; the exclusions
-#     depend on the truth only, so every method is scored on the same regulons
-#   - primary: per-regulon paired difference dAP = AP(method) - AP(attention);
-#     mean (regulon bootstrap, 10,000, BCa) and median (Wilcoxon signed rank),
-#     plus the share of regulons where attention wins
-#   - levels reported as (AP - b) / (1 - b), b = the regulon's base rate
+#     regulons with >= 10 positive (non-same-operon) pairs (so CORUM complexes
+#     of 3-4 genes drop out); exclusions depend on the truth only
+#   - comparisons only within one run (one results directory), so every
+#     method is paired with the attention matrix of the same run; duplicated
+#     (run, method, truth, regulon) rows stop the script
+#   - primary: per-regulon paired difference dAP = AP(comparator) - AP(attention);
+#     mean (regulon bootstrap, BCa interval, p by inverting the BCa interval)
+#     and median (Wilcoxon signed rank); share of regulons where attention
+#     wins, and share tied
+#   - overlap-aware sensitivity: bootstrap over connected groups of regulons
+#     (linked when member Jaccard > 0.2), percentile interval
+#   - levels as (AP - b) / (1 - b), b = the regulon's base rate
 #   - strata: size 5-9 / 10-24 / 25-99 / >= 100; class (TF vs sigma)
-#   - macro-to-micro curve: regulons weighted by n_pos^gamma, gamma 0..1
-#   - sensitivity: regulons with > 50% same-operon member pairs removed;
-#     leave-one-regulon-out jackknife SE of the mean
-#   - Holm families declared in advance: E. coli (M3D, EcoMAC x SC, all x
-#     comparators x mean, median) and K562 (truths x comparators x mean, median)
+#   - pair-weighted means of per-regulon AP, weights n_pos^gamma, gamma 0..1
+#     (gamma = 1 is NOT the pooled AUPR, which ranks all pairs together)
+#   - operon-dominated regulons (> 50% same-operon member pairs) removed, with
+#     interval and test
+#   - Holm families fixed in advance, with fixed sizes (missing entries count):
+#       E. coli: 5 comparators (abs_pearson, clr, genie3, grnboost2, pidc) x
+#                runs baselines_m3d, baselines_ecomac x evidence SC, all x
+#                mean, median = 40 tests
+#       K562 primary: run baselines_k562ess_truthgenes_genie3 x 5 comparators x
+#                5 truths x mean, median = 50 tests
+#       K562 secondary (all genes; shares most genes with the primary run, not
+#                independent): baselines_k562ess_genie3, 40 tests (no PIDC)
 #
-# Usage (repo root):  Rscript analysis/macro_aupr.R [--dirs results/baselines_m3d,results/baselines_ecomac,...]
-#                       [--out results/macro_aupr] [--B 10000]
+# Usage (repo root):  Rscript analysis/macro_aupr.R [--dirs dir1,dir2,...] [--out results/macro_aupr] [--B 10000]
 
 args <- commandArgs(trailingOnly = TRUE)
-opt <- list(dirs = "results/baselines_m3d,results/baselines_ecomac,results/baselines_k562ess_genie3",
-            out = "results/macro_aupr", B = 10000L, seed = 20261017L)
+opt <- list(dirs = paste("results/baselines_m3d", "results/baselines_ecomac", "results/baselines_k562ess_genie3",
+                         "results/baselines_k562ess_truthgenes_genie3", sep = ","),
+            out = "results/macro_aupr", B = 10000L, seed = 20261017L, jaccard = 0.2)
 i <- 1L
-while (i <= length(args)) { k <- sub("^--", "", args[i]); opt[[k]] <- if (k %in% c("B", "seed")) as.integer(args[i + 1L]) else args[i + 1L]; i <- i + 2L }
+while (i <= length(args)) { k <- sub("^--", "", args[i])
+  opt[[k]] <- if (k %in% c("B", "seed")) as.integer(args[i + 1L]) else if (k == "jaccard") as.numeric(args[i + 1L]) else args[i + 1L]
+  i <- i + 2L }
 dir.create(opt$out, recursive = TRUE, showWarnings = FALSE)
 logf <- file.path(opt$out, "macro_aupr.log")
 say <- function(...) { m <- paste0(...); cat(m, "\n"); cat(m, "\n", file = logf, append = TRUE) }
 suppressPackageStartupMessages(library(boot))
 set.seed(opt$seed)
 
-files <- file.path(strsplit(opt$dirs, ",")[[1]], "per_regulon.csv")
-files <- files[file.exists(files)]
-if (!length(files)) stop("no per_regulon.csv found")
-pr <- do.call(rbind, lapply(files, utils::read.csv, stringsAsFactors = FALSE))
+families <- list(
+  "E. coli"        = list(runs = c("baselines_m3d", "baselines_ecomac"), n = 40L),
+  "K562 primary"   = list(runs = "baselines_k562ess_truthgenes_genie3", n = 50L),
+  "K562 secondary" = list(runs = "baselines_k562ess_genie3", n = 40L))
+family_of <- function(run) { f <- names(families)[vapply(families, function(x) run %in% x$runs, NA)]
+  if (length(f)) f else "other (no Holm family)" }
+
+dirs <- strsplit(opt$dirs, ",")[[1]]
+f1 <- file.path(dirs, "per_regulon.csv"); f2 <- file.path(dirs, "regulon_members.csv")
+miss <- c(f1, f2)[!file.exists(c(f1, f2))]
+if (length(miss)) stop("missing input: ", paste(miss, collapse = ", "))
+pr <- do.call(rbind, lapply(f1, utils::read.csv, stringsAsFactors = FALSE))
+mem <- do.call(rbind, lapply(f2, utils::read.csv, stringsAsFactors = FALSE))
+key <- paste(pr$run, pr$method, pr$truth, pr$regulon)
+if (anyDuplicated(key)) stop("duplicated (run, method, truth, regulon) rows: ", paste(utils::head(unique(key[duplicated(key)])), collapse = "; "))
 pr <- pr[!is.na(pr$ap), ]
 pr$ap_norm <- (pr$ap - pr$base_rate) / (1 - pr$base_rate)
 pr$size_bin <- cut(pr$size, c(0, 9, 24, 99, Inf), labels = c("5-9", "10-24", "25-99", ">=100"))
-pr$family <- ifelse(pr$dataset %in% c("m3d", "ecomac"), "E. coli", "K562")
-say("per-regulon rows: ", nrow(pr), " from ", paste(files, collapse = ", "))
+say("per-regulon rows: ", nrow(pr), " from ", paste(dirs, collapse = ", "))
 
 boot_mean <- function(d) {
-  if (length(d) < 5) return(c(lo = NA, hi = NA, p = NA))
+  if (length(d) < 5 || all(d == d[1])) return(c(lo = NA, hi = NA, p = NA))
   b <- boot::boot(d, function(x, i) mean(x[i]), R = opt$B)
-  ci <- tryCatch(boot::boot.ci(b, type = "bca")$bca[4:5], error = function(e) stats::quantile(b$t, c(0.025, 0.975)))
-  c(lo = ci[1], hi = ci[2], p = min(1, max(1 / opt$B, 2 * min(mean(b$t <= 0), mean(b$t >= 0)))))   # floored at 1/B
+  ci <- function(a) boot::boot.ci(b, conf = 1 - a, type = "bca")$bca[4:5]
+  lohi <- ci(0.05)
+  excl <- function(a) { r <- ci(a); r[1] > 0 || r[2] < 0 }       # BCa interval at level 1 - a excludes 0
+  if (!excl(1 - 1e-9)) p <- 1 else if (excl(1 / opt$B)) p <- 1 / opt$B else {
+    lo <- 1 / opt$B; hi <- 1 - 1e-9                                 # smallest a at which it excludes 0
+    for (it in 1:30) { mid <- sqrt(lo * hi); if (excl(mid)) hi <- mid else lo <- mid }
+    p <- hi }
+  c(lo = lohi[1], hi = lohi[2], p = p)
 }
-loro_se <- function(d) { n <- length(d); if (n < 3) return(NA); m <- (sum(d) - d) / (n - 1); sqrt((n - 1) / n * sum((m - mean(m))^2)) }
+groups_of <- function(run, truth, regs) {                        # connected components, member Jaccard > threshold
+  m <- mem[mem$run == run & mem$truth == truth, ]; m <- m[match(regs, m$regulon), ]
+  sets <- strsplit(m$members, ";", fixed = TRUE); n <- length(sets); g <- seq_len(n)
+  find <- function(x) { while (g[x] != x) x <- g[x]; x }
+  for (a in seq_len(n - 1L)) for (b in (a + 1L):n) {
+    inter <- length(intersect(sets[[a]], sets[[b]]))
+    if (inter && inter / length(union(sets[[a]], sets[[b]])) > opt$jaccard) { ra <- find(a); rb <- find(b); if (ra != rb) g[rb] <- ra }
+  }
+  vapply(seq_len(n), find, 0L)
+}
+cluster_ci <- function(d, grp) {
+  if (length(unique(grp)) < 5) return(c(NA, NA))
+  sp <- split(d, grp); s <- vapply(sp, sum, 0); n <- lengths(sp)
+  bt <- replicate(opt$B, { k <- sample(length(sp), replace = TRUE); sum(s[k]) / sum(n[k]) })
+  stats::quantile(bt, c(0.025, 0.975), names = FALSE)
+}
+wil <- function(d) if (sum(d != 0) >= 5) stats::wilcox.test(d, exact = FALSE)$p.value else NA_real_
 
 rows <- list(); strata <- list(); gam <- list(); levels <- list()
-for (key in unique(paste(pr$dataset, pr$truth, sep = "|"))) {
-  x <- pr[paste(pr$dataset, pr$truth, sep = "|") == key, ]
-  ds <- x$dataset[1]; tr <- x$truth[1]
+for (k in unique(paste(pr$run, pr$truth, sep = "|"))) {
+  x <- pr[paste(pr$run, pr$truth, sep = "|") == k, ]
+  rn <- x$run[1]; ds <- x$dataset[1]; tr <- x$truth[1]
   for (m in unique(x$method)) { y <- x[x$method == m, ]
-    levels[[length(levels) + 1L]] <- data.frame(dataset = ds, truth = tr, method = m, n_regulons = nrow(y),
+    levels[[length(levels) + 1L]] <- data.frame(run = rn, dataset = ds, truth = tr, method = m, n_regulons = nrow(y),
       mean_ap_norm = mean(y$ap_norm), median_ap_norm = stats::median(y$ap_norm),
       median_fold = stats::median(y$ap / y$base_rate), median_nonzero = stats::median(y$nonzero)) }
   att <- x[x$method == "attention", ]
+  if (!nrow(att)) next
+  grp_all <- groups_of(rn, tr, att$regulon)
   for (m in setdiff(unique(x$method), "attention")) {
     y <- x[x$method == m, ]; j <- match(att$regulon, y$regulon); ok <- !is.na(j)
     a <- att[ok, ]; d <- y$ap[j[ok]] - a$ap                     # comparator - attention
-    bm <- boot_mean(d)
-    wil <- if (sum(d != 0) >= 5) stats::wilcox.test(d, exact = FALSE)$p.value else NA
-    noop <- a$frac_same_operon <= 0.5
-    rows[[length(rows) + 1L]] <- data.frame(family = x$family[1], dataset = ds, truth = tr, comparator = m,
-      n_regulons = length(d), mean_d = mean(d), mean_lo = bm[["lo"]], mean_hi = bm[["hi"]], p_mean = bm[["p"]],
-      loro_se = loro_se(d), median_d = stats::median(d), p_median = wil, attention_wins = mean(d < 0),
-      mean_d_no_operon_dominated = mean(d[noop]), median_d_no_operon_dominated = stats::median(d[noop]))
-    for (bn in levels(pr$size_bin)) { s <- a$size_bin == bn
-      if (any(s)) strata[[length(strata) + 1L]] <- data.frame(dataset = ds, truth = tr, comparator = m, stratum = paste("size", bn),
-        n = sum(s), mean_d = mean(d[s]), median_d = stats::median(d[s]), attention_wins = mean(d[s] < 0)) }
+    bm <- boot_mean(d); cc <- cluster_ci(d, grp_all[ok])
+    noop <- a$frac_same_operon <= 0.5; bn <- boot_mean(d[noop])
+    rows[[length(rows) + 1L]] <- data.frame(family = family_of(rn), run = rn, dataset = ds, truth = tr, comparator = m,
+      n_regulons = length(d), n_overlap_groups = length(unique(grp_all[ok])),
+      mean_d = mean(d), mean_lo = bm[["lo"]], mean_hi = bm[["hi"]], p_mean = bm[["p"]],
+      mean_lo_overlap = cc[1], mean_hi_overlap = cc[2],
+      median_d = stats::median(d), p_median = wil(d), attention_wins = mean(d < 0), tied = mean(d == 0),
+      n_no_operon_dominated = sum(noop), mean_d_noop = mean(d[noop]), mean_lo_noop = bn[["lo"]], mean_hi_noop = bn[["hi"]],
+      median_d_noop = stats::median(d[noop]), p_median_noop = wil(d[noop]))
+    for (b in levels(pr$size_bin)) { s <- a$size_bin == b
+      if (any(s)) strata[[length(strata) + 1L]] <- data.frame(run = rn, truth = tr, comparator = m, stratum = paste("size", b),
+        n = sum(s), mean_d = mean(d[s]), median_d = stats::median(d[s]), attention_wins = mean(d[s] < 0), tied = mean(d[s] == 0)) }
     for (cl in unique(a$class)) { s <- a$class %in% cl
-      strata[[length(strata) + 1L]] <- data.frame(dataset = ds, truth = tr, comparator = m, stratum = paste("class", cl),
-        n = sum(s), mean_d = mean(d[s]), median_d = stats::median(d[s]), attention_wins = mean(d[s] < 0)) }
+      strata[[length(strata) + 1L]] <- data.frame(run = rn, truth = tr, comparator = m, stratum = paste("class", cl),
+        n = sum(s), mean_d = mean(d[s]), median_d = stats::median(d[s]), attention_wins = mean(d[s] < 0), tied = mean(d[s] == 0)) }
     for (g in c(0, 0.25, 0.5, 0.75, 1)) { w <- a$n_pos^g
-      gam[[length(gam) + 1L]] <- data.frame(dataset = ds, truth = tr, comparator = m, gamma = g, weighted_mean_d = sum(w * d) / sum(w)) }
+      gam[[length(gam) + 1L]] <- data.frame(run = rn, truth = tr, comparator = m, gamma = g,
+        pair_weighted_mean_d = sum(w * d) / sum(w)) }
   }
 }
 res <- do.call(rbind, rows)
-long <- rbind(data.frame(i = seq_len(nrow(res)), stat = "mean", p = res$p_mean, family = res$family),
-              data.frame(i = seq_len(nrow(res)), stat = "median", p = res$p_median, family = res$family))
-long$p_holm <- NA
-for (f in unique(long$family)) { s <- long$family == f; long$p_holm[s] <- stats::p.adjust(long$p[s], "holm") }
-res$p_mean_holm <- long$p_holm[long$stat == "mean"]; res$p_median_holm <- long$p_holm[long$stat == "median"]
+res$p_mean_holm <- NA_real_; res$p_median_holm <- NA_real_
+for (f in names(families)) { s <- res$family == f
+  if (!any(s)) next
+  ph <- stats::p.adjust(c(res$p_mean[s], res$p_median[s]), "holm", n = families[[f]]$n)
+  res$p_mean_holm[s] <- ph[seq_len(sum(s))]; res$p_median_holm[s] <- ph[sum(s) + seq_len(sum(s))] }
 utils::write.csv(res, file.path(opt$out, "macro_vs_attention.csv"), row.names = FALSE)
 utils::write.csv(do.call(rbind, levels), file.path(opt$out, "macro_levels.csv"), row.names = FALSE)
 utils::write.csv(do.call(rbind, strata), file.path(opt$out, "macro_strata.csv"), row.names = FALSE)
-utils::write.csv(do.call(rbind, gam), file.path(opt$out, "macro_gamma.csv"), row.names = FALSE)
+utils::write.csv(do.call(rbind, gam), file.path(opt$out, "macro_pair_weighted.csv"), row.names = FALSE)
 
-say("comparator - attention, per-regulon AP (negative = attention better); Holm within family")
+say("comparator - attention, per-regulon AP (negative = attention better); Holm within the fixed families")
 for (k in seq_len(nrow(res))) with(res[k, ], say(sprintf(
-  "%-7s %-14s %-10s n=%3d  mean %+.4f [%+.4f, %+.4f] p_holm %.3g | median %+.4f p_holm %.3g | attention wins %.0f%%",
-  dataset, truth, comparator, n_regulons, mean_d, mean_lo, mean_hi, p_mean_holm, median_d, p_median_holm, 100 * attention_wins)))
+  "%-36s %-12s %-10s n=%3d  mean %+.4f [%+.4f, %+.4f] (overlap groups [%+.4f, %+.4f]) p_holm %.3g | median %+.4f p_holm %.3g | attention wins %.0f%%, tied %.0f%%",
+  run, truth, comparator, n_regulons, mean_d, mean_lo, mean_hi, mean_lo_overlap, mean_hi_overlap, p_mean_holm,
+  median_d, p_median_holm, 100 * attention_wins, 100 * tied)))
 say("done")

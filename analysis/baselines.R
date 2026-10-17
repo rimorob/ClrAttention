@@ -212,8 +212,15 @@ res <- do.call(rbind, rows)
 utils::write.csv(res, file.path(opt$out, "metrics.csv"), row.names = FALSE)
 # per-regulon AP (macro view; summarized by analysis/macro_aupr.R)
 pr <- do.call(rbind, lapply(names(E), function(m) do.call(rbind, lapply(names(bench), function(nm)
-  cbind(dataset = opt$dataset, method = m, truth = nm, E[[m]][[nm]]$per_regulon, stringsAsFactors = FALSE)))))
+  cbind(run = basename(opt$out), dataset = opt$dataset, method = m, truth = nm, E[[m]][[nm]]$per_regulon,
+        stringsAsFactors = FALSE)))))
 utils::write.csv(pr, file.path(opt$out, "per_regulon.csv"), row.names = FALSE)
+# members of each regulon (gene indices into this run's genes), for the overlap-aware bootstrap
+rm_tab <- do.call(rbind, lapply(names(bench), function(nm) { r <- bench[[nm]]$reg
+  rn <- names(r$members); if (is.null(rn)) rn <- as.character(seq_along(r$members))
+  data.frame(run = basename(opt$out), truth = nm, regulon = rn,
+             members = vapply(r$members, function(m) paste(genes[m], collapse = ";"), ""), stringsAsFactors = FALSE) }))
+utils::write.csv(rm_tab, file.path(opt$out, "regulon_members.csv"), row.names = FALSE)
 for (nm in names(bench)) {
   x <- res[res$truth == nm, ]; x <- x[order(-x$aupr), ]
   say(sprintf("== %s %s (base rate %.4f)", opt$dataset, nm, x$base_rate[1]))
