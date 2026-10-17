@@ -23,7 +23,7 @@
 #
 # Usage (repo root):
 # --gene_subset truths (k562ess): every method is run on the genes covered by
-#   at least one literature truth (DoRothEA A-C, CollecTRI, CORUM; 5,761 of
+#   at least one literature truth (DoRothEA A-C, CollecTRI, CORUM; 5,672 of
 #   8,563), the same input for all methods. PIDC's cost grows with the cube of
 #   the gene count (about 5.5 days single-threaded on all genes, about 40 h on
 #   this subset), so the like-for-like comparison with PIDC uses this subset.

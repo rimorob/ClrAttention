@@ -65,7 +65,9 @@
 
 ### 5. Performance against competitors
 
-- [ ] ⏳ GENIE3 and GRNBoost2 on M3D, EcoMAC and the K562 compendium, same truths, every gene a candidate regulator (jobs 0874-0876, after the granularity sweep).
+- [x] ⚠️ GENIE3 and GRNBoost2 on M3D and EcoMAC (jobs 0874, 0875; QC): attention has the highest pooled regulon co-membership AUPR (+0.010 to +0.017 over GENIE3, +0.008 to +0.028 over CLR, jackknife intervals exclude 0), but the gain is concentrated in global regulons: CRP, σS, Fur, IHF and FNR carry 62% of positive pair incidences. GENIE3 wins median per-regulon coherence and per-TF AUROC (EcoMAC 0.690 vs 0.596); attention is last of the top three on direct TF-gene pairs (TF-node AUPR ratio M3D: CLR 6.75, GENIE3 6.54, attention 5.17). Claim: better module recovery, not better GRN inference. GRNBoost2 is sparse (87-93% tied zeros), not like-for-like.
+- [ ] ⏳ GENIE3 + GRNBoost2 on K562 rerun with duplicated symbols dropped, all rows regenerated (jobs 0878, 0879).
+- [ ] ☐ Baseline follow-ups (QC): score PIDC on M3D; directed DREAM5-style TF→target evaluation (regulators = RegulonDB TFs, GENIE3 unsymmetrized); ARACNE; paired per-regulon Wilcoxon on coherence stratified by size; pooled AUPR without the top-5 regulons; intervals for coherence and TF metrics; regulon-cluster resample; 3 seeds for tree methods; Holm over the prestated family; t re-selected per dataset (t = 9 reported as transfer); check M3D/EcoMAC array overlap before calling EcoMAC a replication.
 - [ ] ⏳ PIDC on the same three datasets (second job lane, single-threaded: about 7 h each for M3D and EcoMAC, about 40 h for K562).
 - [ ] ☐ ARACNE (the classic MI method).
 - [ ] ☐ Learned attention from scGPT or Geneformer on a shared task.
