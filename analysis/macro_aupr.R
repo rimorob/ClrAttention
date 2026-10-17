@@ -13,10 +13,14 @@
 #     mean and median over regulons. Two sources of uncertainty, both required:
 #       regulons: BCa bootstrap over regulons for the mean (p by inverting the
 #                 interval); Wilcoxon signed rank for the median
-#       genes:    delete-d gene jackknife with the regulon set fixed, d = 20% of
-#                 genes (primary; variance factor (n - d)/d = 4), regulons
-#                 scored in a replicate when they keep >= 3 positive pairs;
-#                 d = 50% as a check (SE ratio flagged if off by > 25%)
+#       genes:    delete-d gene jackknife, d = 20% of genes (primary; random
+#                 subsets, variance factor (n - d)/d = 4; Shao & Tu 1995 5.2),
+#                 200 replicates; the regulon set is fixed per design to the
+#                 regulons keeping >= 3 positive pairs in every replicate, and
+#                 the gene-interval estimate is computed on that same set
+#                 (number excluded reported); d = 50% as a stability check,
+#                 flagged when the 95% interval of log(SE ratio) lies wholly
+#                 outside +-log(1.25)
 #     A difference counts only if both intervals exclude 0; Holm on the larger p.
 #   - levels as (AP - b) / (1 - b), b = the regulon's base rate
 #   - strata: size 5-9 / 10-24 / 25-99 / >= 100; class (TF vs sigma)
@@ -83,14 +87,21 @@ boot_mean <- function(d) {
 wil <- function(d) if (sum(d != 0) >= 5) stats::wilcox.test(d, exact = FALSE)$p.value else NA_real_
 # delete-d gene jackknife of a statistic f over the per-regulon differences;
 # regulon set fixed to `regs`; returns SE and the share of (regulon, replicate) cells skipped
-gene_jack <- function(jc, ja, regs, design, f) {
+gene_jack <- function(jc, ja, d_full, regs, design, f) {
   factor <- c(d20 = 0.8 / 0.2, d50 = 1)[[design]]
   jc <- jc[jc$design == design & jc$regulon %in% regs, ]; ja <- ja[ja$design == design & ja$regulon %in% regs, ]
   m <- merge(jc[, c("rep", "regulon", "ap")], ja[, c("rep", "regulon", "ap")], by = c("rep", "regulon"), suffixes = c(".c", ".a"))
-  m <- m[!is.na(m$ap.c) & !is.na(m$ap.a), ]
+  R <- length(unique(jc$rep))
+  okc <- tapply(!is.na(m$ap.c) & !is.na(m$ap.a), m$regulon, sum)
+  fixed <- names(okc)[okc == R]                                   # scored in every replicate
+  m <- m[m$regulon %in% fixed, ]
   th <- vapply(split(m$ap.c - m$ap.a, m$rep), f, 0)
-  c(se = sqrt(factor * mean((th - mean(th))^2)), skipped = 1 - nrow(m) / (length(regs) * length(unique(jc$rep))))
+  list(se = sqrt(factor * mean((th - mean(th))^2)), est = f(d_full[regs %in% fixed]),
+       n = length(fixed), excluded = length(regs) - length(fixed), R = R)
 }
+unstable <- function(j50, j20) { if (!(j50$se > 0 && j20$se > 0)) return(NA)
+  l <- log(j50$se / j20$se); s <- sqrt(1 / j50$R + 1 / j20$R) / sqrt(2)
+  abs(l) - 1.96 * s > log(1.25) }
 zp <- function(est, se) if (is.finite(se) && se > 0) 2 * stats::pnorm(-abs(est) / se) else NA_real_
 
 rows <- list(); strata <- list(); gam <- list(); levels <- list()
@@ -109,19 +120,20 @@ for (k in unique(paste(pr$run, pr$truth, sep = "|"))) {
     a <- att[ok, ]; d <- y$ap[j[ok]] - a$ap                     # comparator - attention
     jc <- pjr[pjr$method == m, ]
     bm <- boot_mean(d); pw <- wil(d)
-    jm20 <- gene_jack(jc, ja, a$regulon, "d20", mean); jm50 <- gene_jack(jc, ja, a$regulon, "d50", mean)
-    jd20 <- gene_jack(jc, ja, a$regulon, "d20", stats::median)
-    pjm <- zp(mean(d), jm20[["se"]]); pjd <- zp(stats::median(d), jd20[["se"]])
+    jm20 <- gene_jack(jc, ja, d, a$regulon, "d20", mean); jm50 <- gene_jack(jc, ja, d, a$regulon, "d50", mean)
+    jd20 <- gene_jack(jc, ja, d, a$regulon, "d20", stats::median)
+    pjm <- zp(jm20$est, jm20$se); pjd <- zp(jd20$est, jd20$se)
     noop <- a$frac_same_operon <= 0.5; bn <- boot_mean(d[noop])
     rows[[length(rows) + 1L]] <- data.frame(family = family_of(rn), run = rn, dataset = ds, truth = tr, comparator = m,
       n_regulons = length(d),
       mean_d = mean(d), mean_lo_regulons = bm[["lo"]], mean_hi_regulons = bm[["hi"]], p_mean_regulons = bm[["p"]],
-      mean_lo_genes = mean(d) - 1.96 * jm20[["se"]], mean_hi_genes = mean(d) + 1.96 * jm20[["se"]], p_mean_genes = pjm,
+      n_regulons_genes = jm20$n, excluded_genes = jm20$excluded, mean_d_genes = jm20$est,
+      mean_lo_genes = jm20$est - 1.96 * jm20$se, mean_hi_genes = jm20$est + 1.96 * jm20$se, p_mean_genes = pjm,
       p_mean = max(bm[["p"]], pjm),
       median_d = stats::median(d), p_median_regulons = pw,
-      median_lo_genes = stats::median(d) - 1.96 * jd20[["se"]], median_hi_genes = stats::median(d) + 1.96 * jd20[["se"]],
+      median_d_genes = jd20$est, median_lo_genes = jd20$est - 1.96 * jd20$se, median_hi_genes = jd20$est + 1.96 * jd20$se,
       p_median_genes = pjd, p_median = max(pw, pjd),
-      jack_se_ratio_d50_d20 = jm50[["se"]] / jm20[["se"]], jack_skipped_d20 = jm20[["skipped"]],
+      jack_se_ratio_d50_d20 = jm50$se / jm20$se, jack_unstable = unstable(jm50, jm20), excluded_genes_d50 = jm50$excluded,
       attention_wins = mean(d < 0), tied = mean(d == 0),
       n_no_operon_dominated = sum(noop), mean_d_noop = mean(d[noop]), mean_lo_noop = bn[["lo"]], mean_hi_noop = bn[["hi"]],
       median_d_noop = stats::median(d[noop]), p_median_noop = wil(d[noop]))
@@ -142,7 +154,6 @@ for (f in names(families)) { s <- res$family == f
   if (!any(s)) next
   ph <- stats::p.adjust(c(res$p_mean[s], res$p_median[s]), "holm", n = families[[f]]$n)
   res$p_mean_holm[s] <- ph[seq_len(sum(s))]; res$p_median_holm[s] <- ph[sum(s) + seq_len(sum(s))] }
-res$jack_unstable <- abs(res$jack_se_ratio_d50_d20 - 1) > 0.25
 utils::write.csv(res, file.path(opt$out, "macro_vs_attention.csv"), row.names = FALSE)
 utils::write.csv(do.call(rbind, levels), file.path(opt$out, "macro_levels.csv"), row.names = FALSE)
 utils::write.csv(do.call(rbind, strata), file.path(opt$out, "macro_strata.csv"), row.names = FALSE)
@@ -152,5 +163,5 @@ say("comparator - attention, per-regulon AP (negative = attention better); both 
 for (k in seq_len(nrow(res))) with(res[k, ], say(sprintf(
   "%-36s %-12s %-10s n=%3d  mean %+.4f regulons [%+.4f, %+.4f] genes [%+.4f, %+.4f] p_holm %.3g | median %+.4f p_holm %.3g | attention wins %.0f%%, tied %.0f%%%s",
   run, truth, comparator, n_regulons, mean_d, mean_lo_regulons, mean_hi_regulons, mean_lo_genes, mean_hi_genes, p_mean_holm,
-  median_d, p_median_holm, 100 * attention_wins, 100 * tied, if (isTRUE(jack_unstable)) "  [gene jackknife unstable: d50/d20 SE ratio off by > 25%]" else "")))
+  median_d, p_median_holm, 100 * attention_wins, 100 * tied, if (isTRUE(jack_unstable)) "  [gene jackknife unstable: d50/d20 SE ratio outside +-25%]" else "")))
 say("done")

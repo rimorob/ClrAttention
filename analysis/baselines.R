@@ -35,7 +35,7 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(dataset = "m3d", methods = "genie3,grnboost2,pidc", t = 9L, workers = 24L, out = NULL,
             jack = 100L, seed = 20261016L, alpha = 0.5, ntrees = 1000L, quick = 0L,
             python = "~/venvs/clr-baselines/bin/python", julia = "~/.juliaup/bin/julia",
-            gene_subset = "none", export_only = 0L, jack_reg = 50L)
+            gene_subset = "none", export_only = 0L, jack_reg = 200L)
 i <- 1L
 while (i <= length(args)) {
   key <- sub("^--", "", args[i]); if (!key %in% names(opt)) stop("unknown argument: ", args[i])
