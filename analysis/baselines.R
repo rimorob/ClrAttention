@@ -138,7 +138,8 @@ evaluate <- function(S) {
     b <- bench[[nm]]; sc <- S[cbind(b$pairs$i, b$pairs$j)]
     out <- list(aupr = ap_fast(sc, b$pairs$label),
                 jack = vapply(halves[[nm]], function(ix) ap_fast(sc[ix], b$pairs$label[ix]), 0),
-                coherence = stats::median(regulon_coherence(S, b$reg, b$co, b$operon, genes), na.rm = TRUE))
+                coherence = stats::median(regulon_coherence(S, b$reg, b$co, b$operon, genes), na.rm = TRUE),
+                per_regulon = regulon_ap_table(S, b$reg, b$co, b$operon, genes))
     if (!is.null(U) && nm %in% names(U)) { u <- U[[nm]]
       out$tf_aupr_ratio <- ap_fast(S[cbind(u$i, u$j)], u$label) / mean(u$label)
       out$tf_auroc_median <- per_tf_median_auroc(S, u) }
@@ -209,6 +210,10 @@ for (m in names(E)) for (nm in names(bench)) {
 }
 res <- do.call(rbind, rows)
 utils::write.csv(res, file.path(opt$out, "metrics.csv"), row.names = FALSE)
+# per-regulon AP (macro view; summarized by analysis/macro_aupr.R)
+pr <- do.call(rbind, lapply(names(E), function(m) do.call(rbind, lapply(names(bench), function(nm)
+  cbind(dataset = opt$dataset, method = m, truth = nm, E[[m]][[nm]]$per_regulon, stringsAsFactors = FALSE)))))
+utils::write.csv(pr, file.path(opt$out, "per_regulon.csv"), row.names = FALSE)
 for (nm in names(bench)) {
   x <- res[res$truth == nm, ]; x <- x[order(-x$aupr), ]
   say(sprintf("== %s %s (base rate %.4f)", opt$dataset, nm, x$base_rate[1]))

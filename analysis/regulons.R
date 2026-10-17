@@ -214,3 +214,50 @@ regulon_coherence <- function(S, reg, co, operon_of, genes) {
     (sum(r[seq_len(n1)]) - n1 * (n1 + 1) / 2) / (as.numeric(n1) * n0)
   }, numeric(1))
 }
+
+# Average precision with ties broken at random, in expectation (McSherry &
+# Najork 2008): within a tie block of n items holding k positives, after r0
+# items and P0 positives, position i is positive with probability k/n and then
+# has on average 1 + (i - 1)(k - 1)/(n - 1) positives at or before it. Equals
+# the usual AP when there are no ties. Needed for sparse scores (GRNBoost2).
+ap_expected <- function(score, label) {
+  score[is.na(score)] <- -Inf
+  o <- order(score, decreasing = TRUE, method = "radix"); s <- score[o]; l <- label[o]
+  blk <- cumsum(c(TRUE, s[-1L] != s[-length(s)]))
+  n <- tabulate(blk); k <- as.numeric(rowsum(l, blk)[, 1])
+  r0 <- c(0, cumsum(n)[-length(n)]); P0 <- c(0, cumsum(k)[-length(k)])
+  tot <- 0
+  one <- n == 1L & k > 0
+  tot <- tot + sum((P0[one] + 1) / (r0[one] + 1))
+  for (b in which(n > 1L & k > 0)) {
+    i <- seq_len(n[b])
+    tot <- tot + sum((k[b] / n[b]) * (P0[b] + 1 + (i - 1) * (k[b] - 1) / (n[b] - 1)) / (r0[b] + i))
+  }
+  tot / sum(label)
+}
+
+# Per-regulon average precision (macro view of co-membership), on the same
+# candidate pairs as regulon_coherence(): positives = unordered member pairs,
+# negatives = member-to-gene pairs sharing no retained regulon; same-operon
+# pairs excluded from both. Regulons with < min_pos positives get ap = NA.
+# Returns one row per regulon: size, positives, negatives, base rate, the
+# fraction of member pairs that are same-operon, AP (ties in expectation), and
+# the fraction of candidate pairs with a nonzero score.
+regulon_ap_table <- function(S, reg, co, operon_of, genes, min_pos = 10L) {
+  op <- operon_of[genes]
+  nm <- names(reg$members); if (is.null(nm)) nm <- as.character(seq_along(reg$members))
+  cl <- if (is.null(reg$class)) rep(NA_character_, length(nm)) else unname(as.character(reg$class))
+  do.call(rbind, lapply(seq_along(reg$members), function(k) {
+    m <- reg$members[[k]]
+    same_m <- outer(op[m], op[m], "=="); ut <- upper.tri(same_m)
+    w <- S[m, m][ut & (is.na(same_m) | !same_m)]
+    ok_b <- !co[m, , drop = FALSE]; same_b <- outer(op[m], op, "==")
+    b <- S[m, , drop = FALSE][ok_b & (is.na(same_b) | !same_b)]
+    n1 <- length(w); n0 <- length(b)
+    data.frame(regulon = nm[k], class = cl[k], size = length(m), n_pos = n1, n_neg = n0,
+               base_rate = if (n1 + n0) n1 / (n1 + n0) else NA_real_,
+               frac_same_operon = if (any(ut)) mean(same_m[ut] %in% TRUE) else NA_real_,
+               ap = if (n1 >= min_pos && n0 > 0) ap_expected(c(w, b), rep(c(1, 0), c(n1, n0))) else NA_real_,
+               nonzero = if (n1 + n0) mean(c(w, b) != 0) else NA_real_, stringsAsFactors = FALSE)
+  }))
+}
