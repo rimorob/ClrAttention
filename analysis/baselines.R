@@ -139,24 +139,38 @@ per_tf_median_auroc <- function(S, u) stats::median(vapply(names(u$targets), fun
   if (sum(y, na.rm = TRUE) < 3) return(NA_real_)
   s <- S[t, ]; ok <- !is.na(y); r <- rank(s[ok]); n1 <- sum(y[ok]); n0 <- sum(ok) - n1
   (sum(r[y[ok] == 1]) - n1 * (n1 + 1) / 2) / (as.numeric(n1) * n0) }, 0), na.rm = TRUE)
-evaluate <- function(S) {
+# macro = FALSE skips the per-regulon tables (used for the hub-stratified scores)
+evaluate <- function(S, macro = TRUE) {
   S[!is.finite(S)] <- 0; diag(S) <- 0
   lapply(stats::setNames(names(bench), names(bench)), function(nm) {
     b <- bench[[nm]]; sc <- S[cbind(b$pairs$i, b$pairs$j)]
     out <- list(aupr = ap_fast(sc, b$pairs$label),
                 jack = vapply(halves[[nm]], function(ix) ap_fast(sc[ix], b$pairs$label[ix]), 0),
-                coherence = stats::median(regulon_coherence(S, b$reg, b$co, b$operon, genes), na.rm = TRUE),
-                per_regulon = regulon_ap_table(S, b$reg, b$co, b$operon, genes),
-                per_regulon_jack = do.call(rbind, parallel::mclapply(names(gene_keep), function(r) {
-                  x <- regulon_ap_table(S, b$reg, b$co, b$operon, genes, min_pos = 3L, keep = gene_keep[[r]])
-                  data.frame(design = sub("_[0-9]+$", "", r), rep = r, regulon = x$regulon, n_pos = x$n_pos, ap = x$ap)
-                }, mc.cores = min(8L, opt$workers))))
+                coherence = stats::median(regulon_coherence(S, b$reg, b$co, b$operon, genes), na.rm = TRUE))
+    if (macro) {
+      out$per_regulon <- regulon_ap_table(S, b$reg, b$co, b$operon, genes)
+      out$per_regulon_jack <- do.call(rbind, parallel::mclapply(names(gene_keep), function(r) {
+        x <- regulon_ap_table(S, b$reg, b$co, b$operon, genes, min_pos = 3L, keep = gene_keep[[r]])
+        data.frame(design = sub("_[0-9]+$", "", r), rep = r, regulon = x$regulon, n_pos = x$n_pos, ap = x$ap)
+      }, mc.cores = min(8L, opt$workers))) }
     if (!is.null(U) && nm %in% names(U)) { u <- U[[nm]]
       out$tf_aupr_ratio <- ap_fast(S[cbind(u$i, u$j)], u$label) / mean(u$label)
       out$tf_auroc_median <- per_tf_median_auroc(S, u) }
     out })
 }
 sym_max <- function(W) { W[is.na(W)] <- 0; pmax(W, t(W)) }
+# Hub control (statistics review 2026-10-17): the walk's stationary distribution
+# pi is very skewed, and deep attention could rank pairs by hubness. Dividing by
+# pi_i + pi_j over-corrects (it strips CLR to the base rate too), so every
+# method is also scored by its within-stratum percentile in 10 strata of
+# pi_i + pi_j ("<method>_hubstrat"), compared with attention_hubstrat and
+# clr_hubstrat under the same adjustment.
+hub_stratify <- function(S, H, k = 10L) {
+  S[!is.finite(S)] <- 0; ut <- which(upper.tri(S)); h <- H[ut]
+  g <- cut(h, unique(stats::quantile(h, seq(0, 1, length.out = k + 1L))), include.lowest = TRUE)
+  r <- stats::ave(S[ut], g, FUN = function(x) rank(x) / length(x))
+  R <- matrix(0, nrow(S), ncol(S), dimnames = dimnames(S)); R[ut] <- r; R + t(R)
+}
 edges_to_matrix <- function(a, b, w) { M <- matrix(0, G, G, dimnames = list(genes, genes))
   ia <- match(a, genes); ib <- match(b, genes); ok <- !is.na(ia) & !is.na(ib)
   M[cbind(ia[ok], ib[ok])] <- w[ok]; M }
@@ -172,13 +186,15 @@ P <- Matrix::Diagonal(G, 1 - opt$alpha) + opt$alpha * Matrix::Matrix(f$operator,
 Pt <- as.matrix(P); for (s in seq_len(opt$t - 1L)) Pt <- as.matrix(Pt %*% P)
 St <- (Pt + t(Pt)) / 2; rm(Pt)
 E$attention <- evaluate(St)
-# Hub diagnostics (secondary; outside the Holm families): the walk converges to
-# its stationary distribution pi, so deep attention partly ranks pairs by
-# pi_i + pi_j. "hub" scores that alone; "attention_dehub" divides it out.
+# hub diagnostics (secondary; outside the Holm families): pi = stationary
+# distribution of the lazy walk (teleport 1e-3); "hub" scores pi_i + pi_j alone
 pi <- rep(1 / G, G); eps <- 1e-3
 for (it in 1:20000) { q <- (1 - eps) * as.numeric(pi %*% P) + eps / G; if (sum(abs(q - pi)) < 1e-13) break; pi <- q }
-H <- outer(q, q, "+"); E$hub <- evaluate(H); E$attention_dehub <- evaluate(St / H)
-rm(P, St, H); f$release(); invisible(gc())
+H <- outer(q, q, "+"); E$hub <- evaluate(H, macro = FALSE)
+E$attention_hubstrat <- evaluate(hub_stratify(St, H), macro = FALSE)
+E$clr_hubstrat <- evaluate(hub_stratify(f$clr_scores, H), macro = FALSE)
+r <- abs(stats::cor(t(X))); r[is.na(r)] <- 0; E$abs_pearson_hubstrat <- evaluate(hub_stratify(r, H), macro = FALSE); rm(r)
+rm(P, St); f$release(); invisible(gc())
 say("references scored")
 
 ## ---- baselines ---------------------------------------------------------------------------
@@ -211,15 +227,17 @@ run_method <- function(m) {
 }
 for (m in strsplit(opt$methods, ",")[[1]]) {
   S <- tryCatch(run_method(m), error = function(e) { say(m, " FAILED: ", conditionMessage(e)); NULL })
-  if (!is.null(S)) E[[m]] <- evaluate(S)
+  if (!is.null(S)) { E[[m]] <- evaluate(S); E[[paste0(m, "_hubstrat")]] <- evaluate(hub_stratify(S, H), macro = FALSE) }
   rm(S); invisible(gc())
 }
 
 ## ---- summary -------------------------------------------------------------------------------
 rows <- list()
 for (m in names(E)) for (nm in names(bench)) {
-  e <- E[[m]][[nm]]; da <- e$jack - E$attention[[nm]]$jack; dc <- e$jack - E$clr[[nm]]$jack
-  d0a <- e$aupr - E$attention[[nm]]$aupr; d0c <- e$aupr - E$clr[[nm]]$aupr
+  hs <- endsWith(m, "_hubstrat")          # hub-stratified scores are compared under the same adjustment
+  ea <- E[[if (hs) "attention_hubstrat" else "attention"]][[nm]]; ec <- E[[if (hs) "clr_hubstrat" else "clr"]][[nm]]
+  e <- E[[m]][[nm]]; da <- e$jack - ea$jack; dc <- e$jack - ec$jack
+  d0a <- e$aupr - ea$aupr; d0c <- e$aupr - ec$aupr
   rows[[length(rows) + 1L]] <- data.frame(dataset = opt$dataset, method = m, truth = nm, aupr = e$aupr,
     base_rate = mean(bench[[nm]]$pairs$label), coherence = e$coherence,
     d_vs_attention = d0a, d_att_lo = d0a - 1.96 * stats::sd(da), d_att_hi = d0a + 1.96 * stats::sd(da),
@@ -230,11 +248,12 @@ for (m in names(E)) for (nm in names(bench)) {
 res <- do.call(rbind, rows)
 utils::write.csv(res, file.path(opt$out, "metrics.csv"), row.names = FALSE)
 # per-regulon AP (macro view; summarized by analysis/macro_aupr.R)
-pr <- do.call(rbind, lapply(names(E), function(m) do.call(rbind, lapply(names(bench), function(nm)
+mm <- names(E)[vapply(names(E), function(m) !is.null(E[[m]][[1]]$per_regulon), NA)]
+pr <- do.call(rbind, lapply(mm, function(m) do.call(rbind, lapply(names(bench), function(nm)
   cbind(run = basename(opt$out), dataset = opt$dataset, method = m, truth = nm, E[[m]][[nm]]$per_regulon,
         stringsAsFactors = FALSE)))))
 utils::write.csv(pr, file.path(opt$out, "per_regulon.csv"), row.names = FALSE)
-prj <- do.call(rbind, lapply(names(E), function(m) do.call(rbind, lapply(names(bench), function(nm)
+prj <- do.call(rbind, lapply(mm, function(m) do.call(rbind, lapply(names(bench), function(nm)
   cbind(run = basename(opt$out), method = m, truth = nm, E[[m]][[nm]]$per_regulon_jack, stringsAsFactors = FALSE)))))
 utils::write.csv(prj, file.path(opt$out, "per_regulon_jack.csv"), row.names = FALSE)
 # members of each regulon (gene indices into this run's genes), for the overlap-aware bootstrap
