@@ -50,3 +50,7 @@ All five original jobs finished.  The remaining COMPUTE_CONSTRAINTS analyses wer
 ## Model choice (agreed with the user, 2026-10-16)
 
 Opus at high effort for analysis design, result interpretation, independent QC reviews and paper writing; Opus at medium as the default; Sonnet for routine work (queue babysitting, status tables, plotting from a settled spec, boilerplate scripts, mechanical ports of designed code). Apply the same split when spawning subagents.
+
+## Scheduler (2026-10-20): the standing rule is ~70-80% machine utilization
+
+`tools/scheduler.sh` (service `clr-sched`, queue `jobs_pc/sched/`) replaces the one-at-a-time runner. Each job declares `# mem: <GB>`, `# cpus: <N>` and optionally `# after: job1,job2`; jobs run in parallel within 100 GB / 50 threads with at least 15 GB left free, each in its own systemd scope `clrjob-<name>` capped at 1.3 x its declared memory (no swap). Stop a job with `systemctl --user stop clrjob-<name>.scope` (stops its R workers too). The END line in `jobs_pc/runner.log` records the measured peak; use it to recalibrate declarations. Watch with `watch -n 30 tools/progress.sh` or the auto-refreshing `docs/status/progress.html`.

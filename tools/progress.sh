@@ -30,7 +30,7 @@ for root in jobs_pc jobs_pc2; do
   for f in "$root"/running/*.sh; do
     [ -e "$f" ] || { echo "   (nothing running)"; continue; }
     b=$(basename "$f" .sh)
-    st=$(grep " START $b\$" "$root/runner.log" | tail -1 | cut -d' ' -f1,2)
+    st=$(grep -E " START $b( |$)" "$root/runner.log" | tail -1 | cut -d' ' -f1,2)
     s=$(date -d "$st" +%s 2>/dev/null || echo $now); el=$(( (now - s) / 60 ))
     exp=$(field "$f" expect); prog=$(field "$f" progress)
     if [ -n "$prog" ]; then
@@ -43,13 +43,15 @@ for root in jobs_pc jobs_pc2; do
       fr=$(awk -v e="$el" -v x="$exp" 'BEGIN { f = e / x; print (f > 0.99) ? 0.99 : f }')
       eta=$(( exp - el )); [ $eta -lt 5 ] && eta=5; lab="~time-based"
     else fr=0; eta=-1; lab="no estimate"; fi
+    jm=$(systemctl --user show "clrjob-$b.scope" -p MemoryCurrent --value 2>/dev/null)
+    [[ "$jm" =~ ^[0-9]+$ ]] && lab="$lab, $((jm / 1073741824)) GB"
     printf "   %-34s %s  %s elapsed  %s  %s\n" "$b" "$(bar "$fr" 30)" "$(hm $el)" \
       "$([ "$eta" -ge 0 ] && echo "ETA $(date -d "@$((now + eta * 60))" '+%a %H:%M')" || echo 'ETA ?')" "($lab)"
-    [ "$eta" -ge 0 ] && t_free=$((now + eta * 60))
+    [ "$eta" -ge 0 ] && [ $((now + eta * 60)) -gt $t_free ] && t_free=$((now + eta * 60))
   done
-  q=$(ls "$root"/queue/*.sh 2>/dev/null)
+  q=$(ls "$root"/queue/*.sh "$root"/sched/*.sh 2>/dev/null)
   [ -z "$q" ] && { echo "   queue empty"; continue; }
-  echo "   queued:"
+  echo "   queued (ETAs assume one job at a time; the scheduler runs several in parallel):"
   unknown=0
   for f in $q; do
     b=$(basename "$f" .sh); exp=$(field "$f" expect)
