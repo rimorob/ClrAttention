@@ -17,10 +17,19 @@ pids=$(pgrep -f "bash ${JOBS_ROOT:-jobs}/running/")
 # kill only the workers connected to those ports: other jobs' workers (a
 # second job lane) must survive.
 tree() { local p=$1 c; echo "$p"; for c in $(pgrep -P "$p"); do tree "$c"; done; }
+# A PSOCK master stops listening once its workers have connected, so look at
+# all of its sockets (listening and established: the local port is the cluster
+# port), and also at the ports the job's log announced ("starting worker pid=..
+# on localhost:PORT"); the latter catches workers whose master already exited.
 ports=""
 for p in $pids; do for q in $(tree "$p"); do
-  ports="$ports $(ss -ltnpH 2>/dev/null | grep "pid=$q," | awk '{n = split($4, a, ":"); print a[n]}')"
+  ports="$ports $(ss -tanpH 2>/dev/null | grep "pid=$q," | awk '{n = split($4, a, ":"); print a[n]}')"
 done; done
+for f in "${JOBS_ROOT:-jobs}"/running/*.sh; do
+  [ -e "$f" ] || continue
+  ports="$ports $(grep -oE 'on localhost:[0-9]+' "${JOBS_ROOT:-jobs}/done/$(basename "$f" .sh).log" 2>/dev/null | cut -d: -f2 | sort -u)"
+done
+ports=$(echo $ports | tr ' ' '\n' | sort -u)
 for p in $pids; do echo "killing job tree $p: $(ps -o args= -p "$p")"; kill_tree "$p"; done
 sleep 3
 for port in $ports; do
