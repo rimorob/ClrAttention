@@ -1,91 +1,137 @@
 #!/bin/bash
 # Resource-aware job scheduler (replaces the one-at-a-time tools/job_runner.sh).
+# Standing project rule: keep the machine at ~70-80% utilization, reliably.
 # Runs several jobs from <root>/<qdir>/*.sh at once, in name order (= priority),
-# while their declared needs fit the budget. A job declares, in comment lines:
-#   # mem: <GB>          expected peak memory (default 30)
+# while their needs fit the budget. A job declares, in comment lines:
+#   # mem: <GB>          expected peak memory (default 30; decimals round up)
 #   # cpus: <N>          threads it keeps busy (default 8)
 #   # after: a,b         job names that must have ended with rc=0 first
-# Each job runs in its own systemd user scope (clrjob-<name>.scope) with
-# MemoryMax = 1.3 x mem (no swap), CPUWeight 10 and nice 19: a job that
-# outgrows its cap is killed alone, never the lane or the desktop, and
-# stopping the scope stops everything it started (R workers included):
-#     systemctl --user stop clrjob-<name>.scope
-# Admission: running declared mem + mem <= BUDGET_MEM, cpus + cpus <= BUDGET_CPU,
-# and MemAvailable - mem >= MIN_AVAIL (GB). A job too big for the budget still
-# runs when nothing else does. Later jobs may start ahead of an earlier one
-# that does not fit yet (backfill), unless it is held by "# after:".
-# Jobs started by the old runner (running/*.sh without a .res file) count with
-# the defaults. Logs: <root>/runner.log (START/END lines, END with the
-# measured peak, sampled every 15 s), <root>/done/<job>.log. A job file runs once unchanged for 30 s.
+# Each job runs in its own systemd user scope clrjob-<name>.scope inside
+# clrjobs.slice (~/.config/systemd/user/clrjobs.slice: MemoryMax 95G, no swap,
+# so all jobs together can never take the desktop's memory). Per-job cap:
+# MemoryMax = min(1.3 x mem, slice cap), no swap, OOMPolicy=kill (one dead
+# worker ends the whole job), CPUWeight 10, nice 19. Stopping the scope stops
+# everything the job started:   systemctl --user stop clrjob-<name>.scope
+# Jobs survive a scheduler restart: the scope writes the exit code to
+# running/<job>.rc, and every loop finalizes jobs whose scope has ended
+# (END line with rc, systemd result and measured peak).
+# Admission: sum over running jobs of max(declared, current) + mem <= BUDGET_MEM,
+# declared cpus + cpus <= BUDGET_CPU, and MemAvailable - mem >= MIN_AVAIL (always).
+# Backfill: later jobs may start ahead of an earlier one that does not fit,
+# unless the earliest eligible job has waited > RESERVE_MIN minutes (then the
+# queue waits for it). Jobs started by the old runner (running/*.sh without a
+# .res file) count with their measured memory (clr-jobs service), at least the
+# default. A job file runs once unchanged for 30 s (copy as .tmp, then mv).
 # Usage (repo root):  tools/scheduler.sh <root> [qdir]
-#   e.g. systemd-run --user --unit=clr-sched -p CPUWeight=10 bash tools/scheduler.sh jobs_pc sched
+#   systemd-run --user --unit=clr-sched -p Restart=on-failure -p CPUWeight=10 bash tools/scheduler.sh jobs_pc sched
 cd "$(dirname "$0")/.." || exit 1
 ROOT="${1:-jobs_pc}"; QDIR="$ROOT/${2:-queue}"
-BUDGET_MEM=${BUDGET_MEM:-100}; BUDGET_CPU=${BUDGET_CPU:-50}; MIN_AVAIL=${MIN_AVAIL:-15}
+BUDGET_MEM=${BUDGET_MEM:-90}; BUDGET_CPU=${BUDGET_CPU:-50}; MIN_AVAIL=${MIN_AVAIL:-15}
+SLICE=${SLICE:-clrjobs.slice}; SLICE_CAP=${SLICE_CAP:-95}; RESERVE_MIN=${RESERVE_MIN:-30}
 DEF_MEM=30; DEF_CPU=8
 export JOBS_ROOT="$ROOT"
 mkdir -p "$QDIR" "$ROOT/running" "$ROOT/done" "$ROOT/control"
 log() { echo "$(date '+%F %T') $*" >> "$ROOT/runner.log"; }
-log "scheduler started (pid $$) on $(hostname), queue $QDIR, budget ${BUDGET_MEM} GB / ${BUDGET_CPU} threads, min available ${MIN_AVAIL} GB"
+log "scheduler started (pid $$) on $(hostname), queue $QDIR, slice $SLICE, budget ${BUDGET_MEM} GB / ${BUDGET_CPU} threads, min available ${MIN_AVAIL} GB"
 pgrep -f "tools/control_runner.sh $ROOT\$" >/dev/null || nohup tools/control_runner.sh "$ROOT" >/dev/null 2>&1 &
 
-decl() { local v; v=$(grep -m1 -E "^# $2:" "$1" | sed -E "s/^# $2: *//; s/ .*//"); echo "${v:-$3}"; }
-last_rc() { grep -E " END $1 rc=" "$ROOT/runner.log" | tail -1 | sed -E 's/.* rc=([0-9]+).*/\1/'; }
+declare -A warned eligible_since
+num() {   # positive number -> integer (decimals round up); else the default (warned in the main loop)
+  if [[ "$1" =~ ^[0-9]+([.][0-9]+)?$ ]]; then awk -v v="$1" 'BEGIN { i = int(v); print (v > i) ? i + 1 : i }'; else echo "$2"; fi
+}
+check() {  # warn once about an invalid declaration (runs in the main shell, so warned[] persists)
+  [ -n "$1" ] && ! [[ "$1" =~ ^[0-9]+([.][0-9]+)?$ ]] && [ -z "${warned[$2$1]}" ] && { log "WARN $2: invalid value '$1', using the default"; warned[$2$1]=1; }
+}
+decl() { grep -m1 -E "^# $2:" "$1" | sed -E "s/^# $2: *//; s/[[:space:]].*//"; }
 avail_gb() { awk '/^MemAvailable/ { print int($2 / 1048576) }' /proc/meminfo; }
-declare -A held
+scope_mem_gb() { local v; v=$(systemctl --user show "$1" -p MemoryCurrent --value 2>/dev/null)
+  [[ "$v" =~ ^[0-9]+$ ]] && echo $(( (v + 1073741823) / 1073741824 )) || echo 0; }
+# a dependency is satisfied when its newest END is rc=0, it is not queued or running again,
+# and that END is newer than the dependent job file
+dep_state() {   # dep dependent_file -> ok | wait | failed | unknown
+  local d=$1 f=$2 line ts
+  [ -e "$QDIR/$d.sh" ] || [ -e "$ROOT/running/$d.sh" ] && { echo wait; return; }
+  line=$(grep -F " END $d rc=" "$ROOT/runner.log" | tail -1)
+  if [ -z "$line" ]; then [ -e "$ROOT/done/$d.sh" ] && echo wait || echo unknown; return; fi
+  ts=$(date -d "$(echo "$line" | cut -d' ' -f1,2)" +%s)
+  case "$line" in *" rc=0 "*|*" rc=0") [ "$ts" -ge "$(stat -c %Y "$f")" ] && echo ok || echo wait ;; *) echo failed ;; esac
+}
 
 start_job() {   # name mem cpus
   local b=$1 mem=$2 cpu=$3 cap
-  cap=$(awk -v m="$mem" 'BEGIN { printf "%d", m * 1.3 + 0.999 }')
+  cap=$(awk -v m="$mem" -v s="$SLICE_CAP" 'BEGIN { c = int(m * 1.3 + 0.999); print (c > s) ? s : c }')
   mv "$QDIR/$b.sh" "$ROOT/running/$b.sh" || return
+  rm -f "$ROOT/running/$b.rc"
   echo "$mem $cpu" > "$ROOT/running/$b.res"; echo 0 > "$ROOT/running/$b.peak"
-  log "START $b (mem ${mem} GB, cap ${cap} GB, cpus ${cpu})"
   systemctl --user reset-failed "clrjob-$b.scope" 2>/dev/null   # a failed scope of the same name blocks the unit name
-  (
-    systemd-run --user --scope --quiet --unit="clrjob-$b" --nice=19 \
-      -p MemoryMax="${cap}G" -p MemorySwapMax=0 -p CPUWeight=10 -p IOWeight=10 \
-      bash "$ROOT/running/$b.sh" > "$ROOT/done/$b.log" 2>&1
-    rc=$?
-    peak=$(awk '{ printf "%.1f", $1 / 1024 }' "$ROOT/running/$b.peak" 2>/dev/null)
-    systemctl --user reset-failed "clrjob-$b.scope" 2>/dev/null
-    mv "$ROOT/running/$b.sh" "$ROOT/done/$b.sh"; rm -f "$ROOT/running/$b.res" "$ROOT/running/$b.peak"
-    log "END $b rc=$rc peak=${peak:-?}GB declared=${mem}GB"
-  ) &
+  log "START $b (mem ${mem} GB, cap ${cap} GB, cpus ${cpu})"
+  setsid systemd-run --user --scope --quiet --unit="clrjob-$b" --slice="$SLICE" --nice=19 \
+    -p MemoryMax="${cap}G" -p MemorySwapMax=0 -p OOMPolicy=kill -p CPUWeight=10 -p IOWeight=10 \
+    bash -c 'bash "$1" > "$2" 2>&1; echo $? > "$3"' _ "$ROOT/running/$b.sh" "$ROOT/done/$b.log" "$ROOT/running/$b.rc" \
+    >/dev/null 2>&1 < /dev/null &
+  sleep 2
+}
+finalize() {    # job whose scope has ended
+  local b=$1 rc res peak mem
+  res=$(systemctl --user show "clrjob-$b.scope" -p Result --value 2>/dev/null)
+  if [ -s "$ROOT/running/$b.rc" ]; then rc=$(cat "$ROOT/running/$b.rc")
+  elif [ "$res" = success ]; then rc=0
+  elif [ "$res" = oom-kill ]; then rc=137
+  else rc=255; fi
+  [ "$res" = oom-kill ] && [ "$rc" = 0 ] && rc=137
+  peak=$(awk '{ printf "%.1f", $1 / 1024 }' "$ROOT/running/$b.peak" 2>/dev/null)
+  read mem _ < "$ROOT/running/$b.res"
+  systemctl --user reset-failed "clrjob-$b.scope" 2>/dev/null
+  mv "$ROOT/running/$b.sh" "$ROOT/done/$b.sh"; rm -f "$ROOT/running/$b.res" "$ROOT/running/$b.peak" "$ROOT/running/$b.rc"
+  log "END $b rc=$rc result=${res:-?} peak=${peak:-?}GB declared=${mem}GB"
 }
 
 while true; do
-  # memory accounting for running jobs: declared needs, and measured peaks
   used_mem=0; used_cpu=0; nrun=0
   for f in "$ROOT"/running/*.sh; do
     [ -e "$f" ] || continue
-    b=$(basename "$f" .sh); nrun=$((nrun + 1))
-    if [ -f "$ROOT/running/$b.res" ]; then read m c < "$ROOT/running/$b.res"
+    b=$(basename "$f" .sh)
+    if [ -f "$ROOT/running/$b.res" ]; then
+      # ended: the job wrote its exit code, or its scope is gone > 60 s after the launch
+      # (killed, e.g. out of memory, or the scope never started)
+      if [ -e "$ROOT/running/$b.rc" ]; then finalize "$b"; continue; fi
+      state=$(systemctl --user is-active "clrjob-$b.scope" 2>/dev/null)
+      if [ "$state" = failed ] || { [ "$state" != active ] && [ "$state" != activating ] && [ "$state" != deactivating ] && \
+         [ $(( $(date +%s) - $(stat -c %Y "$ROOT/running/$b.res") )) -gt 60 ]; }; then finalize "$b"; continue; fi
+      read m c < "$ROOT/running/$b.res"
       cur=$(systemctl --user show "clrjob-$b.scope" -p MemoryCurrent --value 2>/dev/null)
-      if [[ "$cur" =~ ^[0-9]+$ ]]; then g=$((cur / 1048576)); p=$(cat "$ROOT/running/$b.peak" 2>/dev/null || echo 0)   # MB
-        [ "$g" -gt "${p:-0}" ] && echo "$g" > "$ROOT/running/$b.peak"; fi
-    else m=$DEF_MEM; c=$DEF_CPU; fi            # started by the old runner
-    used_mem=$((used_mem + m)); used_cpu=$((used_cpu + c))
+      if [[ "$cur" =~ ^[0-9]+$ ]]; then mb=$((cur / 1048576)); p=$(cat "$ROOT/running/$b.peak" 2>/dev/null || echo 0)
+        [ "$mb" -gt "${p:-0}" ] && echo "$mb" > "$ROOT/running/$b.peak"; fi
+      g=$(scope_mem_gb "clrjob-$b.scope"); [ "$g" -gt "$m" ] && m=$g
+    else                                        # started by the old one-at-a-time runner
+      g=$(scope_mem_gb clr-jobs.service); m=$DEF_MEM; [ "$g" -gt "$m" ] && m=$g; c=$DEF_CPU
+    fi
+    nrun=$((nrun + 1)); used_mem=$((used_mem + m)); used_cpu=$((used_cpu + c))
   done
-  # admission in name order
+  first_waiting=""
   for f in "$QDIR"/*.sh; do
     [ -e "$f" ] || continue
     [ $(( $(date +%s) - $(stat -c %Y "$f") )) -ge 30 ] || continue
     b=$(basename "$f" .sh)
-    mem=$(decl "$f" mem $DEF_MEM); cpu=$(decl "$f" cpus $DEF_CPU); deps=$(decl "$f" after "")
+    rm_=$(decl "$f" mem); rc_=$(decl "$f" cpus); check "$rm_" "$b"; check "$rc_" "$b"
+    mem=$(num "$rm_" $DEF_MEM); cpu=$(num "$rc_" $DEF_CPU); deps=$(decl "$f" after)
     ok=1
     for d in ${deps//,/ }; do
-      rc=$(last_rc "$d")
-      if [ -z "$rc" ]; then ok=0
-      elif [ "$rc" != 0 ]; then ok=0
-        [ -z "${held[$b]}" ] && { log "HOLD $b: dependency $d ended rc=$rc"; held[$b]=1; }
-      fi
+      s=$(dep_state "$d" "$f")
+      [ "$s" = ok ] && continue
+      ok=0
+      { [ "$s" = failed ] || [ "$s" = unknown ]; } && [ -z "${warned[$b$d$s]}" ] && { log "HOLD $b: dependency $d is $s"; warned[$b$d$s]=1; }
     done
     [ $ok = 1 ] || continue
-    if [ $nrun -eq 0 ] || { [ $((used_mem + mem)) -le $BUDGET_MEM ] && [ $((used_cpu + cpu)) -le $BUDGET_CPU ] && \
-                            [ $(( $(avail_gb) - mem )) -ge $MIN_AVAIL ]; }; then
-      start_job "$b" "$mem" "$cpu"
+    [ -n "${eligible_since[$b]}" ] || eligible_since[$b]=$(date +%s)
+    if [ $((used_mem + mem)) -le $BUDGET_MEM ] && [ $((used_cpu + cpu)) -le $BUDGET_CPU ] && \
+       [ $(( $(avail_gb) - mem )) -ge $MIN_AVAIL ] || \
+       { [ $nrun -eq 0 ] && [ $(( $(avail_gb) - (mem < SLICE_CAP ? mem : SLICE_CAP) )) -ge $MIN_AVAIL ]; }; then
+      [ -n "$first_waiting" ] && [ $(( $(date +%s) - ${eligible_since[$first_waiting]} )) -gt $((RESERVE_MIN * 60)) ] && break
+      start_job "$b" "$mem" "$cpu"; unset "eligible_since[$b]"
       used_mem=$((used_mem + mem)); used_cpu=$((used_cpu + cpu)); nrun=$((nrun + 1))
-      sleep 2
+    else
+      [ -z "$first_waiting" ] && first_waiting=$b
     fi
   done
   date '+%F %T' > "$ROOT/heartbeat"
