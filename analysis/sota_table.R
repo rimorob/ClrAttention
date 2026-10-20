@@ -14,7 +14,7 @@ if (length(args) >= 2 && args[1] == "--out") opt$out <- args[2]
 runs <- c(M3D = "results/baselines_m3d", EcoMAC = "results/baselines_ecomac",
           K562 = "results/baselines_k562ess_truthgenes_genie3")
 methods <- c(attention = "Attention", clr = "CLR", genie3 = "GENIE3", pidc = "PIDC",
-             grnboost2 = "GRNBoost2", abs_pearson = "|r|", hub = "Hub only")
+             grnboost2 = "GRNBoost2", abs_pearson = "\\|r\\|", hub = "Hub only")
 hub_methods <- c("attention", "clr", "genie3", "pidc")
 
 lines <- c("# Method comparison", "",
