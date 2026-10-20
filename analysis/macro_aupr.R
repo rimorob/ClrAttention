@@ -20,7 +20,9 @@
 #                 the gene-interval estimate is computed on that same set
 #                 (number excluded reported); d = 50% as a stability check,
 #                 flagged when the 95% interval of log(SE ratio) lies wholly
-#                 outside +-log(1.25)
+#                 outside +-log(1.25), both SEs computed on the regulons kept
+#                 by both designs; the d = 50% interval is reported too
+#   - p-values at the floor (1/B, then Holm) are bounds, not exact values
 #     A difference counts only if both intervals exclude 0; Holm on the larger p.
 #   - levels as (AP - b) / (1 - b), b = the regulon's base rate
 #   - strata: size 5-9 / 10-24 / 25-99 / >= 100; class (TF vs sigma)
@@ -97,7 +99,7 @@ gene_jack <- function(jc, ja, d_full, regs, design, f) {
   m <- m[m$regulon %in% fixed, ]
   th <- vapply(split(m$ap.c - m$ap.a, m$rep), f, 0)
   list(se = sqrt(factor * mean((th - mean(th))^2)), est = f(d_full[regs %in% fixed]),
-       n = length(fixed), excluded = length(regs) - length(fixed), R = R)
+       n = length(fixed), excluded = length(regs) - length(fixed), R = R, set = fixed)
 }
 unstable <- function(j50, j20) { if (!(j50$se > 0 && j20$se > 0)) return(NA)
   l <- log(j50$se / j20$se); s <- sqrt(1 / j50$R + 1 / j20$R) / sqrt(2)
@@ -121,6 +123,9 @@ for (k in unique(paste(pr$run, pr$truth, sep = "|"))) {
     jc <- pjr[pjr$method == m, ]
     bm <- boot_mean(d); pw <- wil(d)
     jm20 <- gene_jack(jc, ja, d, a$regulon, "d20", mean); jm50 <- gene_jack(jc, ja, d, a$regulon, "d50", mean)
+    common <- intersect(jm20$set, jm50$set)                    # stability check on the same regulons
+    keep_c <- a$regulon %in% common
+    s20 <- gene_jack(jc, ja, d[keep_c], a$regulon[keep_c], "d20", mean); s50 <- gene_jack(jc, ja, d[keep_c], a$regulon[keep_c], "d50", mean)
     jd20 <- gene_jack(jc, ja, d, a$regulon, "d20", stats::median)
     pjm <- zp(jm20$est, jm20$se); pjd <- zp(jd20$est, jd20$se)
     noop <- a$frac_same_operon <= 0.5; bn <- boot_mean(d[noop])
@@ -133,7 +138,8 @@ for (k in unique(paste(pr$run, pr$truth, sep = "|"))) {
       median_d = stats::median(d), p_median_regulons = pw,
       median_d_genes = jd20$est, median_lo_genes = jd20$est - 1.96 * jd20$se, median_hi_genes = jd20$est + 1.96 * jd20$se,
       p_median_genes = pjd, p_median = max(pw, pjd),
-      jack_se_ratio_d50_d20 = jm50$se / jm20$se, jack_unstable = unstable(jm50, jm20), excluded_genes_d50 = jm50$excluded,
+      jack_se_ratio_d50_d20 = s50$se / s20$se, jack_unstable = unstable(s50, s20), n_stability_set = length(common),
+      excluded_genes_d50 = jm50$excluded, mean_lo_genes_d50 = jm50$est - 1.96 * jm50$se, mean_hi_genes_d50 = jm50$est + 1.96 * jm50$se,
       attention_wins = mean(d < 0), tied = mean(d == 0),
       n_no_operon_dominated = sum(noop), mean_d_noop = mean(d[noop]), mean_lo_noop = bn[["lo"]], mean_hi_noop = bn[["hi"]],
       median_d_noop = stats::median(d[noop]), p_median_noop = wil(d[noop]))
