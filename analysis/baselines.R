@@ -35,12 +35,12 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(dataset = "m3d", methods = "genie3,grnboost2,pidc", t = 9L, workers = 24L, out = NULL,
             jack = 100L, seed = 20261016L, alpha = 0.5, ntrees = 1000L, quick = 0L,
             python = "~/venvs/clr-baselines/bin/python", julia = "~/.juliaup/bin/julia",
-            gene_subset = "none", export_only = 0L, jack_reg = 200L)
+            gene_subset = "none", export_only = 0L, jack_reg = 200L, macro = 1L)
 i <- 1L
 while (i <= length(args)) {
   key <- sub("^--", "", args[i]); if (!key %in% names(opt)) stop("unknown argument: ", args[i])
   v <- args[i + 1L]
-  opt[[key]] <- if (key %in% c("t", "workers", "jack", "seed", "ntrees", "quick", "export_only", "jack_reg")) as.integer(v) else v
+  opt[[key]] <- if (key %in% c("t", "workers", "jack", "seed", "ntrees", "quick", "export_only", "jack_reg", "macro")) as.integer(v) else v
   i <- i + 2L
 }
 if (is.null(opt$out)) opt$out <- file.path("results", paste0("baselines_", opt$dataset))
@@ -140,7 +140,7 @@ per_tf_median_auroc <- function(S, u) stats::median(vapply(names(u$targets), fun
   s <- S[t, ]; ok <- !is.na(y); r <- rank(s[ok]); n1 <- sum(y[ok]); n0 <- sum(ok) - n1
   (sum(r[y[ok] == 1]) - n1 * (n1 + 1) / 2) / (as.numeric(n1) * n0) }, 0), na.rm = TRUE)
 # macro = FALSE skips the per-regulon tables (used for the hub-stratified scores)
-evaluate <- function(S, macro = TRUE) {
+evaluate <- function(S, macro = opt$macro == 1L) {
   S[!is.finite(S)] <- 0; diag(S) <- 0
   lapply(stats::setNames(names(bench), names(bench)), function(nm) {
     b <- bench[[nm]]; sc <- S[cbind(b$pairs$i, b$pairs$j)]
@@ -248,7 +248,9 @@ for (m in names(E)) for (nm in names(bench)) {
 res <- do.call(rbind, rows)
 utils::write.csv(res, file.path(opt$out, "metrics.csv"), row.names = FALSE)
 # per-regulon AP (macro view; summarized by analysis/macro_aupr.R)
+# --macro 0: pooled metrics only; existing per-regulon tables are left untouched
 mm <- names(E)[vapply(names(E), function(m) !is.null(E[[m]][[1]]$per_regulon), NA)]
+if (length(mm)) {
 pr <- do.call(rbind, lapply(mm, function(m) do.call(rbind, lapply(names(bench), function(nm)
   cbind(run = basename(opt$out), dataset = opt$dataset, method = m, truth = nm, E[[m]][[nm]]$per_regulon,
         stringsAsFactors = FALSE)))))
@@ -262,6 +264,7 @@ rm_tab <- do.call(rbind, lapply(names(bench), function(nm) { r <- bench[[nm]]$re
   data.frame(run = basename(opt$out), truth = nm, regulon = rn,
              members = vapply(r$members, function(m) paste(genes[m], collapse = ";"), ""), stringsAsFactors = FALSE) }))
 utils::write.csv(rm_tab, file.path(opt$out, "regulon_members.csv"), row.names = FALSE)
+}
 for (nm in names(bench)) {
   x <- res[res$truth == nm, ]; x <- x[order(-x$aupr), ]
   say(sprintf("== %s %s (base rate %.4f)", opt$dataset, nm, x$base_rate[1]))
