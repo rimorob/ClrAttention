@@ -247,6 +247,11 @@ for (m in names(E)) for (nm in names(bench)) {
 }
 res <- do.call(rbind, rows)
 utils::write.csv(res, file.path(opt$out, "metrics.csv"), row.names = FALSE)
+# replicate AUPRs on the shared delete-half gene splits, so any two methods can be
+# compared exactly (paired) later, e.g. ties with the best method in a table
+jr <- do.call(rbind, lapply(names(E), function(m) do.call(rbind, lapply(names(bench), function(nm)
+  data.frame(method = m, truth = nm, rep = seq_along(E[[m]][[nm]]$jack), aupr = E[[m]][[nm]]$jack)))))
+utils::write.csv(jr, file.path(opt$out, "jack_replicates.csv"), row.names = FALSE)
 # per-regulon AP (macro view; summarized by analysis/macro_aupr.R)
 # --macro 0: pooled metrics only; existing per-regulon tables are left untouched
 mm <- names(E)[vapply(names(E), function(m) !is.null(E[[m]][[1]]$per_regulon), NA)]
