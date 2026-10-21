@@ -27,7 +27,7 @@
 #   systemd-run --user --unit=clr-sched -p Restart=on-failure -p CPUWeight=10 bash tools/scheduler.sh jobs_pc sched
 cd "$(dirname "$0")/.." || exit 1
 ROOT="${1:-jobs_pc}"; QDIR="$ROOT/${2:-queue}"
-BUDGET_MEM=${BUDGET_MEM:-90}; BUDGET_CPU=${BUDGET_CPU:-50}; MIN_AVAIL=${MIN_AVAIL:-15}
+BUDGET_MEM=${BUDGET_MEM:-90}; BUDGET_CPU=${BUDGET_CPU:-56}   # CPU over-commit only slows jobs; memory is the hard limit; MIN_AVAIL=${MIN_AVAIL:-15}
 SLICE=${SLICE:-clrjobs.slice}; SLICE_CAP=${SLICE_CAP:-95}; RESERVE_MIN=${RESERVE_MIN:-30}
 DEF_MEM=30; DEF_CPU=8
 export JOBS_ROOT="$ROOT"
