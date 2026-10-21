@@ -78,7 +78,7 @@
 - [ ] ☐ Baseline follow-ups (QC): score PIDC on M3D; directed DREAM5-style TF→target evaluation (regulators = RegulonDB TFs, GENIE3 unsymmetrized); ARACNE; paired per-regulon Wilcoxon on coherence stratified by size; pooled AUPR without the top-5 regulons; intervals for coherence and TF metrics; regulon-cluster resample; 3 seeds for tree methods; Holm over the prestated family; t re-selected per dataset (t = 9 reported as transfer); check M3D/EcoMAC array overlap before calling EcoMAC a replication.
 - [ ] ⏳ PIDC on the same three datasets (second job lane, single-threaded: about 7 h each for M3D and EcoMAC, about 40 h for K562).
 - [ ] ☐ ARACNE (the classic MI method).
-- [ ] ☐ Learned attention from scGPT or Geneformer on a shared task.
+- [ ] ☐ Learned-attention comparator (PI: unavoidable; plan `docs/plans/scfm_comparator.md`, 2026-10-21): scPRINT v1 primary (built for GRN inference from attention; human + mouse), scGPT secondary (attention and token-embedding cosine); zero-shot primary, random-weight and permuted-expression controls, CLR-on-learned-attention hybrid as the thesis test; per-dataset blocking on BEELINE (n = 7) plus K562 single cells; leakage audit; preregistered before scoring. About 2 weeks, under 2 GPU-days.
 
 ### 6. Bacteria to human
 
