@@ -17,7 +17,7 @@
 # (END line with rc, systemd result and measured peak).
 # Admission: sum over running jobs of max(declared, current) (after 30 min:
 # max(1.1 x measured peak, current)) + mem <= BUDGET_MEM,
-# declared cpus + cpus <= BUDGET_CPU, and MemAvailable - mem >= MIN_AVAIL (always).
+# declared cpus + cpus <= BUDGET_CPU (or 1-min load + cpus <= BUDGET_CPU), and MemAvailable - mem >= MIN_AVAIL (always).
 # Backfill: later jobs may start ahead of an earlier one that does not fit,
 # unless the earliest eligible job has waited > RESERVE_MIN minutes (then the
 # queue waits for it). Jobs started by the old runner (running/*.sh without a
@@ -128,7 +128,8 @@ while true; do
     done
     [ $ok = 1 ] || continue
     [ -n "${eligible_since[$b]}" ] || eligible_since[$b]=$(date +%s)
-    if [ $((used_mem + mem)) -le $BUDGET_MEM ] && [ $((used_cpu + cpu)) -le $BUDGET_CPU ] && \
+    load=$(awk '{ printf "%d", $1 + 0.999 }' /proc/loadavg)      # declared threads are guesses too: actual load also counts
+    if [ $((used_mem + mem)) -le $BUDGET_MEM ] && { [ $((used_cpu + cpu)) -le $BUDGET_CPU ] || [ $((load + cpu)) -le $BUDGET_CPU ]; } && \
        [ $(( $(avail_gb) - mem )) -ge $MIN_AVAIL ] || \
        { [ $nrun -eq 0 ] && [ $(( $(avail_gb) - (mem < SLICE_CAP ? mem : SLICE_CAP) )) -ge $MIN_AVAIL ]; }; then
       [ -n "$first_waiting" ] && [ $(( $(date +%s) - ${eligible_since[$first_waiting]} )) -gt $((RESERVE_MIN * 60)) ] && break
