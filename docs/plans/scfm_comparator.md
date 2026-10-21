@@ -14,7 +14,7 @@
 3. Orientation fixed in advance: primary score(TF→g) = A[g, TF] (target as query, TF as key); secondary the reverse and max(A, Aᵀ).
 4. Arms: primary zero-shot attention (mean over all heads and layers as each model's default; special tokens removed; rows renormalized); secondary zero-shot embeddings (scGPT token/hidden-state cosine); tertiary self-supervised fine-tuning per dataset (no labels). No head selection trained on truths (leakage).
 5. Controls: same architecture with random weights (fully random; pretrained gene embeddings kept); expression permuted across cells (if the network does not change, it is a prior); gene-embedding-only prior; existing baselines (GENIE3, GRNBoost2, PIDC, |r|); hybrid CLR applied to learned attention (thesis test).
-6. Statistics: per-dataset blocking (n = 7 BEELINE datasets), exact Wilcoxon and sign test (minimum two-sided p 0.0156); Holm over {scPRINT, scGPT} × {CLR-NS, CLR attention}; preregistered non-inferiority margin.
+6. Statistics: per-dataset blocking (n = 7 BEELINE datasets), exact Wilcoxon and sign test (minimum two-sided p 0.0156); Holm over {scPRINT, scGPT} × {CLR-NS, CLR attention}; preregistered non-inferiority margin. **Power problem to fix before preregistering (flagged 2026-10-21):** with 7 datasets the smallest two-sided p (0.0156) exceeds Holm's first threshold for 4 tests (0.0125), so no comparison can reach significance. Options: fewer primary tests (one primary pair, scPRINT vs CLR-NS, others secondary), one-sided tests with a stated direction, adding independent blocks (K562 subsamples, other human datasets), or a mixed model over datasets × truths with the dataset as a random effect.
 7. Mouse: scPRINT on all 7; scGPT on the 2 human datasets (ortholog mapping exploratory).
 
 ## Risks
