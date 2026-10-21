@@ -46,15 +46,15 @@ decl() { grep -m1 -E "^# $2:" "$1" | sed -E "s/^# $2: *//; s/[[:space:]].*//"; }
 avail_gb() { awk '/^MemAvailable/ { print int($2 / 1048576) }' /proc/meminfo; }
 scope_mem_gb() { local v; v=$(systemctl --user show "$1" -p MemoryCurrent --value 2>/dev/null)
   [[ "$v" =~ ^[0-9]+$ ]] && echo $(( (v + 1073741823) / 1073741824 )) || echo 0; }
-# a dependency is satisfied when its newest END is rc=0, it is not queued or running again,
-# and that END is newer than the dependent job file
+# a dependency is satisfied when its newest END is rc=0 and it is not queued or running again
+# (no comparison with the dependent's file time: a dependency may well have finished before
+# the dependent was queued)
 dep_state() {   # dep dependent_file -> ok | wait | failed | unknown
   local d=$1 f=$2 line ts
   [ -e "$QDIR/$d.sh" ] || [ -e "$ROOT/running/$d.sh" ] && { echo wait; return; }
   line=$(grep -F " END $d rc=" "$ROOT/runner.log" | tail -1)
   if [ -z "$line" ]; then [ -e "$ROOT/done/$d.sh" ] && echo wait || echo unknown; return; fi
-  ts=$(date -d "$(echo "$line" | cut -d' ' -f1,2)" +%s)
-  case "$line" in *" rc=0 "*|*" rc=0") [ "$ts" -ge "$(stat -c %Y "$f")" ] && echo ok || echo wait ;; *) echo failed ;; esac
+  case "$line" in *" rc=0 "*|*" rc=0") echo ok ;; *) echo failed ;; esac
 }
 
 start_job() {   # name mem cpus
