@@ -26,7 +26,7 @@
 - [x] ⚠️ All-evidence coherence gain is not significant in the nested bootstrap (+0.011 [-0.004, +0.025]). QC
 - [x] ❌ Hard-thresholded FDR operator alone: 62-77% of genes isolated, unusable for propagation.
 - [x] ❌ FDR graph plus top-10 neighbours (hard selection): +0.013 AUPR, no coherence gain.
-- [ ] ⏳ FDR operators inside the chips bootstrap, per-draw null B = 100 (job 100).
+- [x] ✅ FDR operators inside the cluster bootstrap (job 100; QC 2026-10-21; 200 draws, experiments resampled with replicate chips, paired with the main run's draws): the best hard-FDR operator (FDR 0.05 + top-10) raises SC AUPR over CLR by +0.012 [+0.010, +0.015] with no coherence change and no gain on all-evidence regulons; softmax attention (keff 10, t = 8) beats it by 0.0075 [0.0053, 0.0095] SC AUPR in all 200 paired draws, with 0.026 higher coherence. Diffused-profile FDR readouts lower coherence below CLR. Caveats: marginal intervals (about 12 comparisons; the small fdr20 effects do not survive Bonferroni), fdr20 depths not held out, isolated-gene fraction not logged in this run, and the 'point' summary averages the 907-chip (+0.018) and 466-averaged (+0.013) estimates: report separately.
 - [ ] ☐ Repeat the core result on EcoMAC with held-out depth and bootstrap intervals (point estimate: +0.032 AUPR).
 
 ### 2. Mechanism: which components matter
