@@ -16,7 +16,7 @@
 # running/<job>.rc, and every loop finalizes jobs whose scope has ended
 # (END line with rc, systemd result and measured peak).
 # Admission: sum over running jobs of max(declared, current) (after 30 min:
-# max(1.25 x measured peak, current)) + mem <= BUDGET_MEM,
+# max(1.1 x measured peak, current)) + mem <= BUDGET_MEM,
 # declared cpus + cpus <= BUDGET_CPU, and MemAvailable - mem >= MIN_AVAIL (always).
 # Backfill: later jobs may start ahead of an earlier one that does not fit,
 # unless the earliest eligible job has waited > RESERVE_MIN minutes (then the
@@ -103,9 +103,9 @@ while true; do
       cur=$(systemctl --user show "clrjob-$b.scope" -p MemoryCurrent --value 2>/dev/null)
       if [[ "$cur" =~ ^[0-9]+$ ]]; then mb=$((cur / 1048576)); p=$(cat "$ROOT/running/$b.peak" 2>/dev/null || echo 0)
         [ "$mb" -gt "${p:-0}" ] && echo "$mb" > "$ROOT/running/$b.peak"; fi
-      # after 30 min, count the job at 1.25 x its measured peak instead of the declaration
+      # after 30 min, count the job at 1.1 x its measured peak instead of the declaration
       if [ $(( $(date +%s) - $(stat -c %Y "$ROOT/running/$b.res") )) -gt 1800 ]; then
-        m=$(awk '{ printf "%d", $1 * 1.25 / 1024 + 0.999 }' "$ROOT/running/$b.peak" 2>/dev/null); m=${m:-$DEF_MEM}; fi
+        m=$(awk '{ printf "%d", $1 * 1.1 / 1024 + 0.999 }' "$ROOT/running/$b.peak" 2>/dev/null); m=${m:-$DEF_MEM}; fi
       g=$(scope_mem_gb "clrjob-$b.scope"); [ "$g" -gt "$m" ] && m=$g
     else                                        # started by the old one-at-a-time runner
       g=$(scope_mem_gb clr-jobs.service); m=$DEF_MEM; [ "$g" -gt "$m" ] && m=$g; c=$DEF_CPU
