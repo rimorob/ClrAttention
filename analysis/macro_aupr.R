@@ -139,7 +139,7 @@ for (k in unique(paste(pr$run, pr$truth, sep = "|"))) {
       median_d_genes = jd20$est, median_lo_genes = jd20$est - 1.96 * jd20$se, median_hi_genes = jd20$est + 1.96 * jd20$se,
       p_median_genes = pjd, p_median = max(pw, pjd),
       jack_se_ratio_d50_d20 = s50$se / s20$se, jack_unstable = unstable(s50, s20), n_stability_set = length(common),
-      excluded_genes_d50 = jm50$excluded, mean_lo_genes_d50 = jm50$est - 1.96 * jm50$se, mean_hi_genes_d50 = jm50$est + 1.96 * jm50$se,
+      excluded_genes_d50 = jm50$excluded, mean_lo_genes_d50_stabset = jm50$est - 1.96 * jm50$se, mean_hi_genes_d50_stabset = jm50$est + 1.96 * jm50$se,   # on the d50 regulon subset, not the headline set
       attention_wins = mean(d < 0), tied = mean(d == 0),
       n_no_operon_dominated = sum(noop), mean_d_noop = mean(d[noop]), mean_lo_noop = bn[["lo"]], mean_hi_noop = bn[["hi"]],
       median_d_noop = stats::median(d[noop]), p_median_noop = wil(d[noop]))
