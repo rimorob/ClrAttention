@@ -76,10 +76,11 @@ start_job() {   # name mem cpus
 finalize() {    # job whose scope has ended
   local b=$1 rc res peak mem
   res=$(systemctl --user show "clrjob-$b.scope" -p Result --value 2>/dev/null)
+  # every job writes its exit code from inside its scope; no file means it was killed
+  # (a manual stop leaves the scope result at "success", so that result alone proves nothing)
   if [ -s "$ROOT/running/$b.rc" ]; then rc=$(cat "$ROOT/running/$b.rc")
-  elif [ "$res" = success ]; then rc=0
   elif [ "$res" = oom-kill ]; then rc=137
-  else rc=255; fi
+  else rc=143; fi
   [ "$res" = oom-kill ] && [ "$rc" = 0 ] && rc=137
   peak=$(awk '{ printf "%.1f", $1 / 1024 }' "$ROOT/running/$b.peak" 2>/dev/null)
   read mem _ < "$ROOT/running/$b.res"
