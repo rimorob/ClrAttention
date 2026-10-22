@@ -15,18 +15,26 @@ ink <- c(primary = "#0b0b0b", secondary = "#52514e", muted = "#8a8984", grid = "
 # Sequential ramp (one hue, light -> dark) for densities and heatmaps.
 seq_blue <- c("#fcfcfb", "#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b")
 
+# Shared colour key for ALL figures:
+#   blue #2a78d6 = dependence (MI); light blue #9ec5f4 = histogram bins;
+#   orange = CLR normalization; violet = softmax; magenta = depth / walk;
+#   aqua #1baf7a = the full method of this work only; grey #8a8984 =
+#   competitors / neutral; yellow #eda100, hatched or greyed = post-hoc PC
+#   removal (outside the main pipeline). Platforms and batches use hues outside
+#   this key (red #e34948, green #008300, dark grey #52514e, brown) plus shapes.
+light_blue <- "#9ec5f4"
 # Fixed colour per pipeline component / method family.
 component_cols <- c(
   "Dependence: mutual information" = pal[["blue"]],
-  "Binning: common HG bins"        = pal[["aqua"]],
+  "Binning: common HG bins"        = light_blue,
   "Context normalization (CLR)"    = pal[["orange"]],
   "Softmax with temperature"       = pal[["violet"]],
   "Depth (iterated attention)"     = pal[["magenta"]],
   "Removal of 2 global PCs"        = pal[["yellow"]])
 method_cols <- c(CLR = pal[["orange"]], Attention = pal[["violet"]], Correlation = ink[["muted"]],
                  MI = pal[["blue"]], "Differential expression" = pal[["yellow"]])
-platform_cols <- c("Antisense (GPL199)" = pal[["blue"]], "Genome 2.0 (GPL3154)" = pal[["orange"]],
-                   "no GEO record" = pal[["aqua"]])
+platform_cols <- c("Antisense (GPL199)" = pal[["red"]], "Genome 2.0 (GPL3154)" = pal[["green"]],
+                   "no GEO record" = "#8c5a2b")
 
 theme_clr <- function(base_size = 10) {
   theme_minimal(base_size = base_size, base_family = "sans") %+replace%

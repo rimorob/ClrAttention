@@ -1,0 +1,13 @@
+"row","col","n","r","mi","ndmg"
+"recA vs lexA","M3D build 6: 907 arrays
+(= 466 experiments after averaging replicates)",907,0.84983309743753,0.712374221570984,217
+"recA vs lexA","EcoMAC, all 2,198 arrays
+(three platform groups pooled)",2198,0.740163334707203,0.455866933923494,243
+"recA vs lexA","EcoMAC, Genome 2.0 arrays only
+(735 arrays, one platform)",735,0.546701783205452,0.103787607544005,1
+"sulA vs lexA","M3D build 6: 907 arrays
+(= 466 experiments after averaging replicates)",907,0.757866362718035,0.567135331827551,217
+"sulA vs lexA","EcoMAC, all 2,198 arrays
+(three platform groups pooled)",2198,0.5217835442952,0.276923711091753,243
+"sulA vs lexA","EcoMAC, Genome 2.0 arrays only
+(735 arrays, one platform)",735,0.349078091742505,0.0767599790426057,1

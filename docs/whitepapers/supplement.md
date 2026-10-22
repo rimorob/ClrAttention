@@ -401,14 +401,14 @@ CLR scores carry a permutation null, so hard selection at a false-discovery rate
 
 ## Supplementary Figures
 
-**Supplementary Fig. 1 | Batch structure in pooled compendia.**  Expression of lexA against two SOS genes in:
+**Supplementary Fig. 1 | Mixing platforms creates the "Christmas tree" and dilutes a known LexA–target relationship.**  Expression (log2, RMA) of lexA against two genes it represses, recA (top row) and sulA (bottom row), in:
 
-1. M3D build 6 (907 arrays, one platform);
-2. EcoMAC, all 2,198 arrays, coloured by platform;
-3. EcoMAC Genome 2.0 arrays only.
+1. M3D build 6:  907 arrays from one platform (the 466 experiments used elsewhere are these arrays averaged over replicates);
+2. EcoMAC, all 2,198 arrays, coloured and shaped by platform;
+3. EcoMAC, the 735 Genome 2.0 arrays only.
 
-Each panel reports n, Pearson r and B-spline MI.  (a) lexA–sulA, `figures/scatter_lexA_sulA.png`.  (b) lexA–recA, `figures/scatter_lexA_recA.png`.
+Axis ranges are shared along each row.  "No GEO record" marks 619 EcoMAC arrays (M3D and ASAP chip identifiers) without a GEO series, whose platform therefore could not be looked up.  The dashed 90% normal ellipse outlines arrays annotated with a DNA-damaging treatment (quinolone, mitomycin C, UV or nalidixic acid):  the SOS-induced cluster at high lexA.  Each panel gives n, Pearson r and B-spline MI in bits.  For recA, r is 0.85, 0.74 and 0.55 and MI 0.71, 0.46 and 0.10 bits across the three columns; for sulA, r is 0.76, 0.52 and 0.35 and MI 0.57, 0.28 and 0.08 bits.  The Genome 2.0 arrays include only one DNA-damage array, so their weak relation reflects the missing SOS induction as well as the single platform.  `figures/scatter_lexA.png` (`analysis/ecomac_scatter.R`).
 
-**Supplementary Fig. 2 | Mutual information against correlation for all gene pairs.**  Two-dimensional histograms (log counts) of B-spline MI against |Pearson r| for M3D, EcoMAC uncorrected and EcoMAC with per-platform centring.  The curve is the MI of a bivariate Gaussian, −½ log₂(1 − r²).  `figures/mi_vs_rho.png`.
+**Supplementary Fig. 2 | Excess MI over correlation comes from mixing platforms (8.4% of pairs vs 0.2–0.3%).**  Two-dimensional histograms of B-spline MI (shared histogram bins; bits) against |Pearson r| for every gene pair in M3D (466 experiments, one platform; 9,229,956 pairs), EcoMAC uncorrected and EcoMAC with per-platform centring (2,198 arrays; 8,771,766 pairs each), on the full MI range.  Colour gives gene pairs per bin on a log scale.  The dashed curve is the MI expected for a linear (Gaussian) relationship with the same correlation, −½ log₂(1 − r²).  The large number in each panel is the share of pairs whose MI exceeds that curve by more than 0.1 bits:  0.2% (M3D), 8.4% (EcoMAC uncorrected) and 0.3% (EcoMAC centred); Spearman correlations between MI and |r| are 0.76, 0.77 and 0.77.  Mass below the curve (4.7% of M3D pairs by more than 0.1 bits) and the floor near r = 0 are estimator biases (bin saturation and finite-sample bias), not weaker or extra dependence.  `figures/mi_vs_rho.png` (`analysis/mi_vs_rho.R`).
 
-**Supplementary Fig. 3 | Component contributions at all evidence levels.**  Shapley decomposition as in main-text Fig. 3, for RegulonDB regulons at all evidence levels.  `figures/fig_shapley_all.png`.
+**Supplementary Fig. 3 | Component contributions at all evidence levels.**  Shapley decomposition as in main-text Fig. 3, for RegulonDB regulons at all evidence levels.  The two evidence levels disagree in sign (with an interval excluding 0 at one level at least) only on co-membership AUPR:  the Shapley share of mutual information (strong/confirmed −0.003, all +0.002) and of shared bins (+0.003, 0.000), and the drop-one losses of shared bins (+0.003, −0.003) and CLR normalization (+0.006, −0.001).  `figures/fig_shapley_all.png`.

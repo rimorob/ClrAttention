@@ -211,7 +211,7 @@ Several limitations apply.  RegulonDB evidence derives in part from expression s
 
 **Fig. 2 | Depth.**  Co-membership AUPR and regulon coherence against depth t for attention on CLR, attention on uncalibrated scores, and hard-threshold propagation.  The held-out t* distribution over laboratory splits is overlaid.
 
-**Fig. 3 | Component contributions.**  (a, b) Shapley waterfalls from the most performant configuration to the |r| baseline for co-membership AUPR and regulon coherence (M3D, strong/confirmed evidence), with 95% intervals from the gene jackknife and the regulon bootstrap.  (c) Loss when each component is removed from the full model.  Removal of two global components was chosen after inspecting Supplementary Note 7 and is not part of the main pipeline.  `figures/fig_shapley_SC.png`.
+**Fig. 3 | CLR normalization and softmax drive the coherence gain; depth and CLR drive pooled AUPR.**  (a, b) Shapley waterfalls from the |r| baseline to the full model, components added in pipeline order, for co-membership AUPR and median regulon coherence (M3D, strong/confirmed evidence), with 95% intervals from the gene jackknife and the regulon bootstrap (grey where they include 0).  (c) Loss when each component is removed from the full model, against its Shapley share; a gap marks an interaction.  Removal of two global components (hatched) was chosen after inspecting Supplementary Note 7 and is not part of the main pipeline.  `figures/fig_shapley_SC.png`.
 
 **Fig. 4 | Robustness.**  Differences from CLR with 95% intervals under the gene jackknife, regulon bootstrap, cluster and replicate bootstraps, nested bootstrap, hub stratification, and against the best hard FDR operator.
 

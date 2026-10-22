@@ -1,0 +1,15 @@
+Method: CLR as attention, completed.
+
+Input: a gene expression compendium, a matrix of genes (rows, thousands) by experiments (columns, hundreds to thousands, from many laboratories and conditions).
+
+Step 1 (pairwise dependence, the "query-key" score): for every pair of genes i and j, estimate mutual information MI(i, j) from their expression profiles across experiments (B-spline mutual information).
+
+Step 2 (context normalization, the step CLR introduced in 2007): for each gene i, standardize MI(i, j) against the distribution of all of gene i's MI values (its "context"), giving a z-score z_i(j). Do the same from gene j's side, z_j(i). Combine the two one-sided z-scores (Stouffer: (z_i + z_j)/sqrt(2), negatives clipped at zero). This is the CLR score: a background-corrected, per-gene calibrated relatedness. Highlight: CLR is a context-normalized attention score, published a decade before transformers.
+
+Step 3 (softmax attention, the completion): each gene attends over its 50 highest CLR scores with a softmax whose temperature is set per gene so that the effective number of attended partners exp(entropy) = 10. Result: a sparse row-stochastic attention matrix A (each row sums to 1).
+
+Step 4 (depth, multi-step attention): build a lazy random walk P = 0.5 I + 0.5 A and propagate t steps: P^t, symmetrized S_t = (P^t + P^t transposed)/2. Depth t is chosen without labels on held-out experiments (split by laboratory); median t = 9. Small t keeps fine structure (operons); larger t smooths toward larger modules (regulons).
+
+Output: S_t, a gene-by-gene association matrix used to recover regulatory modules (genes sharing a transcription factor).
+
+Annotate the analogy to transformer attention: dependence score ~ query-key dot product; context normalization ~ scaling/normalization of logits; softmax ~ softmax; depth ~ stacked attention layers. No learned parameters: everything is computed from the data, unsupervised (de novo inference).

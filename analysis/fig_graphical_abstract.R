@@ -135,16 +135,17 @@ draw_abstract <- function() {
       0.3, 8.26, 18, face = "bold", just = "left")
 
   W <- 2.4; gap <- 0.2; Y <- 1.5; H <- 5.5
-  X <- 0.3 + (0:3) * (W + gap)
+  Wv <- c(1.9, 2.9, W, W)              # panel 2 widened (criss-cross), panel 1 narrowed
+  X <- 0.3 + c(0, cumsum(Wv[1:3] + gap))
   xr <- X[4] + W                      # right edge of the method panels (10.5)
-  band(X[1], X[2] + W, 7.38, "#ecebe7", "CLR (Faith et al. 2007)")
+  band(X[1], X[2] + Wv[2], 7.38, "#ecebe7", "CLR (Faith et al. 2007)")
   band(X[3], xr, 7.38, "#e6e3fa", "This work: steps taken from attention")
 
-  card(X[1], Y, W, H, 1, "Expression\ncompendium")
-  card(X[2], Y, W, H, 2, "Mutual information,\nz-scored against\neach gene's own\nbackground")
+  card(X[1], Y, Wv[1], H, 1, "Expression\ncompendium")
+  card(X[2], Y, Wv[2], H, 2, "Mutual information,\nz-scored against each\ngene's own background")
   card(X[3], Y, W, H, 3, "Softmax with\nper-gene\ntemperature")
   card(X[4], Y, W, H, 4, "Multi-step walk,\nnumber of steps\nchosen without\nlabels")
-  for (i in 1:3) chevron(X[i] + W + gap / 2, Y + H / 2)
+  for (i in 1:3) chevron(X[i] + Wv[i] + gap / 2, Y + H / 2)
 
   # ---------------- panel 1: heat-map motif + organisms ----------------------
   x0 <- X[1]
@@ -155,24 +156,24 @@ draw_abstract <- function() {
   M <- prof[mod, ] * 0.95 + matrix(rnorm(ng * ne, sd = 0.55), ng)
   M <- (M - min(M)) / diff(range(M))
   ramp <- colorRampPalette(seq_blue[1:7])(101)
-  hx0 <- x0 + 0.48; hx1 <- x0 + W - 0.2; hy0 <- 3.75; hy1 <- 5.85
+  hx0 <- x0 + 0.48; hx1 <- x0 + Wv[1] - 0.17; hy0 <- 3.75; hy1 <- 5.85
   cw <- (hx1 - hx0) / ne; ch <- (hy1 - hy0) / ng
   for (g in 1:ng) for (e in 1:ne)
     grid.rect(hx0 + (e - 1) * cw, hy1 - g * ch, cw * 0.9, ch * 0.88, default.units = "native",
               just = c("left", "bottom"), gp = gpar(fill = ramp[1 + round(100 * M[g, e])], col = NA))
   txt("genes", x0 + 0.3, (hy0 + hy1) / 2, 11.5, ink[["secondary"]], rot = 90)
   txt("experiments", hx0, hy0 - 0.22, 11.5, ink[["secondary"]], just = "left")
-  seg(hx0 + 1.0, hy0 - 0.22, hx1, hy0 - 0.22, ink[["muted"]], 1.2,
+  seg(hx0 + 0.95, hy0 - 0.22, hx1, hy0 - 0.22, ink[["muted"]], 1.2,
       arrow = arrow(length = unit(0.06, "inches"), type = "closed"))
   # bacterium (E. coli) and human cell (K562)
-  bx <- x0 + 0.62; by <- 2.75
-  grid.curve(bx + 0.3, by, bx + 0.62, by - 0.04, default.units = "native", curvature = -0.6,
+  bx <- x0 + 0.5; by <- 2.75
+  grid.curve(bx + 0.28, by, bx + 0.52, by - 0.04, default.units = "native", curvature = -0.6,
              square = FALSE, ncp = 8, gp = gpar(col = ink[["secondary"]], lwd = 1.2))
-  grid.roundrect(bx, by, 0.66, 0.3, default.units = "native", r = unit(0.15, "inches"),
+  grid.roundrect(bx, by, 0.6, 0.28, default.units = "native", r = unit(0.15, "inches"),
                  gp = gpar(fill = seq_blue[3], col = ink[["secondary"]], lwd = 1.3))
   txt("E. coli", bx + 0.05, by - 0.45, 12.5, face = "italic")
   txt("M3D, EcoMAC\nmicroarrays", bx + 0.05, by - 0.88, 10.5, ink[["secondary"]])
-  hx <- x0 + 1.78; hy <- 2.75
+  hx <- x0 + 1.42; hy <- 2.75
   grid.circle(hx, hy, 0.25, default.units = "native",
               gp = gpar(fill = seq_blue[2], col = ink[["secondary"]], lwd = 1.3))
   grid.circle(hx + 0.04, hy + 0.01, 0.1, default.units = "native",
@@ -180,33 +181,69 @@ draw_abstract <- function() {
   txt("human", hx, hy - 0.45, 12.5)
   txt("K562\nPerturb-seq", hx, hy - 0.88, 10.5, ink[["secondary"]])
 
-  # ---------------- panel 2: CLR = MI z-scored per gene ----------------------
-  x0 <- X[2]; cx <- x0 + W / 2; cy <- 4.4
-  pill("existing method", x0 + 1.02, 5.88, 1.5, 0.3, fill = "#ecebe7", col = NA, size = 10.5,
+  # ---------------- panel 2: CLR criss-cross (after Faith et al. 2007, Fig. 2A) ----
+  # MI matrix with gene i's row and gene j's column; each is z-scored against its own
+  # background; the pair score combines the two (Stouffer, negatives set to 0).
+  x0 <- X[2]; W2 <- Wv[2]
+  pill("existing method", x0 + 1.0, 6.0, 1.5, 0.3, fill = "#ecebe7", col = NA, size = 10.5,
        face = "plain", tcol = ink[["secondary"]])
-  nb <- ring(10, cx, cy, 0.78, phase = 0.25)
-  mi <- c(0.95, 0.25, 0.4, 0.15, 0.8, 0.3, 0.55, 0.12, 0.7, 0.2)
-  for (k in seq_len(nrow(nb))) {
-    s <- trim(cx, cy, nb$x[k], nb$y[k], 0.15, 0.07)
-    seg(s$x0, s$y0, s$x1, s$y1, pal[["blue"]], 0.8 + 6 * mi[k], alpha = 0.35 + 0.6 * mi[k])
+  set.seed(5)
+  n <- 8; cs <- 0.15; mx0 <- x0 + 0.95; my1 <- 5.5; my0 <- my1 - n * cs; mx1 <- mx0 + n * cs
+  A <- matrix(runif(n * n)^1.6, n); A <- (A + t(A)) / 2
+  ri <- 3; cj <- 7; A[ri, cj] <- A[cj, ri] <- 0.97
+  ramp <- colorRampPalette(seq_blue[1:7])(101)
+  for (r in 1:n) for (c in 1:n)
+    grid.rect(mx0 + (c - 1) * cs, my1 - r * cs, cs * 0.9, cs * 0.9, default.units = "native",
+              just = c("left", "bottom"),
+              gp = gpar(fill = if (r == c) ink[["grid"]] else ramp[1 + round(100 * A[r, c])], col = NA))
+  rowy <- my1 - (ri - 0.5) * cs - 0.0075; colx <- mx0 + (cj - 0.5) * cs - 0.0075
+  grid.rect(mx0 - 0.03, rowy, n * cs + 0.045, cs + 0.05, default.units = "native",
+            just = c("left", "centre"), gp = gpar(fill = NA, col = pal[["orange"]], lwd = 2.2))
+  grid.rect(colx, my0 - 0.03, cs + 0.05, n * cs + 0.045, default.units = "native",
+            just = c("centre", "bottom"), gp = gpar(fill = NA, col = pal[["orange"]], lwd = 2.2))
+  grid.rect(colx, rowy, cs * 0.95, cs * 0.95, default.units = "native",
+            gp = gpar(fill = NA, col = ink[["primary"]], lwd = 2.4))
+  txt("i", mx0 - 0.13, rowy, 12.5, face = "bold.italic")
+  txt("j", colx, my1 + 0.14, 12.5, face = "bold.italic")
+  txt("MI of\nevery\ngene\npair", mx1 + 0.12, (my0 + my1) / 2, 10, ink[["secondary"]],
+      just = "left")
+  # the two backgrounds: row i (z_i) and column j (z_j)
+  cb <- 3.35; chh <- 0.42
+  curves <- list(c(x0 + 0.12, x0 + 1.17, 2.3), c(colx - 0.53, colx + 0.53, 1.6))
+  zz <- seq(-3.2, 3.2, length.out = 100)
+  zt <- c(-1.7, -1.2, -0.8, -0.5, -0.2, 0.05, 0.3, 0.6, 0.95, 1.3)
+  for (k in 1:2) {
+    a <- curves[[k]][1]; b <- curves[[k]][2]; zm <- curves[[k]][3]
+    xs <- a + (zz + 3.2) / 6.4 * (b - a)
+    grid.polygon(c(xs, rev(xs)), c(cb + chh * exp(-zz^2 / 2), rep(cb, length(zz))),
+                 default.units = "native", gp = gpar(fill = pal[["orange"]], alpha = 0.22, col = NA))
+    grid.lines(xs, cb + chh * exp(-zz^2 / 2), default.units = "native",
+               gp = gpar(col = pal[["orange"]], lwd = 2))
+    seg(a, cb, b, cb, ink[["muted"]], 1)
+    for (z in zt) { xx <- a + (z + 3.2) / 6.4 * (b - a); seg(xx, cb - 0.08, xx, cb + 0.01, pal[["blue"]], 1.1) }
+    xm <- a + (zm + 3.2) / 6.4 * (b - a)
+    seg(xm, cb - 0.11, xm, cb + 0.14, ink[["primary"]], 2.6)
   }
-  for (k in seq_len(nrow(nb))) node(nb$x[k], nb$y[k], 0.07)
-  query(cx, cy)
-  txt("line width = MI", cx, 3.36, 10.5, ink[["secondary"]])
-  # this gene's own background (orange = CLR normalization)
-  gx0 <- x0 + 0.95; gx1 <- x0 + W - 0.15; gy0 <- 2.05; gh <- 0.72
-  zz <- seq(-3.2, 3.2, length.out = 120)
-  gxs <- gx0 + (zz + 3.2) / 6.4 * (gx1 - gx0)
-  grid.polygon(c(gxs, rev(gxs)), c(gy0 + gh * exp(-zz^2 / 2), rep(gy0, length(zz))),
-               default.units = "native", gp = gpar(fill = pal[["orange"]], alpha = 0.22, col = NA))
-  grid.lines(gxs, gy0 + gh * exp(-zz^2 / 2), default.units = "native",
-             gp = gpar(col = pal[["orange"]], lwd = 2.2))
-  seg(gx0, gy0, gx1, gy0, ink[["muted"]], 1)
-  zt <- c(-1.6, -1.1, -0.7, -0.4, -0.15, 0.1, 0.35, 0.6, 1.0, 1.4, 2.0, 2.75)
-  for (z in zt) { xx <- gx0 + (z + 3.2) / 6.4 * (gx1 - gx0)
-    seg(xx, gy0 - 0.1, xx, gy0 + 0.02, pal[["blue"]], ifelse(z > 2.5, 2.8, 1.3)) }
-  txt("z", gx0 + (2.75 + 3.2) / 6.4 * (gx1 - gx0), gy0 + 0.27, 12.5, face = "bold.italic")
-  txt("gene i's\nown\nbackground", x0 + 0.17, gy0 + 0.35, 10.5, ink[["secondary"]], just = "left")
+  lc <- mean(curves[[1]][1:2]); rc <- mean(curves[[2]][1:2])
+  grid.text(expression(z[i] * "  (row " * italic(i) * ")"), lc, cb - 0.27, default.units = "native",
+            gp = gpar(fontfamily = FONT, fontsize = 11, col = ink[["primary"]]))
+  grid.text(expression(z[j] * "  (column " * italic(j) * ")"), rc, cb - 0.27, default.units = "native",
+            gp = gpar(fontfamily = FONT, fontsize = 11, col = ink[["primary"]]))
+  # connectors from the highlighted row / column to their backgrounds
+  ar <- arrow(length = unit(0.055, "inches"), type = "closed")
+  grid.lines(c(mx0 - 0.22, lc, lc), c(rowy, rowy, cb + chh + 0.08), default.units = "native",
+             arrow = ar, gp = gpar(col = ink[["muted"]], lwd = 1.2, lty = 3, fill = ink[["muted"]]))
+  seg(colx, my0 - 0.05, rc, cb + chh + 0.08, ink[["muted"]], 1.2, lty = 3, arrow = ar)
+  # combination into one score
+  fx <- x0 + W2 / 2
+  seg(lc, cb - 0.42, fx - 0.3, 2.6, ink[["secondary"]], 1.2, arrow = ar)
+  seg(rc, cb - 0.42, fx + 0.3, 2.6, ink[["secondary"]], 1.2, arrow = ar)
+  grid.text(expression((z[i] + z[j]) / sqrt(2)), fx, 2.36, default.units = "native",
+            gp = gpar(fontfamily = FONT, fontsize = 14, col = ink[["primary"]]))
+  txt("negatives set to 0", fx, 2.06, 10, ink[["secondary"]])
+  grid.roundrect(fx, 1.75, 2.35, 0.32, default.units = "native", r = unit(0.06, "inches"),
+                 gp = gpar(fill = "#fbe3d9", col = pal[["orange"]], lwd = 1.4))
+  txt("CLR score for the pair i–j", fx, 1.75, 11, face = "bold")
 
   # ---------------- panel 3: softmax ------------------------------------------
   x0 <- X[3]; cx <- x0 + W / 2; cy <- 4.35
@@ -253,7 +290,7 @@ draw_abstract <- function() {
   txt("t = 9: chosen on\nheld-out labs", tx[3], 1.92, 10.5, ink[["secondary"]])
 
   # ---------------- under the bands ---------------------------------------------
-  txt("Published CLR stops here: a score for each gene pair", (X[1] + X[2] + W) / 2, 1.17,
+  txt("Published CLR stops here: a score for each gene pair", (X[1] + X[2] + Wv[2]) / 2, 1.17,
       12, ink[["secondary"]], face = "italic")
   pill("No learned parameters", (X[3] + xr) / 2, 1.17, 2.7, 0.38, size = 12.5)
   # transformer analogy strip spanning both bands
