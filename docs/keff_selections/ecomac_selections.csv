@@ -1,0 +1,12 @@
+"dataset","variant","criterion","param_name","param_value","t_star","t_q25","t_q75","t_min","t_max","param_split_min","param_split_max","n_splits","t_secondary","quick"
+"ecomac","K3","crit_A","keff",3,2,2,2,2,2,NA,NA,20,9,0
+"ecomac","K5","crit_A","keff",5,2,2,2,2,2,NA,NA,20,9,0
+"ecomac","K10","crit_A","keff",10,8,7,8,6,9,NA,NA,20,9,0
+"ecomac","K25","crit_A","keff",25,7,7,7,6,8,NA,NA,20,9,0
+"ecomac","MH","crit_A","keff_heads",NA,4,4,4,3,4,NA,NA,20,9,0
+"ecomac","O1","crit_A","tau",0.809428242284259,3,3,3,2,4,NA,NA,20,9,0
+"ecomac","O1t","crit_A","tau",4,5,5,5,4,6,4,4,20,9,0
+"ecomac","O2","crit_A","keff_per_gene",NA,2,2,2,2,2,NA,NA,20,9,0
+"ecomac","O2e","crit_A","keff_per_gene",NA,7,6.75,7,6,8,NA,NA,20,9,0
+"ecomac","O3A","crit_A","keff",40,6,5,6,5,6,40,40,20,9,0
+"ecomac","O3B","crit_B","keff",40,4,4,4,3,4,40,40,20,9,0
