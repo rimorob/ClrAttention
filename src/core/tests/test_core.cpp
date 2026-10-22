@@ -1,5 +1,6 @@
 // test_core.cpp — standalone verification of the pure C++ core (no R needed).
 // Compile: g++ -std=c++17 -O2 -I.. test_core.cpp ../clr_core.cpp -o test_core
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <random>
@@ -62,6 +63,34 @@ int main() {
     const double direct = clr_core::mi_pair(w0.data(), w1.data(), h0, h1, E, nb, nb);
     CHECK(std::fabs(direct - mi[0 * G + 1]) < 1e-12,
           "mi_pair seam disagrees with mi_matrix driver");
+  }
+
+  // --- sparse kernel is BIT-IDENTICAL to the dense reference kernel ---
+  {
+    std::uniform_int_distribution<int> ub(3, 40);
+    std::vector<double> scratch(40 * 40);
+    int mismatches = 0;
+    for (int order = 2; order <= 3; ++order) {
+      for (int rep = 0; rep < 40; ++rep) {
+        const int nbx = ub(rng), nby = ub(rng);
+        const std::size_t gx = static_cast<std::size_t>(rep) % G;
+        const std::size_t gy = (gx + 1 + static_cast<std::size_t>(rep) % (G - 1)) % G;
+        std::vector<double> wx(nbx * E), wy(nby * E);
+        clr_core::gene_weights(data.data() + gx * E, E, order, nbx, wx.data());
+        clr_core::gene_weights(data.data() + gy * E, E, order, nby, wy.data());
+        const double hx = clr_core::marginal_entropy(wx.data(), E, nbx);
+        const double hy = clr_core::marginal_entropy(wy.data(), E, nby);
+        const double dense = clr_core::mi_pair(wx.data(), wy.data(), hx, hy, E, nbx, nby);
+        const auto sx = clr_core::sparsify_weights(wx.data(), E, nbx, order);
+        const auto sy = clr_core::sparsify_weights(wy.data(), E, nby, order);
+        const double sparse = clr_core::mi_pair_sparse(sx, sy, hx, hy, E, scratch.data());
+        // Bit-identical at default flags (same per-cell summation order);
+        // aggressive FP contraction (-ffp-contract=fast/-march=native) can
+        // introduce ~1e-15 differences, hence the tolerance.
+        if (std::fabs(dense - sparse) > 1e-12) ++mismatches;
+      }
+    }
+    CHECK(mismatches == 0, "sparse MI kernel not bit-identical to dense kernel");
   }
 
   // --- adaptive bins: different per-gene counts still work ---
@@ -136,6 +165,87 @@ int main() {
         if (!((i < 2 && j < 2) || (i >= 2 && i < 4 && j >= 2 && j < 4)))
           if (se[i * G + j] > top_noise) top_noise = se[i * G + j];
     CHECK(top_corr > top_noise, "CLR did not rank correlated pairs above noise");
+  }
+
+  // --- packed (tiled) MI -> CLR: equal to the dense path -------------------
+  {
+    const std::size_t PG = 300, PE = 120;
+    std::vector<double> pd(PG * PE);
+    for (std::size_t e = 0; e < PE; ++e) {
+      double f[5];
+      for (int q = 0; q < 5; ++q) f[q] = gauss(rng);
+      for (std::size_t g = 0; g < PG; ++g)
+        pd[g * PE + e] = f[g % 5] * ((g % 7) < 3 ? 1.0 : 0.3) + gauss(rng);
+    }
+    std::vector<int> pb(PG, 7);
+    std::vector<double> dmi(PG * PG), dclr(PG * PG);
+    clr_core::mi_matrix(pd.data(), PG, PE, pb.data(), 3, dmi.data(), 4);
+    clr_core::clr_calibrate(dmi.data(), PG, clr_core::Combine::STOUFFER, dclr.data());
+
+    // bands: cover 0..n, increasing, roughly equal area
+    const auto band = clr_core::equal_area_bands(PG, 16);
+    CHECK(band.front() == 0 && band.back() == PG, "bands do not cover all rows");
+    std::size_t maxa = 0, mina = clr_core::packed_size(PG);
+    for (std::size_t b = 0; b + 1 < band.size(); ++b) {
+      CHECK(band[b] < band[b + 1], "bands not strictly increasing");
+      std::size_t area = clr_core::packed_offset(band[b + 1], PG) - clr_core::packed_offset(band[b], PG);
+      maxa = std::max(maxa, area); mina = std::min(mina, area);
+    }
+    CHECK(maxa < 2 * mina + PG, "bands badly unbalanced");
+
+    // double: bit-identical MI and CLR
+    std::vector<double> pk(clr_core::packed_size(PG));
+    clr_core::mi_packed<double>(pd.data(), PG, PE, pb.data(), 3, pk.data(), 4);
+    bool same_mi = true;
+    for (std::size_t i = 0; i < PG; ++i)
+      for (std::size_t j = i + 1; j < PG; ++j)
+        if (pk[clr_core::packed_index(i, j, PG)] != dmi[i * PG + j]) same_mi = false;
+    CHECK(same_mi, "packed MI (double) differs from mi_matrix");
+    clr_core::clr_calibrate_packed<double>(pk.data(), PG, clr_core::Combine::STOUFFER);
+    std::vector<double> back(PG * PG);
+    clr_core::packed_to_dense<double>(pk.data(), PG, back.data());
+    bool same_clr = true;
+    for (std::size_t q = 0; q < PG * PG; ++q) if (back[q] != dclr[q]) same_clr = false;
+    CHECK(same_clr, "packed CLR (double) is not bit-identical to clr_calibrate");
+
+    // float: close
+    std::vector<float> pf(clr_core::packed_size(PG));
+    clr_core::mi_packed<float>(pd.data(), PG, PE, pb.data(), 3, pf.data(), 4);
+    clr_core::clr_calibrate_packed<float>(pf.data(), PG, clr_core::Combine::STOUFFER);
+    double maxd = 0.0;
+    for (std::size_t i = 0; i < PG; ++i)
+      for (std::size_t j = i + 1; j < PG; ++j)
+        maxd = std::max(maxd, std::fabs(static_cast<double>(pf[clr_core::packed_index(i, j, PG)]) - dclr[i * PG + j]));
+    CHECK(maxd < 1e-4, "packed CLR (float) too far from double");
+
+    // top-k against brute force on the dense scores (ties: lower index first)
+    const std::size_t K = 20;
+    std::vector<int> ti(PG * K); std::vector<double> tv(PG * K);
+    clr_core::packed_topk<double>(pk.data(), PG, K, ti.data(), tv.data());
+    bool topk_ok = true;
+    for (std::size_t i = 0; i < PG; ++i) {
+      std::vector<std::pair<double, int>> c;
+      for (std::size_t j = 0; j < PG; ++j)
+        if (j != i && dclr[i * PG + j] > 0) c.emplace_back(dclr[i * PG + j], static_cast<int>(j));
+      std::stable_sort(c.begin(), c.end(), [](const std::pair<double, int> &p, const std::pair<double, int> &q) { return p.first > q.first; });
+      for (std::size_t r = 0; r < K; ++r) {
+        const int want = r < c.size() ? c[r].second : -1;
+        if (ti[i * K + r] != want) topk_ok = false;
+      }
+    }
+    CHECK(topk_ok, "packed_topk disagrees with brute force");
+
+    // block
+    const std::size_t idx[4] = {7, 3, 150, 299};
+    std::vector<double> blk(16);
+    clr_core::packed_block<double>(pk.data(), PG, idx, 4, blk.data());
+    bool blk_ok = true;
+    for (int a = 0; a < 4; ++a)
+      for (int b = 0; b < 4; ++b)
+        if (blk[a * 4 + b] != (a == b ? 0.0 : dclr[idx[a] * PG + idx[b]])) blk_ok = false;
+    CHECK(blk_ok, "packed_block disagrees with dense");
+    std::printf("packed path: MI identical %d, CLR identical %d, float max |diff| %.2e\n",
+                static_cast<int>(same_mi), static_cast<int>(same_clr), maxd);
   }
 
   if (failures == 0) {

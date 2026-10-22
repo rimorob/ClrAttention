@@ -30,3 +30,43 @@ test_that("bins_for_genes handles rules and integers", {
   expect_error(bins_for_genes(d, bins = 1), ">= 2")
   expect_error(bins_for_genes(d, bins = "nope"), "match.arg|should be one of")
 })
+
+test_that("per-gene bin vectors pass through and shuffles reuse observed bins", {
+  set.seed(3)
+  X <- rbind(rnorm(200), rt(200, 3), runif(200), rexp(200))
+  b <- bins_for_genes(X, "fd")
+  expect_identical(bins_for_genes(X, b), b)
+  expect_error(bins_for_genes(X, c(10L, 1L, 10L, 10L)), ">= 2")
+  fit <- ClrAttention$new(X)$estimate_mi(bins = "fd", transform = "none",
+                                         threads = 1)
+  expect_identical(fit$params$mi$bins_used, b)
+  expect_equal(bspline_mi(X, bins = b, transform = "none", threads = 1),
+               fit$mi)
+  # rank transform: bins are fitted on the ranks, i.e. uniform
+  fr <- ClrAttention$new(X)$estimate_mi(bins = "fd", transform = "rank",
+                                        threads = 1)
+  expect_identical(fr$params$mi$bins_used,
+                   bins_for_genes(t(apply(X, 1, rank)), "fd"))
+})
+
+test_that("median_* rules give one common count equal to the per-gene median", {
+  set.seed(4)
+  X <- rbind(matrix(rnorm(10 * 300), 10), matrix(rt(10 * 300, 3), 10))
+  per <- bins_for_genes(X, "scott")
+  b <- bins_for_genes(X, "median_scott")
+  expect_length(unique(b), 1L)
+  expect_equal(b[1], as.integer(round(median(per))))
+  fit <- ClrAttention$new(X)$estimate_mi(bins = "median_fd", transform = "none",
+                                         threads = 1)
+  expect_length(unique(fit$params$mi$bins_used), 1L)
+})
+
+test_that("2-D-aware bin rules: hg depends only on N; scott2d uses N^(-1/4)", {
+  set.seed(5)
+  X <- matrix(rnorm(20 * 907), 20)
+  expect_equal(unique(bins_for_genes(X, "hg")), 9L)
+  expect_equal(unique(bins_for_genes(X[, 1:466], "hg")), 7L)
+  b2 <- unique(bins_for_genes(X, "median_scott2d"))
+  expect_length(b2, 1L)
+  expect_lt(b2, unique(bins_for_genes(X, "median_scott")))
+})

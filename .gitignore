@@ -11,3 +11,15 @@ src/**/*.o
 .Rproj.user/
 *~
 .DS_Store
+data/
+results/
+tools/setup_mac.log
+tools/.Makevars.generated
+results_install.log
+jobs/
+data
+jobs_pc/
+runner_pc.out
+tools/setup_linux.log
+docs/status/
+jobs_pc2/

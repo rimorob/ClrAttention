@@ -14,7 +14,7 @@ make_toy <- function() {
 
 test_that("bspline_mi returns a valid symmetric MI matrix", {
   d <- make_toy()
-  mi <- bspline_mi(d, bins = 10, spline_order = 3)
+  mi <- bspline_mi(d, bins = 10, spline_order = 3, transform = "none")
   expect_true(is.matrix(mi) && nrow(mi) == 8 && ncol(mi) == 8)
   expect_equal(mi, t(mi), tolerance = 1e-12)
   expect_true(all(mi >= -1e-6))

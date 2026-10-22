@@ -1,0 +1,8 @@
+095_ssem_lasso	240
+0876b_rescore_m3d	45
+0876c_rescore_ecomac	60
+0878_genie3_k562ess	900
+0879_genie3_k562ess_truthgenes	420
+0880_macro_aupr	15
+090b_beeline_boot_ctx5000	300
+100_chips_bootstrap_fdr	600

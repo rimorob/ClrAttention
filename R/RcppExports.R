@@ -9,3 +9,31 @@ cpp_clr_calibrate <- function(mi, combine) {
     .Call(`_clr_cpp_clr_calibrate`, mi, combine)
 }
 
+cpp_openmp_info <- function() {
+    .Call(`_clr_cpp_openmp_info`)
+}
+
+cpp_weights_at <- function(v, xmin, xmax, spline_order, num_bins) {
+    .Call(`_clr_cpp_weights_at`, v, xmin, xmax, spline_order, num_bins)
+}
+
+cpp_clr_packed <- function(data, bins_per_var, spline_order, combine, n_threads) {
+    .Call(`_clr_cpp_clr_packed`, data, bins_per_var, spline_order, combine, n_threads)
+}
+
+cpp_packed_dense <- function(ptr) {
+    .Call(`_clr_cpp_packed_dense`, ptr)
+}
+
+cpp_packed_block <- function(ptr, idx) {
+    .Call(`_clr_cpp_packed_block`, ptr, idx)
+}
+
+cpp_packed_topk <- function(ptr, k) {
+    .Call(`_clr_cpp_packed_topk`, ptr, k)
+}
+
+cpp_clr_packed_double_dense <- function(data, bins_per_var, spline_order, combine, n_threads) {
+    .Call(`_clr_cpp_clr_packed_double_dense`, data, bins_per_var, spline_order, combine, n_threads)
+}
+

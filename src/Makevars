@@ -6,4 +6,4 @@ PKG_CPPFLAGS = -I.
 # via SHLIB_OPENMP_CXXFLAGS on supported platforms.
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS)
-OBJECTS = rcpp_bindings.o RcppExports.o core/clr_core.o
+OBJECTS = rcpp_bindings.o RcppExports.o core/clr_core.o core/clr_packed.o

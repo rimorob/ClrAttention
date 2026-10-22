@@ -36,10 +36,107 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cpp_openmp_info
+Rcpp::IntegerVector cpp_openmp_info();
+RcppExport SEXP _clr_cpp_openmp_info() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(cpp_openmp_info());
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_weights_at
+Rcpp::NumericMatrix cpp_weights_at(Rcpp::NumericVector v, double xmin, double xmax, int spline_order, int num_bins);
+RcppExport SEXP _clr_cpp_weights_at(SEXP vSEXP, SEXP xminSEXP, SEXP xmaxSEXP, SEXP spline_orderSEXP, SEXP num_binsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type xmin(xminSEXP);
+    Rcpp::traits::input_parameter< double >::type xmax(xmaxSEXP);
+    Rcpp::traits::input_parameter< int >::type spline_order(spline_orderSEXP);
+    Rcpp::traits::input_parameter< int >::type num_bins(num_binsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_weights_at(v, xmin, xmax, spline_order, num_bins));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_clr_packed
+SEXP cpp_clr_packed(Rcpp::NumericMatrix data, Rcpp::IntegerVector bins_per_var, int spline_order, int combine, int n_threads);
+RcppExport SEXP _clr_cpp_clr_packed(SEXP dataSEXP, SEXP bins_per_varSEXP, SEXP spline_orderSEXP, SEXP combineSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type bins_per_var(bins_per_varSEXP);
+    Rcpp::traits::input_parameter< int >::type spline_order(spline_orderSEXP);
+    Rcpp::traits::input_parameter< int >::type combine(combineSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_clr_packed(data, bins_per_var, spline_order, combine, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_packed_dense
+Rcpp::NumericMatrix cpp_packed_dense(SEXP ptr);
+RcppExport SEXP _clr_cpp_packed_dense(SEXP ptrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_packed_dense(ptr));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_packed_block
+Rcpp::NumericMatrix cpp_packed_block(SEXP ptr, Rcpp::IntegerVector idx);
+RcppExport SEXP _clr_cpp_packed_block(SEXP ptrSEXP, SEXP idxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type idx(idxSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_packed_block(ptr, idx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_packed_topk
+Rcpp::List cpp_packed_topk(SEXP ptr, int k);
+RcppExport SEXP _clr_cpp_packed_topk(SEXP ptrSEXP, SEXP kSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type ptr(ptrSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_packed_topk(ptr, k));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cpp_clr_packed_double_dense
+Rcpp::NumericMatrix cpp_clr_packed_double_dense(Rcpp::NumericMatrix data, Rcpp::IntegerVector bins_per_var, int spline_order, int combine, int n_threads);
+RcppExport SEXP _clr_cpp_clr_packed_double_dense(SEXP dataSEXP, SEXP bins_per_varSEXP, SEXP spline_orderSEXP, SEXP combineSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type bins_per_var(bins_per_varSEXP);
+    Rcpp::traits::input_parameter< int >::type spline_order(spline_orderSEXP);
+    Rcpp::traits::input_parameter< int >::type combine(combineSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cpp_clr_packed_double_dense(data, bins_per_var, spline_order, combine, n_threads));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_clr_cpp_mi_matrix", (DL_FUNC) &_clr_cpp_mi_matrix, 4},
     {"_clr_cpp_clr_calibrate", (DL_FUNC) &_clr_cpp_clr_calibrate, 2},
+    {"_clr_cpp_openmp_info", (DL_FUNC) &_clr_cpp_openmp_info, 0},
+    {"_clr_cpp_weights_at", (DL_FUNC) &_clr_cpp_weights_at, 5},
+    {"_clr_cpp_clr_packed", (DL_FUNC) &_clr_cpp_clr_packed, 5},
+    {"_clr_cpp_packed_dense", (DL_FUNC) &_clr_cpp_packed_dense, 1},
+    {"_clr_cpp_packed_block", (DL_FUNC) &_clr_cpp_packed_block, 2},
+    {"_clr_cpp_packed_topk", (DL_FUNC) &_clr_cpp_packed_topk, 2},
+    {"_clr_cpp_clr_packed_double_dense", (DL_FUNC) &_clr_cpp_clr_packed_double_dense, 5},
     {NULL, NULL, 0}
 };
 

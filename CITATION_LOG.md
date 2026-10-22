@@ -237,3 +237,385 @@ to "how many modes are signal before the representation is noise," which is
 what the depth-diagnosis statistic must operationalize to stop diffusion
 before oversmoothing. Confirmed with the user 2026-09-22.
 *Refs: `donohotanner2009`, `gavishdonoho2014`, `horn1965`.*
+
+---
+
+# Accuracy review, 2026-09-23
+
+The entries below record the decisions taken in the accuracy review that
+preceded the M3D x RegulonDB run. Each was motivated by a defect that was
+confirmed empirically. The scripts are in `validation/` and the regression
+tests are in `tests/testthat/`. Where an entry changes an earlier decision,
+the earlier entry is left as written and the change is recorded here.
+
+## D17. Rank (empirical-copula) transform before MI; FD bins computed on the ranks [joint]
+
+Each gene is replaced by its within-gene ranks before B-spline MI
+estimation. Mutual information is invariant to strictly monotone
+transformations of either variable, so the transform leaves the quantity
+being estimated unchanged and changes only the estimator. It also gives
+every gene the same (uniform) marginal, which removes a confirmed bias
+pathway in the D4 design. Freedman–Diaconis on raw values gives
+heavy-tailed genes many bins: the median was 23 bins for Gaussian genes and
+50, the clamp, for t3 and lognormal genes. The finite-sample upward bias of
+MI grows with bins_i × bins_j: at N = 907 the null MI was 0.012 bits with
+10 bins, 0.09 with 25 and 0.32 with 50. That bias survived CLR calibration
+(Spearman correlation between null CLR score and bins_i × bins_j was 0.32–0.51
+across gene mixes), so
+heavy-tailed genes became false hubs. Freedman–Diaconis applied to the ranks
+gives ⌈N^(1/3)⌉-type counts that are identical across genes (10 at N = 907).
+On a synthetic with M3D-like N = 907, with monotone heavy-tail distortions,
+the edge AUPR was 0.24 for raw values with FD bins, 0.57 for raw values with
+10 bins (2007 parity) and 0.955 for ranks with FD bins. An independent
+QC replication got 0.31, 0.58 and 0.94. Caveat: the synthetic uses
+monotone distortions, which favour the rank transform by construction. The
+real-data comparison of the four configurations is part of the M3D run. The
+Gaussian-copula MI literature makes the same argument: separate the
+marginals from the dependence. Historical parity remains available as
+`transform = "none", bins = 10`. **Default changed with user approval.**
+*Ref: `ince2017`.*
+
+## D18. Benjamini–Hochberg is the default threshold; HC is permutation-calibrated [assistant, user-delegated]
+
+The earlier HC implementation (D9) selected noise. On 60 independent genes
+it kept 11–32% of pairs, and the sqrt(2 log log M) guard fired in only 1 of
+6 runs, because that bound is the typical size of the null HC*, not a
+significance cutoff. The rewrite makes four changes:
+
+- HC is evaluated at the edges of the histogram bins, so tied scores are
+  never split.
+- The search is restricted to i ≤ max(α0·M, 10), with α0 = 0.1.
+- HC* is gated against the (1 − level) quantile of leave-one-out HC* values
+  computed from the B permutation replicates. Each replicate is scored
+  against the pool of the other B − 1 replicates.
+- The HC+ floor p ≥ 1/M is dropped: with permutation p-values it removes
+  exactly the strongest edges, and the calibration already absorbs the
+  extreme-p blow-up the floor guarded against.
+
+On 20 pure-noise runs, calibrated HC selected any edge 0–10% of the time,
+consistent with the nominal 5%. BH at q = 0.05 found slightly more true
+edges at a similar false-positive count, so BH is the default. The user
+delegated this choice. Donoho & Jin (2008) is the right citation for
+using HC as a *threshold*; Donoho & Jin (2004) covers detection.
+*Refs: `donohojin2008`, `benjaminihochberg1995`.*
+
+## D19. The permutation null stays on CLR scores; the MI null is an option only [user]
+
+For one iteration the null was moved to raw MI, because CLR scores are not
+exactly comparable between observed and permuted data. In a 24-gene toy
+with 6–8-gene modules, a gene's own module inflated its row background, so
+true-edge CLR scores (median 2.3) fell below the null per-replicate maximum
+(4.4) and nothing was selected. The user pointed out that the selection has
+to answer "exceptional relative to each gene's background", which is
+CLR's contribution. With a global confounder that answer is the only usable
+one. In a synthetic with a global factor (loading 0.35), BH on the MI null
+kept 45% of pairs at precision 0.03, while BH on the CLR null kept 1.2% at
+precision 0.99. That is seed 3, which is enshrined as a test. An
+independent QC replication with other seeds and designs found the same
+direction at a smaller magnitude: the MI null kept 7–18% of pairs at
+precision 0.07–0.19, and the CLR null kept 0.8–0.9% at precision
+0.94–0.98. The CLR null is the default. The small-G compression is
+documented as a limitation of the regime and is not treated as a reason to
+switch statistics. If the permutation null misbehaves at compendium scale,
+the principled refinement is an empirical null fitted to the central bulk of
+the observed CLR scores, which is not implemented. *Ref: `efron2004`.*
+
+## D20. The permutation replicates reuse the observed per-gene bin counts [user]
+
+`estimate_mi()` records the bin vector it actually used, and every
+permutation replicate reuses it verbatim, together with the spline order
+and the transform. Because FD depends only on the IQR and the range, which a
+permutation preserves, the replicates already reproduced the same counts.
+The change makes that guarantee explicit and independent of the binning
+rule. It does not fix D17's bias on its own: pooling nulls across pairs
+with different bins_i × bins_j still mixes different null distributions.
+
+## D21. Correctness fixes with no methodological choice [assistant]
+
+- **Constant genes.** A constant gene divided by zero in `x_to_z`. MI then
+  became H(Y) against every other gene, so the gene became the top hub.
+  Constant genes are now rejected in both R and the C++ core.
+- **Isolated genes.** Genes with no selected edge now get a self-loop.
+  Previously their row of P was (1 − α)e_i, so they decayed as (1 − α)^t,
+  and tau = Inf zeroed the whole embedding.
+- **Standardization.** `diffuse()` row-standardizes E^(0) by default, so
+  diffusion mixes expression shapes rather than baseline levels.
+- **Histogram p-values.** These now count the null values that share the
+  observed score's bin. The earlier code was anti-conservative by up to one
+  bin.
+- **BH ties.** The cutoff returns the smallest score in the whole rejected
+  set, so tied histogram p-values no longer drop members of the last
+  rejected block. The QC agent found this.
+- **Calibration guard.** `select_threshold(statistic = "clr")` refuses KDE
+  and Rayleigh calibrations. KDE scores are ≤ 0 and put every null value in
+  one bin.
+- **Sparse kernel.** Each sample has at most `spline_order` nonzero
+  B-spline weights. The joint histogram now accumulates only those, in the
+  same sample order, so the result is bit-identical to the dense kernel
+  (max |Δ| = 0 on 200 genes) and 5–20× faster. Memory drops from
+  O(G·N·bins) to O(G·N·order).
+
+## Sign blindness of diffusion (the missing W_V): implemented 2026-09-23 as `diffuse(values = ...)`, see D24
+
+MI is sign-agnostic, but diffusion averages raw profiles. A repressor and
+its target therefore partially cancel: after five steps in the synthetic
+test, g7 (−1.5·tfb) correlated +0.78 with tfb. Transformer attention avoids
+this through a learned value projection W_V. The continuous analogue
+proposed here is value_{j→i} = E[x_i | x_j], read off the B-spline joint
+histogram that MI already computes. It would handle negative and
+non-monotone links (such as the quadratic edge) without needing "meanings".
+Not implemented; flagged for a design decision.
+
+## D22. The default MI is back on raw values, with one common bin count taken as the median of per-gene Scott counts [user]
+
+D17 is **reversed for the default**. The rank (copula) transform stays
+available as `transform = "rank"`.
+
+**The genome-wide result that decided it.** On the full M3D compendium
+(4,297 genes × 907 arrays), scored by co-membership AUPR on the
+strong/confirmed RegulonDB regulator-agnostic benchmark (base rate 0.094),
+CLR on raw values beat CLR on ranks:
+
+| Setting | CLR AUPR |
+|---|---|
+| Raw values, 10 common bins | 0.134 |
+| Raw values, per-gene FD bins | 0.129 |
+| Ranks, 10 bins | 0.127 |
+
+This matches the user's long-standing experience that MI on raw values
+outperforms the copula transform on average. D17's synthetic evidence was
+built from monotone distortions, which favour the rank transform by
+construction, and should not have decided a default.
+
+**What D17 got right, and what is kept.** The real defect was that
+per-gene bin counts differed between genes. The fix kept from D17 is a
+common bin count for every gene. The historical rule, as the user
+reports it, is to compute each gene's optimal count and use the median
+for all genes, with spline order 3. `bins = "median_scott"` is the
+default. Scott's constant of 3.49 is the same as Wand's zero-stage rule,
+which the recovered sources implemented as `calcNumBins`.
+
+**Bin counts on M3D.** The median rule gives 21 bins at N = 907 with Scott
+and 33 with FD. The historical "6–10 bins" corresponds to the smaller N of
+2007-era datasets. Whether 21 bins beats a fixed 10 at N = 907 is measured
+by the `none_median_scott` configuration of the M3D run.
+
+## D23. The bin count is chosen for the 2-D (joint) histogram, and `hg` is the default [joint]
+
+The user objected to 21–33 bins per axis at N = 907. At 33 bins the joint
+table has 1,089 cells for 907 points, fewer than one point per cell. The
+bin budget belongs to the joint histogram, because MI's variance and bias
+come from H(X,Y). The user recalled that Daub et al. used about 6 bins.
+
+Two rules for the joint histogram are implemented:
+
+- **Scott's multivariate normal-reference rule** (`median_scott2d`).
+  For d = 2, h = 3.5·sd·N^(−1/(d+2)) = 3.5·sd·N^(−1/4). The count comes out
+  at 12 at N = 907 and 9 at N = 466, as the median over M3D genes.
+- **Hacine-Gharbi et al. (2012)'s low-bias rule** (`hg`). This rule is
+  derived specifically for histogram MI. It is evaluated at ρ = 0 so that
+  every pair shares one discretization, and it is exact for the null every
+  pair is tested against: B = round(√((1 + √(1 + 24N))/2)). That gives 9
+  bins at N = 907 and 7 at N = 466.
+
+The formula is quoted from memory of the paper and of López de Prado's
+treatment of it. It must be checked against the paper before publication.
+
+**Why this does not change the bias argument of D17 and D22.** B-spline
+order 3 spreads each point over 3 × 3 cells, which lowers variance compared
+with a hard histogram. The rules are therefore, if anything, conservative
+for this estimator.
+
+**Default.** `hg` is now the default. It is also the pre-registered
+primary configuration of the M3D run, so the choice is fixed before seeing
+that run's results. Scott-2d, the historical median-Scott rule and fixed 6,
+8, 10, 12 and 16 bins are reported as sensitivity analyses. They are not
+used to pick the rule after the fact.
+*Refs: `hacinegharbi2012`, `scott1979`, `daub2004`.*
+
+## D24. Value transforms for diffusion: signed and conditional-expectation [joint]
+
+This implements the W_V proposal. `diffuse()` now takes one of three
+values:
+
+- `values = "raw"` passes E_j, the previous behaviour.
+- `values = "signed"` passes sign(cor_ij)·E_j.
+- `values = "conditional"` passes f_ij(E_j), where
+  f_ij(u) = E[z_i | z_j = u].
+
+f_ij is the nonparametric regression of gene i on gene j. It is read off
+the same B-spline basis the MI estimator uses: gene j's bin count and
+spline order, with `weights_at()` exported from the C++ core. f_ij is
+fitted once on the data and re-applied to the diffused profiles at every
+step. Values outside z_j's range are clamped to it. The messages are
+pair-specific, which makes this edge-conditioned message passing. No
+parameters are learned.
+
+**Synthetic check (12 genes, top-3 operator, 10 steps).** The table gives
+the correlation of each diffused target with its true driver.
+
+| Target | raw | signed | conditional | t = 0 |
+|---|---|---|---|---|
+| Repressed target (g7 vs tfb) | +0.78 (flipped) | −0.95 | −0.97 | −0.83 |
+| Quadratic target (g2 vs tfa²) | 0.26 | 0.25 | 0.51 | 0.90 |
+
+**M3D, 1,500-gene quick run.** Only 2 of 3,032 selected edges are
+negatively correlated. Signed diffusion is therefore identical to raw
+diffusion to 4 decimals, and conditional diffusion is slightly below raw
+(co-membership AUPR on strong/confirmed evidence 0.192 vs 0.196 at t = 8).
+Sign cancellation is not what limits diffusion on this benchmark with this
+operator. Results on the full compendium are pending.
+
+## D25. Stouffer is the default bilateral combination, and the default run uses the 466-experiment compendium [user]
+
+The default changes from `combine = "euclidean"` to `"stouffer"` on
+principle. With independent standard-normal directed z-scores, Stouffer's
+null is standard normal; the Euclidean norm's null is Rayleigh-type. The
+2007 Euclidean combination remains available (`combine = "euclidean"`, and
+the `parity2007` and `none_hg_eu` run configurations).
+
+The change has almost no empirical effect on M3D (466 experiments, default
+MI settings):
+
+- Across pairs with any positive score, the Spearman correlation between
+  the two combinations' scores is 0.993.
+- The two top-5,000 lists share 4,864 pairs.
+- The share of negatively correlated pairs among the top 100,000 is 5.9%
+  under Stouffer and 6.3% under Euclidean.
+- On the full 907-array data, co-membership AUPR differs by 0.0003.
+
+The scarcity of anti-correlated edges comes from the data, not from the
+combination. MI is sign-blind, and both combinations use clipped,
+non-negative z-scores.
+
+`tools/run_m3d.sh` now runs only the 466 replicate-averaged experiments by
+default (`SET=chips` runs the 907-array set). The 907-array set counts
+technical replicates as independent samples, which inflates N: it pushes
+the bin rule from 7 to 9 bins and overstates evidence for condition-specific
+genes. Both sets cover the same experiments and all 4,297 genes. The
+optional MI-null comparison (`--mi-null`) is no longer part of the default
+run.
+
+## D26. A pre-declared grid of denser attention operators [joint]
+
+The FDR-only operator (BH q = 0.05) left 62% of genes isolated on the
+907-array set, so it could not test diffusion fairly. The following
+operators are fixed in advance, and every one is reported. None is
+selected on RegulonDB.
+
+| Operator | Construction |
+|---|---|
+| `fdr05` | The current operator: CLR edges passing BH at q = 0.05. |
+| `fdr20` | Same test at q = 0.2. `reselect()` reuses the stored permutation null, so no new permutations are run. |
+| `fdr05_top5`, `fdr05_top10` | `fdr05` plus each gene's own top-k CLR neighbours. The graph is **directed**: row i attends to the k largest entries of S[i, ]. The user chose directed attention because CLR is usually made directional by designating regulators. |
+| `soft10` | Softmax attention over each row's top-50 CLR scores. The per-row temperature is set so that exp(entropy) = 10 effective neighbours. |
+| `pearson_top5`, `pearson_top10` | Control: a directed top-k graph by |Pearson| with |r| as weights. It separates "any smoothing helps" from "MI/CLR attention helps". |
+
+Each operator is run through the full depth sweep with raw, signed and
+conditional values. The readouts are |cor| of the diffused profiles and
+the attention mass (P^t + P^t')/2. `operators.csv` reports each operator's
+density and its share of negatively correlated edges. Interpretation
+waits for bootstrap confidence intervals.
+
+## D27. Results: confidence intervals and depth chosen on held-out labs (466-experiment set, 2026-09-23)
+
+Produced by `analysis/followup.R`; outputs are in `results/avg_followup/`.
+
+**How depth was chosen.** The 466 experiments were split into two halves
+by experimenter (39 labs, 233 + 233 experiments). The operator was built
+on one half and scored by how well attention mass predicts the other
+half's top 1% of CLR pairs. RegulonDB was not used. The search was a
+geometric scan (t = 1, 2, 4, …, 128) followed by golden-section
+refinement. Every operator showed an interior optimum, and the two
+directions agreed:
+
+| Operator | t* (direction 1, direction 2) | Geometric mean |
+|---|---|---|
+| soft10 | 10, 7 | 8 |
+| fdr05_top10 | 8, 6 | 7 |
+| pearson_top10 (control) | 7, 5 | 6 |
+
+**Co-membership AUPR, strong/confirmed regulons.** Base rate 0.094.
+Intervals come from a paired delete-half jackknife over genes (100
+half-samples). Differences are against single-step HG-Stouffer CLR, which
+scores 0.136.
+
+| Method | Difference vs CLR [95% CI] |
+|---|---|
+| \|Pearson\| | −0.020 [−0.024, −0.016] |
+| Raw MI | −0.021 [−0.026, −0.016] |
+| 2007-parity CLR | −0.002 [−0.003, −0.001] |
+| **soft10 at t* = 8** | **+0.021 [+0.015, +0.027]** (0.157; +15% relative) |
+| fdr05_top10 at t* = 7 | +0.013 [+0.007, +0.018] |
+| pearson_top10 at t* = 6 | −0.001 [−0.005, +0.003] |
+
+With all evidence levels (base rate 0.120), soft10 at t* gains +0.007
+[+0.004, +0.011], fdr05_top10 at t* is at 0.000, and pearson_top10 at t*
+loses −0.012.
+
+**Per-regulon coherence, median AUROC.** Intervals come from a paired
+bootstrap over regulons (2000 resamples). CLR scores 0.597 on
+strong/confirmed regulons (n = 144). soft10 at t* = 8 scores 0.632:
++0.031 [+0.018, +0.046], with 69% of regulons improved (Wilcoxon
+p = 4e−4). The Pearson control at t* is lower than CLR: −0.014
+[−0.025, −0.003]. fdr05_top10 at t* is not different from CLR (+0.003).
+The all-evidence results are the same: soft10 gains +0.026
+[+0.015, +0.033] across 181 regulons.
+
+**Beyond the held-out depth.** Pooled AUPR keeps rising up to t ≈ 32
+(soft10 0.167), while regulon coherence peaks at t = 4–8 and then falls
+(0.553 at t = 128). The extra pooled gain at large t comes from the
+large, diffuse regulons, and costs the specific ones. The held-out
+criterion picks the depth where both metrics improve. That depth is the
+one to report.
+
+**Diffused-profile readout, fdr20.** The |cor| of diffused profiles gains
+at most +0.007 [+0.002, +0.011] (at t = 32, strong/confirmed evidence).
+It is not different from CLR, or is slightly worse, with all evidence.
+
+**Conclusion.**
+
+- Softmax attention over calibrated CLR scores, iterated to a depth chosen
+  on held-out labs, recovers regulons better than single-step CLR. The
+  gain is significant on both metrics and both evidence tiers.
+- The same construction on |Pearson| does not beat CLR. The gain
+  therefore depends on the CLR kernel, not on propagation alone.
+- Of the ingredients borrowed from attention, the softmax with a
+  temperature matters most: the hard-thresholded FDR+top-k operator gives
+  about half the pooled gain and no coherence gain.
+
+## D28. Parallel execution, JIT, memory release; co-first-author citation (2026-09-23)
+
+**Parallelism.**  Every resampling script now runs its independent fits with `foreach` on a `doParallel` PSOCK cluster (`analysis/parallel.R`).  The worker count is the number of physical cores minus 2 (kept free for the user), capped by RAM:  floor((0.8 × RAM − 1.5 GB) / peak GB per task).  The usable cores are divided among the workers as OpenMP threads for the MI kernel, so workers × threads never exceeds cores − 2.  PSOCK processes are used rather than forks:  forking a process whose OpenMP runtime is already running is unsafe with some runtimes, and PSOCK also runs on the Linux and Windows workstations.  The scripts covered are:
+
+- `chips_bootstrap.R`:  one task per draw, each written atomically to `draws/<draw>.csv`, so restarts skip finished draws;
+- `perturbation.R`:  all null draws and delete-P fits;
+- `beeline.R`:  one task per dataset × gene set;
+- `ClrAttention$select_threshold()`:  the permutation replicates use whatever `foreach` backend is registered (sequential when none is).
+
+**Reproducibility.**  Random draws are made in the master in the original order, so bootstrap column sets and delete-k subsets match the sequential version.  The chips bootstrap was verified bit-identical to the previous sequential script on a 400-gene test.  Permutation replicates in `select_threshold()` now each run under a seed drawn from the caller's stream, so the null is identical sequentially and in parallel.  It differs from the pre-D28 stream.  The synthetic HC unit test had asserted ≥ 4 of 5 true edges at B = 20.  Over 80 seeds that held in 37% of runs (old and new code alike), so it had been passing on a lucky stream.  It now uses B = 50 and asserts ≥ 3, which held in 40 of 40 seeds.
+
+**Byte-code JIT.**  R has compiled closures and loops at JIT level 3 by default since 3.4.  The scripts set `compiler::enableJIT(3)` explicitly in the master and in every worker, and the package declares `ByteCompile: true`.  The hot paths (MI in C++/OpenMP, and dense and sparse matrix products) are compiled code, so the JIT has little effect on run time.
+
+**Memory.**  `ClrAttention$release()` drops the data, MI, score, operator, trajectory and null matrices and runs a full `gc()`.  A private `finalize()` drops the same references when the object is collected.  That cannot free memory any earlier than R's own collection would, so the scripts call `release()` and `gc()` explicitly after each fit.  Score matrices are now scored as they are produced and then dropped, and the lazy operator is built sparse directly.  At G = 4,297 and N = 907, the measured peak RSS of one chips worker (Linux) fell from 4.7 GB to 3.2 GB.  Most of the difference came from collecting eagerly after each score matrix and from forcing glibc to return freed large blocks to the OS (`MALLOC_MMAP_THRESHOLD_`); by default glibc keeps them resident after `gc()`.  The chips script budgets 3.5 GB per worker, so the 32 GB Mac runs 6 workers and a 128 GB machine is limited by cores, not RAM.
+
+**Citation format.**  The CLR paper lists Faith and Hayete as equal contributors (PMC1764438 author notes:  "Contributed equally").  In-text citations are therefore "Faith, Hayete et al. 2007", which is the standard way to credit co-first authors.  M3D (Faith et al. 2008) has a single first author and is unchanged.
+
+**Addendum (Linux workstation, hyper-threading).**  `tools/setup_linux.sh` sets up the dual-socket Xeon (Ubuntu); it was tested end to end on Ubuntu 24.04.  The RAM left to the user is now given in GB:  `CLR_RESERVE_RAM_GB`, defaulting to max(6 GB, 15% of RAM).  The per-worker budget for the chips run is 3.3 GB, against a measured peak of 3.28 GB.  On 128 GB with 19–20 GB reserved, that allows 32 workers, more than the 26 usable physical cores.  (An earlier note put the Xeon at about 28 workers.  That figure came from budgeting 80% of RAM at 3.5 GB per worker, which was needlessly conservative.)  With `CLR_HT=1`, workers may therefore occupy hyper-threads up to the RAM limit, and any spare hyper-threads go to the MI kernel's OpenMP threads.  `tools/bench_ht.sh` measures draws per hour for 26 workers on physical cores against 32 workers with hyper-threading.  Each plan runs exactly two full rounds, and the results are checked to be identical.  The default stays at physical cores until that benchmark shows a gain.
+
+## D29. Refined BEELINE truths, graded ChIP-seq, depth diagnostic, perturbation variance control (2026-09-24)
+
+Motivated by the first BEELINE results.  There, the cell-type ChIP-seq truth labelled 30–55% of all (TF, gene) pairs as positive in five of the seven datasets, and every method scored at chance.  STRING mixes co-expression evidence, which is correlation by another name, into the truth.
+
+- **Graded ChIP-seq** (`tools/get_chipatlas.R`).  ChIP-Atlas target-gene tables give, for each TF, the MACS2 score of the strongest peak within ±1 kb of each gene's TSS, per experiment.  Experiments are matched to each BEELINE dataset by cell-type label (rules fixed in advance and listed in the script), and the average over all experiments is kept as a second source.  The metric is the Spearman correlation between the TF's row of a score matrix and its binding scores, computed within each TF, because TFs differ in antibody quality and score scale.  Methods are compared by paired Wilcoxon tests over TFs.  Binding strength is not regulation:  this measures whether a network tracks occupancy.
+- **Evidence-filtered STRING** (`analysis/beeline_truths.R`).
+  - `STRING_regulatory`:  STRING v11.0 actions with mode "expression" (transcriptional regulation), directional, TF acting, score ≥ 400.  v11.0 is the last release that published actions, and the action evidence itself includes text mining.
+  - `STRING_curated`:  STRING v12.0 edges with experimental or database channel ≥ 400.  This removes edges supported only by co-expression, text mining or genomic context, and orients them TF → gene.  It is still functional association, not regulation.
+- **Depth diagnostic.**  CLR attention is scored at t = 1, 2, 4, 8 and 16 against every truth (`diag_depths.csv`).  This is never used to choose t.
+- **Perturbation variance control.**  Gene variance is now computed without the perturbation's own experiments, because those experiments inflate their targets' variance and the all-experiment version over-corrects.  The all-experiment version is kept as `auroc_var_strat_allexp`.  Influence fits are saved (`fits.rds`, reused with `--reuse 1`), so future evaluation changes need no refitting.
+- **Compute-constrained choices** are tracked in `docs/COMPUTE_CONSTRAINTS.md`, to be reverted when the workstation is available.  Full gene context for BEELINE is deferred until then.
+
+First look (cloud smoke test, mESC and hHep TFs+500 only, not a result):
+
+- Graded ChIP correlations are near zero for every method:  median per-TF ρ is −0.003 to +0.034 with cell-type-matched experiments.
+- On `STRING_regulatory` (339–412 edges, density 0.2–0.3%), CLR's EPR is 6.1–9.7× random, against 5.1–8.8× for CLR attention.

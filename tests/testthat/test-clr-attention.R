@@ -54,8 +54,12 @@ test_that("pipeline chains and each stage populates its binding", {
 test_that("trajectory starts at the raw data", {
   d <- make_toy()
   fit <- ClrAttention$new(d)$estimate_mi(bins = 10)$calibrate()$
-    build_operator(k = 4)$diffuse(steps = 3)
+    build_operator(k = 4)$diffuse(steps = 3, standardize = FALSE)
   expect_equal(unname(fit$trajectory[[1]]), unname(d), ignore_attr = TRUE)
+  fit$diffuse(steps = 3)  # default: row-standardized start
+  E0 <- fit$trajectory[[1]]
+  expect_equal(unname(rowMeans(E0)), rep(0, nrow(d)), tolerance = 1e-12)
+  expect_equal(unname(apply(E0, 1, sd)), rep(1, nrow(d)), tolerance = 1e-12)
 })
 
 test_that("diffusion converges toward a stationary embedding on a toy", {
@@ -80,7 +84,30 @@ test_that("build_operator validates and supports tau", {
   A <- fit$operator
   expect_true(all(A[A > 0] <= 1.0 + 1e-12))  # row-stochastic: no entry exceeds 1
   rs <- rowSums(A)
-  expect_equal(unname(rs[rs > 0]), rep(1, sum(rs > 0)), tolerance = 1e-12)
+  expect_equal(unname(rs), rep(1, nrow(A)), tolerance = 1e-12)
+})
+
+test_that("isolated genes keep their profile (self-loop), tau = Inf is identity", {
+  d <- make_toy()
+  fit <- ClrAttention$new(d)$estimate_mi(bins = 10)$calibrate()$
+    build_operator(tau = Inf)
+  expect_equal(unname(fit$operator), diag(nrow(d)))
+  fit$diffuse(steps = 20, standardize = FALSE)
+  expect_equal(unname(fit$embedding), unname(d), ignore_attr = TRUE)
+})
+
+test_that("constant genes are rejected before they become MI hubs", {
+  d <- make_toy()
+  d[3, ] <- 5
+  expect_error(bspline_mi(d, bins = 10), "constant gene")
+  expect_error(ClrAttention$new(d)$estimate_mi(bins = 10), "constant gene")
+})
+
+test_that("select_threshold() refuses non-normal calibrations", {
+  fit <- ClrAttention$new(make_toy())$estimate_mi(bins = 10)$
+    calibrate(method = "kde")
+  expect_error(fit$select_threshold(B = 2, method = "fdr", statistic = "clr"),
+               "normal")
 })
 
 test_that("re-running a stage invalidates downstream stages", {
@@ -106,4 +133,55 @@ test_that("print() summarizes state", {
   expect_output(fit$print(), "ClrAttention.*10 genes x 50 samples")
   fit$estimate_mi(bins = 10)
   expect_output(fit$print(), "MI:\\s+estimated")
+})
+
+test_that("value transforms: signed and conditional keep a repressed target's sign", {
+  set.seed(7); n <- 300; tfb <- rnorm(n)
+  X <- rbind(tfb, 2 * tfb + rnorm(n), -1.5 * tfb + rnorm(n),
+             matrix(rnorm(3 * n), 3))
+  f <- ClrAttention$new(X)$estimate_mi(threads = 1)$calibrate()$
+    build_operator(k = 2, alpha = 0.5)
+  f$diffuse(steps = 10, values = "raw")
+  expect_gt(cor(f$embedding[3, ], tfb), 0)          # raw flips the repressed gene
+  for (v in c("signed", "conditional")) {
+    f$diffuse(steps = 10, values = v)
+    expect_lt(cor(f$embedding[3, ], tfb), -0.8)
+    expect_equal(f$params$diffuse$values, v)
+  }
+})
+
+test_that("weights_at reproduces the MI estimator's basis and sums to 1", {
+  set.seed(2); z <- rnorm(200)
+  W <- clr:::cpp_weights_at(z, min(z), max(z), 3L, 9L)
+  expect_equal(unname(rowSums(W)), rep(1, 200), tolerance = 1e-12)
+  W2 <- clr:::cpp_weights_at(c(-100, 100), min(z), max(z), 3L, 9L)  # clamped
+  expect_equal(W2[1, ], W[which.min(z), ])
+  expect_equal(W2[2, ], W[which.max(z), ])
+})
+
+test_that("operator variants: directed top-k union, softmax k_eff, external, reselect", {
+  set.seed(9)
+  f <- ClrAttention$new(make_toy())$estimate_mi(bins = 10, threads = 1)$calibrate()
+  S <- f$clr_scores
+  f$build_operator(tau = Inf, topk_union = 2)
+  A <- f$operator
+  expect_true(all(rowSums(A > 0 & row(A) != col(A)) <= 2))
+  # directed: row i's neighbours are its own top-2 by S[i, ]
+  i <- 1; Si <- S[i, ]; Si[i] <- -Inf
+  expect_setequal(which(A[i, ] > 0), order(Si, decreasing = TRUE)[1:2])
+  expect_true(all(abs(rowSums(A) - 1) < 1e-12))
+  f$build_operator(softmax_keff = 3, softmax_cap = 8)
+  A <- f$operator
+  ne <- apply(A, 1, function(w) { w <- w[w > 0]; exp(-sum(w * log(w))) })
+  expect_equal(unname(ne[rowSums(A > 0) > 3]), rep(3, sum(rowSums(A > 0) > 3)),
+               tolerance = 1e-6)
+  f$set_operator(abs(cor(t(make_toy()))) * (1 - diag(10)), label = "pearson")
+  expect_equal(f$params$operator$selection, "pearson")
+  expect_true(all(abs(rowSums(f$operator) - 1) < 1e-12))
+  set.seed(1)
+  f$select_threshold(B = 5, threads = 1)
+  t05 <- f$threshold
+  f$reselect(0.5)
+  expect_lte(f$threshold, t05)
+  expect_equal(f$params$threshold$q, 0.5)
 })
