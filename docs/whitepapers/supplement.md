@@ -2,7 +2,7 @@
 
 **Context-normalized attention without learning recovers gene regulatory programs**
 
-*Draft, 2026-10-14.  Numbers await an independent QC pass; [pending] marks analyses now running.  Figures are in `figures/`.*
+*Draft, updated 2026-10-22.  Results have been checked by an independent statistical review unless marked otherwise (record in `docs/paper_plan.md`); [PENDING] marks analyses that are preregistered or running.  Figures are in `figures/`.  Notes 1–8 keep their earlier numbering; Notes 9–15 are new.*
 
 ---
 
@@ -64,7 +64,7 @@ The informative feature is the excess band, which is absent in single-platform d
    - The arrays without a GEO record are the weakest group.  Pooling heterogeneous sources dilutes the signal unless the heterogeneity is modelled.
 4. **Attention helps in every configuration.**  The gain is largest on the uncorrected pool:  +0.032 AUPR and +0.048 coherence over CLR(MI), against +0.021 / +0.031 on M3D.
 
-These are single fits without intervals.  [pending: held-out depth and experiment-level bootstrap intervals on EcoMAC, and ComBat-style correction as a stronger batch model.]
+These are single fits without intervals.  ComBat correction by platform, a stronger batch model than centring, is used in Supplementary Note 7 and in the method comparison (main text, Table 2); like centring, it helps both dependence measures more than switching between them, and mutual information keeps a coherence edge after correction.  [PENDING:  held-out depth and experiment-level bootstrap intervals on EcoMAC, and an audit of arrays shared with M3D; until then EcoMAC is not an independent replication and its +0.032 is a point estimate.]
 
 ---
 
@@ -91,7 +91,9 @@ We compared dependence measures for CLR on all seven BEELINE datasets and both g
 - **Gaussian MI as a CLR input.**  It is worse than |r| itself.  The logarithm stretches each row's upper tail, so the per-gene z-scores become dominated by a few pairs.
 - **Attention on CLR-NS.**  It improves on CLR for truths that reward co-regulated target sets (transcriptional-regulation STRING:  2.17 against 1.74).  It loses on truths dominated by co-expression evidence.
 
-[pending: CLR-NS with its own held-out depth, in 5,000-gene and all-gene contexts, with nested cell-bootstrap intervals.]
+**Inference.**  The P values in Supplementary Table 2 treat the 72 combinations as independent, but they come from 7 datasets.  The inferential basis is the per-dataset blocked comparison (Supplementary Note 13):  CLR-NS improves on CLR in 7 of 7 datasets (mean log2 AUPRC ratio +0.06 on BEELINE's primary truths; exact P = 0.016, the smallest attainable with 7 blocks).  CLR-NS was chosen on these truths.
+
+**Attention and wider contexts.**  Overall, attention adds nothing over CLR-NS.  Building CLR-NS and attention on wider gene contexts (the 5,000 most variable genes, all expressed genes, or genes selected as driven by a multimodality or principal-component filter) gives no gain; one dataset drives a nominal loss.  The driven-gene filter is better than variance ranking, which drops well-expressed genes, and Pearson residuals are no better than log-normalization for single-cell co-expression.  [PENDING:  nested cell-bootstrap intervals for every single-cell statement.]
 
 Supplementary Notes 1 and 2 support a single conclusion:  the right dependence measure depends on the data.
 
@@ -160,13 +162,19 @@ Each of 1,000 cluster draws (466 experiments resampled with replacement, one rep
 
 Attention at its own depth exceeded CLR on SC co-membership AUPR in all 1,000 draws.  The per-TF AUROC column is a difference of medians across transcription factors, not a median of per-factor differences.
 
-## Supplementary Note 6 | Perturbation targets
+## Supplementary Note 6 | Perturbation targets (preliminary; the subject of separate work)
 
-Influence scores are calibrated against null removals of the same number of experiments.  Three nulls answer different questions:
+*This analysis extends the operator to a different task and is reported here for completeness.  Its results are mixed, and a full treatment, with differential CLR and single-cell Perturb-seq contrasts, is planned as separate work.*
+
+**Task.**  A stringent test of a network is whether it says something about an intervention that the measurements of the intervention do not already say.  We posed it on M3D, where the identification of perturbation targets was first benchmarked (Cosgrove et al. 2008).  For 15 groups of experiments in which a regulator was deleted, overexpressed or mutated, the targets are the regulator's RegulonDB regulon, mapped by a table fixed in advance.  Each gene is scored by the influence of the perturbation's experiments on its row of the network, that is, the root-mean-square change in the row when those k experiments are removed, z-scored against null removals of k other experiments.
+
+**A variance confound.**  Gene variance, which ignores the perturbation entirely, reaches a median AUROC of 0.646 and beats differential expression (DE) in 14 of 15 perturbations, because regulon members are more variable than other genes.  We therefore compare targets only with non-targets of similar variance:  the variance-stratified AUROC pools Mann–Whitney statistics within deciles of gene variance, computed without the perturbation's own experiments.  Under this control gene variance falls to 0.521 and DE scores 0.516, whereas attention-based influence keeps a median AUROC of 0.572 and beats DE in 12 of 15 perturbations (paired Wilcoxon P = 0.015); influence on CLR and on correlation reaches 0.543 (P = 0.15) and 0.530 (P = 0.80).  The effect is concentrated in specific regulators (HU, AppY, LexA/SOS and RyhB) and absent for the global regulators ppGpp and CRP, whose regulons are diffuse.
+
+**Nulls.**  Influence scores are calibrated against null removals of the same number of experiments.  Three nulls answer different questions:
 
 - **Random (500 draws per k):**  removals uniform over all experiments.  This can attribute laboratory effects to the perturbation.
 - **Laboratory-matched (500 per perturbation):**  for each laboratory holding n of the perturbation's experiments, n of that laboratory's other experiments are removed.  Laboratories with fewer than 10 possible subsets fall back to all experiments.  Matching was complete for 10 of 15 perturbations and partial for RyhB (0%), HU (7%), Fis (20%), FNR (50%) and σ38 (56%).
-- **Laboratory-matched excluding perturbation experiments** [pending, job 089]:  as above, with every experiment of any perturbation group excluded from the pools.
+- **Laboratory-matched excluding perturbation experiments** [PENDING, job 089]:  as above, with every experiment of any perturbation group excluded from the pools.
 
 **Supplementary Table 7 | Variance-stratified AUROC of attention-based influence against differential expression** (15 perturbations).
 
@@ -174,11 +182,11 @@ Influence scores are calibrated against null removals of the same number of expe
 |---|---|---|---|
 | Random | 0.572 | 12/15 | 0.015 |
 | Laboratory-matched | 0.550 | 9/15 | 0.095 |
-| Laboratory-matched, excluding perturbation experiments | [pending] | | |
+| Laboratory-matched, excluding perturbation experiments | [PENDING] | | |
 
-Differential expression scores 0.516 under every null.  The laboratory-matched null is conservative.  In the Covert laboratory, 10 of the 12 other experiments are knockouts of related regulators (ArcA, FNR, AppY) with overlapping regulons, so the null removes related biology as well as the laboratory effect.  AppY z-scores under the two nulls correlate at only r = 0.48, and the null rests on 19–74 distinct subsets for several groups.  Among the 10 fully matched groups the median falls from 0.571 to 0.544.
+Differential expression scores 0.516 under every null.  The laboratory-matched null is conservative.  In the Covert laboratory, 10 of the 12 other experiments are knockouts of related regulators (ArcA, FNR, AppY) with overlapping regulons, so the null removes related biology as well as the laboratory effect.  AppY z-scores under the two nulls correlate at only r = 0.48, and the null rests on 19–74 distinct subsets for several groups.  Among the 10 fully matched groups the median falls from 0.571 to 0.544.  We therefore regard the advantage over DE as suggestive rather than established.
 
-[pending: SSEM-Lasso (Cosgrove et al. 2008) re-implementation on the same perturbations, job 095.]
+**SSEM-Lasso.**  We re-implemented the SSEM-Lasso network filter of Cosgrove et al. (2008) on the same perturbations and truths, with each perturbation's experiments held out of training, so there is no leakage.  Variance-stratified median AUROC is 0.572 for attention-based influence (beats DE in 12/15, P = 0.015), 0.549 for SSEM (12/15, P = 0.041) and 0.516 for DE.  Head to head, attention and SSEM are not distinguishable (SSEM better in 6/15, P = 0.45), and they carry different signal (per-gene Spearman correlation 0.18).  SSEM ranks the perturbed regulator itself first in 11 of 15 perturbations (DE 2/15, attention 3/15), whereas attention leads on small regulons (HU, RyhB, AppY).  The two are complementary:  SSEM finds the regulator and attention-based influence finds its regulon.  We make no claim that attention beats SSEM.  This is not a fair regulon test for SSEM, which was designed for direct targets and keeps the regulator as a predictor.  Caveats:  Holm correction over the six methods gives P ≈ 0.09; the effective number of perturbations is below 15 (two Covert-laboratory perturbations cluster, and ArcA and FNR overlap); without HU and AppY, P = 0.057; and laboratory matching covers only 5 of 15 perturbations.  [PENDING:  SSEM with the regulator dropped from the predictors and trained on the full compendium as published; the same laboratory hold-out as the attention null; a preregistered combination of the two; more perturbations.]
 
 ## Supplementary Note 7 | Removing global expression programs
 
@@ -240,7 +248,154 @@ Removing the first two or three principal components improves both CLR and atten
 
 **PC2 and PC3 are motility and stationary phase.**  The flagellar σ28 regulon and its master regulator FlhDC load strongly on both (σ28 0.80 and 0.82; FlhDC 0.72 and 0.67).  PC3 is anchored by dilution time courses into stationary phase and by σS (rpoS) experiments, and σS loads on it as well (0.63).  The end of PC2 opposite the motility genes is formed by experiments from a single overexpression series grown in 96-well plates, so this component mixes biology with a laboratory-specific culture condition.  The heat-shock (σ32), envelope-stress (σ24) and nitrogen (σ54) sigmulons show no enrichment, and neither do most specific transcription-factor regulons.
 
-**Implication.**  Bacterial expression variance is dominated by a few condition-specific programs, chiefly growth rate and the sigma-factor responses that accompany it (σS for stationary phase and stress, σ28 for motility).  Removing the top components therefore deletes genuine regulatory biology, not technical noise.  It helps the co-membership benchmark because these large, diffuse programs create many co-expressed pairs outside any specific regulon, and those pairs dilute the precision of regulon recovery.  Their removal is therefore a choice about which biology to emphasize, not a correction.  We keep all components in the main analyses.  Attention's gain over CLR persists after removal (Supplementary Note 7), so it is not explained by these global programs.  Whether the same holds in organisms without sigma-factor-dominated transcription is a question for human data [pending].
+**Implication.**  Bacterial expression variance is dominated by a few condition-specific programs, chiefly growth rate and the sigma-factor responses that accompany it (σS for stationary phase and stress, σ28 for motility).  Removing the top components therefore deletes genuine regulatory biology, not technical noise.  It helps the co-membership benchmark because these large, diffuse programs create many co-expressed pairs outside any specific regulon, and those pairs dilute the precision of regulon recovery.  Their removal is therefore a choice about which biology to emphasize, not a correction.  We keep all components in the main analyses.  Attention's gain over CLR persists after removal (Supplementary Note 7), so it is not explained by these global programs.  Whether the same holds in organisms without sigma-factor-dominated transcription is a question for human data [PENDING].
+
+## Supplementary Note 9 | Hub control
+
+**Why it is needed.**  The attention walk converges toward its stationary distribution π, so at large depth attention mass between two genes approaches a function of π_i and π_j.  On M3D, π is very skewed (maximum 310 times the median), and hubness carries real signal:  ranking pairs by H_ij = π_i + π_j alone gives an AUROC of 0.546 on strong/confirmed (SC) regulons.  The pooled AUPR rise toward t ≈ 27 could therefore partly be convergence to hubs.
+
+**Division over-corrects.**  Dividing each method's scores by H removes the hub signal from every method, not only from attention:  it strips CLR to 1.05 times the base rate.  An earlier finding that large-t attention is "mostly hubs" used this division and must be re-tested with stratification before it is used to constrain t [PENDING].
+
+**Within-stratum scoring.**  Pairs are assigned to ten quantile strata of H, and each method's scores are converted to percentile ranks within each stratum (`analysis/baselines.R`, `<method>_hubstrat`), so that a method gains only by ranking pairs better than other pairs of similar hubness.  Every method in the comparison is scored this way (main text, Table 2b).
+
+**Results (M3D, t = 9).**
+
+- *Against CLR, SC regulons:*  attention stays ahead under every adjustment (division by H +0.026; π-residual +0.020; within-stratum percentile +0.016, 95% interval 0.012 to 0.020), and ahead in all ten hub deciles in every jackknife replicate.  In the later comparison run the within-stratum lead was 0.015.
+- *All-evidence regulons:*  the hub-controlled lead over CLR is small (+0.004 to +0.008).  Hub control shrinks the raw lead over CLR on M3D by one third (SC) to three quarters (all evidence).
+- *Against competitors, hub-controlled pooled AUPR:*  attention leads CLR, GENIE3 and PIDC on M3D SC (by 0.015, 0.009 and 0.015) and CLR and GENIE3 on EcoMAC SC (0.020 and 0.009), and it is first in the EcoMAC SC row of Table 2b.  At all evidence levels it leads only CLR, and only on EcoMAC (0.009); it ties GENIE3 on both compendia and PIDC on EcoMAC.
+- *Per regulon, AP against CLR (SC):*  EcoMAC is consistent (attention better in 66% of regulons; P = 0.002), M3D is not significant (54%; P = 0.11).  We do not claim that attention improves most regulons on M3D.
+- *K562:*  the DoRothEA A–B lead over CLR survives (+0.006; 0.002 to 0.010); CollecTRI has no signal under hub control (the hub score alone is at least as good as attention); the CORUM and knockdown-response losses persist.
+
+**Limitation.**  The stratifier is derived from the attention walk.  A method-neutral stratifier (for example CLR degree) and the per-regulon (macro) view under hub control are planned sensitivity checks [PENDING].
+
+## Supplementary Note 10 | Per-regulon (macro) average precision
+
+**Definition (fixed with the statistics reviewer before scoring; `analysis/macro_aupr.R`).**  For every regulon with at least 10 positive non-operon pairs, AP is computed over the same candidates as coherence, with ties broken in expectation.  A gene in several regulons counts in each; regulons are not merged, because multi-membership is meaningful.  The paired difference ΔAP = AP(comparator) − AP(attention) is computed within one run, so negative values favour attention.  Uncertainty has two sources and both must exclude 0:  regulons (BCa bootstrap for the mean, Wilcoxon signed rank for the median) and genes (delete-20% gene jackknife, 200 replicates, regulon set fixed to regulons keeping at least three positive pairs in every replicate; delete-50% as a stability check).  Holm correction is applied to the larger P within families fixed in advance (*E. coli* 40 tests; K562 primary 50; K562 secondary 40, of which 30 are present, missing tests counted).  The gene jackknife keeps only regulons scored in every replicate, which drops small regulons, so the two intervals of the decision rule cover different regulon sets.
+
+**Supplementary Table 9 | Per-regulon ΔAP against attention, *E. coli*** (`results/macro_aupr_v2`; t = 9; negative favours attention).  Intervals are 95% over regulons and over genes; P values are Holm-adjusted within the family of 40; values of 0.004 are at the resampling floor and are bounds.
+
+| Data | Evidence | Comparator | Regulons | Mean ΔAP | Regulon interval | Gene interval | Holm P, mean | Median ΔAP | Holm P, median | Attention wins |
+|---|---|---|---|---|---|---|---|---|---|---|
+| M3D | SC | \|r\| | 123 | −0.0205 | [−0.0387, −0.0109] | [−0.0213, −0.0049] | 0.056 | −0.0011 | 0.15 | 75% |
+| M3D | SC | CLR | 123 | −0.0084 | [−0.0229, −0.0013] | [−0.0047, +0.0069] | 1 | −0.0001 | 1 | 54% |
+| M3D | SC | GENIE3 | 123 | −0.0041 | [−0.0173, +0.0013] | [−0.0062, +0.0082] | 1 | +0.0001 | 1 | 46% |
+| M3D | SC | GRNBoost2 | 123 | −0.0269 | [−0.0484, −0.0164] | [−0.0293, −0.0125] | 0.004 | −0.0009 | 0.33 | 71% |
+| M3D | SC | PIDC | 123 | −0.0221 | [−0.0433, −0.0115] | [−0.0216, −0.0034] | 0.20 | −0.0003 | 1 | 62% |
+| M3D | all | \|r\| | 157 | −0.0204 | [−0.0350, −0.0117] | [−0.0243, −0.0060] | 0.037 | −0.0017 | 0.028 | 76% |
+| M3D | all | CLR | 157 | −0.0084 | [−0.0197, −0.0021] | [−0.0080, +0.0054] | 1 | −0.0001 | 1 | 53% |
+| M3D | all | GENIE3 | 157 | −0.0016 | [−0.0115, +0.0029] | [−0.0066, +0.0089] | 1 | +0.0001 | 1 | 43% |
+| M3D | all | GRNBoost2 | 157 | −0.0240 | [−0.0389, −0.0155] | [−0.0254, −0.0099] | 0.004 | −0.0022 | 0.30 | 71% |
+| M3D | all | PIDC | 157 | −0.0199 | [−0.0363, −0.0098] | [−0.0180, −0.0026] | 0.23 | −0.0002 | 1 | 55% |
+| EcoMAC | SC | \|r\| | 119 | −0.0281 | [−0.0435, −0.0188] | [−0.0307, −0.0121] | 0.004 | −0.0024 | 0.21 | 81% |
+| EcoMAC | SC | CLR | 119 | −0.0131 | [−0.0210, −0.0071] | [−0.0119, +0.0001] | 1 | −0.0008 | 0.86 | 66% |
+| EcoMAC | SC | GENIE3 | 119 | −0.0012 | [−0.0071, +0.0038] | [−0.0081, +0.0055] | 1 | +0.0003 | 1 | 43% |
+| EcoMAC | SC | GRNBoost2 | 119 | −0.0292 | [−0.0473, −0.0194] | [−0.0261, −0.0114] | 0.004 | −0.0012 | 1 | 68% |
+| EcoMAC | SC | PIDC | 119 | −0.0182 | [−0.0311, −0.0100] | [−0.0196, −0.0035] | 0.14 | −0.0006 | 1 | 66% |
+| EcoMAC | all | \|r\| | 155 | −0.0230 | [−0.0356, −0.0153] | [−0.0338, −0.0154] | 0.004 | −0.0021 | 0.63 | 74% |
+| EcoMAC | all | CLR | 155 | −0.0104 | [−0.0176, −0.0052] | [−0.0155, −0.0020] | 0.28 | −0.0005 | 1 | 61% |
+| EcoMAC | all | GENIE3 | 155 | +0.0016 | [−0.0029, +0.0084] | [−0.0073, +0.0049] | 1 | +0.0002 | 1 | 44% |
+| EcoMAC | all | GRNBoost2 | 155 | −0.0224 | [−0.0356, −0.0143] | [−0.0299, −0.0136] | 0.004 | −0.0013 | 0.87 | 65% |
+| EcoMAC | all | PIDC | 155 | −0.0173 | [−0.0277, −0.0100] | [−0.0235, −0.0073] | 0.0066 | −0.0003 | 1 | 59% |
+
+**Reading.**
+
+1. **Parity with CLR and GENIE3.**  No difference from CLR or GENIE3 survives the decision rule in any cell.  Against CLR the regulon interval of the mean often excludes 0 but the gene interval does not.
+2. **Attention ahead of |r| (3 of 4 cells) and PIDC (1 of 4, EcoMAC all evidence) on the mean,** and of our GRNBoost2 runs (4 of 4), which we do not interpret until the wrapper check (Supplementary Note 13); medians are about zero throughout.
+3. **Where the differences sit.**  The mean gaps come from regulons of 5–24 genes, whereas attention's win rate is highest (60–90%) in regulons of 100 genes or more, where the gaps are tiny.  The pooled gain therefore comes from ranking across regulons, not within them.
+4. **Stability.**  Across all families, one cell is flagged by the delete-50% check (about 13 were flagged in the first run).
+
+**K562.**  On transcription-factor truths the per-regulon differences are tiny (|ΔAP| ≤ 0.0025) and none is established.  On CORUM, PIDC (+0.007), CLR (+0.005) and GENIE3 (+0.004) beat attention; the CLR and GENIE3 differences were fragile in the first run (the delete-50% gene interval included 0), and no CORUM comparison is flagged in the rerun.  On knockdown-response modules, CLR (+0.097), GENIE3 (+0.084), |r| (+0.091) and PIDC (+0.100) all beat attention, which wins only 2% of modules against CLR (Supplementary Note 11).  The secondary all-genes K562 run predates the GENIE3 and PIDC rows and is to be rerun or dropped [PENDING].
+
+## Supplementary Note 11 | Resolution against reach:  where attention gains and loses
+
+**Global regulons carry the pooled gain.**  CRP, σS, Fur, IHF and FNR account for 62% of positive pair incidences in the *E. coli* benchmark, and attention's pooled lead is concentrated in them.  Per regulon (Supplementary Note 10) its win rate is highest in regulons of 100 or more genes.
+
+**Direct edges.**  On the TF-node benchmark (199 transcription factors, Y's mRNA as the proxy for its activity) the pooled AUPR ratio on M3D is 6.75 for CLR, 6.54 for GENIE3 and 5.17 for attention.  GENIE3 has the best median per-TF AUROC (EcoMAC 0.690 against 0.596 for attention) and the best median per-regulon coherence.  In the nested bootstrap (Supplementary Table 6) attention trails CLR by 1.71 times random (−2.16 to −1.27), and the difference of median per-TF AUROC is not significant.
+
+**Complexes.**  In K562, 86% of attention's CORUM loss comes from ten ribosome and pre-rRNA complexes.  For the 60S ribosomal subunit, AP is 0.19 for attention against 0.66 for CLR.  These complexes are among the most tightly co-expressed gene sets in the cell, so the loss is consistent with the walk trading their sharp pairwise dependences for aggregation over wider neighbourhoods.
+
+**Knockdown-response modules.**  The raw tie in Table 2a is explained by hubness:  the hub score alone reaches 2.42 times the base rate, and under hub control attention falls to 1.60 against 1.88–2.00 for CLR, GENIE3, PIDC and |r|.  Per module, attention loses, and the loss grows with module size, so it is not a small-module effect; it is driven by tight co-expression cliques.  Two properties of this truth favour direct similarity:  62% of the modules are near-duplicates of one another, and they are built from a held-out half of the same knockdown signal.  [PENDING:  a cluster bootstrap over groups of near-duplicate modules and a sensitivity analysis without ribosomal genes.]
+
+**Candidate fix.**  The preregistered multi-head operator, which averages walks at keff 3, 10 and 30, could keep the sharp neighbourhoods of tight complexes while aggregating over large regulons (Supplementary Note 15) [PENDING].
+
+## Supplementary Note 12 | Granularity, multiscale structure and the depth–size relation
+
+These analyses tested whether depth acts as a resolution parameter.  They did not support that claim, and we report them as negatives.
+
+**Granularity sweep** (M3D and K562; truths from fine to coarse:  operons, transcription-factor regulons, sigmulons without σ70 and σS; CORUM, DoRothEA, CollecTRI, knockdown-response modules).
+
+- Only operons show a sharp interior optimum:  AUPR rises from 0.30 to 0.50 at t = 4–5 and falls beyond t ≈ 8.
+- Coarser truths are flat (AUPR changes of at most 0.02 over t = 8–32), with optima censored at the edge of the grid.
+- There is no fine-to-coarse ordering of optimal depths (*E. coli* argmax 4, 32 and 13 for operons, regulons and sigmulons; K562 0, 26, 4, 7 and 32 for CORUM, knockdown-response modules, DoRothEA A–B, DoRothEA A–C and CollecTRI; ordering test P = 0.12).
+- Single sets drive the optima:  dropping σS moves the sigmulon argmax from 24 to 13.
+- No depth helps CORUM.
+
+**Multiscale pilot.**  If regulation were organized in discrete levels, the number of effective modules N(t) of the walk would show plateaus as t grows.  It does not, for any real operator:  the smallest |d log N / d log t| is 0.43–0.64.  N(t) decays as a near power law (spectral dimension about 1–1.5), far more slowly than for a permuted operator (N = 3 at t = 409, against 30 for the real operator), so the slow structure is real but continuous.  Changing keff reshapes the curve but reveals no level, and the per-gene module size k_i(t) is not a module size at small t, because π is hub-skewed.  Plateau detection is therefore dropped; any multiscale method needs a scale-free summary (slopes, spectral gaps against the null) and π-normalized scores.
+
+**Depth against set size** (per set, M3D).
+
+| Sets | Spearman correlation of best depth with size |
+|---|---|
+| RegulonDB regulons | 0.34 (t ∝ n^0.43) |
+| Label-free correlation modules | 0.44 (0.73 excluding sets at the depth ceiling) |
+| Random gene sets | 0.12 |
+| Operons | −0.03 once ceiling ties are removed |
+
+Size, not regulatory type, predicts the optimum.  This is a generic property of diffusion (covering time grows with module size) and the mechanism that any multiscale claim must respect, not a biological finding.  The extra preference of the largest regulons (Fis, H-NS, IHF, FNR and Fur, at the t = 64 edge) for depth appears to be convergence toward hubs; it must be re-tested with hub-stratified scores (Supplementary Note 9).  [PENDING:  the full size–depth analysis on a logarithmic depth grid to t = 128, with 20 size-matched control draws per set, de-hubbed per-set scores, per-set bootstrap intervals on the best depth, a K562 repeat and keff 3, 10 and 30.]
+
+## Supplementary Note 13 | BEELINE:  competitor methods
+
+GENIE3, GRNBoost2 and PIDC were run on all 14 BEELINE cases (7 datasets × 2 gene sets) with the same genes and truths as CLR, CLR-NS and |r| (`analysis/beeline_baselines.R`).  Per dataset, log2 AUPRC ratios are averaged over gene sets and truths, and methods are compared over the seven datasets with exact Wilcoxon signed-rank and sign tests (smallest attainable P = 0.0156).  CLR was fixed in advance; CLR-NS was chosen on these truths, so comparisons against it are not confirmatory.
+
+**Supplementary Table 10 | BEELINE primary truths (44 dataset × gene set × truth cells, 7 datasets).**
+
+| Method | Median AUPRC ratio | Mean log2 vs CLR | Better than CLR | P (Wilcoxon) | Mean log2 vs CLR-NS | Better than CLR-NS | P (Wilcoxon) |
+|---|---|---|---|---|---|---|---|
+| CLR | 1.48 | — | — | — | −0.06 | 0/7 | 0.016 |
+| CLR-NS | 1.60 | +0.06 | 7/7 | 0.016 | — | — | — |
+| GENIE3 | 1.69 | −0.04 | 3/7 | 0.69 | −0.10 | 1/7 | 0.11 |
+| PIDC | 1.56 | −0.02 | 4/7 | 0.81 | −0.08 | 1/7 | 0.16 |
+| GRNBoost2 | 1.26 | −0.35 | 0/7 | 0.016 | −0.42 | 0/7 | 0.016 |
+| \|r\| | 1.20 | −0.23 | 0/7 | 0.016 | −0.29 | 0/7 | 0.016 |
+
+**Reading.**
+
+- CLR is comparable to GENIE3 and PIDC and beats |r| in 7 of 7 datasets.  Our GRNBoost2 runs also score below CLR in 7 of 7, a result we do not interpret until the wrapper check below.  GENIE3 has the highest median over the 44 cells, but its per-dataset mean is below CLR's.
+- CLR-NS has the highest per-dataset mean, but it was selected on these truths.
+- The human datasets split:  on hESC, GENIE3 and PIDC beat CLR-NS, driven by STRING; on hHep, CLR-NS beats all three.  We do not claim that CLR-NS beats learned methods on human data.
+- Cell-type-specific ChIP-seq truths are near random for every method (median AUPRC ratio 0.98–1.02; |r| equals CLR-NS), as BEELINE reported.
+
+**GRNBoost2 discrepancy.**  In our hands GRNBoost2 is last everywhere, on bulk and single-cell data and on early precision, whereas BEELINE placed it near GENIE3.  We are checking our wrapper (`tools/grnboost2.py`:  per-target routine, early stopping, edge orientation), several seeds, the dask arboreto path and BEELINE's own GRNBoost2 output on one case before making any claim that involves GRNBoost2 [PENDING].  **PIDC.**  On human single-cell data, PIDC falls back from a gamma to a normal approximation for under 1% of pairs, including pairs involving SOX3 and PAX6.
+
+## Supplementary Note 14 | Hard FDR operators inside the cluster bootstrap
+
+CLR scores carry a permutation null, so hard selection at a false-discovery rate is the natural alternative to a softmax.  Hard selection alone isolates 62–77% of genes, so the operators tested add each gene's ten strongest neighbours (FDR 0.05 + top 10, at its held-out t* = 7) or read out the absolute correlation of profiles diffused over an FDR 0.20 graph (|cor(Pᵗ Z)| at t = 8 and 32; no held-out t*).  Every draw of the cluster bootstrap (200 draws, experiments resampled with replicate arrays, same seeds as the main run so the draws pair) recomputes its own permutation null (`analysis/chips_bootstrap.R --fdr_B`).
+
+**Supplementary Table 11 | Hard FDR operators against CLR** (cluster bootstrap, 200 draws; mean and 2.5–97.5% percentiles; marginal intervals).
+
+| Evidence | Operator | Δ AUPR vs CLR | Δ coherence vs CLR |
+|---|---|---|---|
+| SC | FDR 0.05 + top 10, t = 7 | +0.012 [+0.010, +0.015] | +0.002 [−0.019, +0.024] |
+| SC | FDR 0.20, diffused-profile \|r\|, t = 8 | +0.001 [−0.002, +0.004] | −0.023 [−0.041, −0.004] |
+| SC | FDR 0.20, diffused-profile \|r\|, t = 32 | +0.004 [+0.001, +0.008] | −0.022 [−0.042, −0.006] |
+| All | FDR 0.05 + top 10, t = 7 | −0.001 [−0.003, +0.002] | −0.009 [−0.026, +0.006] |
+| All | FDR 0.20, diffused-profile \|r\|, t = 8 | −0.003 [−0.006, +0.000] | −0.023 [−0.039, −0.007] |
+| All | FDR 0.20, diffused-profile \|r\|, t = 32 | −0.003 [−0.006, +0.001] | −0.025 [−0.043, −0.007] |
+
+**Reading.**  The best hard operator gains over CLR on SC regulons (+0.012) without changing coherence or helping all-evidence regulons.  Paired with the same draws, soft attention (keff 10, t = 8) beats it by 0.0075 AUPR (0.0053 to 0.0095), in all 200 draws, with 0.026 higher coherence.  Diffused-profile readouts lower coherence below CLR.
+
+**Caveats.**  The intervals are marginal over about 12 comparisons, and the small FDR 0.20 effects do not survive Bonferroni correction.  The FDR 0.20 depths were not held out.  The fraction of isolated genes was not logged in this run.  Point estimates on the full data are reported separately for the 907-array (+0.018) and 466-experiment (+0.013) sets rather than averaged.
+
+## Supplementary Note 15 | Preregistered analyses [PENDING]
+
+**Attention width (`docs/preregistration_keff.md`; fixed 2026-10-16, implementation choices logged 2026-10-21 before any full run).**  Three data-driven width rules were reviewed before running and each was expected to fail:  one global temperature on CLR z-scores gives a bimodal width split (29% of rows with fewer than 3 partners, 16% near-uniform) that tracks the top score rather than regulon breadth; per-gene widths from local false-discovery rates violate the method's assumptions (a point mass at 0, a heavy tail, dependent rows); and width chosen on held-out data is biased toward wide attention (keff 25 > 10 > 3 on one split).  They are being tested empirically anyway, next to a keff sweep (3, 5, 25) and a multi-head operator (walks at keff 3, 10 and 30 averaged), each at its own held-out depth.
+
+- *Primary endpoint:*  difference in pooled AUPR from keff = 10 on M3D and EcoMAC transcription-factor regulons and on K562 CollecTRI and CORUM; paired delete-half gene jackknife; Holm over 8 variants × 4 endpoints = 32 tests; smallest effect of interest ±0.005.
+- *Decision rule:*  the headline changes only if a variant wins by a Holm-significant margin of at least 0.005 on at least three of the four endpoints, loses on none and replicates on both M3D and EcoMAC.  The multi-head operator becomes the main operator if it gains on CORUM without losing on regulons.
+- *Protocol:*  held-out selections are computed and committed before any truth is read; the truth phase refuses to run unless they match the committed copies.  Selections for M3D and EcoMAC are committed (`docs/keff_selections/`).  Smoke tests on 300-gene subsets scored truths before the change log was fixed and are disclosed there.
+- *A degeneracy found before scoring:*  on the CLR scale the two-group local-FDR model assigns local FDR ≈ 1 to most pairs (83% of rows at the floor of 2 partners), and on raw mutual information 100% of rows reach the ceiling of 30.  The local-FDR variant runs as preregistered; if it meets the decision rule it will be reported as a sharp-attention (about keff 2) result, not as a calibrated width.
+
+**Learned attention (`docs/preregistration_scfm.md`; fixed 2026-10-21, before any foundation-model network was computed).**  The primary contrast is CLR-NS against zero-shot scPRINT v1 attention (mean over layers, heads and cells; special tokens removed; rows renormalized; target as query and transcription factor as key) on the seven BEELINE datasets, all cells, scored on genes that every method covers.  The primary hypothesis is non-inferiority with a margin of 0.15 log2 units of AUPRC ratio, read from the exact Wilcoxon (Hodges–Lehmann) interval of the per-dataset differences (coverage 92.2%), with superiority tested next in a fixed sequence.  Key secondary contrasts (CLR against scPRINT; CLR-NS against scPRINT on early precision) are confirmatory only if the primary holds, with Holm over two tests.  scGPT, readouts other than the primary one, the controls (random weights, permuted expression, data-free gene embeddings), CLR applied to learned attention, fine-tuning and K562 control cells are descriptive.  A leakage audit of each model's pretraining corpus against the evaluation accessions precedes scoring; leakage would favour the foundation models and so make a non-inferiority result conservative.  CLR-NS was chosen on these truths, which the preregistration discloses.
 
 ---
 
@@ -255,3 +410,5 @@ Removing the first two or three principal components improves both CLR and atten
 Each panel reports n, Pearson r and B-spline MI.  (a) lexA–sulA, `figures/scatter_lexA_sulA.png`.  (b) lexA–recA, `figures/scatter_lexA_recA.png`.
 
 **Supplementary Fig. 2 | Mutual information against correlation for all gene pairs.**  Two-dimensional histograms (log counts) of B-spline MI against |Pearson r| for M3D, EcoMAC uncorrected and EcoMAC with per-platform centring.  The curve is the MI of a bivariate Gaussian, −½ log₂(1 − r²).  `figures/mi_vs_rho.png`.
+
+**Supplementary Fig. 3 | Component contributions at all evidence levels.**  Shapley decomposition as in main-text Fig. 3, for RegulonDB regulons at all evidence levels.  `figures/fig_shapley_all.png`.
