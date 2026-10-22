@@ -7,12 +7,14 @@
 ## Positive prompt
 
 ```
-scientific graphical abstract, wide 16:9 infographic, white background, four rounded panels in a row left to right connected by small grey chevron arrows, flat vector illustration, thin dark grey outlines, generous white space, minimal sans-serif labels.
-Panel 1: a compact heatmap grid of small squares in shades of a single blue, below it a simple rod-shaped bacterium icon with one flagellum and a round human cell icon with a nucleus.
-Panel 2: a star graph, one central node with an orange ring connected by blue lines of varying thickness to twelve small white nodes; below it a smooth orange bell curve with short blue tick marks along its base, one tick far in the right tail; a light grey rounded box at the bottom.
-Panel 3: the same central orange-ringed node with about ten thick violet arrows pointing outward and many faint thin grey lines to other nodes; below it a small node-link network with three concentric soft pink-magenta dashed halos expanding from one node; a short horizontal pink scale bar with four evenly spaced ticks; a rounded outlined pill at the bottom.
-Panel 4: left, a hub node in green with many spoke edges to small green nodes and a green circular check mark badge; right, a small dense grey pentagon clique with all edges drawn and a grey circular minus badge; below, a slim horizontal bar chart with four bars (green longest, two grey, one orange) and one empty dashed placeholder bar.
-Palette: blue #2a78d6, orange #eb6834, violet #6250d6, magenta #e87ba4, green #1baf7a, grey #8a8984, near-black #0b0b0b text, light grey #e7e6e2 borders.
+scientific graphical abstract, wide 16:9 infographic, white background, flat vector illustration, thin dark grey outlines, generous white space, minimal sans-serif labels.
+Left two thirds: four small rounded panels in a row connected by grey chevrons, grouped under two labelled bands with square brackets: a light grey band over panels 1-2 and a pale violet band over panels 3-4; a thin light grey strip spans the full width under all four panels.
+Panel 1: a compact heatmap grid of small squares in shades of a single blue; below it a rod-shaped bacterium icon with one flagellum and a round human cell icon with a nucleus.
+Panel 2: a star graph, one central solid black node connected by blue lines of varying thickness to ten small white nodes; below it a smooth orange bell curve with short blue tick marks along its base, one tick far in the right tail.
+Panel 3: the same central black node with about ten thick violet arrows pointing outward and many faint thin grey lines to other nodes.
+Panel 4: a small node-link network with three concentric soft pink-magenta dashed halos expanding from a central black node; below it a short horizontal magenta scale bar with four evenly spaced ticks and one dot on the third tick.
+Right third: one tall panel with two equal horizontal bar charts stacked vertically, each with four bars and a dashed vertical reference line; top chart has a small green hub-and-spoke icon, bars green (longest), grey, grey, orange; bottom chart has a small grey pentagon clique icon, bars green (shortest), orange, grey, grey, with a red arrow pointing left from the orange bar's length to the end of the green bar.
+Palette: blue #2a78d6, orange #eb6834, violet #6250d6, magenta #e87ba4, green #1baf7a, grey #8a8984, red #e34948 (only the loss arrow), near-black #0b0b0b, light grey #e7e6e2 borders.
 ```
 
 ## Negative prompt
@@ -35,7 +37,7 @@ flat vector, Nature-journal figure style, editorial infographic, Swiss minimal, 
 
 ## Notes for the illustrator
 
-- The output is a mood/layout draft only and cannot be submitted to Nature Portfolio journals; redraw everything as vector art.
-- Keep colour semantics from `analysis/plot_theme.R`: orange = context normalization (CLR) throughout; blue = mutual information; violet = softmax; magenta = depth; green (aqua) = CLR attention; grey = competitors and neutral elements.
-- Panel 4 must stay honest: CLR attention leads on large *E. coli* regulons (M3D strong-evidence AUPR / base rate: attention 1.68, GENIE3 1.51, PIDC 1.45, CLR 1.44), while CLR is better on tight complexes (K562 CORUM: attention 3.51, CLR 6.39). The "learned attention (scFM)" bar stays an empty dashed placeholder marked "pending" until that comparison is run.
-- Bar lengths come from the table, not from the generated image.
+- The output is a mood/layout draft only and cannot be submitted to Nature Portfolio journals; redraw everything as vector art, using the code-drawn figure as the reference for content and numbers.
+- Do not credit CLR with the softmax or the walk. Published CLR (Faith et al. 2007) is only the per-gene z-scoring of MI (panels 1-2, grey band); the softmax and the multi-step walk are this work (violet band). The transformer analogy sits in its own strip under both bands, not in a panel.
+- Colour key used in every paper figure (`analysis/plot_theme.R`): blue = dependence (MI); orange = CLR normalization (also the CLR bar); violet = softmax; magenta = depth/walk; green (aqua) = the full method of this work, bars only; grey = competitors; red = the loss marker only; query gene i in neutral black.
+- Results must show the trade-off with equal weight: *E. coli* RegulonDB regulons (this work 1.68, GENIE3 1.51, PIDC 1.45, CLR 1.44) and K562 CORUM complexes (this work 3.51, CLR 6.39, GENIE3 6.32, |r| 7.00; 1.8x lower than CLR). Units: precision-recall area as a multiple of random. Bar lengths come from `docs/whitepapers/sota_table.md`, never from the generated image.
