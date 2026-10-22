@@ -190,3 +190,13 @@ The diffusion-maps and lift readouts (Pᵗ/π) are the classical alternative. Th
 5. **Replication:** Which E. coli complex truth (EcoCyc complexes, ribosomal-protein operons) do you trust for a preregistered replication, and should knockdown-response modules stay secondary?
 
 Context for each: (1) a yes means rerunning the headline, the keff test and the figures. (2) Without the eight RP-dominated entries: attention 2.05×, CLR 2.18× (difference −0.0016 [−0.0042, +0.0010]). (3) The hard version rescues CORUM (7.62×) but costs DoRothEA A-B 0.013 and needs a clique threshold; the walk already aggregates the clique. (4) The alternative is to keep keff-10 attention as the method and present the normalized readout as the explained failure mode plus a preregistered extension. (5) Without an E. coli complex truth, any complex claim rests on K562 alone; the bilateral readout's +0.06 on knockdown response needs the near-duplicate cluster bootstrap.
+
+## PI decisions (2026-10-22, interview)
+
+1. Scope: complexes are in scope. If the preregistered test confirms it, CLR → attention → CLR(log Pᵗ) becomes the main method; plain attention is reported as the ablation.
+2. Complex truth: primary = overlap-merged CORUM (near-duplicate complexes merged so the ribosome counts once), scored pooled and per complex; raw pooled and RP-excluded as sensitivity.
+3. Latent variables: invariance to how many noisy copies of one factor are measured (not hard collapse).
+4. Framing: "CLR → attention → CLR(log)" as normalized attention layers; the readout change is disclosed as coming after the keff preregistration.
+5. E. coli replication truth: EcoCyc protein complexes primary, ribosomal-protein operons as a sanity check; knockdown-response modules secondary. (PI: "less clear, but agree for now".)
+
+Next: write a preregistration for CLR(log Pᵗ) (Opus high-effort design review before committing), then confirmatory runs: E. coli first (truths touched for the first time), then K562 with the overlap-merged CORUM truth.

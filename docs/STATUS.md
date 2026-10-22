@@ -39,6 +39,14 @@
 | Contributions and AI-use disclosure | `docs/contributions.md` | draft; PI to confirm marked items |
 | Preregistrations | `docs/preregistration_keff.md`, `docs/preregistration_scfm.md` | committed before any scoring |
 
+## Open items as of 22 Oct, 16:45
+
+- **CORUM fix found (exploratory):** CLR applied again to log Pᵗ rescues complexes (K562 CORUM 7.95× random vs CLR 6.39×) without hurting TF regulons. PI decisions recorded in `docs/plans/corum_analysis.md`. **Next step:** preregister CLR(log Pᵗ) (Opus high-effort review), then confirmatory runs on E. coli (EcoCyc complexes) and K562 (overlap-merged CORUM).
+- **K562 keff selections:** a one-shot service (`clr-k562-boost`) switches the job to 4 workers as soon as splits 3 and 4 are saved; nothing is lost.
+- **GRNBoost2 diagnostic:** early sign that no early stopping fixes GRNBoost2 (mHSC-E AUPRC ratio 2.75); wait for the full run, then a reviewer.
+- **Thermal watch** (`clr-thermal`) runs until midnight; CPU 2 sits at 82-86 °C under load (no warnings).
+- **Model use:** subagents default to Sonnet (`worker` agent; user setting); Opus high only for design, statistical interpretation and claims.
+
 ## Next
 
 1. **CORUM order-of-operations expert (PI, 22 Oct).** Members of a complex share one latent variable, so all their pairs are strongly coupled. The softmax and the walk may spread attention across the clique and then into the wider translation program. The question is whether collapsing strongly coupled cliques into latent variables before attending, or attending on residuals after removing a clique's shared factor, fixes the loss. A max-effort expert analyses the CORUM results and interviews the PI (questions relayed in the session).
