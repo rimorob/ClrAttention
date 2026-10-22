@@ -23,6 +23,11 @@
 # queue waits for it). Jobs started by the old runner (running/*.sh without a
 # .res file) count with their measured memory (clr-jobs service), at least the
 # default. A job file runs once unchanged for 30 s (copy as .tmp, then mv).
+# Auto-retry: a job killed for memory (oom-kill) is re-queued once as <job>_retry with
+# mem = 1.5 x max(declared, measured peak), capped at the slice; dependents of <job>
+# accept the retry's success. A retry that is killed again is not retried.
+# Restart after reboot: at startup, a job left in running/ whose scope no longer exists
+# and that wrote no exit code is put back into the queue (jobs resume from their caches).
 # Usage (repo root):  tools/scheduler.sh <root> [qdir]
 #   systemd-run --user --unit=clr-sched -p Restart=on-failure -p CPUWeight=10 bash tools/scheduler.sh jobs_pc sched
 cd "$(dirname "$0")/.." || exit 1
@@ -38,6 +43,18 @@ log "scheduler started (pid $$) on $(hostname), queue $QDIR, slice $SLICE, budge
 pgrep -f "tools/control_runner.sh $ROOT\$" >/dev/null || nohup tools/control_runner.sh "$ROOT" >/dev/null 2>&1 &
 
 declare -A warned eligible_since
+# restart after reboot: interrupted jobs (no scope, no exit code) go back to the queue
+for f in "$ROOT"/running/*.sh; do
+  [ -e "$f" ] || continue
+  b=$(basename "$f" .sh)
+  [ -e "$ROOT/running/$b.rc" ] && continue
+  st=$(systemctl --user is-active "clrjob-$b.scope" 2>/dev/null)
+  if [ "$st" != active ] && [ "$st" != activating ]; then
+    systemctl --user reset-failed "clrjob-$b.scope" 2>/dev/null
+    mv "$f" "$QDIR/$b.sh" && touch -d '-1 min' "$QDIR/$b.sh"; rm -f "$ROOT/running/$b.res" "$ROOT/running/$b.peak"
+    log "REQUEUE $b (interrupted: no scope and no exit code at scheduler start)"
+  fi
+done
 num() {   # positive number -> integer (decimals round up); else the default (warned in the main loop)
   if [[ "$1" =~ ^[0-9]+([.][0-9]+)?$ ]]; then awk -v v="$1" 'BEGIN { i = int(v); print (v > i) ? i + 1 : i }'; else echo "$2"; fi
 }
@@ -56,6 +73,10 @@ dep_state() {   # dep dependent_file -> ok | wait | failed | unknown
   [ -e "$QDIR/$d.sh" ] || [ -e "$ROOT/running/$d.sh" ] && { echo wait; return; }
   line=$(grep -F " END $d rc=" "$ROOT/runner.log" | tail -1)
   if [ -z "$line" ]; then [ -e "$ROOT/done/$d.sh" ] && echo wait || echo unknown; return; fi
+  case "$line" in *" rc=0 "*|*" rc=0") echo ok; return ;; esac
+  # failed: an automatic retry may still satisfy it
+  [ -e "$QDIR/${d}_retry.sh" ] || [ -e "$ROOT/running/${d}_retry.sh" ] && { echo wait; return; }
+  line=$(grep -F " END ${d}_retry rc=" "$ROOT/runner.log" | tail -1)
   case "$line" in *" rc=0 "*|*" rc=0") echo ok ;; *) echo failed ;; esac
 }
 
@@ -87,6 +108,14 @@ finalize() {    # job whose scope has ended
   systemctl --user reset-failed "clrjob-$b.scope" 2>/dev/null
   mv "$ROOT/running/$b.sh" "$ROOT/done/$b.sh"; rm -f "$ROOT/running/$b.res" "$ROOT/running/$b.peak" "$ROOT/running/$b.rc"
   log "END $b rc=$rc result=${res:-?} peak=${peak:-?}GB declared=${mem}GB"
+  if [ "$res" = oom-kill ] && ! grep -q "^# retry-of:" "$ROOT/done/$b.sh" && [ ! -e "$QDIR/${b}_retry.sh" ]; then
+    local nm; nm=$(awk -v d="$mem" -v p="${peak:-0}" -v s="$SLICE_CAP" 'BEGIN { m = (p > d) ? p : d; m = int(m * 1.5 + 0.999); print (m > s) ? s : m }')
+    sed -E "s/^# mem: .*/# mem: $nm/" "$ROOT/done/$b.sh" > "$QDIR/${b}_retry.sh.tmp"
+    grep -q "^# mem:" "$QDIR/${b}_retry.sh.tmp" || sed -i "1a # mem: $nm" "$QDIR/${b}_retry.sh.tmp"
+    sed -i "1a # retry-of: $b" "$QDIR/${b}_retry.sh.tmp"
+    touch -d '-1 min' "$QDIR/${b}_retry.sh.tmp"; mv "$QDIR/${b}_retry.sh.tmp" "$QDIR/${b}_retry.sh"
+    log "RETRY $b as ${b}_retry with mem ${nm} GB (killed for memory at ${peak:-?} GB)"
+  fi
 }
 
 while true; do
