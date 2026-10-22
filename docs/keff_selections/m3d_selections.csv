@@ -1,0 +1,12 @@
+"dataset","variant","criterion","param_name","param_value","t_star","t_q25","t_q75","t_min","t_max","param_split_min","param_split_max","n_splits","t_secondary","quick"
+"m3d","K3","crit_A","keff",3,2,2,2,2,2,NA,NA,20,9,0
+"m3d","K5","crit_A","keff",5,2,2,4.25,2,6,NA,NA,20,9,0
+"m3d","K10","crit_A","keff",10,9,8.75,10,8,10,NA,NA,20,9,0
+"m3d","K25","crit_A","keff",25,8,8,8,7,9,NA,NA,20,9,0
+"m3d","MH","crit_A","keff_heads",NA,6,5.75,6,5,7,NA,NA,20,9,0
+"m3d","O1","crit_A","tau",0.682911603817844,4,4,4,4,4,NA,NA,20,9,0
+"m3d","O1t","crit_A","tau",4,6,5,6,5,6,4,4,20,9,0
+"m3d","O2","crit_A","keff_per_gene",NA,2,2,2,2,2,NA,NA,20,9,0
+"m3d","O2e","crit_A","keff_per_gene",NA,8,7.75,8,7,8,NA,NA,20,9,0
+"m3d","O3A","crit_A","keff",40,7,6,7,6,8,40,40,20,9,0
+"m3d","O3B","crit_B","keff",40,4,4,4,4,4,40,40,20,9,0
