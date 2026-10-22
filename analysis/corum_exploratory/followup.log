@@ -1,0 +1,22 @@
+[13:08:46] CORUM_noRP drops 8 RP-dominated complexes 
+[13:09:07] truth DoRothEA_AB   105 sets,  2797795 pairs, base rate 0.1830 
+[13:09:07] truth DoRothEA_ABC  271 sets,  8600878 pairs, base rate 0.1305 
+[13:09:07] truth CollecTRI     491 sets,  3605955 pairs, base rate 0.1278 
+[13:09:07] truth CORUM        1185 sets,  2552670 pairs, base rate 0.0133 
+[13:09:07] truth KD_response   566 sets,  5279625 pairs, base rate 0.0787 
+[13:09:07] truth CORUM_noRP   1177 sets,  2353365 pairs, base rate 0.0119 
+[13:09:38] scored clr                    DoRothEA_AB 0.1939  DoRothEA_ABC 0.1342  CollecTRI 0.1315  CORUM 0.0847  KD_response 0.1908  CORUM_noRP 0.0259 [29 s] 
+[13:10:20] scored a_clr_on_logatt_t2     DoRothEA_AB 0.1936  DoRothEA_ABC 0.1343  CollecTRI 0.1325  CORUM 0.0302  KD_response 0.1210  CORUM_noRP 0.0180 [31 s] 
+[13:11:10] scored a_clr_on_logatt_t4     DoRothEA_AB 0.1864  DoRothEA_ABC 0.1290  CollecTRI 0.1242  CORUM 0.0520  KD_response 0.1865  CORUM_noRP 0.0161 [36 s] 
+[13:12:10] scored att_t9                 DoRothEA_AB 0.2003  DoRothEA_ABC 0.1395  CollecTRI 0.1402  CORUM 0.0465  KD_response 0.1870  CORUM_noRP 0.0243 [36 s] 
+[13:12:49] scored a_clr_bilateral_logP_t9 DoRothEA_AB 0.2045  DoRothEA_ABC 0.1418  CollecTRI 0.1468  CORUM 0.1244  KD_response 0.2650  CORUM_noRP 0.0318 [35 s] 
+[13:12:56] pi (direct solve): max/median 18457, min 3.5e-07 
+[13:13:36] scored a_clr_on_loglift_t9    DoRothEA_AB 0.2046  DoRothEA_ABC 0.1390  CollecTRI 0.1314  CORUM 0.0565  KD_response 0.1252  CORUM_noRP 0.0217 [34 s] 
+[13:14:33] scored clr_hubstrat           DoRothEA_AB 0.1939  DoRothEA_ABC 0.1337  CollecTRI 0.1284  CORUM 0.0451  KD_response 0.1504  CORUM_noRP 0.0202 [56 s] 
+[13:15:40] scored att_t9_hubstrat        DoRothEA_AB 0.1995  DoRothEA_ABC 0.1377  CollecTRI 0.1299  CORUM 0.0275  KD_response 0.1259  CORUM_noRP 0.0187 [66 s] 
+[13:16:52] scored a_clr_on_logatt_t9_hubstrat DoRothEA_AB 0.2066  DoRothEA_ABC 0.1403  CollecTRI 0.1369  CORUM 0.0641  KD_response 0.1600  CORUM_noRP 0.0238 [67 s] 
+[13:17:35] scored a_clr_on_logatt_t9     DoRothEA_AB 0.2091  DoRothEA_ABC 0.1423  CollecTRI 0.1408  CORUM 0.1097  KD_response 0.1935  CORUM_noRP 0.0324 [39 s] 
+[13:18:19] residualized 611 genes in 138 multi-gene units 
+[13:20:57] scored d_resid_att_t9_noboost DoRothEA_AB 0.2000  DoRothEA_ABC 0.1379  CollecTRI 0.1406  CORUM 0.0298  KD_response 0.1324  CORUM_noRP 0.0225 [36 s] 
+[13:21:36] scored d_resid_att_t9_boost   DoRothEA_AB 0.2001  DoRothEA_ABC 0.1379  CollecTRI 0.1404  CORUM 0.0835  KD_response 0.1433  CORUM_noRP 0.0232 [36 s] 
+[13:21:37] done in 12.9 min 

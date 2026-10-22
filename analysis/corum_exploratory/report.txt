@@ -1,0 +1,23 @@
+Memo: /home/boris/Projects/ClrAttention/docs/plans/corum_analysis.md (exploratory, not preregistered, uncommitted; no keff, multi-head or E. coli truth scoring).
+
+**Diagnosis**
+- The softmax causes the loss and the walk partly repairs it: CORUM 2.00× at t = 1, 3.51× at t = 9 (CLR 6.39×).
+- Dilution is per gene: ~10 effective partners per row vs ~77 strong RP partners, leaving 76% of large-complex pairs unweighted at t = 1. Peripheral genes (INTS8, EIF4B) spend 71–84% of their budget on 60S, and (P+Pᵀ)/2 ranks them above RP–RP pairs.
+- No leakage: 88% of RP walk mass stays inside the complex at t = 9.
+- A calibration failure: row-local AP is 0.47 (CLR 0.58), but 60S per-complex AP is 0.19 (CLR 0.66).
+- Eight RP-dominated entries carry 80% of the gap. Without them attention ties CLR (2.05× vs 2.18×).
+
+**Fixes** (Δ vs attention, paired jackknife)
+- (a) CLR on log Pᵗ (per-row z over reachable pairs, Stouffer): CORUM 7.95× (+0.059 [0.033, 0.084]; above CLR and |r|), DoRothEA A–B +0.003 [0.000, 0.006], CollecTRI +0.005 [0.002, 0.007], KD +0.059. The gains survive hub stratification. Re-normalizing raw probabilities fails (2.46×).
+- (b) Coarse-graining (r ≥ 0.6): CORUM 7.62×, but DoRothEA −0.013 and CollecTRI −0.007, so it fails the guard.
+
+**Conceptual answer:** normalization (plus softmax resolution), not order of operations. Attention turns strength into share. The walk already lumps the clique but gives each member 1/n. CLR on log-attention removes each gene's budget, so members inherit the factor's affinity: CLR → attention → CLR(log). Preregister before E. coli. Caveats: the log readout fails at t ≤ 4; the KD gain needs the near-duplicate bootstrap.
+
+**Questions (verbatim)**
+1. **Scope:** Must the method handle protein complexes, or is that a stated boundary? If preregistration confirms CLR(log Pᵗ), should it become the method or a second operator?
+2. **Fair truth:** 80% of the CORUM gap is the cytoplasmic ribosome counted about six times. Which complex truth do we pre-specify: pooled, overlap-merged, macro, or RP-excluded?
+3. **Latent variables:** Did you mean hard collapse (cliques become nodes) or invariance to how many noisy copies of one factor are measured? The data support the second.
+4. **Story:** May we frame the operator as "CLR → attention → CLR(log)", although the readout changes after the keff preregistration?
+5. **Replication:** Which E. coli complex truth (EcoCyc complexes, ribosomal-protein operons) do you trust for a preregistered replication, and should knockdown-response modules stay secondary?
+
+Scripts: /tmp/claude-1000/-home-boris-Projects-ClrAttention/b33914c9-0cfd-485d-8dd4-cf8a2a22b632/scratchpad/ (cleared at boot; copy before 16:00).
