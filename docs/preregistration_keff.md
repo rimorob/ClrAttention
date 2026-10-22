@@ -46,3 +46,12 @@ E. coli: about 20 operators × 2 directions × about 60 s over t ∈ {1, 2, 3, 4
 ## Change log
 
 - 2026-10-16: fixed.
+- 2026-10-21 (before any full run; reviewer GO-WITH-CHANGES): implementation choices logged as deviations or clarifications of `analysis/keff_test.R`:
+  - O1: the width-matched temperature tau is computed on the full-data CLR (median over rows of the bisected tau_i at keff 10) and reused on the training halves.
+  - O2: conditional densities on z > 0 are combined with an unconditional pi0 (Storey, lambda = 0.5); on full M3D, P0(z > 0)/P(z > 0) = 0.92 and the keff distribution is unchanged.
+  - K562 uses the same t grid as E. coli for held-out selection; K562 truths are scored only at each variant's t* and at t = 9.
+  - Decision rule, literal reading: a win needs Holm p < 0.05 against d = 0 and a point estimate >= +0.005 (a loss mirrors it).
+  - "Regulons" in the multi-head rule = M3D TF regulons, EcoMAC TF regulons and K562 CollecTRI.
+  - Disclosure: smoke tests of the script on 300-gene subsets (all three datasets) scored truths before this entry; O2 on M3D TF regulons showed +0.016/+0.018 there. No design change follows from them.
+  - O2/O2e degeneracy, checked on full M3D without truths: on the CLR scale pi0 = 0.94 and the permutation density exceeds the observed density for CLR 2-6, so lfdr is about 1 and 83% of rows sit at the floor of 2; a permutation null on raw MI gives pi0 = 0.016 and 100% of rows at the ceiling of 30; O2e has 94% of rows at the ceiling. The two-group local-FDR approach cannot choose a width in this data on any scale. O2 runs as preregistered; if it meets the decision rule it is reported with its realised keff distribution as a sharp-attention (about keff 2) result, not as an lfdr-calibrated width.
+  - Protocol: held-out selections are computed first for all three datasets (`--stop_after_selection 1`), committed to `docs/keff_selections/`, and the truth phase refuses to run unless its selections match the committed copies.
