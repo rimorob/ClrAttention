@@ -1,0 +1,10 @@
+[13:24:28] CORUM_noRP drops 8 RP-dominated complexes 
+[13:24:47] truth DoRothEA_AB   105 sets,  2797795 pairs, base rate 0.1830 
+[13:24:47] truth DoRothEA_ABC  271 sets,  8600878 pairs, base rate 0.1305 
+[13:24:47] truth CollecTRI     491 sets,  3605955 pairs, base rate 0.1278 
+[13:24:47] truth CORUM        1185 sets,  2552670 pairs, base rate 0.0133 
+[13:24:47] truth KD_response   566 sets,  5279625 pairs, base rate 0.0787 
+[13:24:47] truth CORUM_noRP   1177 sets,  2353365 pairs, base rate 0.0119 
+[13:25:59] scored a_clr_bilateral_logP_t9_robust DoRothEA_AB 0.2036  DoRothEA_ABC 0.1402  CollecTRI 0.1450  CORUM 0.1054  KD_response 0.2460  CORUM_noRP 0.0300 [32 s] 
+[13:26:34] scored a_clr_on_logatt_t9_robust DoRothEA_AB 0.2064  DoRothEA_ABC 0.1401  CollecTRI 0.1385  CORUM 0.0986  KD_response 0.1819  CORUM_noRP 0.0301 [30 s] 
+[13:26:34] done in 2.1 min 

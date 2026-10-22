@@ -1,0 +1,25 @@
+[13:09:10] softmax row perplexity: median 10.00 (should be 10) 
+[13:09:10] macro (per-complex AP, 499 complexes with >= 10 pairs): mean CLR 0.012, t1 0.006, t9 0.007; CLR > t9 in 74% 
+[13:09:10]    a_clr_on_logatt_t9   mean 0.015; beats t9 in 82%, beats CLR in 49% 
+[13:09:10]    a_clr_on_att_t9      mean 0.005; beats t9 in 49%, beats CLR in 26% 
+[13:09:10]    d_density_t9         mean 0.004; beats t9 in 63%, beats CLR in 38% 
+[13:09:10]    b_coarse_r06         mean 0.012; beats t9 in 33%, beats CLR in 17% 
+[13:09:10]    b0_boost_on_att_t9   mean 0.011; beats t9 in 5%, beats CLR in 28% 
+[13:09:10] per-complex loss (CLR - t9) vs size: Spearman 0.16 (p 0.00034); vs member plateau -0.01 (p 0.9); vs members with CLR >= 3: 0.38 (p 7.3e-19) 
+[13:09:10]    non-RP complexes only (492): Spearman with size 0.13, with plateau 0.02; mean loss 0.0011, median 0.0002, CLR > t9 in 73% 
+[13:09:10]    size   5-  9: 320 complexes, mean AP CLR 0.003 t1 0.003 t9 0.002 logCLR 0.003 
+[13:09:10]    size  10- 24: 159 complexes, mean AP CLR 0.010 t1 0.006 t9 0.008 logCLR 0.013 
+[13:09:10]    size  25- 49:  15 complexes, mean AP CLR 0.154 t1 0.039 t9 0.061 logCLR 0.201 
+[13:09:10]    size  50-200:   5 complexes, mean AP CLR 0.198 t1 0.058 t9 0.082 logCLR 0.250 
+[13:09:10] row-local AP (member rows; complex partners vs genes sharing no complex), mean over member rows: 
+[13:09:10]    a_clr_on_att_t9        RP-dominated 0.379   other 0.022 
+[13:09:10]    a_clr_on_logatt_t9     RP-dominated 0.668   other 0.028 
+[13:09:10]    att_t1                 RP-dominated 0.300   other 0.019 
+[13:09:10]    att_t2                 RP-dominated 0.347   other 0.023 
+[13:09:10]    att_t9                 RP-dominated 0.474   other 0.024 
+[13:09:10]    b_coarse_r06           RP-dominated 0.683   other 0.020 
+[13:09:10]    b0_boost_on_att_t9     RP-dominated 0.577   other 0.024 
+[13:09:10]    clr                    RP-dominated 0.578   other 0.024 
+[13:09:10]    d_density_t9           RP-dominated 0.479   other 0.023 
+[13:09:11] within-complex pairs: log(mean softmax weight) ~ log(size) slope -0.50 (pure 1/n dilution = -1); CLR median ~ log(size) slope 0.09 z-units per e-fold 
+[13:09:11] fraction of within-complex pairs with any softmax weight (j in i's top 50 or i in j's): size <= 9 0.05, 10-24 0.06, 25-49 0.25, >= 50 0.24 

@@ -1,0 +1,103 @@
+[12:43:49] 651 genes x 707 samples 
+[12:43:50] truth DoRothEA_AB    36 sets,    25878 pairs, base rate 0.1411 
+[12:43:50] truth DoRothEA_ABC  119 sets,    85491 pairs, base rate 0.1013 
+[12:43:50] truth CollecTRI     154 sets,    30381 pairs, base rate 0.1180 
+[12:43:50] truth CORUM          37 sets,    23653 pairs, base rate 0.2659 
+[12:43:50] truth KD_response   513 sets,    85078 pairs, base rate 0.1812 
+[12:43:51] MI, CLR, softmax operator in 0.0 min 
+[12:43:52] scored clr            CORUM 0.6587 (x2.48)  KD 0.3812  DoRoAB 0.1858  DoRoABC 0.1120  CollecTRI 0.1176  [1 s] 
+[12:43:53] scored abs_r          CORUM 0.7111 (x2.67)  KD 0.4940  DoRoAB 0.1868  DoRoABC 0.1124  CollecTRI 0.1111  [1 s] 
+[12:43:54] scored att_t1         CORUM 0.4965 (x1.87)  KD 0.2436  DoRoAB 0.1599  DoRoABC 0.1064  CollecTRI 0.1202  [1 s] 
+[12:43:55] scored att_t2         CORUM 0.6043 (x2.27)  KD 0.2695  DoRoAB 0.1729  DoRoABC 0.1089  CollecTRI 0.1228  [1 s] 
+[12:43:55] scored att_t3         CORUM 0.6126 (x2.30)  KD 0.2687  DoRoAB 0.1759  DoRoABC 0.1095  CollecTRI 0.1240  [1 s] 
+[12:43:56] scored att_t4         CORUM 0.6162 (x2.32)  KD 0.2712  DoRoAB 0.1776  DoRoABC 0.1097  CollecTRI 0.1240  [1 s] 
+[12:43:57] scored att_t6         CORUM 0.6182 (x2.32)  KD 0.2777  DoRoAB 0.1795  DoRoABC 0.1098  CollecTRI 0.1236  [1 s] 
+[12:43:58] scored att_t9         CORUM 0.6145 (x2.31)  KD 0.2861  DoRoAB 0.1799  DoRoABC 0.1093  CollecTRI 0.1228  [1 s] 
+[12:43:59] stationary pi: 3702 iterations; max/median 261 
+[12:43:59] RP genes in data: 76; RP-dominated complexes (>= 30% RP members): 9: 40S ribosomal subunit, cytoplasmic (32); 40S ribosomal subunit, cytoplasmic.1 (31); 60S ribosomal subunit, cytoplasmic (46); IGF2BP1 complex (3); Nop56p-associated pre-rRNA complex (61); Ribosome, cytoplasmic (78); TNF-alpha/Nf-kappa B signaling complex (RPL6, RPL30, RPS13, CHUK, DDX3X, NFKB2, NFKBIB, REL, IKBKG, NFKB1, MAP3K8, RELB, GLG1, NFKBIA, RELA, TNIP2,  GTF2I) (4); TNF-alpha/NF-kappa B signaling complex 6 (7); TRBP containing complex (DICER, RPL7A, EIF6, MOV10 and subunits of the 60S ribosomal particle) (25) 
+[12:43:59] positive pairs 6290; covered by complex pairs 6290 
+[12:43:59] pooled CORUM AP, CLR - att_t9 = 0.0442; RP-dominated complexes carry 124%; top-10 complexes carry 124% 
+[12:43:59] pooled CORUM AP, CLR - att_t1 = 0.1622; RP-dominated complexes carry 64% 
+[12:43:59]    Ribosome, cytoplasmic                                        size  78  RP 0.97  share of loss t9  64.3%  t1  32.4% 
+[12:43:59]    Nop56p-associated pre-rRNA complex                           size  61  RP 0.97  share of loss t9  29.3%  t1  16.2% 
+[12:43:59]    60S ribosomal subunit, cytoplasmic                           size  46  RP 0.98  share of loss t9  14.5%  t1   7.4% 
+[12:43:59]    40S ribosomal subunit, cytoplasmic                           size  32  RP 0.97  share of loss t9   6.2%  t1   3.1% 
+[12:43:59]    40S ribosomal subunit, cytoplasmic.1                         size  31  RP 0.97  share of loss t9   5.3%  t1   2.7% 
+[12:43:59]    TRBP containing complex (DICER, RPL7A, EIF6, MOV10 and subun size  25  RP 0.84  share of loss t9   4.1%  t1   2.3% 
+[12:43:59]    C complex spliceosome                                        size   8  RP 0.00  share of loss t9   0.2%  t1   0.2% 
+[12:43:59]    CEN complex                                                  size   3  RP 0.00  share of loss t9   0.1%  t1   0.0% 
+[12:43:59]    Arp2/3 protein complex                                       size   3  RP 0.00  share of loss t9   0.1%  t1   0.0% 
+[12:43:59]    PA700-20S-PA28 complex                                       size   3  RP 0.00  share of loss t9   0.1%  t1   0.0% 
+[12:43:59]    HSPA9-GRPEL1-GRPEL2-TIMM44 complex                           size   4  RP 0.00  share of loss t9   0.1%  t1   0.0% 
+[12:43:59]    Rap1 complex.1                                               size   3  RP 0.00  share of loss t9   0.0%  t1   0.0% 
+[12:43:59]    Shelterin complex                                            size   3  RP 0.00  share of loss t9   0.0%  t1   0.0% 
+[12:43:59]    TRBP containing complex (DICER, TRBP, AGO2, RPL7A, EIF6, MOV size   4  RP 0.25  share of loss t9   0.0%  t1   0.0% 
+[12:43:59]    CF IIAm complex (Cleavage factor IIAm complex)               size   3  RP 0.00  share of loss t9   0.0%  t1   0.0% 
+[12:43:59] positives RP-dominated  n=  3220  median pooled percentile CLR 0.8997  t1 0.8493  t9 0.8666; in top 1%: CLR 0.05 t1 0.03 t9 0.03 
+[12:43:59] positives other         n=  3070  median pooled percentile CLR 0.6138  t1 0.3992  t9 0.6748; in top 1%: CLR 0.02 t1 0.03 t9 0.04 
+[12:43:59]    non-RP positives, largest complex size 3-4   n=    54  median pct CLR 0.5242 t1 0.3992 t9 0.6347 
+[12:43:59]    non-RP positives, largest complex size 5-9   n=    13  median pct CLR 0.4851 t1 0.3992 t9 0.2329 
+[12:43:59]    non-RP positives, largest complex size 10-24 n=   153  median pct CLR 0.3688 t1 0.3992 t9 0.4704 
+[12:43:59]    non-RP positives, largest complex size 50+   n=  2850  median pct CLR 0.6289 t1 0.3992 t9 0.6903 
+[12:43:59] top 5000 CORUM-universe pairs, clr   : precision 0.667, RP-RP 0.464 (positive RP-RP 0.464), any RP 0.667, a top-1% pi gene 0.135 
+[12:43:59] top 5000 CORUM-universe pairs, 1     : precision 0.628, RP-RP 0.408 (positive RP-RP 0.408), any RP 0.613, a top-1% pi gene 0.126 
+[12:43:59] top 5000 CORUM-universe pairs, 9     : precision 0.633, RP-RP 0.398 (positive RP-RP 0.398), any RP 0.576, a top-1% pi gene 0.183 
+[12:43:59] mass t=1 RP-dominated size 5-9   rows    7 | share of non-self mass: in complex 0.056, other co-complex 0.923, outside 0.000 | per partner 0.0047 
+[12:43:59] mass t=1 RP-dominated size 25-49 rows  134 | share of non-self mass: in complex 0.383, other co-complex 0.563, outside 0.000 | per partner 0.0053 
+[12:43:59] mass t=1 RP-dominated size 50+   rows  139 | share of non-self mass: in complex 0.971, other co-complex 0.001, outside 0.000 | per partner 0.0065 
+[12:43:59] mass t=1 other        size 5-9   rows    8 | share of non-self mass: in complex 0.000, other co-complex 0.004, outside 0.991 | per partner 0.0000 
+[12:43:59] mass t=1 other        size 10-24 rows   18 | share of non-self mass: in complex 0.005, other co-complex 0.000, outside 0.988 | per partner 0.0001 
+[12:43:59] mass t=1 other        size 25-49 rows   76 | share of non-self mass: in complex 0.282, other co-complex 0.266, outside 0.346 | per partner 0.0042 
+[12:43:59] mass t=1 other        size 50+   rows   76 | share of non-self mass: in complex 0.654, other co-complex 0.000, outside 0.346 | per partner 0.0044 
+[12:43:59] mass t=2 RP-dominated size 5-9   rows    7 | share of non-self mass: in complex 0.074, other co-complex 0.917, outside 0.001 | per partner 0.0088 
+[12:43:59] mass t=2 RP-dominated size 25-49 rows  134 | share of non-self mass: in complex 0.389, other co-complex 0.565, outside 0.001 | per partner 0.0088 
+[12:43:59] mass t=2 RP-dominated size 50+   rows  139 | share of non-self mass: in complex 0.947, other co-complex 0.001, outside 0.001 | per partner 0.0097 
+[12:43:59] mass t=2 other        size 5-9   rows    8 | share of non-self mass: in complex 0.001, other co-complex 0.017, outside 0.981 | per partner 0.0001 
+[12:43:59] mass t=2 other        size 10-24 rows   18 | share of non-self mass: in complex 0.011, other co-complex 0.000, outside 0.984 | per partner 0.0005 
+[12:43:59] mass t=2 other        size 25-49 rows   76 | share of non-self mass: in complex 0.278, other co-complex 0.278, outside 0.410 | per partner 0.0060 
+[12:43:59] mass t=2 other        size 50+   rows   76 | share of non-self mass: in complex 0.590, other co-complex 0.000, outside 0.410 | per partner 0.0056 
+[12:43:59] mass t=9 RP-dominated size 5-9   rows    7 | share of non-self mass: in complex 0.076, other co-complex 0.901, outside 0.012 | per partner 0.0121 
+[12:43:59] mass t=9 RP-dominated size 25-49 rows  134 | share of non-self mass: in complex 0.372, other co-complex 0.580, outside 0.014 | per partner 0.0115 
+[12:43:59] mass t=9 RP-dominated size 50+   rows  139 | share of non-self mass: in complex 0.865, other co-complex 0.001, outside 0.012 | per partner 0.0126 
+[12:43:59] mass t=9 other        size 5-9   rows    8 | share of non-self mass: in complex 0.002, other co-complex 0.033, outside 0.958 | per partner 0.0004 
+[12:43:59] mass t=9 other        size 10-24 rows   18 | share of non-self mass: in complex 0.029, other co-complex 0.000, outside 0.961 | per partner 0.0016 
+[12:43:59] mass t=9 other        size 25-49 rows   76 | share of non-self mass: in complex 0.220, other co-complex 0.218, outside 0.565 | per partner 0.0055 
+[12:43:59] mass t=9 other        size 50+   rows   76 | share of non-self mass: in complex 0.435, other co-complex 0.000, outside 0.565 | per partner 0.0056 
+[12:43:59] within-complex pairs, size 5-9   n=    49: median CLR 0.49 | softmax (A+A')/2 0.0000 (zero 71%) | S9 0.00046 
+[12:43:59] within-complex pairs, size 10-24 n=   153: median CLR 0.15 | softmax (A+A')/2 0.0000 (zero 90%) | S9 0.00029 
+[12:43:59] within-complex pairs, size 25-49 n=  3783: median CLR 2.33 | softmax (A+A')/2 0.0002 (zero 46%) | S9 0.00279 
+[12:43:59] within-complex pairs, size 50+   n=  7683: median CLR 2.50 | softmax (A+A')/2 0.0003 (zero 44%) | S9 0.00334 
+[12:43:59] Spearman(size, per-pair score) over within-complex pairs: CLR 0.07, softmax 0.05, S9 0.07 
+[12:43:59] softmax temperature: RP genes median 0.336 vs other CORUM genes 0.485 vs all 0.425; CLR partners within 1 unit of the row max: RP 9, other CORUM 5, all 5 
+[12:43:59] t=9 mass from 60S ribosomal subunit, cytoplasmic members to non-members (top 25): RPS15A 0.072*, RPS3 0.051*, RPS13 0.034*, RPS18 0.030*, RPS6 0.023*, RPS11 0.023*, RPS14 0.022*, RPS9 0.020*, RPS7 0.020*, RPS17 0.019*, RPS23 0.012*, RPS21 0.006*, RPS12 0.005*, RPS29 0.004*, RPS25 0.003*, RPS3A 0.003*, RPS27 0.002*, SNRPD1 0.002, VEZT 0.002, RPS8 0.002*, MSRB1 0.002, ARPC5 0.002, UBE2H 0.001, GYPA 0.001, PAICS 0.001 
+[12:43:59]    (* = shares a CORUM complex with at least one member) 
+[12:43:59] t=1 softmax mass from members to non-members (top 15): RPS15A 0.093, RPS3 0.047, RPS13 0.038, RPS18 0.026, RPS7 0.026, RPS12 0.021, RPS14 0.021, RPS17 0.018, RPS9 0.016, RPS6 0.014, RPS11 0.014, RPS29 0.009, RPS21 0.009, RPS23 0.007, RPS27 0.006 
+[12:43:59] non-members attending most to the complex (sum of A over members, top 15): RPS7 0.91*, RPS3 0.87*, RPS11 0.82*, RPS15A 0.79*, HIGD1A 0.77, RPS24 0.77*, RPS9 0.77*, RPS23 0.75*, RPS15 0.73*, RPS29 0.73*, RPS19 0.72*, RPS12 0.72*, RPS10 0.71*, RPS21 0.71*, MAP3K4 0.69 
+[12:44:00] local clr            row AP: RP-dominated 0.783, other 0.251 | macro AP: 60S 0.716, Ribosome cyto 0.706; RP-dominated mean 0.574, other mean 0.091 
+[12:44:00] local att_t1         row AP: RP-dominated 0.497, other 0.188 | macro AP: 60S 0.308, Ribosome cyto 0.361; RP-dominated mean 0.217, other mean 0.072 
+[12:44:00] local att_t2         row AP: RP-dominated 0.588, other 0.241 | macro AP: 60S 0.337, Ribosome cyto 0.400; RP-dominated mean 0.240, other mean 0.081 
+[12:44:00] local att_t9         row AP: RP-dominated 0.736, other 0.253 | macro AP: 60S 0.403, Ribosome cyto 0.468; RP-dominated mean 0.319, other mean 0.075 
+[12:44:00] clr_R vs clr_calibrate on a test matrix: max |diff| 0.015 (diagonal handling only) 
+[12:44:01] scored a_clr_on_att_t1 CORUM 0.4430 (x1.67)  KD 0.2273  DoRoAB 0.1565  DoRoABC 0.1054  CollecTRI 0.1196  [1 s] 
+[12:44:02] scored a_clr_on_att_t2 CORUM 0.4822 (x1.81)  KD 0.2356  DoRoAB 0.1608  DoRoABC 0.1065  CollecTRI 0.1201  [1 s] 
+[12:44:02] scored a_clr_on_att_t9 CORUM 0.5454 (x2.05)  KD 0.2549  DoRoAB 0.1683  DoRoABC 0.1074  CollecTRI 0.1196  [1 s] 
+[12:44:03] local a_clr_on_att_t9 row AP: RP-dominated 0.622, other 0.214 | macro AP: 60S 0.312, Ribosome cyto 0.387; RP-dominated mean 0.232, other mean 0.062 
+[12:44:03] scored a_clr_on_logatt_t9 CORUM 0.7261 (x2.73)  KD 0.3091  DoRoAB 0.1957  DoRoABC 0.1158  CollecTRI 0.1262  [1 s] 
+[12:44:04] local a_clr_on_logatt_t9 row AP: RP-dominated 0.826, other 0.269 | macro AP: 60S 0.807, Ribosome cyto 0.810; RP-dominated mean 0.608, other mean 0.092 
+[12:44:04] scored d_geomean_t9   CORUM 0.6755 (x2.54)  KD 0.2776  DoRoAB 0.1981  DoRoABC 0.1171  CollecTRI 0.1301  [1 s] 
+[12:44:05] scored d_density_t9   CORUM 0.5182 (x1.95)  KD 0.1531  DoRoAB 0.1667  DoRoABC 0.1099  CollecTRI 0.1255  [1 s] 
+[12:44:06] local d_density_t9   row AP: RP-dominated 0.687, other 0.219 | macro AP: 60S 0.365, Ribosome cyto 0.407; RP-dominated mean 0.219, other mean 0.049 
+[12:44:07] coarse r0=0.6: 546 units (19 multi-gene, largest 59, 124 genes in multi-gene units, 1891 within-unit pairs) in 0.0 min 
+[12:44:07]    within-unit CORUM-universe pairs: 1841, precision 0.994 (CORUM base rate 0.2659); RP genes in units: 73 of 76 
+[12:44:08] scored b_coarse_r06   CORUM 0.7365 (x2.77)  KD 0.4848  DoRoAB 0.1852  DoRoABC 0.1053  CollecTRI 0.1046  [1 s] 
+[12:44:08] local b_coarse_r06   row AP: RP-dominated 0.929, other 0.296 | macro AP: 60S 0.994, Ribosome cyto 0.944; RP-dominated mean 0.860, other mean 0.092 
+[12:44:09] scored b0_boost_on_att_t9 CORUM 0.7075 (x2.66)  KD 0.3577  DoRoAB 0.1933  DoRoABC 0.1125  CollecTRI 0.1215  [1 s] 
+[12:44:09] local b0_boost_on_att_t9 row AP: RP-dominated 0.808, other 0.257 | macro AP: 60S 0.730, Ribosome cyto 0.762; RP-dominated mean 0.650, other mean 0.083 
+[12:44:10] scored bC_boost_on_clr CORUM 0.6971 (x2.62)  KD 0.4197  DoRoAB 0.1918  DoRoABC 0.1134  CollecTRI 0.1165  [1 s] 
+[12:44:11] coarse r0=0.4: 409 units (38 multi-gene, largest 74, 280 genes in multi-gene units, 4381 within-unit pairs) in 0.0 min 
+[12:44:11]    within-unit CORUM-universe pairs: 3291, precision 0.932 (CORUM base rate 0.2659); RP genes in units: 75 of 76 
+[12:44:12] scored b_coarse_r04   CORUM 0.7017 (x2.64)  KD 0.4237  DoRoAB 0.1811  DoRoABC 0.1070  CollecTRI 0.1125  [1 s] 
+[12:44:13] coarse r0=0.8: 617 units (9 multi-gene, largest 26, 43 genes in multi-gene units, 335 within-unit pairs) in 0.0 min 
+[12:44:13]    within-unit CORUM-universe pairs: 335, precision 1.000 (CORUM base rate 0.2659); RP genes in units: 39 of 76 
+[12:44:14] scored b_coarse_r08   CORUM 0.6456 (x2.43)  KD 0.4562  DoRoAB 0.1830  DoRoABC 0.1105  CollecTRI 0.1098  [1 s] 
+[12:44:14] done in 0.7 min 
