@@ -1,0 +1,2 @@
+"dataset","truth","readout","t","aupr","aupr_6sig","expected_6sig","abs_diff","n_pairs","n_pos","passed","quick","prereg_commit","git_head","time"
+"k562ess","CORUM_raw_pooled","a3r",9,0.105435082561767,0.105435,0.105435,1.74382326911804e-08,2552670,33840,TRUE,FALSE,"90b0e3d4fcd25192d490d44736192610f684d69c","e891f99d57c13a225ac47e8180d8954536b37409","2026-10-22 17:44:44"
