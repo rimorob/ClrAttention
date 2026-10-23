@@ -41,7 +41,7 @@
 
 ## Open items as of 22 Oct, 16:45
 
-- **CORUM fix found (exploratory):** CLR applied again to log Pᵗ rescues complexes (K562 CORUM 7.95× random vs CLR 6.39×) without hurting TF regulons. PI decisions recorded in `docs/plans/corum_analysis.md`. **Next step:** preregister CLR(log Pᵗ) (Opus high-effort review), then confirmatory runs on E. coli (EcoCyc complexes) and K562 (overlap-merged CORUM).
+- **CORUM fix found (exploratory):** CLR applied again to log Pᵗ rescues complexes (K562 CORUM 7.95× random vs CLR 6.39×) without hurting TF regulons. PI decisions recorded in `docs/plans/corum_analysis.md`. **Next step:** preregistered and committed (`docs/preregistration_clr_logpt.md`: confirmatory = E. coli M3D + EcoMAC, EcoCyc complexes superiority and RegulonDB SC non-inferiority vs attention at t = 9; RPE1 merged CORUM key secondary; K562 in-sample only). Now write `analysis/clr_logpt_test.R` with the git gate, run the K562 reproduction check, the label-free t\* phase and the EcoCyc truth build (commit each), then score E. coli.
 - **K562 keff selections:** a one-shot service (`clr-k562-boost`) switches the job to 4 workers as soon as splits 3 and 4 are saved; nothing is lost.
 - **GRNBoost2 diagnostic:** early sign that no early stopping fixes GRNBoost2 (mHSC-E AUPRC ratio 2.75); wait for the full run, then a reviewer.
 - **Thermal watch** (`clr-thermal`) runs until midnight; CPU 2 sits at 82-86 °C under load (no warnings).
