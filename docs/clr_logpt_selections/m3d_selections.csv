@@ -1,0 +1,3 @@
+"dataset","readout","criterion","t_star","t_q25","t_q75","t_min","t_max","n_splits","t_secondary","flag_t_lt4","quick","prereg_commit"
+"m3d","a3r","crit_A",6,6,7,6,8,20,9,FALSE,0,"90b0e3d4fcd25192d490d44736192610f684d69c"
+"m3d","attention","crit_A",9,8.75,10,8,10,20,9,FALSE,0,"90b0e3d4fcd25192d490d44736192610f684d69c"
