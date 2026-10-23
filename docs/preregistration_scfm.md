@@ -153,3 +153,7 @@ d_i = for dataset i, the mean over gene sets and primary truths of log2(AUPRC ra
 ## Change log
 
 - 2026-10-21: fixed (single primary NI contrast replaces 4 Holm tests).
+- 2026-10-22: environment and checkpoints recorded (no truth or scoring touched; the preregistered design is unchanged).
+  - Environment: `~/venvs/scfm`, torch 2.3.1+cu121 (sm_60 binary for Pascal, unverified until the smoke test), scprint 1.0.13, scgpt 0.2.4 (`--no-deps`); full freeze in `docs/scfm_env_freeze.txt`.
+  - scPRINT `medium-v1.5.ckpt` from HF `jkobject/scPRINT`, commit 8e1ad1a1bc40c1fc2f4f1700fe27923eea9a2bed, SHA-256 96ff7c5d9e1ad5076e818bde3c38f498c95cd354cc42029d90691b5ba2964ff8, stored in `~/scfm_models/scprint/`.
+  - scGPT `scGPT_human` (whole-human) from the authors' own release, the Google Drive folder linked in the scGPT repository README (https://github.com/bowang-lab/scGPT, "whole-human"): https://drive.google.com/drive/folders/1oWh_-ZRdhtoGQ2Fw24HP41FgLoomVo-y . The README lists no other source. Downloaded 22 Oct 2026 to `~/scfm_models/scgpt_human/`, SHA-256: `best_model.pt` 6cb5d451ab5c4b33eb673adbe4fddc61d2389df1b89b7651a9fe2e557572b922; `vocab.json` acca93d114ca62c3f0f50debbd23e8c87f0714f4737764454f6b2b13f2e8580f; `args.json` c18e075e018140cb8b2d9029387b9de26607a5ce6a8ccabd6ead70cd76b95d60.
