@@ -1,6 +1,6 @@
 # Project status
 
-*Thursday 22 October 2026, 11:15, before a planned shutdown (GPU moved to the CPU 2 x16 slot). Living file: update at each checkpoint.*
+*Thursday 22 October 2026, 21:45, before a second shutdown (GPUs back in place and visible, both x16, both report NUMA node 0 where node 1 was expected). Living file: update at each checkpoint. Everything is committed and pushed; the jobs resume from their caches (GRNBoost2 8 runs, K562 keff splits 3-4 saved, BEELINE 17%, RPE1 t\* splits in `results/clr_logpt_test/rpe1/splits/`). The CLR(log P^t) checklist below says where to continue; the next step is the EcoCyc truth build. GPU work is set up (`~/venvs/scfm`, checkpoints hashed in the scfm preregistration change log) but the lamindb setup, leakage audit and smoke test are not started: run them only when the CPU jobs are light.*
 
 ## Restarting after the shutdown
 
