@@ -47,6 +47,20 @@
 - **Thermal watch** (`clr-thermal`) runs until midnight; CPU 2 sits at 82-86 °C under load (no warnings).
 - **Model use:** subagents default to Sonnet (`worker` agent; user setting); Opus high only for design, statistical interpretation and claims.
 
+## CLR(log Pᵗ) confirmatory checklist (resume here after any shutdown)
+
+Design is fixed in `docs/preregistration_clr_logpt.md` (PI chose option A, 22 Oct: E. coli is the only confirmatory set; K562 in-sample; RPE1 key secondary). Tick each step only when committed. Jobs run through `jobs_pc/sched` and resume from caches; check `tools/progress.sh` first.
+
+- [x] Preregistration committed (90b0e3d)
+- [x] `analysis/clr_logpt_test.R` with gates; K562 reproduction check passed (e891f99, 5881335)
+- [ ] Label-free t\* phase, M3D and EcoMAC (then RPE1): `--mode selections`; commit to `docs/clr_logpt_selections/`
+- [ ] EcoCyc complex truth build; commit its SHA-256
+- [ ] Implement the scoring (jackknife, bootstrap, Holm per the preregistration); reviewer who has seen no E. coli result checks script against the file
+- [ ] Truth phase, once: E. coli, then RPE1, then K562 (in-sample)
+- [ ] Write-up: verdict per the preregistration's outcome table
+
+If a job died mid-step, rerun that step; do not skip a gate. No truth may be read before the three boxes above it are ticked.
+
 ## Next
 
 1. **CORUM order-of-operations expert (PI, 22 Oct).** Members of a complex share one latent variable, so all their pairs are strongly coupled. The softmax and the walk may spread attention across the clique and then into the wider translation program. The question is whether collapsing strongly coupled cliques into latent variables before attending, or attending on residuals after removing a clique's shared factor, fixes the loss. A max-effort expert analyses the CORUM results and interviews the PI (questions relayed in the session).
