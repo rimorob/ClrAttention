@@ -53,7 +53,8 @@ Design is fixed in `docs/preregistration_clr_logpt.md` (PI chose option A, 22 Oc
 
 - [x] Preregistration committed (90b0e3d)
 - [x] `analysis/clr_logpt_test.R` with gates; K562 reproduction check passed (e891f99, 5881335)
-- [ ] Label-free t\* phase, M3D and EcoMAC (then RPE1): `--mode selections`; commit to `docs/clr_logpt_selections/`
+- [ ] Label-free t\* phase, M3D and EcoMAC (then RPE1): `--mode selections`; commit to `docs/clr_logpt_selections/` (script committed; jobs 0900 m3d, 0901 ecomac, 0902 rpe1 in `jobs_pc/sched`, results in `results/clr_logpt_test/<dataset>/`)
+  - How to resume: if a job died, requeue `jobs_pc/sched/090[0-2]_clrlogpt_sel_*.sh` (the scheduler restarts interrupted jobs; finished splits in `results/clr_logpt_test/<dataset>/splits/` are reused).
 - [ ] EcoCyc complex truth build; commit its SHA-256
 - [ ] Implement the scoring (jackknife, bootstrap, Holm per the preregistration); reviewer who has seen no E. coli result checks script against the file
 - [ ] Truth phase, once: E. coli, then RPE1, then K562 (in-sample)
