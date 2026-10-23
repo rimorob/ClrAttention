@@ -1,15 +1,24 @@
 #!/usr/bin/env Rscript
 # CLR(log P^t) test, as preregistered in docs/preregistration_clr_logpt.md (committed 90b0e3d).
 # This file implements: the gates, the a3r operator (and a2r, a1) and the K562 reproduction check.
-# NOT implemented yet (later commits, after the check passes): label-free t* phase, EcoCyc truth build,
-# E. coli / RPE1 / K562 truth phases. Their entry points exist only as gate-then-stop stubs.
+# Also implemented: --mode selections (label-free held-out t*, see below).
+# NOT implemented yet: EcoCyc truth build, E. coli / RPE1 / K562 truth phases (gate-then-stop stubs).
 #
 # Modes (--mode):
 #   repro   K562 implementation check. Reads ONLY the K562 raw-CORUM truth rows and must reproduce the
 #           exploratory AUPR 0.1054351 (a_clr_bilateral_logP_t9_robust) to 6 significant digits.
 #           Writes <out>/k562_repro/repro_check.csv (passed = TRUE/FALSE). --quick N uses the first N
 #           genes (seeded sample) and reads NO truth (operator diagnostics only; never counts as the check).
-#   selections, truth   gate-checked stubs (see gates below).
+#   selections  Label-free held-out t* (preregistration, "Secondary: held-out t*"). Never reads a truth.
+#           --dataset m3d|ecomac|rpe1|k562ess. Criterion A (AP of S for the other half's top-1% CLR pairs,
+#           upper triangle, ap_fast) on the keff splits (same seeds and generators as keff_test.R: E. coli seed
+#           20261014, 20 lab / author splits; human 20261015, 10 random halves), both directions; operator = keff-10
+#           softmax (cap 50, self-loop for empty rows), lazy walk alpha 0.5; readouts: a3r (new) and attention
+#           (comparator) over the grid; per split-direction argmax (first max), per split geometric mean of the
+#           two directions (rounded), median over splits (floor(x + 0.5)). Attention t* must equal the committed
+#           K10 selections (m3d 9, ecomac 8) or the run stops. Writes <out>/<dataset>/{selections.csv, ...};
+#           per-split curves are cached (resumable). Then label-free checks at t = 9 and at t* on the full data.
+#   truth   gate-checked stub (see gates below).
 #
 # Gates (functions below), each failure is a stop():
 #   gate_prereg()      preregistration tracked in git and identical to HEAD; hash of last commit touching
@@ -26,15 +35,17 @@
 args <- commandArgs(trailingOnly = TRUE)
 opt <- list(mode = "repro", dataset = "k562ess", out = "results/clr_logpt_test", threads = 4L, quick = 0L,
             t = 9L, alpha = 0.5, keff = 10, cap = 50L, seed = 20261022L,
+            workers = 4L, nsplit = NA_integer_, mem_gb = 4, target_frac = 0.01,
+            tgrid = "1,2,3,4,5,6,8,10,12,16,20,24,32", h5 = "",
             expr = "results/baselines_k562ess_truthgenes_genie3/expression.tsv",
             members = "results/baselines_k562ess_truthgenes_genie3/regulon_members.csv")
-ints <- c("threads", "quick", "t", "cap", "seed")
+ints <- c("threads", "quick", "t", "cap", "seed", "workers", "nsplit")
 i <- 1L
 while (i <= length(args)) {
   key <- gsub("-", "_", sub("^--", "", args[i]))
   if (!key %in% names(opt)) stop("unknown argument: ", args[i])
   v <- args[i + 1L]
-  opt[[key]] <- if (key %in% ints) as.integer(v) else if (key %in% c("alpha", "keff")) as.numeric(v) else v
+  opt[[key]] <- if (key %in% ints) as.integer(v) else if (key %in% c("alpha", "keff", "mem_gb", "target_frac")) as.numeric(v) else v
   i <- i + 2L
 }
 PREREG <- "docs/preregistration_clr_logpt.md"
@@ -121,9 +132,188 @@ script_dir <- (function() {
 })()
 source(file.path(script_dir, "regulondb.R")); source(file.path(script_dir, "regulons.R"))
 
+## ---- mode: selections (label-free held-out t*; reads NO truth) ------------------------------------
+if (opt$mode == "selections") {
+  ds <- opt$dataset
+  if (!ds %in% c("m3d", "ecomac", "rpe1", "k562ess")) stop("selections: dataset must be m3d, ecomac, rpe1 or k562ess")
+  ecoli <- ds %in% c("m3d", "ecomac")
+  if (is.na(opt$nsplit)) opt$nsplit <- if (ecoli) 20L else 10L
+  seed <- if (ecoli) 20261014L else 20261015L                  # keff_test.R seeds
+  tgrid <- as.integer(strsplit(opt$tgrid, ",")[[1]])
+  expected_att <- c(m3d = 9L, ecomac = 8L)                     # committed K10 selections (docs/keff_selections)
+  dout <- file.path(opt$out, ds); dir.create(file.path(dout, "splits"), recursive = TRUE, showWarnings = FALSE)
+  dir.create(file.path(dout, "cache"), showWarnings = FALSE)
+  logf <- file.path(dout, "selections.log")
+  say <- function(...) { m <- sprintf("[%s] %s", format(Sys.time(), "%H:%M:%S"), paste0(...)); cat(m, "\n"); cat(m, "\n", file = logf, append = TRUE) }
+  wcsv <- function(x, n) utils::write.csv(x, file.path(dout, n), row.names = FALSE)
+  source(file.path(script_dir, "parallel.R"))
+  say("selections: ", ds, "; options: ", paste(names(opt), unlist(lapply(opt, format)), sep = "=", collapse = " "))
+  import_defs <- function(file, nms) {
+    got <- character(0)
+    for (e in parse(file.path(script_dir, file), keep.source = FALSE))
+      if (is.call(e) && identical(e[[1]], as.name("<-")) && is.name(e[[2]]) &&
+          as.character(e[[2]]) %in% nms && is.call(e[[3]]) && identical(e[[3]][[1]], as.name("function"))) {
+        eval(e, globalenv()); got <- c(got, as.character(e[[2]])) }
+    if (length(setdiff(nms, got))) stop("not found in ", file, ": ", paste(setdiff(nms, got), collapse = ", "))
+  }
+  import_defs("lab_splits.R", c("lab_split", "build_fit"))
+  import_defs("ecomac_batch.R", "author_split")
+  THREADS <- opt$threads; nthr <- function() THREADS
+
+  ## data: as keff_test.R (m3d, ecomac, k562ess) and perturbseq_bulk.R (rpe1); expression only
+  if (ds == "m3d") {
+    m3d <- "data/E_coli_v4_Build_6"; base <- basename(m3d)
+    raw <- utils::read.delim(file.path(m3d, paste0("avg_", base, "_exps466probes4297.tab")), check.names = FALSE)
+    X <- as.matrix(raw[, -1]); rownames(X) <- vapply(strsplit(raw[[1]], "_"), function(p) p[length(p) - 1L], ""); rm(raw)
+    desc <- utils::read.delim(file.path(m3d, paste0(base, ".experiment_descriptions")), stringsAsFactors = FALSE)
+    exper <- sub("^.*experimenter:([^,]*).*$", "\\1", desc$description)
+    exper[!grepl("experimenter:", desc$description)] <- NA
+    lab <- tapply(exper, desc$experiment_name, function(v) v[!is.na(v)][1])
+    lab <- lab[colnames(X)]; lab[is.na(lab)] <- paste0("unknown_", which(is.na(lab))); rm(desc, exper)
+  } else if (ds == "ecomac") {
+    X <- as.matrix(utils::read.delim("data/ecomac/EcoMAC.tsv", header = FALSE))
+    rownames(X) <- utils::read.delim("data/ecomac/gene_names.tsv", header = FALSE, stringsAsFactors = FALSE)[[2]]
+    plat <- utils::read.csv("data/ecomac/array_platform.csv", stringsAsFactors = FALSE)$platform
+    author <- utils::read.delim("data/ecomac/samples.tsv", stringsAsFactors = FALSE, check.names = FALSE)[["Author"]]
+    stopifnot(length(author) == ncol(X), length(plat) == ncol(X))
+    X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
+    X <- suppressMessages(sva::ComBat(X, batch = factor(plat)))
+  } else {
+    h5 <- if (nzchar(opt$h5)) opt$h5 else if (ds == "rpe1") "data/perturbseq/rpe1_normalized_bulk_01.h5ad" else
+      "data/perturbseq/K562_essential_normalized_bulk_01.h5ad"
+    set.seed(20261015L)                                  # perturbseq_bulk.R split of significant knockdowns
+    rdh <- function(p) rhdf5::h5read(h5, p)
+    cat_of <- function(grp, field) { x <- rdh(paste0(grp, "/", field))
+      if (is.list(x)) return(as.character(x$categories)[x$codes + 1L])
+      cats <- tryCatch(rdh(paste0(grp, "/__categories/", field)), error = function(e) NULL)
+      if (is.null(cats)) as.character(x) else as.character(cats)[x + 1L] }
+    Z <- rdh("X"); rownames(Z) <- cat_of("/var", "gene_name"); pert <- cat_of("/obs", "gene_transcript"); colnames(Z) <- pert
+    pval <- as.numeric(rdh("/obs/energy_test_p_value"))
+    K <- pert[pval < 1e-3 & !grepl("non-targeting", pert)]; K <- K[sample(length(K))]
+    Ahalf <- sort(K[seq_len(floor(length(K) / 2))])
+    X <- Z[, Ahalf]; rm(Z); invisible(gc())
+    nf <- !is.finite(X); bad_gene <- rowMeans(nf) > 0.01; X <- X[!bad_gene, , drop = FALSE]
+    n_imp <- sum(!is.finite(X)); X[!is.finite(X)] <- 0; rm(nf)
+    say(sprintf("non-finite: %d genes dropped (> 1%% missing), %d values set to 0", sum(bad_gene), n_imp))
+    if (ds == "k562ess") {
+      X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
+      dup <- rownames(X) %in% rownames(X)[duplicated(rownames(X))]
+      if (any(dup)) { say(sprintf("dropped %d rows with duplicated gene names", sum(dup))); X <- X[!dup, ] }
+    }
+    rm(rdh, cat_of, pert, pval, K, Ahalf)
+  }
+  X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
+  if (opt$quick > 0L) { v <- apply(X, 1, stats::var); X <- X[sort(order(-v)[seq_len(opt$quick)]), ]; rm(v) }
+  storage.mode(X) <- "double"
+  genes <- rownames(X); G <- length(genes)
+  say(sprintf("%s: %d genes x %d samples%s", ds, G, ncol(X), if (opt$quick > 0L) " (--quick)" else ""))
+
+  ## splits (keff_test.R generators and seeds)
+  set.seed(seed)
+  splits <- lapply(seq_len(opt$nsplit), function(s) switch(ds, m3d = lab_split(), ecomac = author_split(),
+                                                           sample(rep(1:2, length.out = ncol(X)))))
+  fp <- list(dataset = ds, quick = opt$quick, seed = seed, G = G, genes_md5 = digest::digest(genes, algo = "md5"),
+             splits_md5 = digest::digest(splits, algo = "md5"), tgrid = tgrid, cap = opt$cap, keff = opt$keff,
+             alpha = opt$alpha, target_frac = opt$target_frac, prereg_commit = HASH)
+  fp_f <- file.path(dout, "splits", "fingerprint.rds")
+  if (file.exists(fp_f)) { if (!isTRUE(all.equal(readRDS(fp_f), fp))) stop("splits/ fingerprint mismatch (", fp_f, "): use a new --out")
+  } else { if (length(list.files(file.path(dout, "splits"), "\\.csv$"))) stop("splits/ has results without a fingerprint")
+    saveRDS(fp, fp_f) }
+  wcsv(data.frame(sample = colnames(X), do.call(cbind, stats::setNames(splits, sprintf("split_%02d", seq_along(splits))))), "split_assignments.csv")
+  say(sprintf("%d splits; half sizes (first split): %d / %d", opt$nsplit, sum(splits[[1]] == 1L), sum(splits[[1]] == 2L)))
+
+  selfloop <- function(A) { e <- which(rowSums(A) == 0); A[cbind(e, e)] <- 1; A }
+  run_split <- function(si) {
+    h <- splits[[si]]
+    Cs <- lapply(1:2, function(d) { set.seed(seed + 100L * si + d); f <- build_fit(X[, h == d, drop = FALSE])
+      C <- f$clr_scores; f$release(); C })
+    ut <- which(upper.tri(matrix(0, G, G))); rows <- list()
+    for (dir in 1:2) {
+      te <- 3L - dir
+      sv <- Cs[[te]][ut]; tA <- as.integer(sv >= stats::quantile(sv, 1 - opt$target_frac)); rm(sv)
+      P <- lazy_walk_P(selfloop(clr:::.softmax_rows(Cs[[dir]], keff = opt$keff, cap = opt$cap)), opt$alpha)
+      cr <- matrix(NA_real_, length(tgrid), 2, dimnames = list(NULL, c("attention", "a3r"))); Pt <- P
+      for (t in seq_len(max(tgrid))) {
+        if (t > 1L) Pt <- as.matrix(Pt %*% P)
+        if (t %in% tgrid) { k <- match(t, tgrid)
+          S <- attention(Pt); cr[k, 1] <- ap_fast(S[ut], tA); rm(S)
+          S <- a3r(Pt); cr[k, 2] <- ap_fast(S[ut], tA); rm(S); invisible(gc(verbose = FALSE)) }
+      }
+      for (r in colnames(cr)) rows[[length(rows) + 1L]] <- data.frame(split = si, direction = dir, readout = r, t = tgrid, crit_A = cr[, r])
+    }
+    do.call(rbind, rows)
+  }
+  done <- sub("\\.csv$", "", list.files(file.path(dout, "splits"), "\\.csv$"))
+  todo <- setdiff(sprintf("split_%02d", seq_len(opt$nsplit)), done)
+  say(sprintf("%d splits done, %d to run; t grid %s", length(done), length(todo), opt$tgrid))
+  if (length(todo)) {
+    W <- min(opt$workers, length(todo)); THREADS <- opt$threads
+    pc <- par_start(mem_gb = opt$mem_gb, workers = W, reserve = max(0L, .par_cores() - W * opt$threads), say = say,
+                    export = setdiff(ls(globalenv()), c("pc")))
+    st <- foreach(nm = todo, .inorder = FALSE, .errorhandling = "pass") %dopar% {
+      if (par_should_stop()) return("stopped")
+      si <- as.integer(sub("split_", "", nm)); t0 <- Sys.time()
+      d <- run_split(si)
+      tmp <- file.path(dout, "splits", paste0(nm, ".csv.part"))
+      utils::write.csv(d, tmp, row.names = FALSE); file.rename(tmp, file.path(dout, "splits", paste0(nm, ".csv")))
+      par_release()
+      sprintf("%s %.1f min", nm, as.numeric(difftime(Sys.time(), t0, units = "mins")))
+    }
+    par_stop(pc)
+    bad <- vapply(st, function(x) inherits(x, "error"), NA)
+    if (any(bad)) say("splits failed: ", paste(vapply(st[bad], conditionMessage, ""), collapse = " | "))
+    say("split timings: ", paste(unlist(st[!bad]), collapse = "; "))
+    if (any(bad) || any(unlist(st[!bad]) == "stopped")) stop("not all splits finished; rerun to resume")
+  }
+  THREADS <- opt$threads
+  cur <- do.call(rbind, lapply(sprintf("%s/splits/split_%02d.csv", dout, seq_len(opt$nsplit)), utils::read.csv))
+  wcsv(cur, "heldout_curves.csv")
+
+  ## aggregation as keff_test.R select(): argmax per split-direction (first max), geometric mean of the two
+  ## directions per split (rounded), median over splits (floor(x + 0.5))
+  sels <- list(); per <- list()
+  for (r in c("a3r", "attention")) {
+    x <- cur[cur$readout == r, ]
+    per_sd <- do.call(rbind, lapply(split(x, list(x$split, x$direction), drop = TRUE), function(y) {
+      y <- y[order(y$t), ]; k <- which.max(y$crit_A)
+      data.frame(split = y$split[1], direction = y$direction[1], t_best = y$t[k], crit_best = y$crit_A[k]) }))
+    per_s <- do.call(rbind, lapply(split(per_sd, per_sd$split), function(y)
+      data.frame(split = y$split[1], t_split = as.integer(round(exp(mean(log(y$t_best))))))))
+    ts <- as.integer(floor(stats::median(per_s$t_split) + 0.5))
+    sels[[r]] <- data.frame(dataset = ds, readout = r, criterion = "crit_A", t_star = ts,
+      t_q25 = stats::quantile(per_s$t_split, 0.25, names = FALSE), t_q75 = stats::quantile(per_s$t_split, 0.75, names = FALSE),
+      t_min = min(per_s$t_split), t_max = max(per_s$t_split), n_splits = nrow(per_s), t_secondary = opt$t,
+      flag_t_lt4 = ts < 4L, quick = opt$quick, prereg_commit = HASH, stringsAsFactors = FALSE)
+    per[[r]] <- cbind(readout = r, per_sd)
+  }
+  sel <- do.call(rbind, sels); wcsv(do.call(rbind, per), "selection_per_split_direction.csv")
+  say(sprintf("t*: a3r %d (IQR %.2f-%.2f, range %d-%d)%s; attention %d (IQR %.2f-%.2f, range %d-%d)",
+              sel$t_star[1], sel$t_q25[1], sel$t_q75[1], sel$t_min[1], sel$t_max[1], if (sel$flag_t_lt4[1]) " FLAG t* < 4" else "",
+              sel$t_star[2], sel$t_q25[2], sel$t_q75[2], sel$t_min[2], sel$t_max[2]))
+  if (opt$quick == 0L && ds %in% names(expected_att) && sel$t_star[sel$readout == "attention"] != expected_att[[ds]])
+    stop("STOP: attention t* ", sel$t_star[sel$readout == "attention"], " != committed K10 selection ", expected_att[[ds]],
+         " for ", ds, "; selections.csv NOT written")
+  wcsv(sel, "selections.csv")
+
+  ## label-free checks on the full data at t = 9 and at the new readout's t*
+  Cf <- file.path(dout, "cache", "clr_full.rds")
+  if (file.exists(Cf)) { cf <- readRDS(Cf); stopifnot(identical(cf$genes_md5, fp$genes_md5)); C <- cf$C; rm(cf)
+  } else { set.seed(seed); f <- build_fit(X); C <- f$clr_scores; f$release(); rm(f)
+    saveRDS(list(C = C, genes_md5 = fp$genes_md5), Cf, compress = FALSE) }
+  P <- lazy_walk_P(selfloop(clr:::.softmax_rows(C, keff = opt$keff, cap = opt$cap)), opt$alpha); rm(C)
+  tt <- sort(unique(c(opt$t, sel$t_star[1]))); Pt <- P; chk <- list()
+  for (t in seq_len(max(tt))) { if (t > 1L) Pt <- as.matrix(Pt %*% P)
+    if (t %in% tt) chk[[as.character(t)]] <- cbind(dataset = ds, depth = if (t == opt$t && t == sel$t_star[1]) "t9=t*" else if (t == opt$t) "t9" else "t_star_a3r",
+                                                  t = t, operator_checks(Pt)) }
+  chk <- do.call(rbind, chk); chk$prereg_commit <- HASH; wcsv(chk, "label_free_checks.csv")
+  say("label-free checks:\n", paste(utils::capture.output(print(chk[, 1:8], row.names = FALSE)), collapse = "\n"))
+  say("done")
+  quit(save = "no")
+}
+
 ## ---- mode: selections / truth stubs -------------------------------------------------------------
-if (opt$mode %in% c("selections", "truth")) {
-  if (opt$mode == "truth") {
+if (opt$mode == "truth") {
+  {
     gate_repro(HASH)
     if (opt$dataset %in% c("m3d", "ecomac")) {
       gate_selections(opt$dataset)
