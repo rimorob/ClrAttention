@@ -493,6 +493,8 @@ complexes_with_pos <- function(sets, operon_of, genes, with_operon) {   # as the
 build_truths_ecoli <- function(ds, genes, synth = NULL, only = NULL) {
   if (is.null(synth)) { rt <- ecoli_regtab(); rtab <- rt$rtab; operon_of <- rt$operon_of } else operon_of <- synth$operon_of
   mem <- ecoli_members(ds, genes, synth); mem <- mem[mem$dataset == ds, ]
+  miss <- setdiff(mem$bnumber, genes)
+  if (length(miss) && is.null(synth)) stop("E. coli member list has ", length(miss), " genes outside the ", ds, " gene universe (e.g. ", paste(utils::head(miss, 3), collapse = ", "), ")")
   sets_of <- function(v) { x <- mem[mem$variant == v, ]
     lapply(split(x$bnumber, x$complex), function(g) sort(stats::na.omit(match(g, genes)))) }
   cx <- function(v, o, role) { s <- sets_of(v); if (!length(s)) NULL else mk_truth(as_reg(s, "complex"), o, genes, role) }
@@ -589,10 +591,11 @@ score_dataset <- function(ds, X, genes, TR, sel, dout, say) {
   HUB <- c("attention_t9", "a3r_t9", "clr", "abs_r"); CORE <- HUB; bench_role <- vapply(bench, function(b) b$role, ""); PCM <- c("attention_t9", "a3r_t9", "clr")
   SC <- list(); PC <- list(); RPC <- list()
   consume <- function(S, nm) {
-    S[!is.finite(S)] <- 0; diag(S) <- 0
+    # pair scores: non-finite scores rank last (ap_fast treats NA as last); other uses below see 0
+    Sna <- S; Sna[!is.finite(Sna)] <- NA; S[!is.finite(S)] <- 0; diag(S) <- 0
     # descriptive truths (huge pair sets on human data) keep only the core methods, to bound memory
     use <- names(bench)[bench_role != "descriptive" | nm %in% CORE]
-    SC[[nm]] <<- lapply(bench[use], function(b) S[cbind(b$pairs$i, b$pairs$j)])
+    SC[[nm]] <<- lapply(bench[use], function(b) Sna[cbind(b$pairs$i, b$pairs$j)]); rm(Sna)
     if (!is.null(Hm) && nm %in% HUB) { hs <- hub_stratify(S, Hm)
       SC[[paste0(nm, "_hubstrat")]] <<- lapply(bench[use], function(b) hs[cbind(b$pairs$i, b$pairs$j)]); rm(hs) }
     if (nm %in% PCM && !is.null(co)) { b <- bench[[cname]]       # per-complex AP, complexes with >= 10 positive pairs (macro_aupr definitions)
@@ -715,6 +718,10 @@ if (opt$mode == "truth") {
   need <- c(TR$complex_truth, TR$sc_truth); if (!all(need %in% names(TR$bench))) stop("primary truth missing: ", paste(setdiff(need, names(TR$bench)), collapse = ", "))
   S <- score_dataset(ds, X, genes, TR, tsel, dout, say); rm(X)
   wout(S$lf, file.path(dout, "label_free_t9.csv"))
+  if (ds == "k562ess" && "CORUM_raw" %in% names(TR$bench)) {   # consistency with the implementation check (descriptive)
+    a <- ap_fast(S$SC$a3r_t9$CORUM_raw, TR$bench$CORUM_raw$pairs$label)
+    say(sprintf("K562 raw CORUM a3r t = 9 AUPR %.9f vs repro %.7f: %s", a, REPRO_AUPR, if (identical(sig6(a), sig6(REPRO_AUPR))) "matches at 6 digits" else "DIFFERS"))
+  }
   JR <- jack_dataset(TR$bench, S$SC, G, dout, say)
   jr <- do.call(rbind, lapply(names(JR), function(nm) { J <- JR[[nm]]
     data.frame(truth = nm, method = rep(colnames(J), each = nrow(J)), rep = rep(seq_len(nrow(J)), ncol(J)), aupr = as.vector(J)) }))
@@ -772,7 +779,7 @@ if (opt$mode == "boot") {
     Pt <- power_t(lazy_walk_P(A, opt$alpha), T_PRIMARY); rm(A)
     S <- list(attention = attention(Pt), a3r = a3r(Pt)); rm(Pt); S$clr <- C; rm(C)
     out <- list()
-    for (m in names(S)) { s <- S[[m]]; s[!is.finite(s)] <- 0; diag(s) <- 0
+    for (m in names(S)) { s <- S[[m]]; s[!is.finite(s)] <- NA
       for (nm in names(bench)) { p <- bench[[nm]]$pairs
         out[[length(out) + 1L]] <- data.frame(draw = label, truth = nm, method = m, aupr = ap_fast(s[cbind(p$i, p$j)], p$label)) } }
     do.call(rbind, out)
