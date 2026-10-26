@@ -837,7 +837,7 @@ decide <- function(ep, boot, repro_ok) {
   r2 <- isTRUE(rej[3] && rej[4])
   r3 <- if (is.null(boot)) NA else isTRUE(boot$d_vs_attention_lo[boot$code == "P1"] > 0 && boot$d_vs_attention_lo[boot$code == "P3"] > -NI_MARGIN)
   r4 <- isTRUE(repro_ok)
-  adopt <- if (is.na(r3)) NA else (r1 && r2 && r3 && r4)
+  adopt <- r1 && r2 && r4 && r3     # three-valued: FALSE as soon as rule 1, 2 or 4 fails; NA only if they pass and the bootstrap is missing
   prim <- data.frame(code = P, d = dP, se = vapply(P, function(k) g(k, "se"), 0), p_raw = pP, reject_alpha = rej,
                      p_holm_primary = holm_p, p_loss = vapply(P, function(k) g(k, "p_loss"), 0), p_loss_holm = loss_holm,
                      effect_ge_min = ifelse(P %in% c("P1", "P2"), dP >= EFFECT_MIN, NA), row.names = NULL)
@@ -861,8 +861,14 @@ decide <- function(ep, boot, repro_ok) {
     rj <- stats::setNames(sec$reject, sec$code)
     if (!isTRUE(rj[["S1"]]) || !isTRUE(rj[["S2"]])) notes <- c(notes, "S1 or S2 failed: the paper does not claim the new method beats CLR on regulons; the headline over CLR stays attributed to attention.")
     if (!isTRUE(rj[["S5"]])) notes <- c(notes, "S5 failed: the human complex result did not replicate in RPE1; the complex claim rests on E. coli plus in-sample K562.")
-    sm <- which(dP[3:4] < 0 & rej[3:4] & !is.na(loss_holm[3:4]) & pP[3:4] < ALPHA1 & vapply(P[3:4], function(k) g(k, "p_loss"), 0) < ALPHA1)
-    if (length(sm)) notes <- c(notes, "A small but significant regulon loss within the margin (NI shown, d < 0 significant) is reported as such.")
+  }
+  # Small regulon loss within the margin: NI shown and d < 0 significant. A single-endpoint claim outside the
+  # adoption rule, so Holm over the four primary (loss) tests, as the "Regulon loss" outcome row; it does not
+  # depend on the secondary family.
+  if (isTRUE(adopt)) {
+    sm <- which(dP[3:4] < 0 & rej[3:4] & !is.na(loss_holm[3:4]) & loss_holm[3:4] < ALPHA1)
+    if (length(sm)) notes <- c(notes, paste0("A small but significant regulon loss within the margin (NI shown, d < 0 significant, Holm) on ",
+                                             paste(P[3:4][sm], collapse = ", "), " is reported as such."))
   }
   list(prim = prim, rules = data.frame(rule1_complexes = r1, rule2_regulon_ni = r2, rule3_bootstrap = r3, rule4_repro = r4, adopt = adopt,
                                        secondary_pending = s_pending), outcomes = outc, secondary = sec, notes = notes)
