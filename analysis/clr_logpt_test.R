@@ -371,6 +371,7 @@ wout <- function(x, f) {                      # every output carries the preregi
   dir.create(dirname(f), recursive = TRUE, showWarnings = FALSE)
   tmp <- paste0(f, ".part"); utils::write.csv(stamp(x), tmp, row.names = FALSE); file.rename(tmp, f)
 }
+save_rds <- function(x, f, ...) { tmp <- paste0(f, ".part"); saveRDS(x, tmp, ...); file.rename(tmp, f) }   # caches: a crash never leaves a truncated file
 logger <- function(f) function(...) { m <- sprintf("[%s] %s", format(Sys.time(), "%H:%M:%S"), paste0(...)); cat(m, "\n")
   dir.create(dirname(f), recursive = TRUE, showWarnings = FALSE); cat(m, "\n", file = f, append = TRUE) }
 none_op <- stats::setNames(character(0), character(0))
@@ -578,7 +579,7 @@ score_dataset <- function(ds, X, genes, TR, sel, dout, say) {
     f$build_operator(alpha = opt$alpha, softmax_keff = opt$keff, softmax_cap = opt$cap)   # exactly as repro mode (build_fit / build_operator)
     ft <- list(C = as.matrix(f$clr_scores), A = as.matrix(f$operator), genes_md5 = md5, prereg = HASH)
     dimnames(ft$C) <- NULL; dimnames(ft$A) <- NULL; f$release(); rm(f); invisible(gc())
-    saveRDS(ft, fitf, compress = FALSE); say(sprintf("MI, CLR, operator in %.1f min", as.numeric(difftime(Sys.time(), t0, units = "mins"))))
+    save_rds(ft, fitf, compress = FALSE); say(sprintf("MI, CLR, operator in %.1f min", as.numeric(difftime(Sys.time(), t0, units = "mins"))))
   }
   A <- ft$A; C <- ft$C; rm(ft)
   # stationary distribution of the lazy walk (teleport 1e-3), as baselines.R (sparse P)
@@ -618,7 +619,7 @@ score_dataset <- function(ds, X, genes, TR, sel, dout, say) {
   }
   rm(Pt, Pd); consume(C, "clr"); rm(C)
   r <- abs(stats::cor(t(X))); r[is.na(r)] <- 0; consume(r, "abs_r"); rm(r, Hm)
-  s <- list(SC = SC, PC = PC, RPC = RPC, lf = lf, fp = fp); saveRDS(s, cf); s
+  s <- list(SC = SC, PC = PC, RPC = RPC, lf = lf, fp = fp); save_rds(s, cf); s
 }
 
 ## ---- jackknife, metrics, endpoints ---------------------------------------------------------------------
@@ -633,13 +634,16 @@ jack_dataset <- function(bench, SC, G, dout, say) {
   for (nm in names(bench)) {
     jf <- file.path(dout, "cache", paste0("jack_", nm, ".rds"))
     methods <- names(SC)[vapply(SC, function(x) nm %in% names(x), NA)]
-    if (file.exists(jf)) { J <- readRDS(jf); if (identical(colnames(J), methods)) { JR[[nm]] <- J; next } }
-    p <- bench[[nm]]$pairs; J <- matrix(NA_real_, opt$jack, length(methods), dimnames = list(NULL, methods))
+    p <- bench[[nm]]$pairs
+    key <- digest::digest(list(halves[[nm]], p$i, p$j, p$label, HASH), algo = "md5")   # cache valid only for these halves and pairs
+    if (file.exists(jf)) { J <- readRDS(jf)
+      if (identical(colnames(J), methods) && nrow(J) == opt$jack && identical(attr(J, "key"), key)) { attr(J, "key") <- NULL; JR[[nm]] <- J; next } }
+    J <- matrix(NA_real_, opt$jack, length(methods), dimnames = list(NULL, methods))
     for (r in seq_len(opt$jack)) {
       inh <- logical(G); inh[halves[[nm]][[r]]] <- TRUE; ix <- which(inh[p$i] & inh[p$j]); lab <- p$label[ix]
       for (m in methods) J[r, m] <- ap_fast(SC[[m]][[nm]][ix], lab)
     }
-    saveRDS(J, jf); JR[[nm]] <- J; say("jackknife done: ", nm)
+    attr(J, "key") <- key; save_rds(J, jf); attr(J, "key") <- NULL; JR[[nm]] <- J; say("jackknife done: ", nm)
   }
   JR
 }
@@ -766,6 +770,13 @@ if (opt$mode == "boot") {
   TR <- build_truths("m3d", genes, ld, only = c("complexes", "regulons_SC")); bench <- TR$bench
   stopifnot(all(c("complexes", "regulons_SC") %in% names(bench)))
   say("truths: ", paste(sprintf("%s %d pos / %d pairs", names(bench), vapply(bench, function(b) sum(b$pairs$label), 0), vapply(bench, function(b) length(b$pairs$label), 0L)), collapse = "; "))
+  # per-draw files are reused on resume only if they were made from the same input, truths and preregistration
+  bfp <- list(genes_md5 = digest::digest(genes, algo = "md5"), chips_md5 = digest::digest(colnames(Xc), algo = "md5"), prereg = HASH,
+              synthetic = SYN, pairs = lapply(bench, function(b) digest::digest(list(b$pairs$i, b$pairs$j, b$pairs$label), algo = "md5")),
+              alpha = opt$alpha, keff = opt$keff, cap = opt$cap, t = T_PRIMARY)
+  bfpf <- file.path(dout, "fingerprint.rds")
+  if (file.exists(bfpf)) { if (!isTRUE(all.equal(readRDS(bfpf), bfp))) stop("boot/ fingerprint mismatch (", bfpf, "): use a new --out")
+  } else { if (length(list.files(file.path(dout, "draws"), "\\.csv$"))) stop("boot/draws has results without a fingerprint"); save_rds(bfp, bfpf) }
   draw_cols <- function() {                   # chips_bootstrap.R draw_cols("cluster"), verbatim
     ex <- names(chips_by_exp); pick <- sample(ex, length(ex), replace = TRUE); used <- list()
     vapply(pick, function(e) { ch <- chips_by_exp[[e]]; avail <- setdiff(ch, used[[e]]); if (!length(avail)) avail <- ch
