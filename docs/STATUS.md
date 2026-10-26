@@ -64,6 +64,11 @@ Design is fixed in `docs/preregistration_clr_logpt.md` (PI chose option A, 22 Oc
 
 If a job died mid-step, rerun that step; do not skip a gate. No truth may be read before the three boxes above it are ticked.
 
+
+## CLR(log P^t) confirmatory verdict (26 Oct 13:41; script `analysis/clr_logpt_test.R`, outputs `results/clr_logpt_test/verdict/`, committed copies in `docs/clr_logpt_verdict/`)
+
+**NOT ADOPTED: failure to confirm; attention stays the main method** (preregistered rule: P1 and P2 must each reach one-sided p < 0.025). Complex superiority vs attention at t = 9: M3D +0.0257 AUPR (jackknife SE 0.0182, p = 0.079), EcoMAC +0.0285 (SE 0.0174, p = 0.051). Both point the predicted way and exceed the +0.005 minimum, but neither passes. Regulon non-inferiority (P3, P4) passed (M3D +0.0043, EcoMAC +0.0033; Holm p < 1e-5). The M3D cluster bootstrap interval for P1 is [+0.013, +0.043] (rule 3 satisfied), which is wider-agnostic to the jackknife result: record this discordance, do not use it to override the verdict. Reproduction check passed. S1-S5 are descriptive (Holm family only applies if adopted). Interpretation and write-up wording: to be reviewed (Opus) before any claim; K562 and RPE1 are in-sample or secondary and cannot rescue the verdict. K562 keff selections job 0893c finished (12:27): commit the selections, then keff phase 2.
+
 ## Next
 
 1. **CORUM order-of-operations expert (PI, 22 Oct), now including the asymmetry assessment (26 Oct).** Members of a complex share one latent variable, so all their pairs are strongly coupled. The softmax and the walk may spread attention across the clique and then into the wider translation program. The question is whether collapsing strongly coupled cliques into latent variables before attending, or attending on residuals after removing a clique's shared factor, fixes the loss. A max-effort expert analyses the CORUM results and interviews the PI (questions relayed in the session), starting from `docs/plans/corum_analysis.md` and `docs/plans/asymmetry_expert.md`.

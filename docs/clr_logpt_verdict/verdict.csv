@@ -1,0 +1,2 @@
+"verdict","rule1_complexes","rule2_regulon_ni","rule3_bootstrap","rule4_repro","adopt","secondary_pending","notes","outcomes_applying","prereg_commit","git_head","script_commit","synthetic"
+"NOT ADOPTED: failure to confirm; main method stays attention",FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,"","Complex superiority not shown on M3D or EcoMAC","9e985b3539762ca743c20d42e2a87d1b03c54726","ee29799b1a15effbfaed2f0f3b695a11a1797108","1f45cfce060a206a6b3d16e5e172b8c07c7243b4",FALSE
