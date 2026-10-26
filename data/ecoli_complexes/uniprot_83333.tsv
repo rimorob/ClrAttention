@@ -1,0 +1,4568 @@
+Entry	Gene Names (primary)	Gene Names (ordered locus)	Gene Names (synonym)	Reviewed
+A5A616	mgtS	b4599 JW1527.1	yneM	reviewed
+O32583	thiS	b4407 JW3955	thiG1	reviewed
+P00350	gnd	b2029 JW2011		reviewed
+P00363	frdA	b4154 JW4115		reviewed
+P00370	gdhA	b1761 JW1750		reviewed
+P00393	ndh	b1109 JW1095		reviewed
+P00448	sodA	b3908 JW3879		reviewed
+P00452	nrdA	b2234 JW2228	dnaF	reviewed
+P00490	malP	b3417 JW5689		reviewed
+P00509	aspC	b0928 JW0911		reviewed
+P00550	mtlA	b3599 JW3573		reviewed
+P00561	thrA	b0002 JW0001	thrA1 thrA2	reviewed
+P00562	metL	b3940 JW3911	metM	reviewed
+P00579	rpoD	b3067 JW3039	alt	reviewed
+P00582	polA	b3863 JW3835	resA	reviewed
+P00634	phoA	b0383 JW0374		reviewed
+P00722	lacZ	b0344 JW0335		reviewed
+P00803	lepB	b2568 JW2552		reviewed
+P00804	lspA	b0027 JW0025	lsp	reviewed
+P00805	ansB	b2957 JW2924		reviewed
+P00811	ampC	b4150 JW4111	ampA	reviewed
+P00861	lysA	b2838 JW2806		reviewed
+P00864	ppc	b3956 JW3928	glu	reviewed
+P00893	ilvI	b0077 JW0076		reviewed
+P00894	ilvH	b0078 JW0077	brnP	reviewed
+P00903	pabA	b3360 JW3323		reviewed
+P00904	trpGD	b1263 JW1255	trpD	reviewed
+P00914	phrB	b0708 JW0698	phr	reviewed
+P00926	dsdA	b2366 JW2363		reviewed
+P00935	metB	b3939 JW3910		reviewed
+P00936	cyaA	b3806 JW3778	cya	reviewed
+P00946	manA	b1613 JW1605	pmi	reviewed
+P00956	ileS	b0026 JW0024	ilvS	reviewed
+P00957	alaS	b2697 JW2667	lovB	reviewed
+P00959	metG	b2114 JW2101		reviewed
+P00962	glnS	b0680 JW0666		reviewed
+P00963	asnA	b3744 JW3722		reviewed
+P00968	carB	b0033 JW0031	pyrA	reviewed
+P02358	rpsF	b4200 JW4158		reviewed
+P02359	rpsG	b3341 JW3303		reviewed
+P02916	malF	b4033 JW3993		reviewed
+P02918	mrcA	b3396 JW3359	ponA	reviewed
+P02919	mrcB	b0149 JW0145	pbpF ponB	reviewed
+P02920	lacY	b0343 JW0334		reviewed
+P02921	melB	b4120 JW4081	mel-4	reviewed
+P02925	rbsB	b3751 JW3730	prlB rbsP	reviewed
+P02929	tonB	b1252 JW5195	exbA	reviewed
+P02930	tolC	b3035 JW5503	colE1-i mtcB mukA refI toc weeA	reviewed
+P02931	ompF	b0929 JW0912	cmlB coa cry tolF	reviewed
+P02942	tsr	b4355 JW4318	cheD	reviewed
+P02943	lamB	b4036 JW3996	malB	reviewed
+P03004	dnaA	b3702 JW3679		reviewed
+P03007	dnaQ	b0215 JW0205	mutD	reviewed
+P03018	uvrD	b3813 JW3786	mutU pdeB rad recL	reviewed
+P03023	lacI	b0345 JW0336		reviewed
+P03819	kefC	b0047 JW0046	trkC	reviewed
+P03959	kdpA	b0698 JW0686		reviewed
+P03960	kdpB	b0697 JW0685		reviewed
+P03961	kdpC	b0696 JW0684		reviewed
+P04036	dapB	b0031 JW0029		reviewed
+P04079	guaA	b2507 JW2491		reviewed
+P04152	umuC	b1184 JW1173		reviewed
+P04391	argI	b4254 JW4211		reviewed
+P04395	alkA	b2068 JW2053	aidA	reviewed
+P04425	gshB	b2947 JW2914	gsh-II	reviewed
+P04693	tyrB	b4054 JW4014		reviewed
+P04737	traA	ECOK12F074		reviewed
+P04805	gltX	b2400 JW2395		reviewed
+P04825	pepN	b0932 JW0915		reviewed
+P04968	ilvA	b3772 JW3745		reviewed
+P04982	rbsD	b3748 JW5857		reviewed
+P04983	rbsA	b3749 JW3728		reviewed
+P04993	recD	b2819 JW2787	hopE	reviewed
+P04994	xseA	b2509 JW2493		reviewed
+P04995	sbcB	b2011 JW1993	cpeA xonA	reviewed
+P05020	pyrC	b1062 JW1049		reviewed
+P05041	pabB	b1812 JW1801		reviewed
+P05042	fumC	b1611 JW1603		reviewed
+P05050	alkB	b2212 JW2200	aidD	reviewed
+P05055	pnp	b3164 JW5851		reviewed
+P05194	aroD	b1693 JW1683		reviewed
+P05458	ptrA	b2821 JW2789	ptr	reviewed
+P05523	mutM	b3635 JW3610	fpg	reviewed
+P05637	apaH	b0049 JW0048		reviewed
+P05704	trg	b1421 JW1417		reviewed
+P05791	ilvD	b3771 JW5605		reviewed
+P05793	ilvC	b3774 JW3747		reviewed
+P05804	uidA	b1617 JW1609	gurA gusA	reviewed
+P05824	recN	b2616 JW5416	radB	reviewed
+P05825	fepA	b0584 JW5086	fep feuB	reviewed
+P05852	tsaD	b3064 JW3036	gcp ygjD	reviewed
+P06129	btuB	b3966 JW3938	bfe cer dcrC	reviewed
+P06134	ada	b2213 JW2201		reviewed
+P06136	ftsQ	b0093 JW0091		reviewed
+P06149	dld	b2133 JW2121		reviewed
+P06609	btuC	b1711 JW1701		reviewed
+P06610	btuE	b1710 JW1700		reviewed
+P06611	btuD	b1709 JW1699		reviewed
+P06612	topA	b1274 JW1266	supX	reviewed
+P06616	era	b2566 JW2550	rbaA sdgE	reviewed
+P06709	birA	b3973 JW3941	bioR dhbB	reviewed
+P06710	dnaX	b0470 JW0459	dnaZ dnaZX	reviewed
+P06715	gor	b3500 JW3467		reviewed
+P06721	metC	b3008 JW2975		reviewed
+P06722	mutH	b2831 JW2799	mutR prv	reviewed
+P06959	aceF	b0115 JW0111		reviewed
+P06961	cca	b3056 JW3028		reviewed
+P06968	dut	b3640 JW3615	dnaS sof	reviewed
+P06971	fhuA	b0150 JW0146	tonA	reviewed
+P06972	fhuB	b0153 JW0149		reviewed
+P06974	fliM	b1945 JW1929	cheC2 fla AII fla QII	reviewed
+P06983	hemC	b3805 JW5932	popE	reviewed
+P06988	hisD	b2020 JW2002		reviewed
+P06992	rsmA	b0051 JW0050	ksgA	reviewed
+P06993	malT	b3418 JW3381	malA	reviewed
+P06996	ompC	b2215 JW2203	meoA par	reviewed
+P06999	pfkB	b1723 JW5280		reviewed
+P07001	pntA	b1603 JW1595		reviewed
+P07003	poxB	b0871 JW0855		reviewed
+P07004	proA	b0243 JW0233		reviewed
+P07012	prfB	b2891 JW5847	supK	reviewed
+P07013	priB	b4201 JW4159		reviewed
+P07014	sdhB	b0724 JW0714		reviewed
+P07017	tar	b1886 JW1875	cheM	reviewed
+P07024	ushA	b0480 JW0469		reviewed
+P07026	sdiA	b1916 JW1901		reviewed
+P07102	appA	b0980 JW0963		reviewed
+P07117	putP	b1015 JW1001		reviewed
+P07118	valS	b4258 JW4215		reviewed
+P07330	cheB	b1883 JW1872		reviewed
+P07363	cheA	b1888 JW1877		reviewed
+P07395	pheT	b1713 JW1703		reviewed
+P07464	lacA	b0342 JW0333		reviewed
+P07604	tyrR	b1323 JW1316		reviewed
+P07623	metAS	b4013 JW3973	metA	reviewed
+P07639	aroB	b3389 JW3352		reviewed
+P07648	recC	b2822 JW2790		reviewed
+P07649	truA	b2318 JW2315	asuC hisT leuK	reviewed
+P07658	fdhF	b4079 JW4040		reviewed
+P07821	fhuC	b0151 JW0147		reviewed
+P07822	fhuD	b0152 JW0148		reviewed
+P07862	ddlB	b0092 JW0090	ddl	reviewed
+P07913	tdh	b3616 JW3591		reviewed
+P08179	purN	b2500 JW2485		reviewed
+P08191	fimH	b4320 JW4283		reviewed
+P08192	folC	b2315 JW2312	dedC	reviewed
+P08200	icd	b1136 JW1122	icdA icdE	reviewed
+P08201	nirB	b3365 JW3328		reviewed
+P08202	araA	b0062 JW0061		reviewed
+P08203	araD	b0061 JW0060		reviewed
+P08244	pyrF	b1281 JW1273		reviewed
+P08312	pheS	b1714 JW5277		reviewed
+P08337	mutT	b0099 JW0097		reviewed
+P08373	murB	b3972 JW3940	yijB	reviewed
+P08394	recB	b2820 JW2788	ior rorA	reviewed
+P08395	sppA	b1766 JW1755		reviewed
+P08400	phoR	b0400 JW0390	nmpB	reviewed
+P08506	dacC	b0839 JW0823		reviewed
+P08622	dnaJ	b0015 JW0014	groP	reviewed
+P08660	lysC	b4024 JW3984	apk	reviewed
+P08839	ptsI	b2416 JW2409		reviewed
+P08956	hsdR	b4350 JW4313	hsr	reviewed
+P09029	purK	b0522 JW0511		reviewed
+P09030	xthA	b1749 JW1738	xth	reviewed
+P09099	xylB	b3564 JW3536		reviewed
+P09147	galE	b0759 JW0742	galD	reviewed
+P09148	galT	b0758 JW0741	galB	reviewed
+P09152	narG	b1224 JW1215	bisD narC	reviewed
+P09158	speE	b0121 JW0117		reviewed
+P09169	ompT	b0565 JW0554		reviewed
+P09323	nagE	b0679 JW0665	pstN	reviewed
+P09348	motA	b1890 JW1879	flaJ	reviewed
+P09372	grpE	b2614 JW2594		reviewed
+P09373	pflB	b0903 JW0886	pfl	reviewed
+P09377	rhaS	b3905 JW3876	rhaC2	reviewed
+P09391	glpG	b3424 JW5687		reviewed
+P09394	glpQ	b2239 JW2233		reviewed
+P09546	putA	b1014 JW0999	poaA	reviewed
+P09831	gltB	b3212 JW3179	aspB	reviewed
+P09832	gltD	b3213 JW3180	aspB	reviewed
+P09835	uhpB	b3668 JW3643		reviewed
+P09980	rep	b3778 JW5604		reviewed
+P0A698	uvrA	b4058 JW4019	dinE	reviewed
+P0A6A0	ubiB	b3835 JW3812	aarF yigQ yigR yigS	reviewed
+P0A6A3	ackA	b2296 JW2293	ack	reviewed
+P0A6A8	acpP	b1094 JW1080		reviewed
+P0A6B4	alr	b4053 JW4013		reviewed
+P0A6B7	iscS	b2530 JW2514	nuvC yfhO yzzO	reviewed
+P0A6C1	nfo	b2159 JW2146		reviewed
+P0A6C8	argB	b3959 JW5553		reviewed
+P0A6D0	argR	b3237 JW3206	xerA	reviewed
+P0A6D3	aroA	b0908 JW0891		reviewed
+P0A6D5	ydiB	b1692 JW1682		reviewed
+P0A6D7	aroK	b3390 JW5947		reviewed
+P0A6E1	aroL	b0388 JW0379		reviewed
+P0A6E4	argG	b3172 JW3140		reviewed
+P0A6E6	atpC	b3731 JW3709	papG uncC	reviewed
+P0A6F1	carA	b0032 JW0030	pyrA	reviewed
+P0A6F3	glpK	b3926 JW3897		reviewed
+P0A6F5	groEL	b4143 JW4103	groL mopA	reviewed
+P0A6F9	groES	b4142 JW4102	groS mopB	reviewed
+P0A6G7	clpP	b0437 JW0427	lopP	reviewed
+P0A6H1	clpX	b0438 JW0428	lopC	reviewed
+P0A6H5	hslU	b3931 JW3902	htpI	reviewed
+P0A6H8	clsA	b1249 JW1241	cls nov yciJ	reviewed
+P0A6I0	cmk	b0910 JW0893	mssA ycaF ycaG	reviewed
+P0A6I6	coaD	b3634 JW3609	kdtB yicA	reviewed
+P0A6J1	cysC	b2750 JW2720		reviewed
+P0A6J3	cysZ	b2413 JW2406		reviewed
+P0A6J5	dadA	b1189 JW1178	dadR	reviewed
+P0A6K1	dapF	b3809 JW5592		reviewed
+P0A6K3	def	b3287 JW3248	fms	reviewed
+P0A6K6	deoB	b4383 JW4346	drm thyR	reviewed
+P0A6L0	deoC	b4381 JW4344	dra thyR	reviewed
+P0A6L2	dapA	b2478 JW2463		reviewed
+P0A6L4	nanA	b3225 JW3194	npl	reviewed
+P0A6M2	dsbB	b1185 JW5182	roxB ycgA	reviewed
+P0A6M4	dtd	b3887 JW3858	yihZ	reviewed
+P0A6M8	fusA	b3340 JW3302	far fus	reviewed
+P0A6N4	efp	b4147 JW4107		reviewed
+P0A6N8	efpL	b2171 JW5362	yeiP	reviewed
+P0A6P1	tsf	b0170 JW0165		reviewed
+P0A6P5	der	b2511 JW5403	engA yfgK	reviewed
+P0A6P9	eno	b2779 JW2750		reviewed
+P0A6Q3	fabA	b0954 JW0937		reviewed
+P0A6Q6	fabZ	b0180 JW0175	sefA yaeA	reviewed
+P0A6R0	fabH	b1091 JW1077		reviewed
+P0A6R3	fis	b3261 JW3229		reviewed
+P0A6S5	ftsB	b2748 JW2718	ygbQ	reviewed
+P0A6S7	gpsA	b3608 JW3583		reviewed
+P0A6T1	pgi	b4025 JW3985		reviewed
+P0A6T3	galK	b0757 JW0740	galA	reviewed
+P0A6T5	folE	b2153 JW2140		reviewed
+P0A6U3	mnmG	b3741 JW3719	gidA trmF	reviewed
+P0A6U5	rsmG	b3740 JW3718	gidB	reviewed
+P0A6V1	glgC	b3430 JW3393		reviewed
+P0A6V5	glpE	b3425 JW3388		reviewed
+P0A6W3	mraY	b0087 JW0085	murX	reviewed
+P0A6X1	hemA	b1210 JW1201		reviewed
+P0A6X3	hfq	b4172 JW4130		reviewed
+P0A6X7	ihfA	b1712 JW1702	hid himA	reviewed
+P0A6Y1	ihfB	b0912 JW0895	himD hip	reviewed
+P0A6Y5	hslO	b3401 JW5692	yrfI	reviewed
+P0A6Y8	dnaK	b0014 JW0013	groP grpF seg	reviewed
+P0A6Z3	htpG	b0473 JW0462		reviewed
+P0A6Z6	nikR	b3481 JW3446	yhhG	reviewed
+P0A700	hypA	b2726 JW2696		reviewed
+P0A703	hybF	b2991 JW5493		reviewed
+P0A705	infB	b3168 JW3137	gicD ssyG	reviewed
+P0A707	infC	b1718 JW5829	fit srjA	reviewed
+P0A710	yciB	b1254 JW1246	ispZ	reviewed
+P0A712	kdgT	b3909 JW5560		reviewed
+P0A715	kdsA	b1215 JW1206		reviewed
+P0A717	prs	b1207 JW1198	prsA	reviewed
+P0A720	tmk	b1098 JW1084	ycfG	reviewed
+P0A722	lpxA	b0181 JW0176		reviewed
+P0A725	lpxC	b0096 JW0094	asmB envA	reviewed
+P0A729	yceF	b1087 JW5155		reviewed
+P0A731	mgsA	b0963 JW5129	yccG	reviewed
+P0A738	moaC	b0783 JW0766	chlA3	reviewed
+P0A742	mscL	b3291 JW3252	yhdC	reviewed
+P0A744	msrA	b4219 JW4178	pms	reviewed
+P0A746	msrB	b1778 JW1767	yeaA	reviewed
+P0A749	murA	b3189 JW3156	murZ	reviewed
+P0A754	kefF	b0046 JW0045	yabF	reviewed
+P0A759	nagB	b0678 JW0664	glmD	reviewed
+P0A761	nanE	b3223 JW3192	yhcJ	reviewed
+P0A763	ndk	b2518 JW2502		reviewed
+P0A769	mntH	b2392 JW2388	yfeP	reviewed
+P0A776	rppH	b2830 JW2798	nudH ygdP	reviewed
+P0A784	orn	b4162 JW5740	o204a yjeR	reviewed
+P0A786	pyrB	b4245 JW4204		reviewed
+P0A790	panD	b0131 JW0127		reviewed
+P0A794	pdxJ	b2564 JW2548		reviewed
+P0A796	pfkA	b3916 JW3887		reviewed
+P0A799	pgk	b2926 JW2893		reviewed
+P0A7A7	plsB	b4041 JW4001		reviewed
+P0A7A9	ppa	b4226 JW4185		reviewed
+P0A7B1	ppk	b2501 JW2486		reviewed
+P0A7B3	nadK	b2615 JW2596	yfjB yfjE	reviewed
+P0A7B5	proB	b0242 JW0232		reviewed
+P0A7B8	hslV	b3932 JW3903	htpO yiiC	reviewed
+P0A7C2	lexA	b4043 JW4003	exrA spr tsl umuA	reviewed
+P0A7D1	pth	b1204 JW1195	rap	reviewed
+P0A7D4	purA	b4177 JW4135	adeK	reviewed
+P0A7E1	pyrD	b0945 JW0928		reviewed
+P0A7E3	pyrE	b3642 JW3617		reviewed
+P0A7E5	pyrG	b2780 JW2751		reviewed
+P0A7E9	pyrH	b0171 JW0166	smbA	reviewed
+P0A7F6	speD	b0120 JW0116		reviewed
+P0A7F9	queA	b0405 JW0395		reviewed
+P0A7G2	rbfA	b3167 JW3136	P15B yhbB	reviewed
+P0A7G6	recA	b2699 JW2669	lexB recH rnmB tif umuB zab	reviewed
+P0A7H0	recF	b3700 JW3677	uvrF	reviewed
+P0A7I4	prfC	b4375 JW5873	miaD tos	reviewed
+P0A7I7	ribA	b1277 JW1269		reviewed
+P0A7J0	ribB	b3041 JW3009	htrP	reviewed
+P0A7J3	rplJ	b3985 JW3948		reviewed
+P0A7J7	rplK	b3983 JW3946	relC	reviewed
+P0A7K2	rplL	b3986 JW3949		reviewed
+P0A7K6	rplS	b2606 JW2587		reviewed
+P0A7L0	rplA	b3984 JW3947		reviewed
+P0A7L3	rplT	b1716 JW1706	pdzA	reviewed
+P0A7L8	rpmA	b3185 JW3152		reviewed
+P0A7M2	rpmB	b3637 JW3612		reviewed
+P0A7M6	rpmC	b3312 JW3274		reviewed
+P0A7M9	rpmE	b3936 JW3907		reviewed
+P0A7N4	rpmF	b1089 JW1075		reviewed
+P0A7N9	rpmG	b3636 JW3611		reviewed
+P0A7R1	rplI	b4203 JW4161		reviewed
+P0A7R5	rpsJ	b3321 JW3283	nusE	reviewed
+P0A7R9	rpsK	b3297 JW3259		reviewed
+P0A7S3	rpsL	b3342 JW3304	strA	reviewed
+P0A7S9	rpsM	b3298 JW3260		reviewed
+P0A7T3	rpsP	b2609 JW2590		reviewed
+P0A7T7	rpsR	b4202 JW4160		reviewed
+P0A7U3	rpsS	b3316 JW3278		reviewed
+P0A7U7	rpsT	b0023 JW0022		reviewed
+P0A7V0	rpsB	b0169 JW0164		reviewed
+P0A7V3	rpsC	b3314 JW3276		reviewed
+P0A7V8	rpsD	b3296 JW3258	ramA	reviewed
+P0A7W1	rpsE	b3303 JW3265	spc	reviewed
+P0A7W7	rpsH	b3306 JW3268		reviewed
+P0A7X3	rpsI	b3230 JW3199		reviewed
+P0A7X6	rimM	b2608 JW5413	yfjA	reviewed
+P0A7Y0	rnc	b2567 JW2551		reviewed
+P0A7Y4	rnhA	b0214 JW0204	dasF herA rnh sdrA	reviewed
+P0A7Z0	rpiA	b2914 JW5475	ygfC	reviewed
+P0A7Z4	rpoA	b3295 JW3257	pez phs sez	reviewed
+P0A800	rpoZ	b3649 JW3624		reviewed
+P0A809	ruvA	b1861 JW1850		reviewed
+P0A812	ruvB	b1860 JW1849		reviewed
+P0A814	ruvC	b1863 JW1852		reviewed
+P0A817	metK	b2942 JW2909	metX	reviewed
+P0A821	selA	b3591 JW3564	fdhA	reviewed
+P0A825	glyA	b2551 JW2535		reviewed
+P0A830	dctA	b3528 JW3496		reviewed
+P0A832	smpB	b2620 JW2601	smqB	reviewed
+P0A836	sucC	b0728 JW0717		reviewed
+P0A840	surE	b2744 JW2714	ygbC	reviewed
+P0A847	tgt	b0406 JW0396		reviewed
+P0A850	tig	b0436 JW0426		reviewed
+P0A853	tnaA	b3708 JW3686	ind	reviewed
+P0A855	tolB	b0740 JW5100		reviewed
+P0A858	tpiA	b3919 JW3890	tpi	reviewed
+P0A862	tpx	b1324 JW1317	yzzJ	reviewed
+P0A870	talB	b0008 JW0007	yaaK	reviewed
+P0A873	trmD	b2607 JW2588		reviewed
+P0A879	trpB	b1261 JW1253		reviewed
+P0A884	thyA	b2827 JW2795		reviewed
+P0A887	ubiE	b3833 JW5581	yigO	reviewed
+P0A890	tusA	b3470 JW3435	sirA yhhP	reviewed
+P0A894	rapZ	b3205 JW3172	yhbJ	reviewed
+P0A898	ybeY	b0659 JW0656		reviewed
+P0A8B2	smrB	b2331 JW2328	yfcN	reviewed
+P0A8D6	ymdB	b1045 JW1032		reviewed
+P0A8E7	yajQ	b0426 JW5058		reviewed
+P0A8F0	upp	b2498 JW2483	uraP	reviewed
+P0A8F8	uvrB	b0779 JW0762		reviewed
+P0A8G0	uvrC	b1913 JW1898		reviewed
+P0A8G6	wrbA	b1004 JW0989		reviewed
+P0A8G9	xseB	b0422 JW0412	yajE	reviewed
+P0A8H3	zupT	b3040 JW3008	ygiE	reviewed
+P0A8H6	yihI	b3866 JW3837		reviewed
+P0A8I1	yqgF	b2949 JW2916	ruvX	reviewed
+P0A8I5	trmB	b2960 JW2927	trmI yggH	reviewed
+P0A8I8	rlmH	b0636 JW0631	ybeA	reviewed
+P0A8J2	dnaT	b4362 JW4326		reviewed
+P0A8J8	rhlB	b3780 JW3753	mmrA	reviewed
+P0A8K1	psd	b4160 JW4121		reviewed
+P0A8L1	serS	b0893 JW0876		reviewed
+P0A8M0	asnS	b0930 JW0913	tss	reviewed
+P0A8M3	thrS	b1719 JW1709		reviewed
+P0A8M6	tmaR	b2007 JW1989	yeeX	reviewed
+P0A8N0	matP	b0956 JW0939	ycbG	reviewed
+P0A8N3	lysS	b2890 JW2858	asuD herC	reviewed
+P0A8N5	lysU	b4129 JW4090		reviewed
+P0A8N7	epmA	b4155 JW4116	genX poxA yjeA	reviewed
+P0A8P6	xerC	b3811 JW3784		reviewed
+P0A8P8	xerD	b2894 JW2862	xprB	reviewed
+P0A8Q0	frdC	b4152 JW4113		reviewed
+P0A8Q3	frdD	b4151 JW4112		reviewed
+P0A8R0	rraA	b3929 JW3900	menG yiiV	reviewed
+P0A8S1	argP	b2916 JW2883	iciA	reviewed
+P0A8S9	flhD	b1892 JW1881	flbB	reviewed
+P0A8T1	prmA	b3259 JW3227	yhdI	reviewed
+P0A8T7	rpoC	b3988 JW3951	tabB	reviewed
+P0A8V0	rbn	b2268 JW2263	elaC rnz	reviewed
+P0A8V2	rpoB	b3987 JW3950	groN nitB rif ron stl stv tabD	reviewed
+P0A8V6	fadR	b1187 JW1176	oleR thdB	reviewed
+P0A8W0	nanR	b3226 JW3195	yhcK	reviewed
+P0A8X0	darP	b4234 JW4193	yjgA	reviewed
+P0A8Y1	yjjG	b4374 JW4336		reviewed
+P0A8Y3	yihX	b3885 JW5566		reviewed
+P0A8Y5	yidA	b3697 JW3674		reviewed
+P0A8Y8	entH	b0597 JW0589	ybdB	reviewed
+P0A903	bamC	b2477 JW2462	dapX nlpB	reviewed
+P0A910	ompA	b0957 JW0940	con tolG tut	reviewed
+P0A912	pal	b0741 JW0731	excC	reviewed
+P0A921	pldA	b3821 JW3794		reviewed
+P0A924	pgpB	b1278 JW1270		reviewed
+P0A935	mltA	b2813 JW2784	mlt ygdM	reviewed
+P0A937	bamE	b2617 JW2598	smpA	reviewed
+P0A940	bamA	b0177 JW0172	yaeT yzzN yzzY	reviewed
+P0A944	rimI	b4373 JW4335		reviewed
+P0A948	rimJ	b1066 JW1053		reviewed
+P0A951	speG	b1584 JW1576		reviewed
+P0A953	fabB	b2323 JW2320	fabC	reviewed
+P0A955	eda	b1850 JW1839	hga kdgA	reviewed
+P0A959	alaA	b2290 JW2287	yfbQ	reviewed
+P0A962	ansA	b1767 JW1756		reviewed
+P0A964	cheW	b1887 JW1876		reviewed
+P0A968	cspD	b0880 JW0864	cspH ybjA	reviewed
+P0A972	cspE	b0623 JW0618	gicA msmC	reviewed
+P0A988	dnaN	b3701 JW3678		reviewed
+P0A991	fbaB	b2097 JW5344	dhnA	reviewed
+P0A993	fbp	b4232 JW4191	fdp	reviewed
+P0A998	ftnA	b1905 JW1893	ftn gen-165 rsgA	reviewed
+P0A9A6	ftsZ	b0095 JW0093	sfiB sulB	reviewed
+P0A9A9	fur	b0683 JW0669		reviewed
+P0A9B2	gapA	b1779 JW1768		reviewed
+P0A9B6	epd	b2927 JW2894	gapB	reviewed
+P0A9C0	glpA	b2241 JW2235		reviewed
+P0A9C5	glnA	b3870 JW3841		reviewed
+P0A9C9	glpX	b3925 JW3896		reviewed
+P0A9D2	gstA	b1635 JW1627	gst	reviewed
+P0A9D8	dapD	b0166 JW0161		reviewed
+P0A9E0	araC	b0064 JW0063		reviewed
+P0A9E5	fnr	b1334 JW1328	nirR	reviewed
+P0A9G4	cueR	b0487 JW0476	copR ybbI	reviewed
+P0A9G6	aceA	b4015 JW3975	icl	reviewed
+P0A9G8	modE	b0761 JW0744	modR	reviewed
+P0A9H3	cadA	b4131 JW4092	ldcI	reviewed
+P0A9H7	cfa	b1661 JW1653	cdfA	reviewed
+P0A9H9	cheZ	b1881 JW1870		reviewed
+P0A9J0	rng	b3247 JW3216	cafA orfF yhdF	reviewed
+P0A9J4	panE	b0425 JW0415	apbA	reviewed
+P0A9J6	rbsK	b3752 JW3731		reviewed
+P0A9J8	pheA	b2599 JW2580		reviewed
+P0A9K7	phoU	b3724 JW3702	nmpA	reviewed
+P0A9K9	slyD	b3349 JW3311		reviewed
+P0A9L3	fklB	b4207 JW5746	ytfC	reviewed
+P0A9M0	lon	b0439 JW0429	capR deg lopA muc	reviewed
+P0A9M2	hpt	b0125 JW5009		reviewed
+P0A9M5	gpt	b0238 JW0228	gpp gxu	reviewed
+P0A9M8	pta	b2297 JW2294		reviewed
+P0A9N4	pflA	b0902 JW0885	act	reviewed
+P0A9N8	nrdG	b4237 JW4196	yjgE	reviewed
+P0A9P0	lpdA	b0116 JW0112	lpd	reviewed
+P0A9P4	trxB	b0888 JW0871		reviewed
+P0A9P6	deaD	b3162 JW5531	csdA mssB rhlD	reviewed
+P0A9Q1	arcA	b4401 JW4364	cpxC dye fexA msp seg sfrA	reviewed
+P0A9Q5	accD	b2316 JW2313	dedB usg	reviewed
+P0A9Q7	adhE	b1241 JW1228	ana	reviewed
+P0A9Q9	asd	b3433 JW3396	hom	reviewed
+P0A9R7	ftsE	b3463 JW3428		reviewed
+P0A9S1	fucO	b2799 JW2770		reviewed
+P0A9S5	gldA	b3945 JW5556		reviewed
+P0A9S7	livG	b3455 JW3420		reviewed
+P0A9T0	serA	b2913 JW2880		reviewed
+P0A9V1	lptB	b3201 JW3168	yhbG	reviewed
+P0A9V8	yihU	b3882 JW3853		reviewed
+P0A9W3	ettA	b4391 JW4354	yjjK	reviewed
+P0A9X4	mreB	b3251 JW3220	envB rodY	reviewed
+P0A9X9	cspA	b3556 JW3525	cspS	reviewed
+P0A9Y6	cspC	b1823 JW1812	msmB	reviewed
+P0A9Z1	glnB	b2553 JW2537		reviewed
+P0AA04	ptsH	b2415 JW2408	hpr	reviewed
+P0AA10	rplM	b3231 JW3200		reviewed
+P0AA16	ompR	b3405 JW3368	kmt ompB	reviewed
+P0AA25	trxA	b3781 JW5856	fipA tsnC	reviewed
+P0AA37	rluA	b0058 JW0057	yabO	reviewed
+P0AA41	truC	b2791 JW2762	yqcB	reviewed
+P0AA43	rsuA	b2183 JW2171	yejD	reviewed
+P0AA47	plaP	b2014 JW5330	yeeF	reviewed
+P0AA76	dgoT	b3691 JW5859	yidT	reviewed
+P0AA78	exuT	b3093 JW3064		reviewed
+P0AA84	clsB	b0789 JW0772	ybhO	reviewed
+P0AA89	dosC	b1490 JW5241	dgcO yddV	reviewed
+P0AA93	ypdA	b2380 JW5388		reviewed
+P0AA99	dpaA	b0224 JW0214	ldtF yafK	reviewed
+P0AAA9	zraP	b4002 JW5546	yjaI zra	reviewed
+P0AAB4	ubiD	b3843 JW3819	yigC yigY	reviewed
+P0AAC6	yccA	b0970 JW0953		reviewed
+P0AAC8	iscA	b2528 JW2512	yfhF	reviewed
+P0AAD6	sdaC	b2796 JW2767	dcrA	reviewed
+P0AAD8	tdcC	b3116 JW3087		reviewed
+P0AAE0	cycA	b4208 JW4166	dagA ytfD	reviewed
+P0AAE8	cadB	b4132 JW4093		reviewed
+P0AAF1	potE	b0692 JW0679		reviewed
+P0AAG0	dppD	b3541 JW3510		reviewed
+P0AAH0	pstB	b3725 JW3703	phoT	reviewed
+P0AAH4	sapD	b1291 JW1284	trkE	reviewed
+P0AAI3	ftsH	b3178 JW3145	hflB mrsC std tolZ	reviewed
+P0AAI5	fabF	b1095 JW1081	fabJ	reviewed
+P0AAJ3	fdnH	b1475 JW1471		reviewed
+P0AAJ5	fdoH	b3893 JW3864		reviewed
+P0AAM1	hyaC	b0974 JW0956		reviewed
+P0AAM3	hypC	b2728 JW2698		reviewed
+P0AAM7	hybG	b2990 JW2958		reviewed
+P0AAN3	hypB	b2727 JW2697		reviewed
+P0AAP3	frmR	b0357 JW0348	yaiN	reviewed
+P0AAR3	ybaK	b0481 JW0470		reviewed
+P0AAT4	ybdG	b0577 JW0566	mscM	reviewed
+P0AAT6	rsfS	b0637 JW5090	rsfA slm3 ybeB	reviewed
+P0AAW9	acrZ	b0762 JW5102	ybhT	reviewed
+P0AAX8	ybiS	b0819 JW0803		reviewed
+P0AAZ4	rarA	b0892 JW0875	mgsA ycaJ	reviewed
+P0AB06	mepK	b0926 JW0909	ycbK	reviewed
+P0AB38	lpoB	b1105 JW5157	ycfM	reviewed
+P0AB58	lapB	b1280 JW1272	yciM	reviewed
+P0AB71	fbaA	b2925 JW2892	fba fda	reviewed
+P0AB74	kbaY	b3137 JW3106	agaY kba yraC	reviewed
+P0AB77	kbl	b3617 JW3592		reviewed
+P0AB80	ilvE	b3770 JW5606		reviewed
+P0AB83	nth	b1633 JW1625		reviewed
+P0AB85	apbE	b2214 JW5368	yojK yojL	reviewed
+P0AB87	fucA	b2800 JW2771	fucC prd	reviewed
+P0AB89	purB	b1131 JW1117		reviewed
+P0AB91	aroG	b0754 JW0737		reviewed
+P0AB98	atpB	b3738 JW3716	papD uncB	reviewed
+P0ABA6	atpG	b3733 JW3711	papC uncG	reviewed
+P0ABB0	atpA	b3734 JW3712	papA uncA	reviewed
+P0ABB4	atpD	b3732 JW3710	papB uncD	reviewed
+P0ABB8	mgtA	b4242 JW4201	corB mgt	reviewed
+P0ABC3	hflC	b4175 JW4133	hflA	reviewed
+P0ABC7	hflK	b4174 JW4132	hflA	reviewed
+P0ABD3	bfr	b3336 JW3298		reviewed
+P0ABD5	accA	b0185 JW0180		reviewed
+P0ABD8	accB	b3255 JW3223	fabE	reviewed
+P0ABE5	cybB	b1418 JW5224		reviewed
+P0ABF1	pcnB	b0143 JW5808		reviewed
+P0ABF6	cdd	b2143 JW2131		reviewed
+P0ABG1	cdsA	b0175 JW5810	cds	reviewed
+P0ABG4	ftsW	b0089 JW0087		reviewed
+P0ABG7	mrdB	b0634 JW0629	rodA	reviewed
+P0ABH0	ftsA	b0094 JW0092	divA	reviewed
+P0ABH7	gltA	b0720 JW0710	gluT icdB	reviewed
+P0ABH9	clpA	b0882 JW0866	lopD	reviewed
+P0ABI4	corA	b3816 JW3789		reviewed
+P0ABI8	cyoB	b0431 JW0421		reviewed
+P0ABJ1	cyoA	b0432 JW0422		reviewed
+P0ABJ3	cyoC	b0430 JW0420		reviewed
+P0ABJ6	cyoD	b0429 JW0419		reviewed
+P0ABJ9	cydA	b0733 JW0722	cyd-1	reviewed
+P0ABK2	cydB	b0734 JW0723	cyd-2	reviewed
+P0ABK5	cysK	b2414 JW2407	cysZ	reviewed
+P0ABK7	csgB	b1041 JW1024		reviewed
+P0ABK9	nrfA	b4070 JW4031		reviewed
+P0ABL3	napB	b2203 JW5367	yejY	reviewed
+P0ABN1	dgkA	b4042 JW4002	dgk	reviewed
+P0ABN5	dcuA	b4138 JW5735	genA	reviewed
+P0ABN9	dcuB	b4123 JW4084	genF	reviewed
+P0ABP8	deoD	b4384 JW4347	pup	reviewed
+P0ABQ0	coaBC	b3639 JW5642	dfp	reviewed
+P0ABQ4	folA	b0048 JW0047	tmrA	reviewed
+P0ABR9	mhpB	b0348 JW0339		reviewed
+P0ABS1	dksA	b0145 JW0141		reviewed
+P0ABS5	dnaG	b3066 JW3038	dnaP parB	reviewed
+P0ABS8	holE	b1842 JW1831		reviewed
+P0ABT2	dps	b0812 JW0797	pexB vtm	reviewed
+P0ABU0	menB	b2262 JW2257		reviewed
+P0ABU2	ychF	b1203 JW1194	engD gtp1	reviewed
+P0ABU7	exbB	b3006 JW2974		reviewed
+P0ABU9	tolQ	b0737 JW0727	fii	reviewed
+P0ABV2	exbD	b3005 JW2973		reviewed
+P0ABV6	tolR	b0738 JW0728		reviewed
+P0ABY7	flhC	b1891 JW1880	flaI	reviewed
+P0ABZ1	fliG	b1939 JW1923	fla AII.2 fla BII	reviewed
+P0ABZ6	surA	b0053 JW0052		reviewed
+P0AC00	frlB	b3371 JW5700	yhfN	reviewed
+P0AC02	bamD	b2595 JW2577	yfiO	reviewed
+P0AC13	folP	b3177 JW3144	dhpS	reviewed
+P0AC16	folB	b3058 JW3030	ygiG	reviewed
+P0AC19	folX	b2303 JW2300		reviewed
+P0AC23	focA	b0904 JW0887	ycaE	reviewed
+P0AC30	ftsX	b3462 JW3427	ftsS	reviewed
+P0AC33	fumA	b1612 JW1604		reviewed
+P0AC38	aspA	b4139 JW4099		reviewed
+P0AC41	sdhA	b0723 JW0713		reviewed
+P0AC44	sdhD	b0722 JW0712		reviewed
+P0AC47	frdB	b4153 JW4114		reviewed
+P0AC53	zwf	b1852 JW1841		reviewed
+P0AC55	glnK	b0450 JW0440	ybaI	reviewed
+P0AC69	grxD	b1654 JW1646	ydhD	reviewed
+P0AC75	waaA	b3633 JW3608	kdtA	reviewed
+P0AC78	wecA	b3784 JW3758	rfe	reviewed
+P0AC81	gloA	b1651 JW1643		reviewed
+P0AC84	gloB	b0212 JW0202	yafR	reviewed
+P0AC88	gmd	b2053 JW2038	yefA yefN	reviewed
+P0AC98	satP	b0010 JW0009	yaaH	reviewed
+P0ACB0	dnaB	b4052 JW4012	groP grpA	reviewed
+P0ACB2	hemB	b0369 JW0361	ncf	reviewed
+P0ACB4	hemG	b3850 JW3827	yihB	reviewed
+P0ACC1	prmC	b1212 JW1203	hemK	reviewed
+P0ACC3	erpA	b0156 JW0152	yadR	reviewed
+P0ACC7	glmU	b3730 JW3708	yieA	reviewed
+P0ACD4	iscU	b2529 JW2513	nifU yfhN	reviewed
+P0ACD8	hyaB	b0973 JW0955		reviewed
+P0ACE0	hybC	b2994 JW2962		reviewed
+P0ACE3	hha	b0460 JW0449		reviewed
+P0ACE7	hinT	b1103 JW1089	ycfF	reviewed
+P0ACF0	hupA	b4000 JW3964		reviewed
+P0ACF4	hupB	b0440 JW0430	hopD	reviewed
+P0ACF8	hns	b1237 JW1225	bglY cur drdX h-ns hnsA msyA osmZ pilG topS	reviewed
+P0ACG1	stpA	b2669 JW2644	hnsB	reviewed
+P0ACG8	hslR	b3400 JW3363	yrfH	reviewed
+P0ACJ0	lrp	b0889 JW0872	alsB ihb livR oppI	reviewed
+P0ACJ8	crp	b3357 JW5702	cap csm	reviewed
+P0ACN4	allR	b0506 JW0494	glxA3 ybbU	reviewed
+P0ACN7	cytR	b3934 JW3905		reviewed
+P0ACP7	purR	b1658 JW1650		reviewed
+P0ACQ4	oxyR	b3961 JW3933	momR mor	reviewed
+P0ACR9	mprA	b2684 JW2659	emrR	reviewed
+P0ACS9	acrR	b0464 JW0453	ybaH	reviewed
+P0ACV0	lpxL	b1054 JW1041	htrB waaM	reviewed
+P0ACV6	mpaA	b1326 JW1319	ycjI	reviewed
+P0ACY3	yeaG	b1783 JW1772		reviewed
+P0ACZ4	evgA	b2369 JW2366		reviewed
+P0AD14	btsS	b2126 JW5353	yehU	reviewed
+P0AD27	pbgA	b2188 JW2176	lapC yejM yejN	reviewed
+P0AD49	raiA	b2597 JW2578	yfiA	reviewed
+P0AD57	ispB	b3187 JW3154	cel yhbD	reviewed
+P0AD59	ivy	b0220 JW0210	ykfE	reviewed
+P0AD61	pykF	b1676 JW1666		reviewed
+P0AD65	mrdA	b0635 JW0630	pbpA	reviewed
+P0AD68	ftsI	b0084 JW0082	pbpB	reviewed
+P0AD70	ampH	b0376 JW5052	yaiH	reviewed
+P0AD99	brnQ	b0401 JW0391		reviewed
+P0ADA1	tesA	b0494 JW0483	apeA pldC	reviewed
+P0ADC1	lptE	b0641 JW0636	rlpB	reviewed
+P0ADE4	tamA	b4220 JW4179	yftM ytfM	reviewed
+P0ADG4	suhB	b2533 JW2517	ssyA	reviewed
+P0ADG7	guaB	b2508 JW5401	guaR	reviewed
+P0ADI4	entB	b0595 JW0587	entG	reviewed
+P0ADL1	nepI	b3662 JW5938	yicM	reviewed
+P0ADN0	viaA	b3745 JW5610	yieD yieM	reviewed
+P0ADN2	maoP	b3764 JW3737	yifE	reviewed
+P0ADP0	yigB	b3812 JW3785		reviewed
+P0ADP2	yigI	b3820 JW5588		reviewed
+P0ADR8	ppnN	b2795 JW2766	ygdH	reviewed
+P0ADS2	zapA	b2910 JW2878	ygfE	reviewed
+P0ADV1	lptA	b3200 JW3167	yhbN	reviewed
+P0ADV9	lptC	b3199 JW3166	yrbK	reviewed
+P0ADY1	ppiD	b0441 JW0431	ybaU	reviewed
+P0ADY3	rplN	b3310 JW3272		reviewed
+P0ADY7	rplP	b3313 JW3275		reviewed
+P0ADZ0	rplW	b3318 JW3280		reviewed
+P0ADZ4	rpsO	b3165 JW3134	secC	reviewed
+P0AE01	trmJ	b2532 JW2516	yfhQ	reviewed
+P0AE06	acrA	b0463 JW0452	lir mtcA	reviewed
+P0AE08	ahpC	b0605 JW0598		reviewed
+P0AE12	amn	b1982 JW1963		reviewed
+P0AE16	ampG	b0433 JW0423		reviewed
+P0AE18	map	b0168 JW0163		reviewed
+P0AE22	aphA	b4055 JW4015	napA yjbP	reviewed
+P0AE24	araE	b2841 JW2809		reviewed
+P0AE52	bcp	b2480 JW2465		reviewed
+P0AE67	cheY	b1882 JW1871		reviewed
+P0AE70	mazF	b2782 JW2753	chpA chpAK	reviewed
+P0AE72	mazE	b2783 JW2754	chpAI chpR	reviewed
+P0AE82	cpxA	b3911 JW3882	ecfB eup ssd	reviewed
+P0AE85	cpxP	b4484 JW5558	yiiO	reviewed
+P0AE88	cpxR	b3912 JW3883	yiiA	reviewed
+P0AEA8	cysG	b3368 JW3331		reviewed
+P0AEB2	dacA	b0632 JW0627	pfv	reviewed
+P0AEC3	arcB	b3210 JW5536		reviewed
+P0AEC5	barA	b2786 JW2757		reviewed
+P0AEC8	dcuS	b4125 JW4086	yjdH	reviewed
+P0AED7	dapE	b2472 JW2456	msgB	reviewed
+P0AEE3	degS	b3235 JW3204	hhoB htrH	reviewed
+P0AEE5	mglB	b2150 JW2137		reviewed
+P0AEE8	dam	b3387 JW3350		reviewed
+P0AEF0	dnaC	b4361 JW4325	dnaD	reviewed
+P0AEG4	dsbA	b3860 JW3832	dsf ppfA	reviewed
+P0AEG6	dsbC	b2893 JW2861	xprA	reviewed
+P0AEH1	rseP	b0176 JW0171	ecfE yaeL	reviewed
+P0AEI1	miaB	b0661 JW0658	yleA	reviewed
+P0AEJ2	entC	b0593 JW0585		reviewed
+P0AEJ4	envZ	b3404 JW3367	ompB perA tpo	reviewed
+P0AEJ6	eutB	b2441 JW2434		reviewed
+P0AEK2	fabG	b1093 JW1079		reviewed
+P0AEK4	fabI	b1288 JW1281	envM	reviewed
+P0AEK7	fdnI	b1476 JW1472		reviewed
+P0AEL0	fdoI	b3892 JW3863		reviewed
+P0AEL8	fimZ	b0535 JW5073	ybcA	reviewed
+P0AEM6	fliA	b1922 JW1907	flaD rpoF	reviewed
+P0AEM9	tcyJ	b1920 JW1905	fliY yzzR	reviewed
+P0AEN1	fre	b3844 JW3820	fadI flrD fsrC ubiB	reviewed
+P0AEN4	ftsL	b0083 JW0081	mraR yabD	reviewed
+P0AEN8	fucU	b2804 JW2775		reviewed
+P0AEP3	galU	b1236 JW1224	ychD	reviewed
+P0AEP7	gcl	b0507 JW0495		reviewed
+P0AEP9	glcD	b2979 JW2946	gox yghM	reviewed
+P0AER0	glpF	b3927 JW3898		reviewed
+P0AES0	gss	b2988 JW2956	gsp	reviewed
+P0AES2	gudD	b2787 JW2758	ygcX	reviewed
+P0AES4	gyrA	b2231 JW2225	hisW nalA parD	reviewed
+P0AES6	gyrB	b3699 JW5625	acrB cou himB hisU nalC parA pcbA	reviewed
+P0AES9	hdeA	b3510 JW3478	yhhC yhiB	reviewed
+P0AET2	hdeB	b3509 JW5669	yhhD yhiC	reviewed
+P0AET8	hdhA	b1619 JW1611	hsdH	reviewed
+P0AEU7	skp	b0178 JW0173	hlpA ompH	reviewed
+P0AEV1	rssB	b1235 JW1223	hnr sprE ychL	reviewed
+P0AEW6	gsk	b0477 JW0466		reviewed
+P0AEW9	fruK	b2168 JW2155	fpk	reviewed
+P0AEX7	livH	b3457 JW3422		reviewed
+P0AEX9	malE	b4034 JW3994		reviewed
+P0AEY3	mazG	b2781 JW2752		reviewed
+P0AEY5	mdaB	b3028 JW2996	mda66	reviewed
+P0AEY8	mdfA	b0842 JW0826	cmlA cmr	reviewed
+P0AEZ1	metF	b3941 JW3913		reviewed
+P0AEZ3	minD	b1175 JW1164		reviewed
+P0AF06	motB	b1889 JW1878		reviewed
+P0AF12	mtnN	b0159 JW0155	mtn pfs yadA	reviewed
+P0AF16	murJ	b1069 JW1056	mviN yceN	reviewed
+P0AF18	nagA	b0677 JW0663		reviewed
+P0AF24	nagD	b0675 JW0661		reviewed
+P0AF28	narL	b1221 JW1212	frdR	reviewed
+P0AF32	narV	b1465 JW1460		reviewed
+P0AF36	zapB	b3928 JW3899	yiiU	reviewed
+P0AF52	ghxP	b4064 JW4025	yjcD	reviewed
+P0AF61	ghoS	b4128 JW4089	arT yjdK	reviewed
+P0AF67	tsaE	b4168 JW4126	yjeE	reviewed
+P0AF90	rraB	b4255 JW4212	yjgD	reviewed
+P0AF93	ridA	b4243 JW5755	yjgF	reviewed
+P0AFA2	narX	b1222 JW1213	narR	reviewed
+P0AFA7	nhaB	b1186 JW1175		reviewed
+P0AFB1	nlpI	b3163 JW3132	yhbM	reviewed
+P0AFB5	glnL	b3869 JW3840	glnR ntrB	reviewed
+P0AFB8	glnG	b3868 JW3839	glnT ntrC	reviewed
+P0AFC0	nudB	b1865 JW1854	ntpA	reviewed
+P0AFC3	nuoA	b2288 JW2283		reviewed
+P0AFC7	nuoB	b2287 JW5875		reviewed
+P0AFD1	nuoE	b2285 JW2280		reviewed
+P0AFD4	nuoH	b2282 JW2277		reviewed
+P0AFD6	nuoI	b2281 JW2276		reviewed
+P0AFE0	nuoJ	b2280 JW2275		reviewed
+P0AFE4	nuoK	b2279 JW2274		reviewed
+P0AFE8	nuoM	b2277 JW2272		reviewed
+P0AFF0	nuoN	b2276 JW2271		reviewed
+P0AFF2	nupC	b2393 JW2389	cru	reviewed
+P0AFF4	nupG	b2964 JW2932		reviewed
+P0AFF6	nusA	b3169 JW3138		reviewed
+P0AFG0	nusG	b3982 JW3945		reviewed
+P0AFG3	sucA	b0726 JW0715		reviewed
+P0AFG6	sucB	b0727 JW0716		reviewed
+P0AFG8	aceE	b0114 JW0110		reviewed
+P0AFI0	oxc	b2373 JW2370	yfdU	reviewed
+P0AFI2	parC	b3019 JW2987		reviewed
+P0AFI7	pdxH	b1638 JW1630		reviewed
+P0AFJ7	pitA	b3493 JW3460	pit	reviewed
+P0AFL3	ppiA	b3363 JW3326	rot rotA	reviewed
+P0AFL6	ppx	b2502 JW2487		reviewed
+P0AFM2	proX	b2679 JW2654	proU	reviewed
+P0AFM6	pspA	b1304 JW1297		reviewed
+P0AFP6	ybgI	b0710 JW0700		reviewed
+P0AFQ5	rutC	b1010 JW0995	ycdK	reviewed
+P0AFR2	dauA	b1206 JW5189	ychM	reviewed
+P0AFS3	folM	b1606 JW1598	ydgB	reviewed
+P0AFS9	mepM	b1856 JW5304	yebA	reviewed
+P0AFT2	tcyL	b1918 JW1903	yecS	reviewed
+P0AFU0	yejB	b2178 JW2166		reviewed
+P0AFU4	glrR	b2554 JW2538	yfhA	reviewed
+P0AFV4	mepS	b2175 JW2163	spr yeiV	reviewed
+P0AFW0	rfaH	b3842 JW3818	hlyT sfrB	reviewed
+P0AFW2	rmf	b0953 JW0936		reviewed
+P0AFX0	hpf	b3203 JW3170	yhbH	reviewed
+P0AFX7	rseA	b2572 JW2556	mclA yfiJ	reviewed
+P0AFX9	rseB	b2571 JW2555		reviewed
+P0AFY6	sbmA	b0377 JW0368		reviewed
+P0AFY8	seqA	b0687 JW0674		reviewed
+P0AFZ3	sspB	b3228 JW3197		reviewed
+P0AFZ5	sulA	b0958 JW0941	sfiA	reviewed
+P0AG07	rpe	b3386 JW3349	dod yhfD	reviewed
+P0AG11	umuD	b1183 JW1172		reviewed
+P0AG16	purF	b2312 JW2309		reviewed
+P0AG18	purE	b0523 JW0512		reviewed
+P0AG24	spoT	b3650 JW3625		reviewed
+P0AG30	rho	b3783 JW3756	nitA psuA rnsC sbaA tsu	reviewed
+P0AG55	rplF	b3305 JW3267		reviewed
+P0AG59	rpsN	b3307 JW3269		reviewed
+P0AG63	rpsQ	b3311 JW3273	neaA	reviewed
+P0AG67	rpsA	b0911 JW0894	ssyF	reviewed
+P0AG74	rusA	b0550 JW0538	rus ybcP	reviewed
+P0AG80	ugpB	b3453 JW3418		reviewed
+P0AG86	secB	b3609 JW3584		reviewed
+P0AG90	secD	b0408 JW0398		reviewed
+P0AG93	secF	b0409 JW0399		reviewed
+P0AG96	secE	b3981 JW3944	prlG	reviewed
+P0AG99	secG	b3175 JW3142		reviewed
+P0AGA2	secY	b3300 JW3262	prlA	reviewed
+P0AGB0	serB	b4388 JW4351		reviewed
+P0AGB3	rpoH	b3461 JW3426	fam hin htpR	reviewed
+P0AGB6	rpoE	b2573 JW2557	sigE	reviewed
+P0AGC0	uhpT	b3666 JW3641		reviewed
+P0AGC3	slt	b4392 JW4355	sltY	reviewed
+P0AGD1	sodC	b1646 JW1638		reviewed
+P0AGD3	sodB	b1656 JW1648		reviewed
+P0AGD7	ffh	b2610 JW5414		reviewed
+P0AGE0	ssb	b4059 JW4020	exrB lexC	reviewed
+P0AGE4	sstT	b3089 JW3060	ygjU	reviewed
+P0AGE6	chrR	b3713 JW3691	yieF	reviewed
+P0AGE9	sucD	b0729 JW0718		reviewed
+P0AGF2	csdE	b2811 JW2782	ygdK	reviewed
+P0AGF4	xylE	b4031 JW3991		reviewed
+P0AGF6	tdcB	b3117 JW3088		reviewed
+P0AGG0	thiL	b0417 JW0407		reviewed
+P0AGG2	tesB	b0452 JW0442		reviewed
+P0AGI1	rbsC	b3750 JW3729		reviewed
+P0AGJ7	trmL	b3606 JW3581	yibK	reviewed
+P0AGJ9	tyrS	b1637 JW1629		reviewed
+P0AGK1	ubiA	b4040 JW4000	cyr	reviewed
+P0AGM7	uraA	b2497 JW2482		reviewed
+P0C018	rplR	b3304 JW3266		reviewed
+P0C037	ppnP	b0391 JW0382	yaiE	reviewed
+P0C054	ibpA	b3687 JW3664	hslT htpN	reviewed
+P0C058	ibpB	b3686 JW3663	hslS htpE	reviewed
+P0C077	relE	b1563 JW1555		reviewed
+P0C079	relB	b1564 JW1556		reviewed
+P0C093	slmA	b3641 JW5641	ttk yicB	reviewed
+P0C0K3	srkA	b3859 JW3831	rdoA yihE	reviewed
+P0C0L2	osmC	b1482 JW1477		reviewed
+P0C0L7	proP	b4111 JW4072		reviewed
+P0C0R7	rlmE	b3179 JW3146	ftsJ mrsF rrmJ	reviewed
+P0C0S1	mscS	b2924 JW2891	yggB	reviewed
+P0C0T5	mepA	b2328 JW2325		reviewed
+P0C0V0	degP	b0161 JW0157	htrA ptd	reviewed
+P0CE47	tufA	b3339 JW3301		reviewed
+P0CE48	tufB	b3980 JW3943		reviewed
+P0CG19	rph	b3643 JW3618	orfE	reviewed
+P0DM85	rdcA	b4109 JW4070	crfC yjdA	reviewed
+P0DMC5	rcsC	b2218 JW5917/JW5920		reviewed
+P0DMC7	rcsB	b2217 JW2205		reviewed
+P0DP90	ilvG			reviewed
+P0DTT0	bipA	b3871 JW5571	o591 typA yihK	reviewed
+P0DTV7	speFL	b4803		reviewed
+P10026	traM	ECOK12F071		reviewed
+P10121	ftsY	b3464 JW3429		reviewed
+P10378	entE	b0594 JW0586		reviewed
+P10408	secA	b0098 JW0096	azi pea prlD	reviewed
+P10443	dnaE	b0184 JW0179	polC	reviewed
+P10902	nadB	b2574 JW2558	nicB	reviewed
+P10903	narK	b1223 JW1214		reviewed
+P10905	ugpA	b3452 JW3417		reviewed
+P10906	ugpE	b3451 JW3416		reviewed
+P10907	ugpC	b3450 JW3415		reviewed
+P10908	ugpQ	b3449 JW3414		reviewed
+P11071	aceK	b4016 JW3976		reviewed
+P11349	narH	b1225 JW1216		reviewed
+P11350	narI	b1227 JW1218	chlI	reviewed
+P11454	entF	b0586 JW0578		reviewed
+P11458	nadA	b0750 JW0733	nicA	reviewed
+P11551	fucP	b2801 JW2772		reviewed
+P11553	fucK	b2803 JW2774		reviewed
+P11557	damX	b3388 JW3351	yhfB	reviewed
+P11667	argO	b2923 JW2890	yggA	reviewed
+P11880	murF	b0086 JW0084	mra	reviewed
+P12008	aroC	b2329 JW2326		reviewed
+P12281	moeA	b0827 JW0811	bisB chlE narE	reviewed
+P12282	moeB	b0826 JW0810	chlN	reviewed
+P12295	ung	b2580 JW2564		reviewed
+P12758	udp	b3831 JW3808		reviewed
+P12995	bioA	b0774 JW0757		reviewed
+P12996	bioB	b0775 JW0758		reviewed
+P12998	bioF	b0776 JW0759		reviewed
+P13000	bioD1	b0778 JW0761		reviewed
+P13001	bioH	b3412 JW3375	bioB	reviewed
+P13009	metH	b4019 JW3979		reviewed
+P13029	katG	b3942 JW3914		reviewed
+P13035	glpD	b3426 JW3389	glyD	reviewed
+P13036	fecA	b4291 JW4251		reviewed
+P13039	fes	b0585 JW0576		reviewed
+P13445	rpoS	b2741 JW5437	appR katF nur otsX sigS	reviewed
+P13458	sbcC	b0397 JW0387	rmuA	reviewed
+P13482	treA	b1197 JW1186	osmA	reviewed
+P13518	csrD	b3252 JW3221	yhdA	reviewed
+P13738	nhaA	b0019 JW0018	ant	reviewed
+P14081	selB	b3590 JW3563	fdhA	reviewed
+P14175	proV	b2677 JW2652		reviewed
+P14176	proW	b2678 JW2653		reviewed
+P14294	topB	b1763 JW1752		reviewed
+P14375	zraR	b4004 JW3968	hydG	reviewed
+P14377	zraS	b4003 JW3967	hydH	reviewed
+P14407	fumB	b4122 JW4083		reviewed
+P14565	traI	ECOK12F104		reviewed
+P14900	murD	b0088 JW0086		reviewed
+P15005	mcrB	b4346 JW5871	rglB	reviewed
+P15028	fecB	b4290 JW4250		reviewed
+P15029	fecD	b4288 JW4248		reviewed
+P15030	fecC	b4289 JW4249		reviewed
+P15034	pepP	b2908 JW2876		reviewed
+P15042	ligA	b2411 JW2403	dnaL lig lop pdeC	reviewed
+P15043	recQ	b3822 JW5855		reviewed
+P15047	entA	b0596 JW0588		reviewed
+P15067	glgX	b3431 JW3394	glyX	reviewed
+P15254	purL	b2557 JW2541	purI	reviewed
+P15288	pepD	b0237 JW0227	pepH	reviewed
+P15373	prlF	b3129 JW3098	sohA	reviewed
+P15640	purD	b4005 JW3969		reviewed
+P15723	dgt	b0160 JW0156		reviewed
+P15770	aroE	b3281 JW3242		reviewed
+P15877	gcd	b0124 JW0120		reviewed
+P15993	aroP	b0112 JW0108		reviewed
+P16384	miaA	b4171 JW4129	trpX	reviewed
+P16456	selD	b1764 JW1753	fdhB	reviewed
+P16528	iclR	b4018 JW3978		reviewed
+P16659	proS	b0194 JW0190	drpA	reviewed
+P16686	phnH	b4100 JW4061		reviewed
+P16687	phnI	b4099 JW4060		reviewed
+P16688	phnJ	b4098 JW4059		reviewed
+P16692	phnP	b4092 JW4053		reviewed
+P16703	cysM	b2421 JW2414		reviewed
+P16869	fhuE	b1102 JW1088		reviewed
+P16926	mreC	b3250 JW3219		reviewed
+P17109	menD	b2264 JW5374		reviewed
+P17115	gutQ	b2708 JW5431	srlQ	reviewed
+P17117	nfsA	b0851 JW0835	mda18 mdaA ybjB	reviewed
+P17169	glmS	b3729 JW3707		reviewed
+P17411	chbF	b1734 JW1723	celF ydjD	reviewed
+P17443	murG	b0090 JW0088		reviewed
+P17444	betA	b0311 JW0303		reviewed
+P17445	betB	b0312 JW0304		reviewed
+P17846	cysI	b2763 JW2733		reviewed
+P17854	cysH	b2762 JW2732		reviewed
+P17888	priA	b3935 JW3906	srgA	reviewed
+P17952	murC	b0091 JW0089		reviewed
+P17993	ubiG	b2232 JW2226	pufX yfaB	reviewed
+P18196	minC	b1176 JW1165		reviewed
+P18200	pgpA	b0418 JW0408	yajN	reviewed
+P18335	argD	b3359 JW3322	dapC dtu	reviewed
+P18775	dmsA	b0894 JW5118		reviewed
+P18776	dmsB	b0895 JW0878		reviewed
+P18843	nadE	b1740 JW1729	efg ntrL	reviewed
+P18956	ggt	b3447 JW3412		reviewed
+P19318	narY	b1467 JW1462		reviewed
+P19319	narZ	b1468 JW1463		reviewed
+P19624	pdxA	b0052 JW0051		reviewed
+P19636	eutC	b2440 JW2433		reviewed
+P19925	entD	b0583 JW5085		reviewed
+P19926	agp	b1002 JW0987		reviewed
+P19934	tolA	b0739 JW0729	cim excC lky	reviewed
+P20083	parE	b3030 JW2998	nfxD	reviewed
+P20966	fruA	b2167 JW2154	ptsF	reviewed
+P21151	fadA	b3845 JW5578	oldA	reviewed
+P21156	cysD	b2752 JW2722		reviewed
+P21165	pepQ	b3847 JW3823		reviewed
+P21170	speA	b2938 JW2905		reviewed
+P21177	fadB	b3846 JW3822	oldB	reviewed
+P21179	katE	b1732 JW1721		reviewed
+P21338	rna	b0611 JW0603	rnsA	reviewed
+P21345	gltP	b4077 JW4038		reviewed
+P21437	yggF	b2930 JW2897	yggK	reviewed
+P21499	rnr	b4179 JW5741	vacB yjeC	reviewed
+P21507	srmB	b2576 JW2560	rbaB rhlA	reviewed
+P21513	rne	b1084 JW1071	ams hmp1	reviewed
+P21514	pdeL	b0315 JW0307	yahA	reviewed
+P21599	pykA	b1854 JW1843		reviewed
+P21645	lpxD	b0179 JW0174	firA omsA	reviewed
+P21693	dbpA	b1343 JW1337		reviewed
+P21829	ybhA	b0766 JW0749		reviewed
+P21865	kdpD	b0695 JW0683		reviewed
+P21888	cysS	b0526 JW0515		reviewed
+P22106	asnB	b0674 JW0660		reviewed
+P22188	murE	b0085 JW0083		reviewed
+P22255	cysQ	b4214 JW4172	amtA	reviewed
+P22256	gabT	b2662 JW2637		reviewed
+P22259	pckA	b3403 JW3366	pck	reviewed
+P22333	add	b1623 JW1615		reviewed
+P22523	mukB	b0924 JW0907		reviewed
+P22525	ycbB	b0925 JW0908		reviewed
+P22634	murI	b3967 JW5550	dga glr yijA	reviewed
+P22729	livM	b3456 JW3421		reviewed
+P22731	livF	b3454 JW3419		reviewed
+P23003	trmA	b3965 JW3937		reviewed
+P23256	malY	b1622 JW1614		reviewed
+P23367	mutL	b4170 JW4128		reviewed
+P23522	garL	b3126 JW3095	yhaF	reviewed
+P23538	ppsA	b1702 JW1692	pps	reviewed
+P23721	serC	b0907 JW0890	pdxC pdxF	reviewed
+P23827	eco	b2209 JW2197	eti	reviewed
+P23830	pssA	b2585 JW2569	pss	reviewed
+P23836	phoP	b1130 JW1116		reviewed
+P23837	phoQ	b1129 JW1115		reviewed
+P23843	oppA	b1243 JW1235		reviewed
+P23845	cysN	b2751 JW2721		reviewed
+P23847	dppA	b3544 JW3513		reviewed
+P23857	pspE	b1308 JW1301		reviewed
+P23862	priC	b0467 JW0456		reviewed
+P23865	prc	b1830 JW1819	tsp	reviewed
+P23872	aes	b0476 JW0465	ybaC	reviewed
+P23873	hipB	b1508 JW1501		reviewed
+P23874	hipA	b1507 JW1500		reviewed
+P23882	fmt	b3288 JW3249	yhdD	reviewed
+P23883	puuC	b1300 JW1293	aldH	reviewed
+P23886	cydC	b0886 JW0869	mdrA mdrH surB	reviewed
+P23890	cadC	b4133 JW4094		reviewed
+P23893	hemL	b0154 JW0150	gsa popC	reviewed
+P23894	htpX	b1829 JW1818		reviewed
+P23895	emrE	b0543 JW0531	eb mvrC	reviewed
+P23908	argE	b3957 JW3929		reviewed
+P23909	mutS	b2733 JW2703	fdv	reviewed
+P23930	lnt	b0657 JW0654	cutE	reviewed
+P24082	traN	ECOK12F089		reviewed
+P24171	dcp	b1538 JW1531		reviewed
+P24173	waaC	b3621 JW3596	rfa-2 rfaC yibC	reviewed
+P24177	acrD	b2470 JW2454	yffA	reviewed
+P24182	accC	b3256 JW3224	fabG	reviewed
+P24183	fdnG	b1474 JW1470		reviewed
+P24186	folD	b0529 JW0518	ads	reviewed
+P24188	trhO	b1055 JW1042	yceA	reviewed
+P24192	hypD	b2729 JW2699		reviewed
+P24193	hypE	b2730 JW2700		reviewed
+P24203	yjiA	b4352 JW5790		reviewed
+P24205	lpxM	b1855 JW1844	msbB	reviewed
+P24207	pheP	b0576 JW0565		reviewed
+P24215	uxuA	b4322 JW4285		reviewed
+P24224	acpS	b2563 JW2547	dpj	reviewed
+P24228	dacB	b3182 JW3149		reviewed
+P24230	recG	b3652 JW3627	radC spoV	reviewed
+P24232	hmp	b2552 JW2536	fsrB hmpA	reviewed
+P24554	radA	b4389 JW4352	sms	reviewed
+P25397	tehB	b1430 JW1426		reviewed
+P25437	frmA	b0356 JW0347	adhC	reviewed
+P25516	acnA	b1276 JW1268	acn	reviewed
+P25519	hflX	b4173 JW4131		reviewed
+P25522	mnmE	b3706 JW3684	thdF trmE	reviewed
+P25524	codA	b0337 JW0328		reviewed
+P25526	gabD	b2661 JW2636		reviewed
+P25527	gabP	b2663 JW2638		reviewed
+P25534	ubiH	b2907 JW2875	visB	reviewed
+P25535	ubiI	b2906 JW2874	visC	reviewed
+P25536	yhdE	b3248 JW3217		reviewed
+P25539	ribD	b0414 JW0404	ribG ybaE	reviewed
+P25552	gppA	b3779 JW5603	gpp	reviewed
+P25553	aldA	b1415 JW1412	ald	reviewed
+P25665	metE	b3829 JW3805		reviewed
+P25714	yidC	b3705 JW3683		reviewed
+P25718	malS	b3571 JW3543		reviewed
+P25737	lysP	b2156 JW2143	cadR	reviewed
+P25740	waaG	b3631 JW3606	pcsA rfaG	reviewed
+P25745	mnmA	b1133 JW1119	asuE trmU ycfB	reviewed
+P25888	rhlE	b0797 JW0781		reviewed
+P25889	preA	b2147 JW2134	yeiA	reviewed
+P25894	loiP	b2936 JW2903	yggG	reviewed
+P26458	appB	b0979 JW0961	cbdB cyxB	reviewed
+P26459	appC	b0978 JW0960	cbdA cyxA	reviewed
+P26602	ubiC	b4039 JW5713		reviewed
+P26616	maeA	b1479 JW5238	sfcA	reviewed
+P26648	ftsP	b3017 JW2985	sufI	reviewed
+P27125	rhaT	b3907 JW3878		reviewed
+P27128	waaO	b3627 JW3602	rfaI	reviewed
+P27243	waaL	b3622 JW3597	rfaL	reviewed
+P27249	glnD	b0167 JW0162		reviewed
+P27250	ahr	b4269 JW5761	yjgB	reviewed
+P27278	nadR	b4390 JW5800	nadI	reviewed
+P27296	dinG	b0799 JW0784	rarB	reviewed
+P27302	tktA	b2935 JW5478	tkt	reviewed
+P27303	emrA	b2685 JW2660		reviewed
+P27306	sthA	b3962 JW5551	sth udhA	reviewed
+P27431	roxA	b1128 JW1114	ycfD	reviewed
+P27434	rodZ	b2516 JW2500	yfgA	reviewed
+P27550	acs	b4069 JW4030	yfaC	reviewed
+P27828	wecB	b3786 JW5600	nfrC rffE yifF	reviewed
+P27829	wecC	b3787 JW5599	rffD	reviewed
+P27830	rffG	b3788 JW5598		reviewed
+P27833	wecE	b3791 JW3765	rffA yifI	reviewed
+P27837	thrP	b3795 JW5595	yifK	reviewed
+P27838	cyaY	b3807 JW3779		reviewed
+P27848	yigL	b3826 JW5854		reviewed
+P27859	tatD	b4483 JW5931	mttC yigW yigX	reviewed
+P28246	bcr	b2182 JW5363	bicA bicR sur suxA	reviewed
+P28248	dcd	b2065 JW2050	dus paxA	reviewed
+P28305	pabC	b1096 JW1082		reviewed
+P28306	mltG	b1097 JW1083	yceG	reviewed
+P28629	adiA	b4117 JW5731	adi	reviewed
+P28630	holA	b0640 JW0635		reviewed
+P28631	holB	b1099 JW1085		reviewed
+P28632	holD	b4372 JW4334		reviewed
+P28861	fpr	b3924 JW3895	mvrA	reviewed
+P28903	nrdD	b4238 JW4197		reviewed
+P28905	holC	b4259 JW4216		reviewed
+P29018	cydD	b0887 JW0870	htrD	reviewed
+P29131	ftsN	b3933 JW3904	msgA	reviewed
+P29745	pepT	b1127 JW1113		reviewed
+P30011	nadC	b0109 JW0105		reviewed
+P30014	rnt	b1652 JW1644		reviewed
+P30015	lhr	b1653 JW1645	rhlF	reviewed
+P30125	leuB	b0073 JW5807		reviewed
+P30131	hypF	b2712 JW5433	hydA	reviewed
+P30138	thiF	b3992 JW3956		reviewed
+P30139	thiG	b3991 JW5549		reviewed
+P30140	thiH	b3990 JW3953		reviewed
+P30147	hyi	b0508 JW0496	gip ybbG	reviewed
+P30176	ybiA	b0798 JW0783		reviewed
+P30177	ybiB	b0800 JW0785		reviewed
+P30178	hcxB	b0801 JW0786	ybiC	reviewed
+P30745	moaA	b0781 JW0764	bisA chlA chlA1 narA	reviewed
+P30748	moaD	b0784 JW0767	chlA4 chlM	reviewed
+P30749	moaE	b0785 JW0768	chlA5	reviewed
+P30750	metN	b0199 JW0195	abc	reviewed
+P30844	basS	b4112 JW4073	pmrB	reviewed
+P30847	baeS	b2078 JW2063		reviewed
+P30850	rnb	b1286 JW1279		reviewed
+P30855	evgS	b2370 JW2367		reviewed
+P30863	dkgB	b0207 JW0197	yafB	reviewed
+P30870	glnE	b3053 JW3025		reviewed
+P30958	mfd	b1114 JW1100		reviewed
+P31057	panB	b0134 JW0130		reviewed
+P31069	kch	b1250 JW1242		reviewed
+P31119	aas	b2836 JW2804		reviewed
+P31120	glmM	b3176 JW3143	mrsA yhbF	reviewed
+P31129	dgcZ	b1535 JW1528	ydeG ydeH	reviewed
+P31133	potF	b0854 JW0838		reviewed
+P31134	potG	b0855 JW5818		reviewed
+P31135	potH	b0856 JW0840		reviewed
+P31142	sseA	b2521 JW2505		reviewed
+P31224	acrB	b0462 JW0451	acrE	reviewed
+P31460	dgoR	b4479 JW5627	yidW	reviewed
+P31466	adeP	b3714 JW3692	purP yieG	reviewed
+P31473	ravA	b3746 JW3725	yieN	reviewed
+P31545	efeB	b1019 JW1004	ycdB	reviewed
+P31547	metI	b0198 JW0194	yaeE	reviewed
+P31550	thiB	b0068 JW0067	tbpA yabL	reviewed
+P31551	caiD	b0036 JW0035	yaaL	reviewed
+P31552	caiC	b0037 JW0036	yaaM	reviewed
+P31553	caiT	b0040 JW0039	yaaP	reviewed
+P31554	lptD	b0054 JW0053	imp ostA yabG	reviewed
+P31572	caiB	b0038 JW0037	yaaN	reviewed
+P31658	hchA	b1967 JW1950	yedU yzzC	reviewed
+P31660	prpC	b0333 JW0324	yahS yzzD	reviewed
+P31663	panC	b0133 JW0129		reviewed
+P31667	rpnA	b3411 JW3374	yhgA	reviewed
+P31677	otsA	b1896 JW5312		reviewed
+P31678	otsB	b1897 JW1886		reviewed
+P31806	nnr	b4167 JW4125	yjeF	reviewed
+P31979	nuoF	b2284 JW2279		reviewed
+P31992	pptA	b1461 JW1456	ydcE	reviewed
+P32055	fcl	b2052 JW2037	wcaG yefB	reviewed
+P32056	gmm	b2051 JW5335	nudD wcaH yefC	reviewed
+P32099	lplA	b4386 JW4349	yjjF	reviewed
+P32131	hemN	b3867 JW3838	yihJ	reviewed
+P32138	yihQ	b3878 JW3849	squQ	reviewed
+P32140	yihS	b3880 JW5569		reviewed
+P32143	yihV	b3883 JW5568		reviewed
+P32156	rhaM	b3901 JW3872	yiiL	reviewed
+P32157	yiiM	b3910 JW5559		reviewed
+P32169	rhaD	b3902 JW3873	rhuA	reviewed
+P32170	rhaA	b3903 JW5561		reviewed
+P32171	rhaB	b3904 JW3875		reviewed
+P32173	mobA	b3857 JW3829	chlB mob narB	reviewed
+P32176	fdoG	b3894 JW3865		reviewed
+P32177	fdhD	b3895 JW3866		reviewed
+P32662	gph	b3385 JW3348	yhfE	reviewed
+P32664	nudC	b3996 JW5548	yjaD	reviewed
+P32684	rluF	b4022 JW3982	yjbC	reviewed
+P32695	dusA	b4049 JW5950	yjbN	reviewed
+P32705	actP	b4067 JW4028	yjcG	reviewed
+P32717	yjcS	b4083 JW5721		reviewed
+P32719	alsE	b4085 JW4046	yjcU	reviewed
+P33013	dacD	b2010 JW5329	phsE yeeC	reviewed
+P33015	tsuA	b2013 JW1995	yeeE	reviewed
+P33018	yeiG	b2154 JW2141		reviewed
+P33022	rihB	b2162 JW2149	yeiK	reviewed
+P33025	psuG	b2165 JW2152	pscG yeiN	reviewed
+P33195	gcvP	b2903 JW2871		reviewed
+P33219	yebF	b1847 JW1836		reviewed
+P33221	purT	b1849 JW1838		reviewed
+P33224	aidB	b4187 JW5867		reviewed
+P33225	torA	b0997 JW0982		reviewed
+P33226	torC	b0996 JW0981		reviewed
+P33231	lldP	b3603 JW3578	lctP	reviewed
+P33232	lldD	b3605 JW3580	lctD	reviewed
+P33234	adiY	b4116 JW4077		reviewed
+P33371	dusC	b2140 JW2128	yohI	reviewed
+P33570	tktB	b2465 JW2449		reviewed
+P33599	nuoC	b2286 JW5375	nuoCD nuoD	reviewed
+P33602	nuoG	b2283 JW2278		reviewed
+P33607	nuoL	b2278 JW2273		reviewed
+P33643	rluD	b2594 JW2576	sfhB yfiI	reviewed
+P33644	pgeF	b2593 JW2575	yfiH	reviewed
+P33647	chpB	b4225 JW4184	chpBK yjfE	reviewed
+P33650	feoB	b3409 JW3372		reviewed
+P33667	selU	b0503 JW0491	ybbB	reviewed
+P33913	yejA	b2177 JW2165		reviewed
+P33916	yejF	b2180 JW2168		reviewed
+P33919	radD	b2184 JW2172	yejH yejI yejJ	reviewed
+P33937	napA	b2206 JW2194	yojC yojD yojE	reviewed
+P35340	ahpF	b0606 JW0599		reviewed
+P36548	amiA	b2435 JW2428	yfeE	reviewed
+P36553	hemF	b2436 JW2429		reviewed
+P36566	cmoM	b0921 JW0904	smtA ycbD	reviewed
+P36649	cueO	b0123 JW0119	yacK	reviewed
+P36655	dsbD	b4136 JW5734	cutA2 cycZ dipZ	reviewed
+P36675	arfA	b4550 JW3253	yhdL	reviewed
+P36680	zapD	b0102 JW0099	yacF	reviewed
+P36683	acnB	b0118 JW0114	yacI yacJ	reviewed
+P36837	dtpB	b3496 JW3463	yhiP	reviewed
+P36929	rsmB	b3289 JW3250	fmu/fmv rrmB sun yhdB	reviewed
+P36937	kdpF	b4513 JW0687		reviewed
+P36979	rlmN	b2517 JW2501	yfgB	reviewed
+P37001	pagP	b0622 JW0617	crcA ybeG	reviewed
+P37002	fluC	b0624 JW0619	crcB ybeI	reviewed
+P37013	norR	b2709 JW5843	ygaA	reviewed
+P37019	clcA	b0155 JW5012	eriC yadQ	reviewed
+P37025	thpR	b0147 JW5011	ligT yadP	reviewed
+P37028	btuF	b0158 JW0154	yadT	reviewed
+P37051	purU	b1232 JW1220	tgs ychI	reviewed
+P37095	pepB	b2523 JW2507	yfhI	reviewed
+P37128	nudK	b2467 JW2451	yffH	reviewed
+P37177	ptsP	b2829 JW2797	ygdF ygdO	reviewed
+P37188	gatB	b2093 JW2077		reviewed
+P37197	ccp	b3518 JW3486	yhjA	reviewed
+P37306	allK	b0521 JW0510	arcC ybcF	reviewed
+P37313	dppF	b3540 JW3509	dppE	reviewed
+P37329	modA	b0763 JW0746		reviewed
+P37330	glcB	b2976 JW2943	glc	reviewed
+P37340	mdtK	b1663 JW1655	norE norM ydhE	reviewed
+P37344	pspF	b1303 JW1296	ycjB	reviewed
+P37349	dhaM	b1198 JW5185	ycgC	reviewed
+P37351	rpiB	b4090 JW4051	yjcA	reviewed
+P37353	menE	b2260 JW2255		reviewed
+P37595	iaaA	b0828 JW0812	spt ybiK	reviewed
+P37597	punC	b1660 JW1652	ydhC	reviewed
+P37610	tauD	b0368 JW0360	ssiD yaiG	reviewed
+P37613	panZ	b3459 JW3424	panM yhhK	reviewed
+P37617	zntA	b3469 JW3434	yhhO	reviewed
+P37624	rbbA	b3486 JW5676	yhiG yhiH	reviewed
+P37634	rlmJ	b3499 JW3466	yhiR	reviewed
+P37637	mdtF	b3514 JW3482	yhiV	reviewed
+P37653	bcsA	b3533 JW5665	yhjO yhjP	reviewed
+P37666	ghrB	b3553 JW5656	tkrA yiaE	reviewed
+P37672	dlgD	b3575 JW3547	yiaK	reviewed
+P37677	lyx	b3580 JW3552	lyxK sgbK xylK yiaP	reviewed
+P37685	aldB	b3588 JW3561	yiaX	reviewed
+P37686	yiaY	b3589 JW5648		reviewed
+P37689	gpmI	b3612 JW3587	pgmI yibO	reviewed
+P37690	envC	b3613 JW5646	yibP	reviewed
+P37744	rfbA	b2039 JW2024	rmlA rmlA1	reviewed
+P37745	rfbC	b2038 JW2023	rmlC	reviewed
+P37747	glf	b2036 JW2021	yefE	reviewed
+P37758	narU	b1469 JW1464	yddF	reviewed
+P37769	kduD	b2842 JW2810	ygeC yqeD	reviewed
+P37773	mpl	b4233 JW4192	yjfG	reviewed
+P37774	tcyN	b1917 JW1902	yecC	reviewed
+P37794	chbG	b1733 JW1722	ydjC	reviewed
+P37902	gltI	b0655 JW5092	ybeJ yzzK	reviewed
+P38036	ygcB	b2761 JW2731	cas3	reviewed
+P38038	cysJ	b2764 JW2734		reviewed
+P38051	menF	b2265 JW2260	yfbA	reviewed
+P38054	cusA	b0575 JW0564	ybdE	reviewed
+P38097	dgcE	b2067 JW2052	yegE	reviewed
+P38135	fadK	b1701 JW5910	ydiD	reviewed
+P38393	kilR	b1352 JW1347	kil ydaD	reviewed
+P38489	nfsB	b0578 JW0567	dprA nfnB nfsI ntr	reviewed
+P38506	ygdG	b2798 JW5446	exo xni	reviewed
+P39099	degQ	b3234 JW3203	hhoA	reviewed
+P39172	znuA	b1857 JW5831	yebL yzzP	reviewed
+P39176	erfK	b1990 JW1968	yeeG yzzT	reviewed
+P39177	uspG	b0607 JW0600	ybdQ yzzU	reviewed
+P39180	flu	b2000 JW1982	yeeQ yzzX	reviewed
+P39276	dtpC	b4130 JW4091	yjdL	reviewed
+P39277	yjeH	b4141 JW4101		reviewed
+P39286	rsgA	b4161 JW4122	engC yjeQ	reviewed
+P39301	ulaA	b4193 JW5744	sgaT yjfS	reviewed
+P39304	ulaD	b4196 JW4154	sgaH yjfV	reviewed
+P39315	qorB	b4211 JW4169	qor2 ytfG	reviewed
+P39321	tamB	b4221 JW4180	ytfN ytfO	reviewed
+P39325	ytfQ	b4227 JW4186		reviewed
+P39344	idnT	b4265 JW4222	gntW yjgT	reviewed
+P39353	nanY	b4280 JW5769	yjhC	reviewed
+P39371	nanM	b4310 JW5777	yjhT	reviewed
+P39377	iadA	b4328 JW4291	yjiF	reviewed
+P39386	mdtM	b4337 JW4300	yjiO	reviewed
+P39396	btsT	b4354 JW5791	yjiY	reviewed
+P39400	lgoD	b4358 JW5793	yjjN	reviewed
+P39405	fhuF	b4367 JW4331	yjjS	reviewed
+P39406	rsmC	b4371 JW4333	yjjT	reviewed
+P39411	yjjX	b4394 JW5801		reviewed
+P39414	ttdT	b3063 JW3035	ygjC ygjE	reviewed
+P39453	torS	b0993 JW5135	yccI	reviewed
+P39831	ydfG	b1539 JW1532		reviewed
+P39838	rcsD	b2216 JW2204	yojN yojP yojQ	reviewed
+P40191	pdxK	b2418 JW2411	yfeI	reviewed
+P40710	nlpE	b0192 JW0188	cutF	reviewed
+P40711	arfB	b0191 JW0187	yaeJ	reviewed
+P40874	solA	b1059 JW1046		reviewed
+P41036	nanT	b3224 JW3193		reviewed
+P41052	mltB	b2701 JW2671		reviewed
+P41407	azoR	b1412 JW1409	acpD	reviewed
+P41409	rihA	b0651 JW0646	ybeK	reviewed
+P42588	patA	b3073 JW5510	ygjG	reviewed
+P42593	fadH	b3081 JW3052	ygjL	reviewed
+P42601	alx	b3088 JW5515	ygjT	reviewed
+P42620	yqjG	b3102 JW3073		reviewed
+P42632	tdcE	b3114 JW5522	yhaS	reviewed
+P42641	obgE	b3183 JW3150	cgtA obg yhbZ	reviewed
+P43341	lpxH	b0524 JW0513	ybbF	reviewed
+P43671	pqiB	b0951 JW0934	pqi5B	reviewed
+P43672	uup	b0949 JW0932	ycbH ycbI	reviewed
+P45395	kdsD	b3197 JW3164	yrbH	reviewed
+P45424	nanQ	b3221 JW3190	yhcH	reviewed
+P45425	nanK	b3222 JW5538	yhcI	reviewed
+P45464	lpoA	b3147 JW3116	yraM	reviewed
+P45470	yhbO	b3153 JW5529		reviewed
+P45475	ubiV	b3159 JW5530	yhbV	reviewed
+P45508	yfaL	b2233 JW2227	yfaF yfaJ yfaK	reviewed
+P45527	ubiU	b3158 JW3127	yhbU	reviewed
+P45541	frlC	b4474 JW5699	yhfO yhfP	reviewed
+P45562	xapB	b2406 JW2397		reviewed
+P45563	xapA	b2407 JW2398	pndA	reviewed
+P45568	dxr	b0173 JW0168	ispC yaeM	reviewed
+P45577	proQ	b1831 JW5300	yebJ yobE yoeC	reviewed
+P45748	tsaC	b3282 JW3243	rimN yrdC	reviewed
+P45955	cpoB	b0742 JW0732	ybgF	reviewed
+P45956	ygbF	b2754 JW5438	cas2	reviewed
+P46022	mtgA	b3208 JW3175	mgt yrbM	reviewed
+P46136	yddG	b1473 JW1469		reviewed
+P46139	dgcN	b2604 JW2585	yfiN	reviewed
+P46849	rtcA	b4475 JW5688	yhgJ yhgK	reviewed
+P46850	rtcB	b3421 JW3384	yhgL	reviewed
+P46883	tynA	b1386 JW1381	maoA	reviewed
+P46889	ftsK	b0890 JW0873		reviewed
+P46891	cof	b0446 JW0436		reviewed
+P50456	mlc	b1594 JW1586	dgsA	reviewed
+P50457	puuE	b1302 JW1295	goaG	reviewed
+P50465	nei	b0714 JW0704		reviewed
+P52006	nudI	b2251 JW2245	yfaO	reviewed
+P52061	rdgB	b2954 JW2921	yggV	reviewed
+P52073	glcE	b4468 JW5487	gox yghL	reviewed
+P52074	glcF	b4467 JW5486	gox yghL	reviewed
+P52101	glrK	b2556 JW5407	yfhK	reviewed
+P52106	csgD	b1040 JW1023		reviewed
+P52126	abpB	b2627 JW2608	yfjK	reviewed
+P52129	rnlA	b2630 JW2611	std yfjN	reviewed
+P52643	ldhA	b1380 JW1375	hslI htpH	reviewed
+P54745	mngA	b0731 JW0720	hrsA	reviewed
+P55135	rlmD	b2785 JW2756	rumA ygcA	reviewed
+P55734	ygaP	b2668 JW2643		reviewed
+P56100	cydX	b4515 JW0724	ybgT	reviewed
+P56580	srlE	b2703 JW5430	gutA gutE	reviewed
+P56976	blr	b4409 JW5963		reviewed
+P60061	adiC	b4115 JW4076	aniC yjdD yjdE	reviewed
+P60240	rapA	b0059 JW0058	hepA yabA	reviewed
+P60340	truB	b3166 JW3135	yhbA	reviewed
+P60422	rplB	b3317 JW3279		reviewed
+P60438	rplC	b3320 JW3282		reviewed
+P60472	ispU	b0174 JW0169	rth uppS yaeS	reviewed
+P60560	guaC	b0104 JW0101		reviewed
+P60584	caiA	b0039 JW0038	yaaO	reviewed
+P60595	hisH	b2023 JW2005		reviewed
+P60624	rplX	b3309 JW3271		reviewed
+P60651	speB	b2937 JW2904		reviewed
+P60664	hisF	b2025 JW2007		reviewed
+P60716	lipA	b0628 JW0623	lip	reviewed
+P60720	lipB	b0630 JW5089		reviewed
+P60723	rplD	b3319 JW3281	eryA	reviewed
+P60752	msbA	b0914 JW0897		reviewed
+P60785	lepA	b2569 JW2553		reviewed
+P60844	aqpZ	b0875 JW0859	bniP	reviewed
+P60955	lgt	b2828 JW2796	umpA	reviewed
+P61175	rplV	b3315 JW3277	eryB	reviewed
+P61316	lolA	b0891 JW0874	lplA yzzV	reviewed
+P61320	lolB	b1209 JW1200	hemM ychC	reviewed
+P61887	rffH	b3789 JW3763	rmlA2 yifG	reviewed
+P61889	mdh	b3236 JW3205		reviewed
+P62395	secM	b0097 JW5007	srrA yacA	reviewed
+P62399	rplE	b3308 JW3270		reviewed
+P62552	ccdA	ECOK12F042	H letA	reviewed
+P62554	ccdB	ECOK12F043	G letB letD	reviewed
+P62617	ispF	b2746 JW2716	mecS ygbB	reviewed
+P62620	ispG	b2515 JW2499	gcpE	reviewed
+P62623	ispH	b0029 JW0027	lytB yaaE	reviewed
+P62707	gpmA	b0755 JW0738	gpm pgm pgmA	reviewed
+P63020	nfuA	b3414 JW3377	gntY yhgI	reviewed
+P63183	kup	b3747 JW5609	trkD	reviewed
+P63224	gmhA	b0222 JW0212	lpcA tfrA yafI	reviewed
+P63228	gmhB	b0200 JW0196	yaeD	reviewed
+P63235	gadC	b1492 JW1487	acsA xasA	reviewed
+P63284	clpB	b2592 JW2573	htpM	reviewed
+P63386	mlaF	b3195 JW3162	yrbF	reviewed
+P63389	yheS	b3352 JW3315		reviewed
+P63883	amiC	b2817 JW5449	ygdN	reviewed
+P64423	zntB	b1342 JW1336	ydaN	reviewed
+P64461	lsrG	b1518 JW1511	yneC	reviewed
+P64467	cnu	b1625 JW1617	ydgT	reviewed
+P64483	proXp-y	b1787 JW1776	yeaK	reviewed
+P64512	mgrB	b1826 JW1815	yobG	reviewed
+P64524	cbtA	b2005 JW1987	yeeV	reviewed
+P64534	rcnB	b2107 JW5346	yohN	reviewed
+P64588	yqjI	b3071 JW3042		reviewed
+P64594	yhaV	b3130 JW3099		reviewed
+P64596	dolP	b3150 JW3119	yraP	reviewed
+P64602	mlaB	b3191 JW5535	yrbB	reviewed
+P64604	mlaD	b3193 JW3160	yrbD	reviewed
+P64606	mlaE	b3194 JW3161	yrbE	reviewed
+P64612	zapE	b3232 JW3201	yhcM	reviewed
+P64636	yrfG	b3399 JW5865		reviewed
+P65870	queD	b2765 JW2735	ygcM	reviewed
+P66817	diaA	b3149 JW3118	yraO	reviewed
+P66899	ygeX	b2871 JW2839		reviewed
+P66948	bepA	b2494 JW2479	yfgC	reviewed
+P67095	yfcE	b2300 JW5377		reviewed
+P67430	nemR	b1649 JW5874	ydhM	reviewed
+P67444	xanQ	b2882 JW2850	ygfO	reviewed
+P67603	yqfB	b2900 JW2868		reviewed
+P67910	hldD	b3619 JW3594	htrM rfaD waaD	reviewed
+P68183	malG	b4032 JW3992		reviewed
+P68187	malK	b4035 JW3995		reviewed
+P68191	sra	b1480 JW5962	rpsV	reviewed
+P68398	tadA	b2559 JW2543	yfhC	reviewed
+P68688	grxA	b0849 JW0833	grx	reviewed
+P68699	atpE	b3737 JW3715	papH uncE	reviewed
+P68739	nfi	b3998 JW5547	yjaF	reviewed
+P68767	pepA	b4260 JW4217	carP xerB	reviewed
+P68919	rplY	b2185 JW2173		reviewed
+P69054	sdhC	b0721 JW0711	cybA	reviewed
+P69210	mdtI	b1599 JW1591	ydgE	reviewed
+P69212	mdtJ	b1600 JW1592	ydgF	reviewed
+P69228	baeR	b2079 JW2064		reviewed
+P69346	yefM	b2017 JW5835		reviewed
+P69348	yoeB	b4539 JW5331		reviewed
+P69380	fieF	b3915 JW3886	yiiP	reviewed
+P69411	rcsF	b0196 JW0192		reviewed
+P69423	tatC	b3839 JW3815	mttB yigU yigV	reviewed
+P69425	tatB	b3838 JW5580	mttA2 ysgB	reviewed
+P69428	tatA	b3836 JW3813	mttA1 yigT	reviewed
+P69441	adk	b0474 JW0463	dnaW plsA	reviewed
+P69451	fadD	b1805 JW1794	oldD	reviewed
+P69490	ccmE	b2197 JW2185	yejS	reviewed
+P69681	amtB	b0451 JW0441	ybaG	reviewed
+P69739	hyaA	b0972 JW0954		reviewed
+P69741	hybO	b2997 JW2965	yghV	reviewed
+P69776	lpp	b1677 JW1667	mlpA mulI	reviewed
+P69783	crr	b2417 JW2410	gsr iex tgs treD	reviewed
+P69786	ptsG	b1101 JW1087	glcA umg	reviewed
+P69791	chbA	b1736 JW1725	celC	reviewed
+P69795	chbB	b1738 JW1727	celA	reviewed
+P69797	manX	b1817 JW1806	gptB ptsL	reviewed
+P69801	manY	b1818 JW1807	pel ptsP	reviewed
+P69805	manZ	b1819 JW1808	gptB ptsM	reviewed
+P69831	gatC	b2092 JW2076		reviewed
+P69853	dmsD	b1591 JW5262	ynfI	reviewed
+P69856	nanC	b4311 JW5778	yjhA	reviewed
+P69874	potA	b1126 JW1112		reviewed
+P69902	frc	b2374 JW2371	yfdW	reviewed
+P69908	gadA	b3517 JW3485	gadS	reviewed
+P69910	gadB	b1493 JW1488		reviewed
+P69913	csrA	b2696 JW2666	zfiA	reviewed
+P69922	fucI	b2802 JW2773		reviewed
+P69924	nrdB	b2235 JW2229	ftsB	reviewed
+P69931	hda	b2496 JW5397	idaB yfgE	reviewed
+P75682	yagE	b0268 JW0261		reviewed
+P75691	yahK	b0325 JW0317		reviewed
+P75792	ybiV	b0822 JW0806	supH	reviewed
+P75804	yliI	b0837 JW0821		reviewed
+P75809	ybjI	b0844 JW5113		reviewed
+P75820	amiD	b0867 JW0851	ybjR	reviewed
+P75825	hcp	b0873 JW0857	ybjW	reviewed
+P75830	macA	b0878 JW0862	ybjY	reviewed
+P75831	macB	b0879 JW0863	ybjZ	reviewed
+P75862	zapC	b0946 JW5125	ycbW	reviewed
+P75863	ycbX	b0947 JW5126		reviewed
+P75864	rlmL	b0948 JW0931	rlmK rlmKL ycbY	reviewed
+P75876	rlmI	b0967 JW5898	yccW	reviewed
+P75892	rutG	b1006 JW5137	ycdG	reviewed
+P75898	rutA	b1012 JW0997	ycdM	reviewed
+P75906	pgaB	b1023 JW5142	ycdR	reviewed
+P75908	dgcT	b1025 JW5143	ycdT	reviewed
+P75913	ghrA	b1033 JW5146	ycdW	reviewed
+P75914	ycdX	b1034 JW1017		reviewed
+P75949	nagZ	b1107 JW1093	ycfO	reviewed
+P75957	lolD	b1117 JW5162	ycfV	reviewed
+P75959	nagK	b1119 JW1105	ycfX	reviewed
+P75960	cobB	b1120 JW1106	ycfY	reviewed
+P75990	bluF	b1163 JW1150	blrp ycgF	reviewed
+P76008	ldcA	b1192 JW1181	ycgQ	reviewed
+P76010	ycgR	b1194 JW1183		reviewed
+P76014	dhaL	b1199 JW5186	ycgS	reviewed
+P76015	dhaK	b1200 JW5187	ycgT	reviewed
+P76037	puuP	b1296 JW1289	ycjJ	reviewed
+P76038	puuD	b1298 JW1291	ycjL	reviewed
+P76045	ompG	b1319 JW1312		reviewed
+P76055	ttcA	b1344 JW1338	ydaO	reviewed
+P76077	paaA	b1388 JW1383	ydbO	reviewed
+P76081	paaE	b1392 JW1387	ydbR	reviewed
+P76082	paaF	b1393 JW1388	ydbR	reviewed
+P76084	paaI	b1396 JW1391	ydbV	reviewed
+P76104	rlhA	b1435 JW1431	ydcP	reviewed
+P76108	ydcS	b1440 JW1435		reviewed
+P76113	curA	b1449 JW5907	yncB	reviewed
+P76129	dosP	b1489 JW1484	dos pdeO yddU	reviewed
+P76141	lsrR	b1512 JW1505	ydeW	reviewed
+P76149	sad	b1525 JW5247	yneI	reviewed
+P76194	sufE	b1679 JW1669	ynhA	reviewed
+P76216	astB	b1745 JW1734	ydjT	reviewed
+P76217	astD	b1746 JW5282	ydjU	reviewed
+P76236	cdgI	b1785 JW1774	yeaI	reviewed
+P76251	dmlA	b1800 JW1789	yeaU	reviewed
+P76256	tsaB	b1807 JW1796	yeaZ	reviewed
+P76257	yoaA	b1808 JW1797		reviewed
+P76264	mntP	b1821 JW5830	yebN	reviewed
+P76272	letB	b1834 JW1823	yebT	reviewed
+P76273	rsmF	b1835 JW5301	yebU	reviewed
+P76278	yebZ	b1840 JW1829		reviewed
+P76316	dcyD	b1919 JW5313	yedO	reviewed
+P76318	yedK	b1931 JW1916	yedG	reviewed
+P76330	dgcQ	b1956 JW5832	yedQ	reviewed
+P76334	drpB	b1963 JW1946	yedR	reviewed
+P76339	hprS	b1968 JW1951	yedV	reviewed
+P76341	hiuH	b1970 JW1953	yedX	reviewed
+P76342	msrP	b1971 JW1954	yedY	reviewed
+P76343	msrQ	b1972 JW1955	yedZ	reviewed
+P76344	zinT	b1973 JW1956	yodA	reviewed
+P76346	mtfA	b1976 JW1958	yeeI	reviewed
+P76364	cbeA	b2004 JW1986	yeeU	reviewed
+P76387	wzc	b2060 JW2045		reviewed
+P76399	mdtC	b2076 JW2061	yegO	reviewed
+P76407	yegS	b2086 JW2070		reviewed
+P76422	thiD	b2103 JW2090	thiJ	reviewed
+P76440	preT	b2146 JW2133	yeiT	reviewed
+P76445	lpxT	b2174 JW2162	yeiU	reviewed
+P76458	atoD	b2221 JW2215		reviewed
+P76459	atoA	b2222 JW2216		reviewed
+P76469	rhmA	b2245 JW2239	yfaU	reviewed
+P76474	arnF	b2258 JW5373	pmrM yfbJ	reviewed
+P76491	yfbR	b2291 JW2288		reviewed
+P76503	fadI	b2342 JW2339	yfcY	reviewed
+P76535	murQ	b2428 JW2421	yfeU	reviewed
+P76541	eutL	b2439 JW2432	yffJ	reviewed
+P76558	maeB	b2463 JW2447	ypfF	reviewed
+P76562	tmcA	b2474 JW2459	ypfI	reviewed
+P76576	yfgM	b2513 JW2497		reviewed
+P76577	pbpC	b2519 JW2503	yfgN	reviewed
+P76594	patZ	b2584 JW2568	pka yfiQ	reviewed
+P76621	glaH	b2659 JW5427	csiD gab ygaT	reviewed
+P76632	casB	b2759 JW2729	cse2 ygcK	reviewed
+P76658	hldE	b3052 JW3024	rfaE waaE yqiF	reviewed
+P77044	mhpC	b0349 JW0340		reviewed
+P77150	pdxY	b1636 JW1628	ydgS	reviewed
+P77165	paoA	b0286 JW0280	yagT	reviewed
+P77172	pdeF	b2503 JW2488	yfgF	reviewed
+P77173	zipA	b2412 JW2404		reviewed
+P77182	mnmC	b2324 JW5380	yfcK	reviewed
+P77202	dsbG	b0604 JW0597	ybdP	reviewed
+P77211	cusC	b0572 JW0561	ibeB ylcB	reviewed
+P77212	rclA	b0304 JW5040	ykgC	reviewed
+P77214	cusF	b0573 JW0562	cusX ylcC	reviewed
+P77215	rhmD	b2247 JW2241	yfaW	reviewed
+P77218	eutD	b2458 JW2442	eutI ypfA	reviewed
+P77239	cusB	b0574 JW0563	ylcD	reviewed
+P77243	prpD	b0334 JW0325	yahT	reviewed
+P77247	hxpB	b1727 JW1716	yniC	reviewed
+P77256	ydjG	b1771 JW1760		reviewed
+P77258	nemA	b1650 JW1642	ydhN	reviewed
+P77302	dgcM	b1341 JW5206	ydaM	reviewed
+P77319	hscC	b0650 JW0645	ybeW	reviewed
+P77324	paoB	b0285 JW0279	yagS	reviewed
+P77335	hlyE	b1182 JW5181	clyA hpr sheA ycgD	reviewed
+P77348	mppA	b1329 JW1322	ynaH	reviewed
+P77364	glxK	b0514 JW0502	glxB5 ybbZ	reviewed
+P77366	ycjU	b1317 JW1310	pgmB	reviewed
+P77395	cnoX	b0492 JW5067	ybbN	reviewed
+P77398	arnA	b2255 JW2249	pmrI yfbG	reviewed
+P77399	fadJ	b2341 JW2338	yfcX	reviewed
+P77425	allC	b0516 JW0504	glxB7 ylbB	reviewed
+P77434	alaC	b2379 JW2376	yfdZ	reviewed
+P77444	sufS	b1680 JW1670	csdB ynhB	reviewed
+P77454	glsA1	b0485 JW0474	ybaS	reviewed
+P77455	paaZ	b1387 JW1382	maoC ydbN	reviewed
+P77485	cusS	b0570 JW5082	ybcZ	reviewed
+P77488	dxs	b0420 JW0410	yajP	reviewed
+P77489	paoC	b0284 JW0278	yagR	reviewed
+P77493	ydjH	b1772 JW5289		reviewed
+P77499	sufC	b1682 JW1672	ynhD	reviewed
+P77510	dpiB	b0619 JW0611	citA mpdB ybeP	reviewed
+P77526	yfcG	b2302 JW2299		reviewed
+P77529	tcyP	b1729 JW1718	ydjN	reviewed
+P77541	prpB	b0331 JW0323	yahQ	reviewed
+P77555	allD	b0517 JW0505	glxB8 ylbC	reviewed
+P77567	nhoA	b1463 JW1458	yddI	reviewed
+P77581	astC	b1748 JW1737	argM cstC ydjW	reviewed
+P77589	mhpT	b0353 JW5046	orfT yaiK	reviewed
+P77625	hxpA	b2293 JW5376	yfbT	reviewed
+P77649	selO	b1706 JW1696	ydiU	reviewed
+P77667	sufA	b1684 JW1674	ydiC	reviewed
+P77671	allB	b0512 JW0500	glxB3 ybbX	reviewed
+P77674	patD	b1444 JW1439	prr ydcW	reviewed
+P77712	fadM	b0443 JW0433	tesC ybaW	reviewed
+P77718	thiI	b0423 JW0413	yajK	reviewed
+P77748	ydiJ	b1687 JW1677		reviewed
+P77754	spy	b1743 JW1732		reviewed
+P77766	rnm	b1266 JW1258	trpH yciV	reviewed
+P77774	bamB	b2512 JW2496	yfgL	reviewed
+P77781	menI	b1686 JW1676	ydiI	reviewed
+P77788	nudG	b1759 JW1748	ynjG	reviewed
+P77791	maa	b0459 JW0448	ylaD	reviewed
+P77806	ybdL	b0600 JW0593		reviewed
+P78055	fsaA	b0825 JW5109	fsa mipB ybiZ	reviewed
+P78061	puuA	b1297 JW5201	ycjK	reviewed
+P80645	ssuD	b0935 JW0918	ycbN	reviewed
+P80668	feaB	b1385 JW1380	maoB padA ydbG	reviewed
+Q06065	atoC	b2220 JW2214	az	reviewed
+Q06067	atoS	b2219 JW2213		reviewed
+Q46806	hyuA	b2873 JW2841	ygeZ	reviewed
+Q46810	mocA	b2877 JW2845	ygfJ	reviewed
+Q46821	uacT	b2888 JW5470	ygfU	reviewed
+Q46822	idi	b2889 JW2857	ygfV	reviewed
+Q46839	glcA	b2975 JW2942	yghK	reviewed
+Q46845	yghU	b2989 JW5492		reviewed
+Q46851	gpr	b3001 JW2970	mgrA yghZ	reviewed
+Q46856	yqhD	b3011 JW2978		reviewed
+Q46857	dkgA	b3012 JW5499	yqhE	reviewed
+Q46864	mqsA	b3021 JW2989	ygiT	reviewed
+Q46865	mqsR	b3022 JW2990	ygiU	reviewed
+Q46868	ubiK	b3042 JW5505	yqiC	reviewed
+Q46871	yqjH	b3070 JW3041		reviewed
+Q46877	norV	b2710 JW2680	flrD ygaI ygaJ ygaK	reviewed
+Q46893	ispD	b2747 JW2717	ygbP	reviewed
+Q46896	ygbT	b2755 JW2725	cas1	reviewed
+Q46897	casE	b2756 JW2726	cas6e ygcH	reviewed
+Q46898	casD	b2757 JW5844	cas5 ygcI	reviewed
+Q46899	casC	b2758 JW2728	cas4 cse4 ygcJ	reviewed
+Q46901	casA	b2760 JW2730	cse1 ygcL	reviewed
+Q46920	queF	b2794 JW2765	yqcD	reviewed
+Q46925	csdA	b2810 JW2781	ygdJ	reviewed
+Q46927	tcdA	b2812 JW2783	csdL ygdL	reviewed
+Q46938	kduI	b2843 JW2811	yqeE	reviewed
+Q46948	yajL	b0424 JW5057	thiJ	reviewed
+Q47146	fadE	b0221 JW5020	yafH	reviewed
+Q47149	yafQ	b0225 JW0215		reviewed
+Q47150	dinJ	b0226 JW0216		reviewed
+Q47152	rayT	b0228 JW0218	TnpAREP yafM	reviewed
+Q47155	dinB	b0231 JW0221	dinP	reviewed
+Q47208	allF	b0518 JW0506	fdrA ylbD	reviewed
+Q47319	tapT	b2583 JW5409	tuaA yfiP	reviewed
+Q47377	arnE	b4544 JW2252	pmrL yfbW	reviewed
+Q57261	truD	b2745 JW2715	ygbO	reviewed
+Q59385	copA	b0484 JW0473	atcU f834 ybaR	reviewed
+Q6BF16	dgoA	b4477 JW5628	yidU	reviewed
+Q6BF17	dgoD	b4478 JW5629	yidU	reviewed
+Q93K97	nudF	b3034 JW3002	aspP yqiE yzzG	reviewed
+A5A627	tisB	b4618 JW3649	ysdB	reviewed
+P00547	thrB	b0003 JW0002		reviewed
+P00816	cynS	b0340 JW0331	cnt	reviewed
+P00887	aroH	b1704 JW1694		reviewed
+P00888	aroF	b2601 JW2582		reviewed
+P00895	trpE	b1264 JW1256		reviewed
+P00909	trpC	b1262 JW1254	trpF	reviewed
+P00934	thrC	b0004 JW0003		reviewed
+P00944	xylA	b3565 JW3537		reviewed
+P00954	trpS	b3384 JW3347		reviewed
+P00961	glyS	b3559 JW3530	glyS(B)	reviewed
+P02413	rplO	b3301 JW3263		reviewed
+P02924	araF	b1901 JW1889		reviewed
+P02932	phoE	b0241 JW0231	ompE	reviewed
+P03024	galR	b2837 JW2805		reviewed
+P03817	mioC	b3742 JW3720	yieB	reviewed
+P04335	frsA	b0239 JW0229	yafA	reviewed
+P04816	livK	b3458 JW3423		reviewed
+P04951	kdsB	b0918 JW0901		reviewed
+P05100	tag	b3549 JW3518		reviewed
+P05459	pdxB	b2320 JW2317		reviewed
+P05706	srlB	b2704 JW2673	gutB	reviewed
+P05707	srlD	b2705 JW2674	gutD	reviewed
+P05719	hsdS	b4348 JW4311	hss	reviewed
+P05847	ttdA	b3061 JW3033	ygjA	reviewed
+P06720	melA	b4119 JW4080	mel-7	reviewed
+P06864	ebgA	b3076 JW5511		reviewed
+P06960	argF	b0273 JW0266		reviewed
+P06986	hisC	b2021 JW2003		reviewed
+P06987	hisB	b2022 JW2004		reviewed
+P06989	hisI	b2026 JW2008	hisIE	reviewed
+P07018	tap	b1885 JW1874		reviewed
+P07023	tyrA	b2600 JW2581		reviewed
+P07109	hisP	b2306 JW2303		reviewed
+P07364	cheR	b1884 JW1873	cheX	reviewed
+P07650	deoA	b4382 JW4345	tpp ttg	reviewed
+P07762	glgB	b3432 JW3395		reviewed
+P07813	leuS	b0642 JW0637		reviewed
+P08142	ilvB	b3671 JW3646		reviewed
+P08178	purM	b2499 JW2484	purG	reviewed
+P08189	fimF	b4318 JW4281		reviewed
+P08190	fimG	b4319 JW4282		reviewed
+P08194	glpT	b2240 JW2234		reviewed
+P08204	araB	b0063 JW0062		reviewed
+P08331	cpdB	b4213 JW4171		reviewed
+P08365	chpS	b4224 JW5750	chpBI yjfB	reviewed
+P08368	creB	b4398 JW4361	yjjE	reviewed
+P08401	creC	b4399 JW4362	phoM	reviewed
+P08722	bglF	b3722 JW3700	bglC bglS	reviewed
+P08957	hsdM	b4349 JW4312	hsm	reviewed
+P09053	avtA	b3572 JW5652		reviewed
+P09130	traD	ECOK12F102		reviewed
+P09151	leuA	b0074 JW0073		reviewed
+P09184	vsr	b1960 JW1943		reviewed
+P09378	rhaR	b3906 JW3877	rhaC1	reviewed
+P09549	dedD	b2314 JW5378		reviewed
+P09551	argT	b2310 JW2307		reviewed
+P09833	modC	b0765 JW0748	chlD narD	reviewed
+P09836	uhpC	b3667 JW3642		reviewed
+P0A6A6	leuC	b0072 JW0071		reviewed
+P0A6C5	argA	b2818 JW2786		reviewed
+P0A6E9	bioD2	b1593 JW5264	ynfK	reviewed
+P0A6I3	coaA	b3974 JW3942	panK rts	reviewed
+P0A6I9	coaE	b0103 JW0100	yacE	reviewed
+P0A6J8	ddlA	b0381 JW0372		reviewed
+P0A6L9	hscB	b2527 JW2511	yfhE	reviewed
+P0A6S3	flgI	b1080 JW1067	fla FIX flaM	reviewed
+P0A6T9	gcvH	b2904 JW2872		reviewed
+P0A6U8	glgA	b3429 JW3392		reviewed
+P0A6V8	glk	b2388 JW2385		reviewed
+P0A6W9	gshA	b2688 JW2663	gsh-I	reviewed
+P0A6Z1	hscA	b2526 JW2510	hsc	reviewed
+P0A734	minE	b1174 JW1163		reviewed
+P0A752	nadD	b0639 JW0634	ybeN	reviewed
+P0A756	kefG	b3351 JW3314	yheR	reviewed
+P0A766	rsxA	b1627 JW1619	rnfA ydgL	reviewed
+P0A780	nusB	b0416 JW0406	groNB ssyB	reviewed
+P0A7A5	pcm	b2743 JW2713		reviewed
+P0A7D7	purC	b2476 JW2461		reviewed
+P0A7F3	pyrI	b4244 JW4203		reviewed
+P0A7H3	recO	b2565 JW2549		reviewed
+P0A7I0	prfA	b1211 JW1202	sueB uar	reviewed
+P0A7N1	ykgM	b0296 JW5035	rpmE2	reviewed
+P0A7Q1	rpmI	b1717 JW1707		reviewed
+P0A7Q6	rpmJ1	b3299 JW3261		reviewed
+P0A7Y8	rnpA	b3704 JW3681		reviewed
+P0A805	frr	b0172 JW0167	rrf	reviewed
+P0A843	tatE	b0627 JW0622	ybeC	reviewed
+P0A877	trpA	b1260 JW1252		reviewed
+P0A881	trpR	b4393 JW4356	rtrY	reviewed
+P0A8A4	ppsR	b1703 JW1693	ydiA	reviewed
+P0A8A8	rimP	b3170 JW5533	yhbC	reviewed
+P0A8F4	udk	b2066 JW2051		reviewed
+P0A8H8	yacG	b0101 JW5008		reviewed
+P0A8P1	aat	b0885 JW0868	ycaA	reviewed
+P0A8Q6	clpS	b0881 JW0865	yljA	reviewed
+P0A8U6	metJ	b3938 JW3909		reviewed
+P0A8W2	slyA	b1642 JW5267		reviewed
+P0A8Z3	ybgC	b0736 JW0726		reviewed
+P0A908	mipA	b1782 JW1771	yeaF	reviewed
+P0A927	tsx	b0411 JW0401	nupA	reviewed
+P0A996	glpC	b2243 JW2237		reviewed
+P0A9C3	galM	b0756 JW0739		reviewed
+P0A9D4	cysE	b3607 JW3582		reviewed
+P0A9E2	soxS	b4062 JW4023		reviewed
+P0A9F1	mntR	b0817 JW0801	ybiQ	reviewed
+P0A9F3	cysB	b1275 JW1267		reviewed
+P0A9H1	mug	b3068 JW3040	ygjF	reviewed
+P0A9I1	citE	b0616 JW0608	ybdW	reviewed
+P0A9I5	napD	b2207 JW2195	yojF	reviewed
+P0A9L5	ppiC	b3775 JW3748	parVA	reviewed
+P0A9L8	proC	b0386 JW0377		reviewed
+P0A9P9	idnO	b4266 JW4223	yjgU	reviewed
+P0A9R4	fdx	b2525 JW2509		reviewed
+P0A9S3	gatD	b2091 JW2075		reviewed
+P0A9U1	ybhF	b0794 JW5104		reviewed
+P0A9U3	ybiT	b0820 JW0804		reviewed
+P0A9W0	ulaR	b4191 JW4149	yjfQ	reviewed
+P0A9W6	ibaG	b3190 JW3157	yrbA	reviewed
+P0A9X1	znuC	b1858 JW1847	yebM	reviewed
+P0AA39	rluC	b1086 JW1072	yceC	reviewed
+P0AA53	qmcA	b0489 JW0478	ybbK	reviewed
+P0AA57	yobA	b1841 JW1830		reviewed
+P0AA60	yghB	b3009 JW2976		reviewed
+P0AA63	yqjA	b3095 JW3066		reviewed
+P0AA67	rhtA	b0813 JW0798	ybiF	reviewed
+P0AA80	garP	b3127 JW3096	yhaU	reviewed
+P0AA86	dsbE	b2195 JW2183	ccmG yejQ	reviewed
+P0AAA7	wzxE	b3792 JW3766	wzx yifJ	reviewed
+P0AAC0	uspE	b1333 JW1327	ydaA	reviewed
+P0AAD2	mtr	b3161 JW3130		reviewed
+P0AAD4	tyrP	b1907 JW1895		reviewed
+P0AAF3	araG	b1900 JW1888		reviewed
+P0AAF6	artP	b0864 JW0848		reviewed
+P0AAG5	mdlB	b0449 JW5061	mdl	reviewed
+P0AAG8	mglA	b2149 JW2136		reviewed
+P0AAH8	sapF	b1290 JW1283		reviewed
+P0AAI9	fabD	b1092 JW1078	tfpA	reviewed
+P0AAJ8	hybA	b2996 JW2964		reviewed
+P0AAK1	hycB	b2724 JW2694	hevB	reviewed
+P0AAL0	napF	b2208 JW2196	yojG	reviewed
+P0AAL3	napG	b2205 JW2193	yojA yojB	reviewed
+P0AAN9	iraP	b0382 JW0373	yaiB	reviewed
+P0AAP1	dgcC	b0385 JW0376	adrA yaiC	reviewed
+P0AAS3	ybbJ	b0488 JW5065		reviewed
+P0AAS5	allH	b0520 JW0509	ylbF	reviewed
+P0AB01	elyC	b0920 JW0903	ycbC	reviewed
+P0AB10	pqiC	b0952 JW5127	ymbA	reviewed
+P0AB18	tusE	b0969 JW0952	yccK	reviewed
+P0AB24	efeO	b1018 JW1003	ycdO	reviewed
+P0AB40	bhsA	b1112 JW1098	comC ycfR	reviewed
+P0AB65	yccX	b0968 JW5131		reviewed
+P0AB67	pntB	b1602 JW1594		reviewed
+P0ABA0	atpF	b3736 JW3714	papF uncF	reviewed
+P0ABA4	atpH	b3735 JW3713	papE uncH	reviewed
+P0ABC9	betT	b0314 JW0306		reviewed
+P0ABE9	cynT	b0339 JW0330		reviewed
+P0ABF4	eutM	b2457 JW2441	cchA yffZ	reviewed
+P0ABF8	pgsA	b1912 JW1897		reviewed
+P0ABL1	nrfB	b4071 JW4032	yjcI	reviewed
+P0ABM1	ccmC	b2199 JW2187	yejT yejU	reviewed
+P0ABP3	dcuC	b0621 JW0613/JW0616		reviewed
+P0ABQ2	garR	b3125 JW5526	yhaE	reviewed
+P0ABR5	hcaE	b2538 JW2522	digA hcaA hcaA1 phdC1 yfhU	reviewed
+P0ABR7	yeaW	b1802 JW5294		reviewed
+P0ABT5	dusB	b3260 JW3228	yhdG	reviewed
+P0ABT8	yijE	b3943 JW5557		reviewed
+P0ABU5	elbB	b3209 JW3176	elb2 yzzB	reviewed
+P0ABW0	hcaC	b2540 JW2524	hcaA3 phdB yfhW	reviewed
+P0ABZ4	kdsC	b3198 JW3165	yrbI yrbJ	reviewed
+P0AC28	ygfA	b2912 JW2879		reviewed
+P0AC51	zur	b4046 JW5714	yjbK	reviewed
+P0AC62	grxC	b3610 JW3585	yibM	reviewed
+P0AC86	glgP	b3428 JW3391	glgY	reviewed
+P0AC94	gntP	b4321 JW4284	yjiB	reviewed
+P0ACA3	sspA	b3229 JW3198	pog ssp	reviewed
+P0ACA7	gstB	b0838 JW0822	yliJ	reviewed
+P0ACG4	hokC	b4412 JW5002	gef	reviewed
+P0ACH5	marA	b1531 JW5249		reviewed
+P0ACI6	asnC	b3743 JW3721		reviewed
+P0ACL5	glcC	b2980 JW2947	yghN	reviewed
+P0ACL7	lldR	b3604 JW3579	lctR	reviewed
+P0ACP1	cra	b0080 JW0078	fruC fruR shl	reviewed
+P0ACQ0	rbsR	b3753 JW3732		reviewed
+P0ACS2	soxR	b4063 JW4024	marC	reviewed
+P0ACS5	zntR	b3292 JW3254	yhdM	reviewed
+P0ACU0	cecR	b0796 JW0780	ybiH	reviewed
+P0ACU2	rutR	b1013 JW0998	ycdC	reviewed
+P0ACU5	fabR	b3963 JW3935	yijC	reviewed
+P0ACV2	lpxP	b2378 JW2375	ddg	reviewed
+P0ACV4	lapA	b1279 JW1271	yciS	reviewed
+P0ACZ8	cusR	b0571 JW0560	ylcA	reviewed
+P0AD01	dcuR	b4124 JW4085	yjdG	reviewed
+P0AD03	letA	b1833 JW1822	yebS	reviewed
+P0AD42	pgpC	b2560 JW5408	yfhB	reviewed
+P0AD96	livJ	b3460 JW3425		reviewed
+P0ADA3	nlpD	b2742 JW2712		reviewed
+P0ADC3	lolC	b1116 JW5161	ycfU	reviewed
+P0ADC6	lptG	b4262 JW5760	yjgQ	reviewed
+P0ADD2	yjjB	b4363 JW4327		reviewed
+P0ADD5	yjjP	b4364 JW5796		reviewed
+P0ADE6	kbp	b2665 JW2640	ygaU yzzM	reviewed
+P0ADF6	edd	b1851 JW1840		reviewed
+P0ADF8	ilvN	b3670 JW3645		reviewed
+P0ADG1	ilvM	b3769 JW3742		reviewed
+P0ADN6	lptM	b4558 JW3781	yifL	reviewed
+P0ADP5	bioP	b3827 JW3803	yigM	reviewed
+P0ADP7	ubiJ	b3834 JW3811	yigP	reviewed
+P0ADQ2	fabY	b3888 JW3859	yiiD	reviewed
+P0ADR6	rlmM	b2806 JW2777	ygdE	reviewed
+P0ADU2	ygiN	b3029 JW2997		reviewed
+P0ADV7	mlaC	b3192 JW3159	yrbC	reviewed
+P0ADW3	zapG	b3233 JW5539	lapD yhcB	reviewed
+P0AE76	cobU	b1993 JW1971		reviewed
+P0AE78	corC	b0658 JW0655	ybeX	reviewed
+P0AEA2	csgG	b1037 JW1020		reviewed
+P0AEA5	cyoE	b0428 JW0418		reviewed
+P0AEB5	ynaI	b1330 JW1323		reviewed
+P0AED0	uspA	b3495 JW3462		reviewed
+P0AED5	uvrY	b1914 JW1899	yecB	reviewed
+P0AEE1	dcrB	b3472 JW5682	yhhR	reviewed
+P0AEF4	dpiA	b0620 JW0612	citB criR mpdA	reviewed
+P0AEF8	dppB	b3543 JW3512		reviewed
+P0AEG1	dppC	b3542 JW3511		reviewed
+P0AEH5	elaB	b2266 JW2261	yfbD	reviewed
+P0AEI4	rimO	b0835 JW0819	yliG	reviewed
+P0AEI6	nudJ	b1134 JW1120	ymfB	reviewed
+P0AEJ0	emrB	b2686 JW2661		reviewed
+P0AEJ8	eutN	b2456 JW2440	cchB yffY	reviewed
+P0AEL6	fepB	b0592 JW0584		reviewed
+P0AEM0	fkpB	b0028 JW0026	slpA yaaD	reviewed
+P0AEQ3	glnH	b0811 JW0796		reviewed
+P0AER3	gltJ	b0654 JW0649		reviewed
+P0AER5	gltK	b0653 JW0648		reviewed
+P0AER8	gltS	b3653 JW3628	gltC	reviewed
+P0AEU0	hisJ	b2309 JW2306		reviewed
+P0AEV9	hycI	b2717 JW2687		reviewed
+P0AEZ7	mltD	b0211 JW5018	dniR yafG	reviewed
+P0AEZ9	moaB	b0782 JW0765	chlA2	reviewed
+P0AF01	modB	b0764 JW0747	chlJ	reviewed
+P0AF03	mog	b0009 JW0008	chlG mogA yaaG	reviewed
+P0AF26	narJ	b1226 JW1217		reviewed
+P0AF98	lptF	b4261 JW4218	yjgP	reviewed
+P0AFA9	nikC	b3478 JW3443		reviewed
+P0AFH2	oppB	b1244 JW1236		reviewed
+P0AFH6	oppC	b1245 JW1237		reviewed
+P0AFI5	pbpG	b2134 JW5355	yohB	reviewed
+P0AFJ5	phoB	b0399 JW0389		reviewed
+P0AFK4	potB	b1125 JW1111		reviewed
+P0AFK6	potC	b1124 JW1110		reviewed
+P0AFK9	potD	b1123 JW1109		reviewed
+P0AFL1	potI	b0857 JW0841		reviewed
+P0AFL9	pqiA	b0950 JW0933	pqi5A	reviewed
+P0AFP2	atl	b0454 JW0444	ybaZ	reviewed
+P0AFP9	ybhR	b0792 JW5803		reviewed
+P0AFQ2	ybhS	b0793 JW0777		reviewed
+P0AFR7	ycjO	b1311 JW1304		reviewed
+P0AFR9	ydcV	b1443 JW1438		reviewed
+P0AFS5	tqsA	b1601 JW1593	ydgG	reviewed
+P0AFT5	btsR	b2125 JW5352	yehT	reviewed
+P0AFU8	ribC	b1662 JW1654	ribE	reviewed
+P0AFW4	rnk	b0610 JW0602		reviewed
+P0AFX4	rsd	b3995 JW3959		reviewed
+P0AFY2	sanA	b2144 JW2132	yeiF	reviewed
+P0AFZ7	trkH	b3849 JW5576		reviewed
+P0AG00	wzzE	b3785 JW5601	wzz yifC	reviewed
+P0AG03	ubiX	b2311 JW2308	dedF	reviewed
+P0AG20	relA	b2784 JW2755		reviewed
+P0AG40	ribF	b0025 JW0023	yaaC	reviewed
+P0AG44	rplQ	b3294 JW3256		reviewed
+P0AG48	rplU	b3186 JW3153		reviewed
+P0AG51	rpmD	b3302 JW3264		reviewed
+P0AG76	sbcD	b0398 JW0388	yajA	reviewed
+P0AG78	sbp	b3917 JW3888		reviewed
+P0AG82	pstS	b3728 JW3706	phoS	reviewed
+P0AGA6	uhpA	b3669 JW3644		reviewed
+P0AGC5	mltF	b2558 JW2542	yfhD	reviewed
+P0AGG4	trxC	b2582 JW2566	yfiG	reviewed
+P0AGH3	sapB	b1293 JW1286		reviewed
+P0AGH5	sapC	b1292 JW1285		reviewed
+P0AGK8	iscR	b2531 JW2515	yfhP	reviewed
+P0AGL2	tdcF	b3113 JW5521	yhaR	reviewed
+P0AGL5	ratA	b2619 JW2600	pasT yfjG	reviewed
+P0AGL7	rsmE	b2946 JW2913	yggJ	reviewed
+P0AGM9	xanP	b3654 JW3629	yicE	reviewed
+P0C066	mltC	b2963 JW5481	yggZ	reviewed
+P0C0L9	iscX	b2524 JW2508	yfhJ	reviewed
+P0C0U4	rimK	b0852 JW0836		reviewed
+P0C7L2	paaJ	b1397 JW1392	paaE ydbW	reviewed
+P0C8J6	gatY	b2096 JW5343	yegF	reviewed
+P0C960	emtA	b1193 JW5821	mltE sltZ ycgP	reviewed
+P0CI31	hcaB	b2541 JW2525	phdD yfhX	reviewed
+P0DKB3	mntS	b4705 JW0800.1	rybA	reviewed
+P0DMC9	rcsA	b1951 JW1935		reviewed
+P0DP92	bcsQ		yhjQ	reviewed
+P0DW56	spfP	b4837		reviewed
+P10100	rlpA	b0633 JW0628		reviewed
+P10151	leuO	b0076 JW0075		reviewed
+P10346	glnQ	b0809 JW0794		reviewed
+P10384	fadL	b2344 JW2341	ttr	reviewed
+P10441	lpxB	b0182 JW0177	pgsB	reviewed
+P10442	rnhB	b0183 JW0178		reviewed
+P11868	tdcD	b3115 JW5806	yhaA	reviewed
+P13016	ampD	b0110 JW0106		reviewed
+P13033	glpB	b2242 JW2236		reviewed
+P13656	chiA	b3338 JW3300	yheB	reviewed
+P13669	mngR	b0730 JW0719	farR g30 ybgB	reviewed
+P13857	rimL	b1427 JW1423		reviewed
+P15031	fecE	b4287 JW4247		reviewed
+P15032	recE	b1350 JW1344		reviewed
+P15038	helD	b0962 JW0945		reviewed
+P15078	cstA	b0598 JW0590	ybdC	reviewed
+P16095	sdaA	b1814 JW1803		reviewed
+P16256	panF	b3258 JW3226		reviewed
+P16429	hycC	b2723 JW2693	hevC	reviewed
+P16430	hycD	b2722 JW2692	hevD	reviewed
+P16431	hycE	b2721 JW2691	hevE	reviewed
+P16432	hycF	b2720 JW2690	hevF	reviewed
+P16433	hycG	b2719 JW2689	hevG	reviewed
+P16676	cysA	b2422 JW2415		reviewed
+P16678	phnK	b4097 JW5727		reviewed
+P16679	phnL	b4096 JW4057		reviewed
+P16685	phnG	b4101 JW4062		reviewed
+P16691	phnO	b4093 JW4054		reviewed
+P16700	cysP	b2425 JW2418		reviewed
+P17315	cirA	b2155 JW2142	cir feuA	reviewed
+P17334	chbC	b1737 JW1726	celB	reviewed
+P17446	betI	b0313 JW0305		reviewed
+P17802	mutY	b2961 JW2928	micA	reviewed
+P18133	pncB	b0931 JW0914		reviewed
+P18392	rstB	b1609 JW1601	uspT	reviewed
+P18777	dmsC	b0896 JW0879		reviewed
+P19323	fhlA	b2731 JW2701		reviewed
+P19642	malX	b1621 JW1613		reviewed
+P20099	bisC	b3551 JW5940		reviewed
+P21169	speC	b2965 JW5482		reviewed
+P21189	polB	b0060 JW0059	dinA	reviewed
+P21369	pncA	b1768 JW1757	nam ydjB	reviewed
+P21517	malZ	b0403 JW0393		reviewed
+P21866	kdpE	b0694 JW5096		reviewed
+P21889	aspS	b1866 JW1855	tls	reviewed
+P22186	mraZ	b0081 JW0079	yabB	reviewed
+P22524	mukE	b0923 JW0906	kicA ycbA	reviewed
+P22564	rihC	b0030 JW0028	yaaF	reviewed
+P22939	ispA	b0421 JW0411		reviewed
+P23173	tnaB	b3709 JW5619/JW5622	trpP	reviewed
+P23200	mglC	b2148 JW2135		reviewed
+P23331	tdk	b1238 JW1226		reviewed
+P23482	hyfB	b2482 JW2467	yffF	reviewed
+P23484	fecI	b4293 JW4253		reviewed
+P23485	fecR	b4292 JW4252		reviewed
+P23524	garK	b3124 JW3093	yhaD	reviewed
+P23849	trkG	b1363 JW1358		reviewed
+P23869	ppiB	b0525 JW0514		reviewed
+P23871	hemH	b0475 JW0464	popA visA	reviewed
+P23876	fepD	b0590 JW0582		reviewed
+P23877	fepG	b0589 JW0581		reviewed
+P23878	fepC	b0588 JW0580		reviewed
+P23917	mak	b0394 JW0385	yajF	reviewed
+P24077	entS	b0591 JW0583	ybdA	reviewed
+P24169	speF	b0693 JW0680		reviewed
+P24180	acrE	b3265 JW3233	envC	reviewed
+P24197	ygiD	b3039 JW3007		reviewed
+P24216	fliD	b1924 JW1909	flaV flbC	reviewed
+P24251	crl	b0240 JW0230		reviewed
+P24255	rpoN	b3202 JW3169	glnF ntrA	reviewed
+P24555	ptrB	b1845 JW1834	tlp	reviewed
+P25396	tehA	b1429 JW1425		reviewed
+P25736	endA	b2945 JW2912		reviewed
+P25742	waaQ	b3632 JW3607	rfaQ	reviewed
+P25746	hflD	b1132 JW5165	ycfC	reviewed
+P25798	fliF	b1938 JW1922	fla AII.1 fla BI	reviewed
+P25906	pdxI	b1406 JW1403	ydbC	reviewed
+P26218	bglH	b3720 JW3698	yieC	reviewed
+P26281	folK	b0142 JW0138		reviewed
+P26646	acuI	b3253 JW3222	yhdH	reviewed
+P26647	plsC	b3018 JW2986	parF	reviewed
+P27129	waaJ	b3626 JW3601	rfaJ waaR	reviewed
+P27241	waaZ	b3624 JW3599	rfaZ	reviewed
+P27245	marR	b1530 JW5248	cfxB inaR soxQ	reviewed
+P27247	plsX	b1090 JW5156		reviewed
+P27248	gcvT	b2905 JW2873		reviewed
+P27253	scpA	b2917 JW2884	sbm yliK	reviewed
+P27254	argK	b2918 JW2885	ygfD	reviewed
+P27298	prlC	b3498 JW3465	opdA	reviewed
+P27300	lpxK	b0915 JW0898	ycaH	reviewed
+P27305	gluQ	b0144 JW5892	yadB	reviewed
+P27896	narQ	b2469 JW2453		reviewed
+P28224	mliC	b1639 JW1631	ydhA	reviewed
+P28304	qorA	b4051 JW4011	hcz qor qor1	reviewed
+P28307	csgA	b1042 JW1025		reviewed
+P28634	trmO	b0195 JW0191	tsaA yaeB	reviewed
+P28635	metQ	b0197 JW0193	yaeC	reviewed
+P28904	treC	b4239 JW4198	olgH	reviewed
+P29208	menC	b2261 JW2256		reviewed
+P29680	hemE	b3997 JW3961		reviewed
+P30126	leuD	b0071 JW0070		reviewed
+P30136	thiC	b3994 JW3958		reviewed
+P30137	thiE	b3993 JW3957		reviewed
+P30843	basR	b4113 JW4074	pmrA	reviewed
+P30845	eptA	b4114 JW5730	pmrC yjdB	reviewed
+P30860	artJ	b0860 JW0844		reviewed
+P30871	ygiF	b3054 JW3026		reviewed
+P31058	yadC	b0135 JW0131		reviewed
+P31434	yicI	b3656 JW3631		reviewed
+P31441	ade	b3665 JW3640	yicP	reviewed
+P31467	yieH	b3715 JW3693		reviewed
+P31675	setA	b0070 JW0069	yabM	reviewed
+P31680	djlA	b0055 JW0054	yabH	reviewed
+P31697	fimC	b4316 JW4279		reviewed
+P31801	chaA	b1216 JW1207		reviewed
+P32053	intA	b2622 JW2602	intX slpA	reviewed
+P32125	mobB	b3856 JW5575	yihC	reviewed
+P32129	yihG	b3862 JW3834	f310	reviewed
+P32136	yihO	b3876 JW5852		reviewed
+P32141	yihT	b3881 JW3852		reviewed
+P32144	csqR	b3884 JW5567	yihW	reviewed
+P32166	menA	b3930 JW3901	yiiW	reviewed
+P32669	fsaB	b3946 JW3918	talC yijG	reviewed
+P32670	ptsA	b3947 JW5555	frwA yijH	reviewed
+P32715	mdtO	b4081 JW4042	yjcQ	reviewed
+P32716	mdtN	b4082 JW4043	yjcR	reviewed
+P32718	alsK	b4084 JW5724	yjcT	reviewed
+P32721	alsA	b4087 JW4048	yjcW	reviewed
+P33012	sbmC	b2009 JW1991	gyrI yeeB	reviewed
+P33026	setB	b2170 JW2157	yeiO	reviewed
+P33030	yeiR	b2173 JW2161		reviewed
+P33129	htrE	b0139 JW0135		reviewed
+P33229	ralR	b1348 JW5208	lar ral ydaB	reviewed
+P33358	mlrA	b2127 JW2115	yehV	reviewed
+P33359	yehW	b2128 JW2116		reviewed
+P33360	yehX	b2129 JW2117		reviewed
+P33361	yehY	b2130 JW2118		reviewed
+P33363	bglX	b2132 JW2120	yohA	reviewed
+P33590	nikA	b3476 JW3441		reviewed
+P33591	nikB	b3477 JW3442		reviewed
+P33915	yejE	b2179 JW2167		reviewed
+P33927	ccmF	b2196 JW2184	yejR	reviewed
+P33931	ccmA	b2201 JW5366	yejW	reviewed
+P33934	napH	b2204 JW2192	yejZ	reviewed
+P33940	mqo	b2210 JW2198	yojH	reviewed
+P33941	yojI	b2211 JW2199	yojJ	reviewed
+P36560	asr	b1597 JW5826		reviewed
+P36662	torD	b0998 JW0983		reviewed
+P36672	treB	b4240 JW4199		reviewed
+P36673	treR	b4241 JW4200		reviewed
+P36767	rdgC	b0393 JW0384	yaiD	reviewed
+P36938	pgm	b0688 JW0675		reviewed
+P36999	rlmA	b1822 JW1811	rrmA yebH	reviewed
+P37146	nrdF	b2676 JW2651	ygaD	reviewed
+P37194	slp	b3506 JW3474		reviewed
+P37338	glaR	b2664 JW2639	csiR gabC ygaE	reviewed
+P37339	lhgD	b2660 JW2635	lhgO ygaF	reviewed
+P37355	menH	b2263 JW2258	yfbB	reviewed
+P37387	xylF	b3566 JW3538	xylT	reviewed
+P37388	xylG	b3567 JW3539		reviewed
+P37596	norW	b2711 JW2681	flrR ygbD	reviewed
+P37619	yhhQ	b3471 JW3436		reviewed
+P37621	yhhS	b3473 JW5945		reviewed
+P37631	rdsA	b3492 JW3459	yhiN	reviewed
+P37636	mdtE	b3513 JW3481	yhiU	reviewed
+P37639	gadX	b3516 JW3484	yhiX	reviewed
+P37646	pdeH	b3525 JW3493	yhjH	reviewed
+P37647	kdgK	b3526 JW5668	yhjI	reviewed
+P37651	bcsZ	b3531 JW3499	bcsC yhjM	reviewed
+P37657	bcsE	b3536 JW3504	yhjS	reviewed
+P37661	eptB	b3546 JW5660	yhjW	reviewed
+P37664	yiaC	b3550 JW3519		reviewed
+P37665	yiaD	b3552 JW5657		reviewed
+P37669	wecH	b3561 JW3533	yiaH	reviewed
+P37671	plaR	b3574 JW3546	yiaJ	reviewed
+P37674	yiaM	b3577 JW3549		reviewed
+P37675	yiaN	b3578 JW5651		reviewed
+P37676	yiaO	b3579 JW3551		reviewed
+P37678	sgbH	b3581 JW3553	yiaQ	reviewed
+P37680	sgbE	b3583 JW3555	yiaS	reviewed
+P37692	waaF	b3620 JW3595	rfaF	reviewed
+P37759	rfbB	b2041 JW2026	rmlB	reviewed
+P37760	rfbD	b2040 JW2025	rmlD	reviewed
+P37765	rluB	b1269 JW1261	yciL	reviewed
+P38101	eamB	b2578 JW2562	yfiK	reviewed
+P38134	etk	b0981 JW0964	yccC	reviewed
+P38684	torR	b0995 JW0980		reviewed
+P39196	lplT	b2835 JW2803	ygeD	reviewed
+P39199	prmB	b2330 JW5841	yfcB	reviewed
+P39280	epmB	b4146 JW4106	yjeK	reviewed
+P39288	queG	b4166 JW4124	yjeS	reviewed
+P39300	ulaG	b4192 JW5868	yjfR	reviewed
+P39306	ulaF	b4198 JW4156	sgaE yjfX	reviewed
+P39310	ytfB	b4206 JW5745		reviewed
+P39333	bdcA	b4249 JW4207	yjgI	reviewed
+P39352	nanX	b4279 JW5768	yjhB	reviewed
+P39358	yjhG	b4297 JW4259		reviewed
+P39375	iraD	b4326 JW5782	yjiD	reviewed
+P39376	yjiE	b4327 JW4290	qseD	reviewed
+P39394	symE	b4347 JW4310	dinL sosC yjiW	reviewed
+P39398	lgoT	b4356 JW4319	yjiZ yjjL	reviewed
+P39401	mdoB	b4359 JW5794	opgB yjjO	reviewed
+P39404	bglJ	b4366 JW5955	yjjR	reviewed
+P39451	adhP	b1478 JW1474	yddN	reviewed
+P39452	nrdE	b2675 JW2650		reviewed
+P39829	garD	b3128 JW3097	yhaG	reviewed
+P39835	gntT	b3415 JW5690	gntM usgA yhgC	reviewed
+P40120	mdoD	b1424 JW1420	opgD ydcG yzzZ	reviewed
+P40719	qseC	b3026 JW2994	ygiY	reviewed
+P42592	ygjK	b3080 JW3051		reviewed
+P42604	uxaA	b3091 JW3062	ygjW	reviewed
+P42615	mzrA	b3096 JW3067	ecfM yqjB	reviewed
+P42628	dlsT	b3110 JW5519	yhaO	reviewed
+P43329	hrpA	b1413 JW5905		reviewed
+P43674	ycaL	b0909 JW0892		reviewed
+P43676	pitB	b2987 JW2955		reviewed
+P45522	kefB	b3350 JW3313	trkB	reviewed
+P45523	fkpA	b3347 JW3309	yzzS	reviewed
+P45532	tusD	b3345 JW3307	yheN	reviewed
+P45543	frlD	b3374 JW3337	yhfQ	reviewed
+P45548	php	b3379 JW3342	yhfV	reviewed
+P45578	luxS	b2687 JW2662	ygaG	reviewed
+P45579	hcxA	b0599 JW0592	ybdH	reviewed
+P45758	gspD	b3325 JW5707	yheF	reviewed
+P45799	nudE	b3397 JW3360	yrfE	reviewed
+P46130	ybhC	b0772 JW0755		reviewed
+P46133	abgT	b1336 JW5822	ydaH	reviewed
+P46187	rseC	b2570 JW2554		reviewed
+P46474	yhdP	b4472 JW5542	yhdQ yhdR	reviewed
+P46852	yhhW	b3439 JW3402		reviewed
+P46923	torZ	b1872 JW1861	bisZ	reviewed
+P50466	aer	b3072 JW3043	air yqjJ	reviewed
+P51020	mhpE	b0352 JW0343		reviewed
+P51025	frmB	b0355 JW0346	yaiM	reviewed
+P51981	ycjG	b1325 JW1318	ycjH	reviewed
+P52005	torY	b1873 JW1862	yecK	reviewed
+P52045	scpB	b2919 JW2886	mmcD ygfG	reviewed
+P52062	hemW	b2955 JW2922	yggW	reviewed
+P52094	hisQ	b2308 JW2305		reviewed
+P52095	ldcC	b0186 JW0181	ldc ldcH	reviewed
+P52097	tilS	b0188 JW0183	mesJ yaeN	reviewed
+P52130	rnlB	b2631 JW5418	yfjO	reviewed
+P52599	emrK	b2368 JW2365		reviewed
+P52600	emrY	b2367 JW2364		reviewed
+P52612	fliI	b1941 JW1925	fla AIII flaC	reviewed
+P52645	ydbH	b1381 JW1376		reviewed
+P52647	ydbK	b1378 JW1372		reviewed
+P52697	pgl	b0767 JW0750	ybhE	reviewed
+P55798	pphA	b1838 JW1827	prpA yebX	reviewed
+P55799	pphB	b2734 JW2704	prpB ygbH	reviewed
+P58034	ymgF	b4520 JW1156		reviewed
+P60293	mukF	b0922 JW0905	kicB	reviewed
+P60390	rsmH	b0082 JW0080	mraW yabC	reviewed
+P60546	gmk	b3648 JW3623	spoR	reviewed
+P60757	hisG	b2019 JW2001		reviewed
+P60782	plsY	b3059 JW3031	ygiH	reviewed
+P60906	hisS	b2514 JW2498		reviewed
+P60932	uppP	b3057 JW3029	bacA upk	reviewed
+P61517	can	b0126 JW0122	cynT2 yadF	reviewed
+P61714	ribE	b0415 JW0405	ribH ybaF	reviewed
+P61949	fldA	b0684 JW0671		reviewed
+P62601	treF	b3519 JW3487		reviewed
+P62615	ispE	b1208 JW1199	ipk ychB	reviewed
+P63177	rlmB	b4180 JW4138	yjfH	reviewed
+P63201	gadW	b3515 JW3483	yhiW	reviewed
+P63746	eutS	b2462 JW2446	ypfE	reviewed
+P64426	digH	b1491 JW1486	yddW	reviewed
+P64506	yebY	b1839 JW1828		reviewed
+P64550	alaE	b2670 JW2645	ygaW	reviewed
+P64554	queE	b2777 JW2748	ygcF	reviewed
+P64559	sdhE	b2897 JW2865	cptB ygfY	reviewed
+P64578	higB	b3083 JW3054	ygjN	reviewed
+P64581	yqjD	b3098 JW3069		reviewed
+P64646	ghoT	b4559 JW5732	yjdO	reviewed
+P65643	eutT	b2459 JW2443	ypfB	reviewed
+P67080	yggS	b2951 JW2918		reviewed
+P67662	aaeR	b3243 JW3212	qseA yhcS	reviewed
+P67697	hicB	b1438 JW1433	ydcQ	reviewed
+P67701	higA	b3082 JW3053	ygjM	reviewed
+P68066	grcA	b2579 JW2563	yfiD	reviewed
+P68567	rsmJ	b3497 JW5672	yhiQ	reviewed
+P68679	rpsU	b3065 JW3037		reviewed
+P69222	infA	b0884 JW0867		reviewed
+P69330	citD	b0617 JW0609	ybdX	reviewed
+P69432	pgaD	b1021 JW1006	ycdP	reviewed
+P69434	pgaA	b1024 JW1010	ycdS	reviewed
+P69488	cutA	b4137 JW4097	cutA1 cycY	reviewed
+P69503	apt	b0469 JW0458		reviewed
+P69506	ytfE	b4209 JW4167		reviewed
+P69811	fruB	b2169 JW2156	fpr fruF	reviewed
+P69820	ulaC	b4195 JW4153	ptxA sgaA yjfU	reviewed
+P69822	ulaB	b4194 JW4152	sgaB yjfT	reviewed
+P69828	gatA	b2094 JW2078/JW2081		reviewed
+P69829	ptsN	b3204 JW3171	rpoP yhbI	reviewed
+P69937	gdx	b4148 JW5738	sugE	reviewed
+P71229	hyfR	b2491 JW2476		reviewed
+P71241	wcaJ	b2047 JW2032		reviewed
+P75713	allE	b0515 JW0503	glxB6 ylbA	reviewed
+P75726	citF	b0615 JW5087	ybdV	reviewed
+P75728	ubiF	b0662 JW0659	yleB	reviewed
+P75780	fiu	b0805 JW0790	ybiL	reviewed
+P75783	ybiO	b0808 JW5108		reviewed
+P75796	gsiA	b0829 JW5897	yliA	reviewed
+P75797	gsiB	b0830 JW5111	yliB	reviewed
+P75798	gsiC	b0831 JW0815	yliC	reviewed
+P75800	pdeI	b0833 JW0817	yliE	reviewed
+P75801	dgcI	b0834 JW0818	yliF	reviewed
+P75823	ltaE	b0870 JW0854	ybjU	reviewed
+P75824	hcr	b0872 JW5117	ybjV	reviewed
+P75849	gloC	b0927 JW0910	ycbL	reviewed
+P75869	sxy	b0959 JW0942	tfoX yccR	reviewed
+P75893	rutF	b1007 JW5138	ycdH	reviewed
+P75894	rutE	b1008 JW0993	ycdI	reviewed
+P75895	rutD	b1009 JW0994	ycdJ	reviewed
+P75897	rutB	b1011 JW5139	ycdL	reviewed
+P75905	pgaC	b1022 JW1007	ycdQ	reviewed
+P75915	ycdY	b1035 JW1018		reviewed
+P75919	clsC	b1046 JW5150	ymdC	reviewed
+P75952	comR	b1111 JW5159	ycfQ	reviewed
+P75954	ycfS	b1113 JW5820		reviewed
+P75958	lolE	b1118 JW1104	ycfW	reviewed
+P75966	rluE	b1135 JW1121	ymfC	reviewed
+P75987	iraM	b1160 JW1147	elb1 elbA ycgW	reviewed
+P75989	bluR	b1162 JW1149	ycgE	reviewed
+P75993	ariR	b1166 JW1153	ymgB	reviewed
+P76004	ycgM	b1180 JW1169		reviewed
+P76016	dhaR	b1201 JW5188	ycgU	reviewed
+P76027	oppD	b1246 JW1238		reviewed
+P76041	ycjM	b1309 JW1302	ggaP	reviewed
+P76042	ycjN	b1310 JW1303		reviewed
+P76043	ycjQ	b1313 JW1306		reviewed
+P76044	ycjR	b1314 JW5202		reviewed
+P76052	abgB	b1337 JW1331	ydaI	reviewed
+P76079	paaC	b1390 JW1385	ydbP	reviewed
+P76083	paaH	b1395 JW1390	ydbU	reviewed
+P76085	paaK	b1398 JW5218		reviewed
+P76086	paaX	b1399 JW1394	ydbY	reviewed
+P76091	ynbB	b1409 JW1406		reviewed
+P76106	hicA	b4532 JW5230	yncN	reviewed
+P76112	mnaT	b1448 JW5233	yncA	reviewed
+P76115	pqqU	b1451 JW1446	yncD	reviewed
+P76136	safA	b1500 JW1494.1	yneN	reviewed
+P76143	lsrF	b1517 JW1510	yneB	reviewed
+P76145	tam	b1519 JW1512	yneD	reviewed
+P76147	dgcF	b1522 JW5825	yneF	reviewed
+P76182	rsxD	b1630 JW1622	rnfD ydgO	reviewed
+P76190	mepH	b1655 JW5270	ydhO	reviewed
+P76192	ydhV	b1673 JW5272		reviewed
+P76193	ynhG	b1678 JW1668		reviewed
+P76213	cho	b1741 JW1730	dinM sosD ydjQ	reviewed
+P76234	yeaE	b1781 JW1770		reviewed
+P76237	dgcJ	b1786 JW5291	yeaJ	reviewed
+P76242	nimT	b1791 JW1780	yeaN	reviewed
+P76245	dgcP	b1794 JW5292	yeaP	reviewed
+P76250	dmlR	b1799 JW1788	yeaT	reviewed
+P76290	cmoA	b1870 JW1859	yecO	reviewed
+P76291	cmoB	b1871 JW1860	yecP	reviewed
+P76340	hprR	b1969 JW5322	yedW	reviewed
+P76347	yeeJ	b1978 JW5833		reviewed
+P76350	shiA	b1981 JW1962	yeeM	reviewed
+P76352	yeeO	b1985 JW1965		reviewed
+P76373	ugd	b2028 JW2010	pmrE udg yefA	reviewed
+P76395	pphC	b2072 JW2057	yegK	reviewed
+P76397	mdtA	b2074 JW5338	yegM	reviewed
+P76398	mdtB	b2075 JW2060	yegN	reviewed
+P76403	trhP	b2081 JW2066	yegQ	reviewed
+P76423	thiM	b2104 JW2091		reviewed
+P76425	rcnA	b2106 JW2093	yohM	reviewed
+P76472	arnD	b2256 JW2250	pmrJ yfbH	reviewed
+P76473	arnT	b2257 JW2251	pmrK yfbI	reviewed
+P76518	yfdE	b2371 JW2368		reviewed
+P76524	ypdF	b2385 JW2382		reviewed
+P76536	yfeX	b2431 JW2424		reviewed
+P76553	eutG	b2453 JW2437	yffV	reviewed
+P76578	yfhM	b2520 JW2504		reviewed
+P76641	guaD	b2883 JW5466	ygfP	reviewed
+P76773	ompL	b3875 JW3846	yshA	reviewed
+P76938	epmC	b2326 JW5381	yfcM	reviewed
+P77129	allG	b4572	ylbE	reviewed
+P77154	ycjT	b1316 JW1309		reviewed
+P77161	glxR	b0509 JW0497	glxB1 ybbQ	reviewed
+P77171	ydcI	b1422 JW5226		reviewed
+P77223	rsxB	b1628 JW1620	rnfB ydgM	reviewed
+P77245	murR	b2427 JW2420	yfeT	reviewed
+P77257	lsrA	b1513 JW1506	ego ydeX	reviewed
+P77272	murP	b2429 JW2422	yfeV	reviewed
+P77279	fetA	b0490 JW0479	ybbL	reviewed
+P77285	rsxG	b1631 JW1623	rnfG ydgP	reviewed
+P77300	xynR	b0272 JW0265	yagI	reviewed
+P77304	dtpA	b1634 JW1626	tppB ydgR	reviewed
+P77306	yqiK	b3051 JW3023		reviewed
+P77333	pgrR	b1328 JW1321	ycjZ	reviewed
+P77334	pdeR	b1285 JW1278	gmr yciR	reviewed
+P77338	mscK	b0465 JW0454	aefA kefA	reviewed
+P77357	abgA	b1338 JW5205	ydaJ	reviewed
+P77359	djlC	b0649 JW0644	ybeV	reviewed
+P77374	ynfE	b1587 JW1579		reviewed
+P77379	rclR	b0305 JW0298	ykgD	reviewed
+P77397	mhpA	b0347 JW0338		reviewed
+P77439	fryA	b2383 JW2380	ypdD	reviewed
+P77467	paaG	b1394 JW1389	ydbT	reviewed
+P77475	yqaB	b2690 JW2665		reviewed
+P77481	ycjV	b4524 JW1311/JW5203	ymjB	reviewed
+P77503	ycjS	b1315 JW1308		reviewed
+P77522	sufB	b1683 JW5273	ynhE	reviewed
+P77544	yfcF	b2301 JW2298		reviewed
+P77570	anmK	b1640 JW1632	ydhH	reviewed
+P77580	mhpF	b0351 JW0342	mhpE	reviewed
+P77608	mhpD	b0350 JW0341		reviewed
+P77611	rsxC	b1629 JW1621	rnfC ydgN	reviewed
+P77615	ycjW	b1320 JW1313		reviewed
+P77619	yfeW	b2430 JW5395	pbp4B	reviewed
+P77626	sutR	b1434 JW1430	ydcN	reviewed
+P77650	hcaD	b2542 JW2526	hcaA4 phdA yfhY	reviewed
+P77690	arnB	b2253 JW5372	pmrH yfbE	reviewed
+P77704	ydjI	b1773 JW1762		reviewed
+P77716	ycjP	b1312 JW1305		reviewed
+P77731	allA	b0505 JW0493	glxA2 ybbT	reviewed
+P77733	focB	b2492 JW2477		reviewed
+P77735	yajO	b0419 JW0409		reviewed
+P77737	oppF	b1247 JW1239		reviewed
+P77743	prpR	b0330 JW0322	yahP	reviewed
+P77747	ompN	b1377 JW1371	ynaG	reviewed
+P77756	queC	b0444 JW0434	ybaX	reviewed
+P77757	arnC	b2254 JW2248	pmrF yfbF	reviewed
+P77783	ynfF	b1588 JW5260		reviewed
+P77790	ddpX	b1488 JW1483	vanX yddT	reviewed
+P78285	rrrD	b0555 JW0544	arrD ybcS	reviewed
+P80644	ssuE	b0937 JW0920	ycbP	reviewed
+Q2EES9	torI	b4501 JW5387		reviewed
+Q46799	xdhA	b2866 JW5462	ygeS	reviewed
+Q46800	xdhB	b2867 JW2835	ygeT	reviewed
+Q46817	ghxQ	b4464 JW5467	ygfQ ygfR	reviewed
+Q46829	bglA	b2901 JW2869	bglD yqfC	reviewed
+Q46855	yqhC	b3010 JW5849		reviewed
+Q46915	gudX	b2788 JW2759	ygcY	reviewed
+Q46916	gudP	b2789 JW2760	ygcZ	reviewed
+Q47140	hcaF	b2539 JW2523	digB hcaA2 hcaB phdC2 yfhV	reviewed
+Q47141	hcaR	b2537 JW2521	phdR yfhT	reviewed
+Q47157	yafO	b0233 JW0223		reviewed
+Q47538	tauB	b0366 JW0358	ssiB yaiQ	reviewed
+Q47690	mmuM	b0261 JW0253	yagD	reviewed
+A5A618	ynhF	b4602 JW1649.1		reviewed
+C1P607	ibsA	b4667 JW2058.1		reviewed
+C1P615	ibsC	b4665 JW2879.1		reviewed
+C1P616	ibsD	b4664 JW3023.1		reviewed
+C1P617	ibsE	b4666 JW3023.2		reviewed
+O32528	ypdI	b2376 JW2373		reviewed
+O52982	yfjS	b2636 JW5921		reviewed
+P00960	glyQ	b3560 JW3531	glyS(A)	reviewed
+P03012	tnpR	ECOK12F009		reviewed
+P03014	pinE	b1158 JW1144	pin	reviewed
+P03030	lysR	b2839 JW2807		reviewed
+P03813	ygeA	b2840 JW2808		reviewed
+P03825	gspB	b3322 JW3284	pinO pioO pno	reviewed
+P03856	repE	ECOK12F045	E rep	reviewed
+P04128	fimA	b4314 JW4277	pilA	reviewed
+P04846	nlpA	b3661 JW3635		reviewed
+P04949	fliC	b1923 JW1908	flaF hag	reviewed
+P05052	appY	b0564 JW0553		reviewed
+P05827	ilvY	b3773 JW3746		reviewed
+P06282	cdh	b3918 JW3889		reviewed
+P06615	resD	ECOK12F044	D	reviewed
+P06846	ebgR	b3075 JW3046		reviewed
+P07000	pldB	b3825 JW5584		reviewed
+P07654	pstA	b3726 JW3704	phoT	reviewed
+P08550	cvpA	b2313 JW2310	dedE	reviewed
+P08555	dsdX	b2365 JW2362	orf445 yfdA yfdD	reviewed
+P08997	aceB	b4014 JW3974	mas	reviewed
+P09126	hemD	b3804 JW3776		reviewed
+P09155	rnd	b1804 JW1793		reviewed
+P09163	yjaB	b4012 JW3972		reviewed
+P09424	mtlD	b3600 JW3574		reviewed
+P0A6G3	pncC	b2700 JW2670	ygaD	reviewed
+P0A6G5	citX	b0614 JW0606	ybdU	reviewed
+P0A6L7	uxaB	b1521 JW1514		reviewed
+P0A6P7	engB	b3865 JW5930	yihA	reviewed
+P0A6S0	flgH	b1079 JW5153	fla FVIII flaY	reviewed
+P0A6W0	glsA2	b1524 JW1517	yneH	reviewed
+P0A6W5	greA	b3181 JW3148		reviewed
+P0A7A2	gpmB	b4395 JW4358	ytjC	reviewed
+P0A7C6	pepE	b4021 JW3981		reviewed
+P0A7H6	recR	b0472 JW0461		reviewed
+P0A7P5	rpmH	b3703 JW3680	rimA ssaF	reviewed
+P0A823	sfsA	b0146 JW0142	sfs1	reviewed
+P0A867	talA	b2464 JW2448		reviewed
+P0A8B5	ybaB	b0471 JW0460		reviewed
+P0A8C8	yidD	b4557 JW3682		reviewed
+P0A8D0	nrdR	b0413 JW0403	ybaD	reviewed
+P0A8G3	uxaC	b3092 JW3063	ygjX ygjY ygjZ	reviewed
+P0A8I3	yaaA	b0006 JW0005		reviewed
+P0A8P3	yggX	b2962 JW2929		reviewed
+P0A8R9	hdfR	b4480 JW5607	pssR yifA yifD	reviewed
+P0A8S5	uspB	b3494 JW3461	yhiO	reviewed
+P0A8U0	syd	b2793 JW2764	ydr	reviewed
+P0A8Z0	yciA	b1253 JW1245		reviewed
+P0A901	blc	b4149 JW4110	yjeL	reviewed
+P0A915	ompW	b1256 JW1248	yciD	reviewed
+P0A917	ompX	b0814 JW0799	ybiG	reviewed
+P0A930	wza	b2062 JW2047		reviewed
+P0A932	gfcE	b0983 JW0966	yccZ	reviewed
+P0A9E9	yeiL	b2163 JW2150	nsr	reviewed
+P0A9F6	gcvA	b2808 JW2779		reviewed
+P0A9F9	metR	b3828 JW3804		reviewed
+P0A9G2	nhaR	b0020 JW0019	antO	reviewed
+P0A9H5	btuR	b1270 JW1262	cobA	reviewed
+P0A9I3	gcvR	b2479 JW2464	yffD	reviewed
+P0A9I8	nirD	b3366 JW3329		reviewed
+P0A9N0	ptsO	b3206 JW3173	npr rpoR yhbK	reviewed
+P0A9T4	tas	b2834 JW2802	ygdS	reviewed
+P0A9U6	puuR	b1299 JW1292	ycjC	reviewed
+P0AA73	yhbE	b3184 JW3151		reviewed
+P0AA82	codB	b0336 JW0327		reviewed
+P0AAB2	wzb	b2061 JW2046		reviewed
+P0AAB6	galF	b2042 JW2027	wcaN	reviewed
+P0AAB8	uspD	b3923 JW3894	yiiT	reviewed
+P0AAE2	proY	b0402 JW5055	yajM	reviewed
+P0AAG3	gltL	b0652 JW0647		reviewed
+P0AAI1	ssuB	b0933 JW0916	ycbE	reviewed
+P0AAJ1	ynfG	b1589 JW1581		reviewed
+P0AAK7	nrfC	b4072 JW4033	yjcJ	reviewed
+P0AAR0	tomB	b0461 JW0450	ybaJ	reviewed
+P0AAS7	ybcJ	b0528 JW5070		reviewed
+P0AAV4	pxpB	b0711 JW0701	ybgJ	reviewed
+P0AAX6	mcbA	b0806 JW5106	ybiM	reviewed
+P0AAY6	ybjN	b0853 JW0837		reviewed
+P0AB20	hspQ	b0966 JW5970	yccV	reviewed
+P0AB28	yceD	b1088 JW1074	g30k	reviewed
+P0AB33	bssS	b1060 JW5152	yceP	reviewed
+P0AB93	arsB	b3502 JW3469	arsF	reviewed
+P0AB96	arsC	b3503 JW3470	arsG	reviewed
+P0ABC0	atpI	b3739 JW5611	uncI	reviewed
+P0ABD1	yeaV	b1801 JW5293		reviewed
+P0ABE2	bolA	b0435 JW5060		reviewed
+P0ABH4	mreD	b3249 JW3218		reviewed
+P0ABL5	napC	b2202 JW2190	yejX	reviewed
+P0ABL8	ccmB	b2200 JW2188	yejV	reviewed
+P0ABM5	ccmD	b2198 JW2186	yojM	reviewed
+P0ABM9	ccmH	b2194 JW2182	yejP	reviewed
+P0ABP6	dedA	b2317 JW2314		reviewed
+P0ABW3	yfaE	b2236 JW2230		reviewed
+P0ABW5	sfmA	b0530 JW0519		reviewed
+P0ABW9	flgB	b1073 JW1060	fla FII flbA	reviewed
+P0ABX2	flgC	b1074 JW1061	fla FIII flaW	reviewed
+P0ABX5	flgG	b1078 JW1065	fla FVII flaL	reviewed
+P0ABX8	fliL	b1944 JW1928	cheC1 fla AI fla QI	reviewed
+P0AC05	fliP	b1948 JW1932	flaR	reviewed
+P0AC07	fliQ	b1949 JW1933	flaQ	reviewed
+P0AC26	nirC	b3367 JW3330		reviewed
+P0AC35	ttdB	b3062 JW3034	ygjB	reviewed
+P0AC59	grxB	b1064 JW1051		reviewed
+P0AC65	nrdH	b2673 JW2648	ygaN	reviewed
+P0AC92	gnsA	b4517 JW0976	yccL	reviewed
+P0AC96	gntU	b4476 JW5686		reviewed
+P0ACA1	yibF	b3592 JW3565		reviewed
+P0ACH8	melR	b4118 JW4079		reviewed
+P0ACI0	rob	b4396 JW4359		reviewed
+P0ACJ5	decR	b0447 JW0437	ybaO	reviewed
+P0ACK2	agaR	b3131 JW3100	yhaW	reviewed
+P0ACK5	deoR	b0840 JW0824	nucR	reviewed
+P0ACK8	fucR	b2805 JW2776		reviewed
+P0ACL0	glpR	b3423 JW3386		reviewed
+P0ACL2	exuR	b3094 JW3065		reviewed
+P0ACL9	pdhR	b0113 JW0109	aceC genA yacB	reviewed
+P0ACM5	ggaR	b2101 JW2088	yegW	reviewed
+P0ACP5	gntR	b3438 JW5946		reviewed
+P0ACQ7	tdcA	b3118 JW3089		reviewed
+P0ACR0	allS	b0504 JW0492	glxA1 ybbS	reviewed
+P0ACR2	punR	b1659 JW1651	ydhB	reviewed
+P0ACR4	yeiE	b2157 JW2144		reviewed
+P0ACS7	rpiR	b4089 JW4050	alsR yjcY	reviewed
+P0ACT2	envR	b3264 JW3232	yhdK	reviewed
+P0ACT6	uidR	b1618 JW1610	gusR	reviewed
+P0ACX3	ydhR	b1667 JW1657		reviewed
+P0ACX5	fumD	b1675 JW1665	ydhZ	reviewed
+P0ACY1	ydjA	b1765 JW1754		reviewed
+P0ACZ2	etp	b0982 JW5132	yccY	reviewed
+P0AD89	tnaC	b3707 JW3685	tnaL	reviewed
+P0ADB4	ecnA	b4410 JW5737		reviewed
+P0ADB7	ecnB	b4411 JW4108	yjeU	reviewed
+P0ADD7	yjjQ	b4365 JW4329		reviewed
+P0ADE8	ygfZ	b2898 JW2866	yzzW	reviewed
+P0ADH5	fimB	b4312 JW4275		reviewed
+P0ADH7	fimE	b4313 JW4276		reviewed
+P0ADI0	pinR	b1374 JW1368	ynaD	reviewed
+P0ADQ7	ygaM	b2672 JW2647		reviewed
+P0ADT5	ygiC	b3038 JW3006		reviewed
+P0ADU5	ygiW	b3024 JW2992		reviewed
+P0ADW6	yhcC	b3211 JW3178		reviewed
+P0ADX9	rsmD	b3465 JW3430	yhhF	reviewed
+P0ADZ7	yajC	b0407 JW0397		reviewed
+P0AE26	araH	b4460 JW1887		reviewed
+P0AE30	artM	b0861 JW0845		reviewed
+P0AE34	artQ	b0862 JW0846		reviewed
+P0AE37	astA	b1747 JW1736	ydjV	reviewed
+P0AE39	ypdB	b2381 JW2378		reviewed
+P0AE45	paeA	b4218 JW4177	ytfL	reviewed
+P0AE56	bfd	b3337 JW3299	yheA	reviewed
+P0AE60	cedA	b1731 JW1720	ydjP	reviewed
+P0AE95	csgE	b1039 JW1022		reviewed
+P0AE98	csgF	b1038 JW1021		reviewed
+P0AEB0	cysW	b2423 JW2416		reviewed
+P0AEC0	mgpA	b1816 JW1805	yoaE	reviewed
+P0AED9	dcm	b1961 JW1944	mec	reviewed
+P0AEK0	exoX	b1844 JW1833	yobC	reviewed
+P0AEL3	feoA	b3408 JW3371		reviewed
+P0AEM4	flgM	b1071 JW1058		reviewed
+P0AEP1	galP	b2943 JW2910		reviewed
+P0AEQ6	glnP	b0810 JW0795		reviewed
+P0AEU3	hisM	b2307 JW2304		reviewed
+P0AEW1	hyfE	b2485 JW2470		reviewed
+P0AEW4	cpdA	b3032 JW3000	icc	reviewed
+P0AEX3	kgtP	b2587 JW2571	witA	reviewed
+P0AF08	mrp	b2113 JW2100		reviewed
+P0AF10	mtlR	b3601 JW3575		reviewed
+P0AF20	nagC	b0676 JW0662	nagR	reviewed
+P0AF40	yijD	b3964 JW3936		reviewed
+P0AF43	yjbB	b4020 JW3980		reviewed
+P0AF63	nsrR	b4178 JW4136	yjeB	reviewed
+P0AF96	tabA	b4252 JW5756	yjgK	reviewed
+P0AFA5	nfrB	b0569 JW0558		reviewed
+P0AFH0	ogt	b1335 JW1329		reviewed
+P0AFJ1	yjdM	b4108 JW4069	phnA	reviewed
+P0AFK0	pmbA	b4235 JW4194	tldE	reviewed
+P0AFK2	pnuC	b0751 JW0734		reviewed
+P0AFM9	pspB	b1305 JW1298		reviewed
+P0AFN2	pspC	b1306 JW1299		reviewed
+P0AFQ7	ycfH	b1100 JW1086		reviewed
+P0AFR4	yciO	b1267 JW5196		reviewed
+P0AFS1	lsrD	b1515 JW1508	ydeZ	reviewed
+P0AFV2	yhiD	b3508 JW5670	yhhE	reviewed
+P0AFV8	pspD	b1307 JW1300		reviewed
+P0AG14	sohB	b1272 JW1264		reviewed
+P0AG34	rhtB	b3824 JW5585	yigK	reviewed
+P0AG38	rhtC	b3823 JW5586	yigJ	reviewed
+P0AG84	yghA	b3003 JW2972		reviewed
+P0AGG8	tldD	b3244 JW3213	yhdO	reviewed
+P0AGH8	pstC	b3727 JW3705	phoW	reviewed
+P0AGI4	xylH	b3568 JW3540		reviewed
+P0AGI8	trkA	b3290 JW3251		reviewed
+P0AGJ2	trmH	b3651 JW3626	spoU	reviewed
+P0AGK4	yhbY	b3180 JW3147		reviewed
+P0C8J8	gatZ	b2095 JW2082		reviewed
+P0C8K0	kbaZ	b3132 JW3101	agaZ yhaX	reviewed
+P0CB39	eptC	b3955 JW3927	cptA yijP	reviewed
+P0CE44	uidB	b1616 JW1608	gusB uidP	reviewed
+P0CE45	uidB		gusB uidP	reviewed
+P0CF88	insI1	b0256 JW0246		reviewed
+P0CK95	yghJ	b4466 JW5925		reviewed
+P0DP21	yjiP	b4338 JW5953	rpnD	reviewed
+P0DP70	phnE	b4103 JW4065	phnE2	reviewed
+P0DP89	ilvG	b4488		reviewed
+P10371	hisA	b2024 JW2006		reviewed
+P10423	iap	b2753 JW2723		reviewed
+P10805	envY	b0566 JW0555		reviewed
+P11072	lit	b1139 JW1125		reviewed
+P11446	argC	b3958 JW3930		reviewed
+P11875	argS	b1876 JW1865		reviewed
+P11988	bglB	b3721 JW3699		reviewed
+P11989	bglG	b3723 JW3701	bglC	reviewed
+P12999	bioC	b0777 JW0760		reviewed
+P13024	fdhE	b3891 JW3862		reviewed
+P15006	mcrC	b4345 JW5789		reviewed
+P15070	fliN	b1946 JW1930	flaN motD	reviewed
+P15286	flk	b2321 JW2318	div	reviewed
+P15639	purH	b4006 JW3970		reviewed
+P15977	malQ	b3416 JW3379	malA	reviewed
+P16525	tus	b1610 JW1602	tau	reviewed
+P16677	phnC	b4106 JW4067		reviewed
+P16682	phnD	b4105 JW4066	psiD	reviewed
+P16689	phnM	b4095 JW4056		reviewed
+P16690	phnN	b4094 JW4055		reviewed
+P16701	cysU	b2424 JW2417	cysT	reviewed
+P17410	chbR	b1735 JW1724	celD	reviewed
+P17583	cynX	b0341 JW0332		reviewed
+P18310	ssbF	ECOK12F060	ssb ssf	reviewed
+P18393	ybdZ	b4511 JW0577		reviewed
+P18811	malI	b1620 JW1612		reviewed
+P19317	narW	b1466 JW1461		reviewed
+P19769	insK	b3558 JW3528	dinS	reviewed
+P19930	hyaD	b0975 JW0957		reviewed
+P20605	fic	b3361 JW3324		reviewed
+P21420	nmpC	b0553	phmA	reviewed
+P21515	acpH	b0404 JW0394	yajB	reviewed
+P21893	recJ	b2892 JW2860		reviewed
+P22586	fliO	b1947 JW5316	flaP flbD	reviewed
+P23839	yicC	b3644 JW3619	orfX	reviewed
+P23841	xapR	b2405 JW2396	pndR yfeB	reviewed
+P23842	pdeA	b2395 JW5391	yfeA	reviewed
+P23898	nlpC	b1708 JW1698		reviewed
+P23910	araJ	b0396 JW0386		reviewed
+P24174	manC	b2049 JW2034	cpsB rfbM	reviewed
+P24175	manB	b2048 JW2033	cpsG rfbL	reviewed
+P24181	acrF	b3266 JW3234	envD	reviewed
+P24200	mcrA	b1159 JW1145	rglA	reviewed
+P24202	mrr	b4351 JW4314		reviewed
+P24218	intD	b0537 JW0525	int	reviewed
+P24240	ascB	b2716 JW2686		reviewed
+P24241	ascF	b2715 JW5435		reviewed
+P24242	ascG	b2714 JW5434		reviewed
+P24244	appX	b4592 JW0961.1	yccB	reviewed
+P25549	aslA	b3801 JW3773	atsA	reviewed
+P25741	waaP	b3630 JW3605	rfaP	reviewed
+P25744	mdtG	b1053 JW1040	yceE	reviewed
+P25748	galS	b2151 JW2138		reviewed
+P25772	ligB	b3647 JW3622	yicF	reviewed
+P25960	gspO	b3335 JW3297	hofD hopD hopO yheC	reviewed
+P26266	fepE	b0587 JW0579		reviewed
+P26365	amiB	b4169 JW4127	yjeD	reviewed
+P26612	amyA	b1927 JW1912	yedC	reviewed
+P26649	glgS	b3049 JW3021	scoR	reviewed
+P27111	cynR	b0338 JW5894		reviewed
+P27126	waaS	b3629 JW3604	rfaS	reviewed
+P27127	waaB	b3628 JW3603	rfaB	reviewed
+P27240	waaY	b3625 JW3600	rfaY	reviewed
+P27242	waaU	b3623 JW3598	rfaK waaK	reviewed
+P27832	wecD	b3790 JW5597	rffC yifH	reviewed
+P27835	wzyE	b3793 JW3769	wzy	reviewed
+P27836	wecG	b3794 JW3770	rffM	reviewed
+P27862	yigZ	b3848 JW5577		reviewed
+P28249	asmA	b2064 JW2049	yegA	reviewed
+P28638	yhdJ	b3262 JW5543		reviewed
+P29012	dadX	b1190 JW1179	alnB dadB	reviewed
+P30128	greB	b3406 JW3369		reviewed
+P30130	fimD	b4317 JW5780		reviewed
+P30149	yabI	b0065 JW5005		reviewed
+P30235	psuK	b2166 JW2153	pscK yeiC	reviewed
+P30744	sdaB	b2797 JW2768		reviewed
+P30859	artI	b0863 JW0847		reviewed
+P31060	modF	b0760 JW0743	ORF6 phrA	reviewed
+P31068	fliH	b1940 JW1924	fla AII.3 fla BIII	reviewed
+P31122	sotB	b1528 JW1521	ydeA	reviewed
+P31125	eamA	b1533 JW5250	ydeD	reviewed
+P31126	ydeE	b1534 JW1527	ydeF	reviewed
+P31436	setC	b3659 JW3633	yicK	reviewed
+P31440	adeQ	b3664 JW5636	yicO	reviewed
+P31442	emrD	b3673 JW5634	yicQ	reviewed
+P31452	glvC	b3683 JW3660	ptiC	reviewed
+P31459	dgoK	b3693 JW3670	yidV	reviewed
+P31462	mdtL	b3710 JW3688	yidY	reviewed
+P31474	hsrA	b3754 JW3733	yieO	reviewed
+P31548	thiQ	b0066 JW0065	yabJ	reviewed
+P31549	thiP	b0067 JW0066	yabK	reviewed
+P31574	fixB	b0042 JW0041	yaaR	reviewed
+P31600	nfrA	b0568 JW0557		reviewed
+P31665	rpnC	b0132 JW5010	yadD	reviewed
+P31802	narP	b2193 JW2181		reviewed
+P31825	yfiC	b2575 JW2559		reviewed
+P31826	yddA	b1496 JW5242		reviewed
+P31828	pqqL	b1494 JW1489	yddC	reviewed
+P32137	yihP	b3877 JW3848		reviewed
+P32154	frvB	b3899 JW5562	yiiJ	reviewed
+P32672	frwC	b3949 JW3921	yijJ	reviewed
+P32675	pflC	b3952 JW3924	yijM	reviewed
+P32676	frwD	b3953 JW3925	yijN	reviewed
+P32696	pspG	b4050 JW5716	yjbO	reviewed
+P32701	pdeC	b4061 JW4022	yjcC	reviewed
+P32710	nrfE	b4074 JW4035	yjcL	reviewed
+P32711	nrfF	b4075 JW4036	yjcM	reviewed
+P32714	mdtP	b4080 JW4041	yjcP	reviewed
+P32720	alsC	b4086 JW4047	yjcV	reviewed
+P33014	tsuB	b2012 JW1994	yeeD	reviewed
+P33021	nupX	b2161 JW2148	yeiJ	reviewed
+P33024	psuT	b2164 JW2151	pscT yeiM	reviewed
+P33128	yadV	b0140 JW0136	ecpD	reviewed
+P33135	fliR	b1950 JW1934	flaP	reviewed
+P33136	mdoG	b1048 JW1035	opgG	reviewed
+P33222	yjfC	b4186 JW4144		reviewed
+P33228	recT	b1349 JW1343		reviewed
+P33230	rcbA	b1347 JW1341	ydaC	reviewed
+P33340	yehA	b2108 JW2095		reviewed
+P33341	yehB	b2109 JW2096		reviewed
+P33342	yehC	b2110 JW2097		reviewed
+P33343	yehD	b2111 JW2098		reviewed
+P33362	yehZ	b2131 JW2119	osmF	reviewed
+P33369	mdtQ	b2139 JW5838/JW5358	yohG yohH	reviewed
+P33593	nikD	b3479 JW3444		reviewed
+P33594	nikE	b3480 JW3445		reviewed
+P33595	sgrR	b0069 JW0068	yabN	reviewed
+P33596	recX	b2698 JW2668	oraA	reviewed
+P33790	traG	ECOK12F099		reviewed
+P33920	yejK	b2186 JW2174		reviewed
+P34210	ompP	ECOK12F029	ompX	reviewed
+P34749	hofQ	b3391 JW3354	hopQ	reviewed
+P36561	cobS	b1992 JW1970		reviewed
+P36562	cobT	b1991 JW1969		reviewed
+P36647	ppdD	b0108 JW0104		reviewed
+P36659	cbpA	b1000 JW0985		reviewed
+P36667	wbbL	b4571 JW2016		reviewed
+P36678	gspM	b3334 JW5704	hopZ pshM	reviewed
+P36771	lrhA	b2289 JW2284	genR	reviewed
+P36879	yadG	b0127 JW0123		reviewed
+P36995	cspB	b1557 JW1549		reviewed
+P37005	lasT	b4403 JW4366	yjtD	reviewed
+P37009	fbpC	b0262 JW0254	afuC yagC	reviewed
+P37016	yadK	b0136 JW0132		reviewed
+P37017	yadL	b0137 JW0133		reviewed
+P37018	yadM	b0138 JW0134		reviewed
+P37024	hrpB	b0148 JW0144	yadO	reviewed
+P37047	cdaR	b0162 JW5013	sdaR yaeG	reviewed
+P37050	yadN	b0141 JW0137		reviewed
+P37127	aegA	b2468 JW2452	yffG	reviewed
+P37147	fxsA	b4140 JW4100	yjeG	reviewed
+P37180	hybB	b2995 JW5494		reviewed
+P37182	hybD	b2993 JW2961		reviewed
+P37195	dctR	b3507 JW3475	yhiF	reviewed
+P37309	arsR	b3501 JW3468	arsE	reviewed
+P37326	intS	b2349 JW2345	intC yfdB	reviewed
+P37590	pmrD	b2259 JW2254		reviewed
+P37623	acpT	b3475 JW3440	yhhU	reviewed
+P37645	yhjG	b3524 JW3492	yhjF	reviewed
+P37649	pdeK	b3529 JW5943	yhjK	reviewed
+P37652	bcsB	b3532 JW3500	yhjN	reviewed
+P37662	yhjX	b3547 JW3516		reviewed
+P37679	sgbU	b3582 JW5650	yiaR	reviewed
+P37746	rfbX	b2037 JW2022	wzx	reviewed
+P37749	wbbI	b2034 JW2019	yefG	reviewed
+P37757	yddE	b1464 JW1459		reviewed
+P37766	ydiF	b1694 JW1684		reviewed
+P37772	yjfF	b4231 JW5754		reviewed
+P37906	puuB	b1301 JW1294	ordL ycjA	reviewed
+P37908	yfjD	b4461 JW5415	ypjE	reviewed
+P38035	rtcR	b3422 JW3385	yhgB	reviewed
+P38052	sfmF	b0534 JW5072	ybcG	reviewed
+P38521	yggL	b2959 JW2926		reviewed
+P38683	torT	b0994 JW0979	yccH	reviewed
+P39160	uxuB	b4323 JW4286		reviewed
+P39163	chaC	b1218 JW1209		reviewed
+P39173	yeaD	b1780 JW1769	yzzQ	reviewed
+P39206	caiE	b0035 JW5004		reviewed
+P39208	idnK	b4268 JW4225	gntV	reviewed
+P39265	alsB	b4088 JW4049	yjcX	reviewed
+P39267	rdcB	b4110 JW5729	yjcZ	reviewed
+P39285	mscM	b4159 JW4120	yjeP	reviewed
+P39297	bsmA	b4189 JW5743	yjfO	reviewed
+P39298	yjfP	b4190 JW4148		reviewed
+P39305	ulaE	b4197 JW4155	sgaU yjfW	reviewed
+P39328	ytfT	b4230 JW5753		reviewed
+P39334	bdcR	b4251 JW4208	yjgJ	reviewed
+P39346	idnD	b4267 JW4224	yjgV	reviewed
+P39347	intB	b4271 JW4227		reviewed
+P39359	yjhH	b4298 JW5775		reviewed
+P39362	sgcE	b4301 JW4263	yjhK	reviewed
+P39365	sgcC	b4304 JW4266	yjhN	reviewed
+P39370	nanS	b4309 JW4272	yjhS	reviewed
+P39380	kptA	b4331 JW5784	yjiI	reviewed
+P39399	lgoR	b4357 JW5792	yjjM	reviewed
+P39408	yjjV	b4378 JW4341		reviewed
+P39409	yjjW	b4379 JW4342		reviewed
+P39410	yjjJ	b4385 JW4348		reviewed
+P39830	ybaL	b0478 JW0467	ylaA	reviewed
+P39832	znuB	b1859 JW1848	yebI	reviewed
+P39902	sprT	b2944 JW2911	yggI	reviewed
+P40876	ycbF	b0944 JW5124		reviewed
+P41441	gspF	b3327 JW3289	hofF hopF	reviewed
+P41442	gspG	b3328 JW3290	hofG hopG	reviewed
+P41443	gspH	b3329 JW3291	hofH hopH	reviewed
+P42596	rlmG	b3084 JW5513	ygjO	reviewed
+P42624	yhaK	b3106 JW3077		reviewed
+P42626	yhaM	b4470 JW5518	yhaN	reviewed
+P42630	tdcG	b4471 JW5520	yhaP yhaQ	reviewed
+P42640	yhbX	b3173 JW5534		reviewed
+P42904	agaV	b3133 JW3102	yhaY	reviewed
+P42905	agaW	b3134		reviewed
+P42907	agaS	b3136 JW3105	yraB	reviewed
+P42909	agaB	b3138 JW3107	yraD	reviewed
+P42910	agaC	b3139 JW3108	yraE	reviewed
+P42911	agaD	b3140 JW3109	yraF	reviewed
+P42912	agaI	b3141 JW3110	yraG	reviewed
+P42913	yraH	b3142 JW3111		reviewed
+P42914	yraI	b3143 JW3112		reviewed
+P42915	yraJ	b3144 JW3113		reviewed
+P43319	yraK	b3145 JW3114		reviewed
+P43337	nudL	b1813 JW1802	yeaB	reviewed
+P45428	dcuD	b3227 JW3196	yhcL	reviewed
+P45463	ttdR	b3060 JW3032	ygiP	reviewed
+P45530	tusB	b3343 JW3305	yheL	reviewed
+P45531	tusC	b3344 JW3306	yheM	reviewed
+P45539	frlA	b3370 JW3333	yhfM	reviewed
+P45544	frlR	b3375 JW5698	yhfR	reviewed
+P45565	ais	b2252 JW2246	pmrG	reviewed
+P45750	hofP	b3392 JW5694	yrfA	reviewed
+P45751	hofO	b3393 JW3356	yrfB	reviewed
+P45753	hofM	b3395 JW5693	yrfD	reviewed
+P45756	gspA	b3323 JW3285	yheD	reviewed
+P45759	gspE	b3326 JW3288	yheG	reviewed
+P45760	gspI	b3330 JW5706	yheH	reviewed
+P45761	gspJ	b3331 JW3293	yheI	reviewed
+P45762	gspK	b3332 JW3294	yheJ	reviewed
+P45763	gspL	b3333 JW5705	yheK	reviewed
+P45766	yhdW	b3268 JW3236		reviewed
+P45767	yhdX	b3269 JW5544		reviewed
+P45768	yhdY	b3270 JW5545		reviewed
+P45769	yhdZ	b3271 JW3239		reviewed
+P45800	yrfF	b3398 JW3361		reviewed
+P46068	dsdC	b2364 JW2361		reviewed
+P46118	hexR	b1853 JW1842	yebK	reviewed
+P46481	aaeB	b3240 JW3209	yhcP	reviewed
+P46482	aaeA	b3241 JW3210	yhcQ	reviewed
+P46837	yhgF	b3407 JW3370		reviewed
+P46846	gntX	b3413 JW5691	yhgH	reviewed
+P46854	aaaT	b3441 JW3405	yhhY	reviewed
+P46859	gntK	b3437 JW3400		reviewed
+P46888	uspC	b1895 JW1884	yecG	reviewed
+P52037	ygfF	b2902 JW2870	yqfD	reviewed
+P52043	scpC	b2920 JW2887	ygfH	reviewed
+P52067	fsr	b0479 JW0468		reviewed
+P52076	qseB	b3025 JW2993	ygiX	reviewed
+P52086	cobC	b0638 JW0633	phpB	reviewed
+P52102	yfhL	b2562 JW2546		reviewed
+P52108	rstA	b1608 JW1600	urpT	reviewed
+P52119	ratB	b2618 JW2599	pasI yfjF	reviewed
+P52127	abpA	b2628 JW2609	yfjL	reviewed
+P52143	ypjA	b2647 JW5422		reviewed
+P52613	fliJ	b1942 JW1926	flaO flaS	reviewed
+P52614	fliK	b1943 JW1927	flaE flaR	reviewed
+P52627	fliZ	b1921 JW1906	yedH	reviewed
+P54746	mngB	b0732 JW0721	ybgG	reviewed
+P56258	wecF	b4481 JW5596	rffT yifM	reviewed
+P56579	srlA	b2702 JW5429	gutA sbl	reviewed
+P60566	fixA	b0041 JW0040	yaaQ	reviewed
+P60778	tsgA	b3364 JW3327	gutS yhfC yhfH	reviewed
+P62517	mdoH	b1049 JW1037	opgH	reviewed
+P63204	gadE	b3512 JW3480	yhiE yhiT	reviewed
+P63417	yhbS	b3156 JW3125		reviewed
+P64448	ynbE	b1382 JW1377		reviewed
+P64453	ortT	b1445 JW5232	ydcX	reviewed
+P64530	rcnR	b2105 JW2092	yohL	reviewed
+P64599	ubiT	b3157 JW3126	yhbT	reviewed
+P64634	hofN	b3394 JW3357	yrfC	reviewed
+P64638	feoC	b3410 JW3373	yhgG	reviewed
+P65367	yqcA	b2790 JW2761		reviewed
+P65556	yfcD	b2299 JW2296		reviewed
+P67087	rsmI	b3146 JW3115	yraL	reviewed
+P69367	mdtH	b1065 JW1052	yceL	reviewed
+P69808	fryB	b2387 JW5389	ypdH	reviewed
+P69816	frwB	b3950 JW3922	yijK	reviewed
+P69826	cmtA	b2933 JW2900		reviewed
+P71298	intF	b0281 JW0275	yagO	reviewed
+P71301	ecpR	b0294 JW5031	matA ykgK	reviewed
+P75683	yagG	b0270 JW0263		reviewed
+P75685	rclC	b0301 JW5038	ykgB	reviewed
+P75687	rclB	b0303 JW5039	ykgI	reviewed
+P75712	ybbW	b0511 JW0499	glxB2	reviewed
+P75715	sfmH	b0533 JW5071		reviewed
+P75733	chiP	b0681 JW0667	ybfM	reviewed
+P75736	ybfF	b0686 JW0673		reviewed
+P75742	dtpD	b0709 JW0699	ybgH	reviewed
+P75745	pxpC	b0712 JW0702	ybgK	reviewed
+P75746	pxpA	b0713 JW0703	ybgL	reviewed
+P75757	zitB	b0752 JW0735	ybgR	reviewed
+P75777	ybhG	b0795 JW0779		reviewed
+P75782	rlmF	b0807 JW5107	ybiN	reviewed
+P75785	opgE	b0815 JW0800	ybiP	reviewed
+P75794	ybiY	b0824 JW0808		reviewed
+P75799	gsiD	b0832 JW0816	yliD	reviewed
+P75806	ybjG	b0841 JW5112		reviewed
+P75811	rcdA	b0846 JW5114	ybjK	reviewed
+P75817	rlmC	b0859 JW0843	rumB ybjF	reviewed
+P75826	lysO	b0874 JW0858	ybjE	reviewed
+P75838	ycaO	b0905 JW0888		reviewed
+P75843	ycaQ	b0916 JW0899		reviewed
+P75851	ssuC	b0934 JW5121	ycbM	reviewed
+P75853	ssuA	b0936 JW0919	ycbO	reviewed
+P75855	elfA	b0938 JW5122	ycbQ	reviewed
+P75856	elfD	b0939 JW0922	ycbR	reviewed
+P75857	elfC	b0940 JW0923	ycbS	reviewed
+P75858	elfG	b0941 JW0924	ycbT	reviewed
+P75901	efeU	b4490 JW5141/JW1002	ycdN	reviewed
+P75920	mdoC	b1047 JW1034	opgC ymdD	reviewed
+P75925	yceJ	b1057 JW1044		reviewed
+P75938	flgF	b1077 JW1064	fla FVI flaX	reviewed
+P75942	flgJ	b1081 JW1068	fla FX flaZ	reviewed
+P75948	thiK	b1106 JW1092	ycfN	reviewed
+P75969	intE	b1140 JW1126	ycfI	reviewed
+P75995	pdeG	b1168 JW5174	ycgG	reviewed
+P76002	pliG	b1178 JW1167	ycgK	reviewed
+P76007	cvrA	b1191 JW5184	nhaP2 ycgO	reviewed
+P76017	ycgV	b1202 JW1193		reviewed
+P76046	ycjX	b1321 JW1314		reviewed
+P76057	xisR	b1346 JW5207	ydaQ	reviewed
+P76062	racR	b1356 JW1351	ydaR	reviewed
+P76078	paaB	b1389 JW1384	ynbF	reviewed
+P76080	paaD	b1391 JW5217	ydbQ	reviewed
+P76097	ydcJ	b1423 JW1419		reviewed
+P76114	mcbR	b1450 JW1445	yncC	reviewed
+P76128	ddpA	b1487 JW5240	yddS	reviewed
+P76135	ydeO	b1499 JW1494		reviewed
+P76142	lsrB	b1516 JW1509	yneA	reviewed
+P76159	rrrQ	b1554 JW1546	arrQ ydfQ	reviewed
+P76173	ynfH	b1590 JW5261		reviewed
+P76175	clcB	b1592 JW5263	mriT ynfJ	reviewed
+P76187	ydhF	b1647 JW1639		reviewed
+P76204	ydiV	b1707 JW1697	cdgR	reviewed
+P76215	astE	b1744 JW1733	ydjS	reviewed
+P76224	ynjC	b1755 JW5285		reviewed
+P76241	nimR	b1790 JW1779	yeaM	reviewed
+P76249	leuE	b1798 JW1787	yeaS	reviewed
+P76254	yeaX	b1803 JW1792		reviewed
+P76261	pdeD	b1815 JW1804	adrB yoaD	reviewed
+P76268	kdgR	b1827 JW1816	yebP	reviewed
+P76270	msrC	b1832 JW1821	yebR	reviewed
+P76298	flhA	b1879 JW1868		reviewed
+P76299	flhB	b1880 JW1869	yecQ	reviewed
+P76329	yedP	b1955 JW1938		reviewed
+P76345	yodB	b1974 JW5323		reviewed
+P76372	wzzB	b2027 JW5836	cld rol wzz	reviewed
+P76393	yegI	b2070 JW2055		reviewed
+P76446	pdeN	b2176 JW2164	rtn	reviewed
+P76461	atoB	b2224 JW2218		reviewed
+P76498	yfcO	b2332 JW2329		reviewed
+P76499	yfcP	b2333 JW2330		reviewed
+P76500	yfcQ	b2334 JW2331		reviewed
+P76501	yfcR	b2335 JW2332		reviewed
+P76502	sixA	b2340 JW2337	yfcW	reviewed
+P76506	mlaA	b2346 JW2343	vacJ	reviewed
+P76540	eutK	b2438 JW2431	yffI	reviewed
+P76551	eutA	b2451 JW2435	yffT	reviewed
+P76552	eutH	b2452 JW2436	yffU	reviewed
+P76555	eutQ	b2460 JW2444	ypfC	reviewed
+P76556	eutP	b2461 JW2445	ypfD	reviewed
+P76655	yqiG	b3046 JW5507		reviewed
+P76909	ynjD	b1756 JW5286		reviewed
+P77156	ydcU	b1442 JW1437		reviewed
+P77170	pinQ	b1545 JW1538	ydfL	reviewed
+P77179	rsxE	b1632 JW1624	rnfE ydgQ	reviewed
+P77183	paoD	b0283 JW0277	yagQ	reviewed
+P77196	yfcU	b4661 JW2334/JW2335	yfcT	reviewed
+P77213	ybdK	b0581 JW0570		reviewed
+P77228	ydfJ	b1543 JW1536		reviewed
+P77231	citG	b0613 JW0605	ybdT	reviewed
+P77249	sfmC	b0531 JW0520		reviewed
+P77265	mdlA	b0448 JW0438	mdl	reviewed
+P77268	ddpD	b1484 JW1479	yddP	reviewed
+P77269	yphF	b2548 JW2532		reviewed
+P77288	yfcV	b2339 JW2336		reviewed
+P77295	ygaV	b2667 JW2642		reviewed
+P77307	fetB	b0491 JW5066	ybbM	reviewed
+P77308	ddpB	b1486 JW1481	yddR	reviewed
+P77315	yphD	b2546 JW2530		reviewed
+P77329	hyfG	b2487 JW2472		reviewed
+P77365	yafY	b0251 JW0240		reviewed
+P77368	ybcL	b0545 JW0533		reviewed
+P77377	wzxC	b2046 JW2031	wzx	reviewed
+P77390	citC	b0618 JW0610	ybeO	reviewed
+P77400	ybaT	b0486 JW0475		reviewed
+P77416	hyfD	b2484 JW2469		reviewed
+P77432	lsrK	b1511 JW1504	ydeV	reviewed
+P77437	hyfF	b2486 JW2471		reviewed
+P77445	eutE	b2455 JW2439	yffX	reviewed
+P77463	ddpC	b1485 JW1480	yddQ	reviewed
+P77468	sfmD	b0532 JW0521		reviewed
+P77473	pdeB	b0457 JW5062	ylaB	reviewed
+P77494	hokB	b4428 JW5225	ydcB	reviewed
+P77509	yphE	b2547 JW2531		reviewed
+P77549	yfcJ	b2322 JW2319		reviewed
+P77561	ydeP	b1501 JW1495		reviewed
+P77579	fryC	b2386 JW2383	ypdG	reviewed
+P77585	ypdE	b2384 JW2381		reviewed
+P77596	yagF	b0269 JW0262		reviewed
+P77599	yfcS	b2336 JW2333		reviewed
+P77622	ddpF	b1483 JW1478	yddO	reviewed
+P77672	lsrC	b1514 JW1507	ydeY	reviewed
+P77682	yfdG	b2350 JW2346		reviewed
+P77689	sufD	b1681 JW1671	ynhC	reviewed
+P77692	ykfI	b0245 JW0234		reviewed
+P77744	abgR	b1339 JW1333		reviewed
+P77768	rpnB	b2305 JW2302	yfcI	reviewed
+P77795	ydcT	b1441 JW1436		reviewed
+P77804	ydgA	b1614 JW1606		reviewed
+P77858	hyfC	b2483 JW2468		reviewed
+P78067	ynjE	b1757 JW5287		reviewed
+Q46798	ygeR	b2865 JW2833		reviewed
+Q46801	xdhC	b2868 JW2836	ygeU	reviewed
+Q46802	uacR	b2869 JW2837	ygeV	reviewed
+Q46803	ygeW	b2870 JW5463		reviewed
+Q46811	ygfK	b2878 JW5923		reviewed
+Q46814	xdhD	b2881 JW2849	ygfN	reviewed
+Q46820	uacF	b2887 JW5469	ygfT	reviewed
+Q46824	ygfX	b2896 JW2864	cptA	reviewed
+Q46836	pppA	b2972 JW2939	yghH	reviewed
+Q46863	ygiS	b3020 JW2988		reviewed
+Q46890	otnC	b2738 JW2708	ygbL	reviewed
+Q46891	otnI	b2739 JW2709	ygbM	reviewed
+Q46908	ygcR	b2770 JW5441		reviewed
+Q46939	yqeF	b2844 JW5453		reviewed
+Q46953	ypjF	b2646 JW2627		reviewed
+Q47005	nac	b1988 JW1967		reviewed
+Q47013	elaD	b2269 JW5840		reviewed
+Q47083	cbl	b1987 JW1966		reviewed
+Q47129	feaR	b1384 JW1379	maoB maoR ydbM	reviewed
+Q47142	hcaT	b2536 JW2520	yfhS	reviewed
+Q47156	yafN	b0232 JW0222		reviewed
+Q47537	tauA	b0365 JW0357	ssiA yaiR	reviewed
+Q47539	tauC	b0367 JW0359	ssiC yaiJ	reviewed
+Q47622	sapA	b1294 JW1287		reviewed
+Q47689	mmuP	b0260 JW5027	ykfD	reviewed
+Q47706	uidC	b1615 JW1607	gusC	reviewed
+Q57083	perR	b0254 JW0244		reviewed
+Q6BEX0	ytfR	b4485 JW5752	ytfS	reviewed
+A0A0G3HGF9	sbcB			unreviewed
+A0A0G3HLV0	puuD			unreviewed
+A0A0G3HUT6	gsiB			unreviewed
+A0A0G3I6S6	frlD			unreviewed
+A0A385XJ53	insA9	b4709		reviewed
+A0A385XJE6	insH21	b4711		reviewed
+A0A385XJL4	insB9	b4710		reviewed
+A0A6G6FTN6	chiA			unreviewed
+A5A605	ykfM	b4586		reviewed
+A5A615	yncL	b4598 JW1439.1		reviewed
+A5A624	dinQ	b4613		reviewed
+A5A628	yjbT	b4620		reviewed
+A5A630	ytcA	b4622		reviewed
+A8DYP9	uof	b4637		reviewed
+C1P5Z7	sgrT	b4662 JW0068.1		reviewed
+C1P5Z8	ykgR	b4671 JW5035.1		reviewed
+C1P601	rzoQ	b4689 JW1545.1		reviewed
+C1P602	yoaK	b4676 JW5292.1		reviewed
+C1P603	yoaJ	b4675 JW5292.2		reviewed
+C1P605	azuC	b4663 JW1891.1		reviewed
+C1P608	ibsB	b4668 JW2058.2		reviewed
+C1P609	yohP	b4679 JW5358.1		reviewed
+C1P610	ypdK	b4680 JW2375.1		reviewed
+C1P611	shoB	b4687 JW2546.1	ryfB yphI	reviewed
+E2JKY7	mgtL	b4702 JW4200.1		reviewed
+G3MTW7	pmrR	b4703 JW4072.1		reviewed
+K0JFS6	wrbA			unreviewed
+P03061	ivbL	b3672 JW3647		reviewed
+P03835	insG	b4278 JW5767		reviewed
+P03841	malM	b4037 JW3997	molA	reviewed
+P06626	traJ	ECOK12F072		reviewed
+P06627	traY	ECOK12F073		reviewed
+P06965	dicC	b1569 JW1561		reviewed
+P06966	dicA	b1570 JW1562		reviewed
+P07021	yfiB	b2605 JW2586		reviewed
+P08245	yciH	b1282 JW1274		reviewed
+P08321	traL	ECOK12F075		reviewed
+P08322	traE	ECOK12F076		reviewed
+P08369	creD	b4400 JW4363	cet	reviewed
+P08371	ppdB	b2825 JW5451	ygdC	reviewed
+P08372	ppdC	b2823 JW2791	ygdA	reviewed
+P08390	usg	b2319 JW2316		reviewed
+P09127	hemX	b3803 JW3775		reviewed
+P09129	traS	ECOK12F100		reviewed
+P09153	tfaE	b1156 JW1142	ycfA	reviewed
+P09162	yjaA	b4011 JW3971		reviewed
+P09557	dicB	b1575 JW1566		reviewed
+P0A772	nrdI	b2674 JW2649	ygaO	reviewed
+P0A7C8	psiE	b4030 JW3990	yjbA	reviewed
+P0A8A0	yebC	b1864 JW1853		reviewed
+P0A8A2	yeeN	b1983 JW1964		reviewed
+P0A8C1	ybjQ	b0866 JW0850		reviewed
+P0A8C4	ygfB	b2909 JW5473		reviewed
+P0A8D3	yaiI	b0387 JW0378		reviewed
+P0A8D9	yfbV	b2295 JW2292		reviewed
+P0A8E1	ycfP	b1108 JW5158		reviewed
+P0A8J4	ybeD	b0631 JW0626		reviewed
+P0A8K8	yihY	b3886 JW3857		reviewed
+P0A8L7	yciU	b1248 JW1240		reviewed
+P0A8R7	ycjF	b1322 JW1315		reviewed
+P0A8T5	fliE	b1937 JW1921	fla AI flaN	reviewed
+P0A8U2	yafD	b0209 JW5017		reviewed
+P0A8W5	yqgE	b2948 JW2915		reviewed
+P0A8W8	yfbU	b2294 JW2291		reviewed
+P0A8X2	yceI	b1056 JW1043		reviewed
+P0A8X4	yccT	b0964 JW0947		reviewed
+P0A8Z7	yqiA	b3031 JW2999	yzzI	reviewed
+P0A905	slyB	b1641 JW1633		reviewed
+P0A976	cspF	b1558 JW1550		reviewed
+P0A978	cspG	b0990 JW0974	cspI	reviewed
+P0A982	cspH	b0989 JW5134	cspK	reviewed
+P0A986	cspI	b1552 JW1544	cspJ	reviewed
+P0A9A2	ftnB	b1902 JW1890	yecI	reviewed
+P0A9K1	phoH	b1020 JW1005	psiH	reviewed
+P0A9K3	ybeZ	b0660 JW0657		reviewed
+P0A9R2	essD	b0554 JW0543	ybcR	reviewed
+P0A9T6	ybaQ	b0483 JW0472		reviewed
+P0A9T8	ybbA	b0495 JW0484		reviewed
+P0A9U8	ydiO	b1695 JW5275		reviewed
+P0A9V5	yiaG	b3555 JW3524		reviewed
+P0A9W9	yrdA	b3279 JW5710		reviewed
+P0AA31	yedF	b1930 JW1915		reviewed
+P0AA49	yfdV	b2372 JW2369		reviewed
+P0AA70	yedA	b1959 JW1942		reviewed
+P0AA91	yeaY	b1806 JW1795		reviewed
+P0AAA1	yagU	b0287 JW0281		reviewed
+P0AAA3	ecpA	b0293 JW0287	matB yagZ	reviewed
+P0AAA5	ymcE	b0991 JW0975	sfa	reviewed
+P0AAC4	ybhL	b0786 JW0769		reviewed
+P0AAE5	ydgI	b1605 JW1597		reviewed
+P0AAK4	hydN	b2713 JW2683		reviewed
+P0AAL6	ydhY	b1674 JW1664		reviewed
+P0AAN1	hybE	b2992 JW2960		reviewed
+P0AAP5	iprA	b0375 JW0366	yaiV	reviewed
+P0AAP7	yaiY	b0379 JW0370		reviewed
+P0AAQ0	yaiZ	b0380 JW5053		reviewed
+P0AAQ2	yajD	b0410 JW0400		reviewed
+P0AAR5	ybaN	b0468 JW0457		reviewed
+P0AAR8	ybaV	b0442 JW0432		reviewed
+P0AAS0	ylaC	b0458 JW5063		reviewed
+P0AAU7	ybfE	b0685 JW5816		reviewed
+P0AAV0	ybgE	b0735 JW0725		reviewed
+P0AAW5	ybhQ	b0791 JW0774		reviewed
+P0AAX3	ybiJ	b0802 JW0787		reviewed
+P0AAY1	bssR	b0836 JW0820	yliH	reviewed
+P0AAZ0	ybjO	b0858 JW0842		reviewed
+P0AAZ7	ycaR	b0917 JW0900		reviewed
+P0AB12	yccF	b0961 JW0944		reviewed
+P0AB14	yccJ	b1003 JW0988		reviewed
+P0AB26	yceB	b1063 JW1050		reviewed
+P0AB35	ycfJ	b1110 JW1096		reviewed
+P0AB49	ychH	b1205 JW1196		reviewed
+P0AB52	ychN	b1219 JW1210		reviewed
+P0AB55	yciI	b1251 JW1243		reviewed
+P0ABR1	dinI	b1061 JW1048		reviewed
+P0ABY2	fliT	b1926 JW1911		reviewed
+P0ABY4	fldB	b2895 JW2863		reviewed
+P0AC73	ebgC	b3077 JW3048		reviewed
+P0ACB7	hemY	b3802 JW3774		reviewed
+P0ACC9	wcaB	b2058 JW2043		reviewed
+P0ACD2	wcaF	b2054 JW2039		reviewed
+P0ACG6	hokD	b1562 JW1554	relF	reviewed
+P0ACH1	sfsB	b3188 JW3155	nlp sfs7	reviewed
+P0ACI3	xylR	b3569 JW3541		reviewed
+P0ACM2	rspR	b1540 JW1533	ydfH	reviewed
+P0ACM9	yihL	b3872 JW3843		reviewed
+P0ACN2	ytfH	b4212 JW5747		reviewed
+P0ACR7	yfeR	b2409 JW2400		reviewed
+P0ACU7	yjdC	b4135 JW5733	cutA3	reviewed
+P0ACX0	ydgC	b1607 JW1599		reviewed
+P0ACX9	ydiE	b1705 JW1695		reviewed
+P0ACY6	yeaL	b1789 JW1778		reviewed
+P0ACY9	yebG	b1848 JW1837		reviewed
+P0AD12	yeeZ	b2016 JW1998		reviewed
+P0AD17	yohC	b2135 JW5356		reviewed
+P0AD19	yohK	b2142 JW2130		reviewed
+P0AD24	yejL	b2187 JW2175		reviewed
+P0AD30	yfcA	b2327 JW2324		reviewed
+P0AD35	yfdO	b2358 JW2355	oweS	reviewed
+P0AD44	yfhG	b2555 JW2539		reviewed
+P0AD47	yphA	b2543 JW2527		reviewed
+P0AD72	pheL	b2598 JW2579	pheAE	reviewed
+P0AD79	leuL	b0075 JW0074	leuLP	reviewed
+P0AD83	pyrL	b4246 JW4205		reviewed
+P0AD86	thrL	b0001 JW4367		reviewed
+P0AD92	trpL	b1265 JW1257	trpEE	reviewed
+P0ADA5	yajG	b0434 JW0424		reviewed
+P0ADA7	osmB	b1283 JW1275		reviewed
+P0ADB1	osmE	b1739 JW1728	anr	reviewed
+P0ADE2	ytfK	b4217 JW5749		reviewed
+P0ADF3	rhoL	b3782 JW3755		reviewed
+P0ADI7	yecD	b1867 JW5307		reviewed
+P0ADI9	yhhN	b3468 JW3433		reviewed
+P0ADJ3	yhjR	b3535 JW3503		reviewed
+P0ADJ5	bcsF	b3537 JW5663	yhjT	reviewed
+P0ADJ8	yiaA	b3562 JW3534		reviewed
+P0ADK4	yiaW	b3587 JW3559		reviewed
+P0ADK6	yibA	b3594 JW3568		reviewed
+P0ADK8	yibL	b3602 JW3577		reviewed
+P0ADL6	yidG	b3675 JW3651		reviewed
+P0ADM0	yidH	b3676 JW3652		reviewed
+P0ADM4	yidQ	b3688 JW5633		reviewed
+P0ADM8	yieE	b3712 JW3690		reviewed
+P0ADQ5	yiiE	b3889 JW5929		reviewed
+P0ADR0	yqaA	b2689 JW2664		reviewed
+P0ADR2	ygdD	b2807 JW2778		reviewed
+P0ADS6	yggE	b2922 JW2889		reviewed
+P0ADT2	ygiB	b3037 JW5927		reviewed
+P0ADT8	ygiM	b3055 JW3027		reviewed
+P0ADX7	yhhA	b3448 JW3413		reviewed
+P0AE14	ampE	b0111 JW0107		reviewed
+P0AE28	aroM	b0390 JW0381		reviewed
+P0AE42	yqaE	b2666 JW2641		reviewed
+P0AE48	ytfP	b4222 JW4181		reviewed
+P0AE58	caiF	b0034 JW0033		reviewed
+P0AE63	chaB	b1217 JW1208		reviewed
+P0AE74	citT	b0612 JW0604	ybdS	reviewed
+P0AE91	creA	b4397 JW4360	yjjD	reviewed
+P0AEB7	yoaB	b1809 JW5295		reviewed
+P0AEH3	elaA	b2267 JW2262	yfbC	reviewed
+P0AEH8	yjiG	b4329 JW4292		reviewed
+P0AEQ1	glcG	b2977 JW2944	yghC	reviewed
+P0AET5	hdeD	b3511 JW3479	yhiA	reviewed
+P0AEV4	hycA	b2725 JW2695	hevA	reviewed
+P0AEV7	hycH	b2718 JW2688	hevH	reviewed
+P0AEX5	prkB	b3355 JW3318	yhfF	reviewed
+P0AEY1	marC	b1529 JW1522	ydeB ydeC	reviewed
+P0AF45	yjbE	b4026 JW3986		reviewed
+P0AF54	yjcH	b4068 JW4029		reviewed
+P0AF78	yjfJ	b4182 JW4140		reviewed
+P0AF80	yjfL	b4184 JW4142		reviewed
+P0AF82	yjfN	b4188 JW5742		reviewed
+P0AF86	yjfY	b4199 JW4157		reviewed
+P0AFH8	osmY	b4376 JW4338		reviewed
+P0AFI9	perM	b2493 JW2478	yfgO	reviewed
+P0AFM4	psiF	b0384 JW5054		reviewed
+P0AFN6	yadH	b0128 JW0124		reviewed
+P0AFP0	yadS	b0157 JW0153		reviewed
+P0AFP4	ybbO	b0493 JW0482		reviewed
+P0AFR0	rssA	b1234 JW1222	ychK	reviewed
+P0AFS7	ydiK	b1688 JW1678		reviewed
+P0AFU2	yfbS	b2292 JW2289		reviewed
+P0AFV0	yibH	b3597 JW3571		reviewed
+P0AFW8	rof	b0189 JW0184	yaeO	reviewed
+P0AFZ1	sseB	b2522 JW5404		reviewed
+P0AG27	yibN	b3611 JW3586		reviewed
+P0AG71	rmuC	b3832 JW3809	yigN	reviewed
+P0AGC7	ytjB	b4387 JW4350	smp	reviewed
+P0AGH1	yhhJ	b3485 JW5677		reviewed
+P0AGJ5	yfiF	b2581 JW2565		reviewed
+P0AGM0	yhhT	b3474 JW5680		reviewed
+P0AGM2	yicG	b3646 JW3621		reviewed
+P0AGM5	ychA	b1214 JW1205	sirB1	reviewed
+P0CB62	ymiA	b4522 JW1267.1		reviewed
+P0CE49	insH1	b0259 JW0250		reviewed
+P0CE50	insH2	b0552 JW0540		reviewed
+P0CE51	insH3	b0656 JW0652		reviewed
+P0CE52	insH4	b1331 JW1324		reviewed
+P0CE53	insH6	b1994 JW1972		reviewed
+P0CE54	insH7	b2030 JW2014		reviewed
+P0CE55	insH8	b2192 JW2179		reviewed
+P0CE56	insH9	b2982 JW2949		reviewed
+P0CE57	insH10	b3218 JW3185		reviewed
+P0CE58	insH11	b3505 JW3472		reviewed
+P0CE59		JW1882		reviewed
+P0CE60		JW5895		reviewed
+P0CE61		JW5914		reviewed
+P0CE62		JW5928		reviewed
+P0CE63		JW5935		reviewed
+P0CE64		JW5936		reviewed
+P0CE65		JW5951		reviewed
+P0CF07	insA1	b0022 JW0021		reviewed
+P0CF08	insA2	b0265 JW0257		reviewed
+P0CF09	insA3	b0275 JW0269		reviewed
+P0CF10	insA4	b4516 JW0971		reviewed
+P0CF11	insA5	b1894		reviewed
+P0CF12	insA6	b3444 JW3408		reviewed
+P0CF13	insA8	JW2286		reviewed
+P0CF25	insB1	b0021 JW0020		reviewed
+P0CF26	insB2	b0264 JW0256		reviewed
+P0CF27	insB3	b0274 JW0268		reviewed
+P0CF28	insB5	b1893		reviewed
+P0CF29	insB6	b3445 JW3409		reviewed
+P0CF30		JW2285		reviewed
+P0CF40	insC1	b0360 JW0351		reviewed
+P0CF41	insC2	b1403 JW1400		reviewed
+P0CF42	insC3	b1997 JW1978		reviewed
+P0CF43	insC4	b2861 JW2829		reviewed
+P0CF44	insC5	b3044 JW3012		reviewed
+P0CF45	insC6	b4272 JW4229		reviewed
+P0CF46	insC7	ECOK12F021	ybiA yuaJ	reviewed
+P0CF47		JW5900		reviewed
+P0CF48		JW5902		reviewed
+P0CF49		JW5919		reviewed
+P0CF50		JW5934		reviewed
+P0CF53	insD1	b0361 JW0352		reviewed
+P0CF54	insD2	b1402 JW1397		reviewed
+P0CF55	insD3	b1996 JW1975		reviewed
+P0CF56	insD4	b2860 JW2826		reviewed
+P0CF57	insD5	b3045 JW3013		reviewed
+P0CF58	insD6	b4273 JW4230		reviewed
+P0CF59	insD7	ECOK12F020	ybhB yuaI	reviewed
+P0CF60	insD8	b1578 JW1570		reviewed
+P0CF61		JW5899		reviewed
+P0CF62		JW5903		reviewed
+P0CF63		JW5918		reviewed
+P0CF64		JW5933		reviewed
+P0CF66	insE1	b0298 JW5036		reviewed
+P0CF67	insE2	b0373 JW5050		reviewed
+P0CF68	insE3	b0540 JW5074		reviewed
+P0CF69	insE4	b1027 JW5144		reviewed
+P0CF70	insE5	b2088 JW5341		reviewed
+P0CF71	insE6	ECOK12F001	yaaA	reviewed
+P0CF72	insE7	ECOK12F018	ybfA	reviewed
+P0CF79	insF1	b0299 JW0293		reviewed
+P0CF80	insF2	b0372 JW0363		reviewed
+P0CF81	insF3	b0541 JW0529		reviewed
+P0CF82	insF4	b1026 JW1012		reviewed
+P0CF83	insF5	b2089 JW2073		reviewed
+P0CF84	insF6	ECOK12F002	yaaB	reviewed
+P0CF87	yfjU	JW2619		reviewed
+P0CF89	insI3	b1404 JW1401		reviewed
+P0CF90	insI4	b4284 JW4244		reviewed
+P0CF91	insL1	b0016 JW0015		reviewed
+P0CF92	insL2	b0582 JW0572		reviewed
+P0CF93	insL3	b2394 JW5390		reviewed
+P0DP22	yjiQ	b4339 JW4302	rpnD	reviewed
+P0DP63	ybeH	b4581 JW0620		reviewed
+P0DP64	ybeM	b4581 JW0621		reviewed
+P0DP69	phnE1	b4104 JW4065		reviewed
+P0DPC4	ytiC	b4720	ytiB	reviewed
+P0DPC5	ytiD	b4721		reviewed
+P0DPC6	idlP	b4722	orf27	reviewed
+P0DPC7	rseD	b4725	orf51	reviewed
+P0DPD0	ldrA	b4419 JW5957		reviewed
+P0DPD1	ldrC	b4423 JW5959		reviewed
+P0DPO8	ynfT	b4748	ynfQ	reviewed
+P0DPP2	yoaL	b4751		reviewed
+P0DQD7	gndA			reviewed
+P0DSE4	argL	b4766		reviewed
+P0DSG0	pssL	b4782		reviewed
+P0DSH2	baxL	b4794		reviewed
+P0DSH3	yibX	b4795		reviewed
+P0DUM3	timP	b4812	ECK4669 ryfA	reviewed
+P0DXX6	xtpA	b4845		reviewed
+P10030	pifC	ECOK12F041	C repC	reviewed
+P11286	yiaB	b3563 JW5654		reviewed
+P11290	yibD	b3615 JW3590		reviewed
+P11291	yzcX	b3808 JW3780	cyaX	reviewed
+P11447	argH	b3960 JW3932		reviewed
+P11519	flmC	ECOK12F065	ORF70	reviewed
+P11663	fumE	b2929 JW2896	yggD	reviewed
+P11866	tdcR	b3119 JW5525		reviewed
+P12994	ybhB	b0773 JW0756		reviewed
+P13959	repA2	ECOK12F006	copB	reviewed
+P13970	srnB	ECOK12F004/ECOK12F005		reviewed
+P13979	traT	ECOK12F101		reviewed
+P14497	traF	ECOK12F091		reviewed
+P15069	traH	ECOK12F098		reviewed
+P15081	gutM	b2706 JW2675	srlM	reviewed
+P15082	srlR	b2707 JW2676	gutR	reviewed
+P16681	yjdN	b4107 JW4068	phnB	reviewed
+P16684	phnF	b4102 JW4063		reviewed
+P16916	rhsA	b3593 JW3566		reviewed
+P16917	rhsB	b3482 JW5679		reviewed
+P16918	rhsC	b0700 JW0689		reviewed
+P16919	rhsD	b0497 JW0486		reviewed
+P18004	traC	ECOK12F084		reviewed
+P18006	trbI	ECOK12F085		reviewed
+P18033	traQ	ECOK12F094		reviewed
+P18035	trbB	ECOK12F095		reviewed
+P18390	yjjA	b4360 JW5795		reviewed
+P18471	traU	ECOK12F087		reviewed
+P18472	traW	ECOK12F086		reviewed
+P18473	trbC	ECOK12F088		reviewed
+P19767	insA7	b4294 JW4254		reviewed
+P19931	hyaE	b0976 JW0958		reviewed
+P19932	hyaF	b0977 JW0959		reviewed
+P21361	yciG	b1259 JW1251		reviewed
+P21362	yciF	b1258 JW1250		reviewed
+P21365	yciC	b1255 JW1247		reviewed
+P21367	ycaC	b0897 JW0880		reviewed
+P21503	ycaD	b0898 JW0881		reviewed
+P22707	finO			reviewed
+P22709	traX	ECOK12F105		reviewed
+P22787	yifB	b3765 JW3738		reviewed
+P23325	arpA	b4017 JW3977	arp yjaC	reviewed
+P23481	hyfA	b2481 JW2466	yffE	reviewed
+P23840	dinD	b3645 JW3620	orfY pcsA yicD	reviewed
+P24178	yffB	b2471 JW2455		reviewed
+P24211	rhsE	b1456 JW1451		reviewed
+P25531	yicR	b3638 JW5643		reviewed
+P25550	aslB	b3800 JW5594	atsB	reviewed
+P25738	msyB	b1051 JW1039		reviewed
+P25743	ychE	b1242 JW1229		reviewed
+P25747	yeiB	b2152 JW2139		reviewed
+P26608	fliS	b1925 JW1910		reviewed
+P27294	inaA	b2237 JW2231	yfaG	reviewed
+P27297	bax	b3570 JW5653		reviewed
+P27375	yjaZ	b3989 JW3952	htrC	reviewed
+P27843	yigG	b3818 JW5590		reviewed
+P27844	rarD	b3819 JW5589		reviewed
+P28303	dinF	b4044 JW4004		reviewed
+P28369	prfH	b0236 JW0226		reviewed
+P28697	mbiA	b0012 JW5001	htgA htpY	reviewed
+P28721	gltF	b3214 JW3181		reviewed
+P28722	yhcA	b3215 JW3182		reviewed
+P28912	yhhI	b3484 JW3451		reviewed
+P28916	ybfD	b0706 JW0696		reviewed
+P28917	ydcC	b1460 JW1455		reviewed
+P29217	yceH	b1067 JW1054		reviewed
+P29744	flgL	b1083 JW1070	flaT flaU	reviewed
+P30143	yaaJ	b0007 JW0006		reviewed
+P30192	insZ	b4573 JW1227/JW5883	ychG	reviewed
+P30852	smf	b4473 JW5708		reviewed
+P30864	yafC	b0208 JW0198		reviewed
+P30979	ybeF	b0629 JW0624		reviewed
+P31061	nohA	b1548 JW1541	nohQ	reviewed
+P31063	yedD	b1928 JW1913		reviewed
+P31064	yedE	b1929 JW1914		reviewed
+P31130	ydeI	b1536 JW1529		reviewed
+P31131	ydeJ	b1537 JW1530		reviewed
+P31433	yicH	b3655 JW3630		reviewed
+P31435	yicJ	b3657 JW5939		reviewed
+P31437	yicL	b3660 JW3634		reviewed
+P31446	yidI	b3677 JW3653		reviewed
+P31447	yidJ	b3678 JW3654		reviewed
+P31448	yidK	b3679 JW3655		reviewed
+P31449	yidL	b3680 JW3656		reviewed
+P31450	glvG	b4556		reviewed
+P31453	yidP	b3684 JW3661		reviewed
+P31456	cbrA	b3690 JW5631	yidS	reviewed
+P31463	yidZ	b3711 JW3689		reviewed
+P31468	cbrB	b3716 JW3694	yieI	reviewed
+P31469	cbrC	b3717 JW3695	yieJ	reviewed
+P31470	yieK	b3718 JW5613		reviewed
+P31471	yieL	b3719 JW5612		reviewed
+P31475	yieP	b3755 JW5608		reviewed
+P31666	yadE	b0130 JW0126		reviewed
+P31679	yaaU	b0045 JW0044	yabE	reviewed
+P31808	yciK	b1271 JW1263		reviewed
+P31827	yddB	b1495 JW1490		reviewed
+P32051	ydeK	b1510 JW1503	orfT	reviewed
+P32057	wcaI	b2050 JW2035	yefD	reviewed
+P32135	yihN	b3874 JW3845		reviewed
+P32139	yihR	b3879 JW3850		reviewed
+P32152	frvR	b3897 JW3868	yiiH	reviewed
+P32153	frvX	b3898 JW3869	yiiI	reviewed
+P32155	frvA	b3900 JW3871	yiiK	reviewed
+P32674	pflD	b3951 JW3923	yijL	reviewed
+P32677	yijO	b3954 JW3926		reviewed
+P32687	yjbF	b4027 JW5711		reviewed
+P32689	yjbH	b4029 JW3989		reviewed
+P32703	yjcE	b4065 JW4026		reviewed
+P32709	nrfD	b4073 JW4034	yjcK	reviewed
+P32712	nrfG	b4076 JW4037	yjcN	reviewed
+P33011	yeeA	b2008 JW1990		reviewed
+P33020	yeiI	b2160 JW2147		reviewed
+P33029	yeiQ	b2172 JW2160		reviewed
+P33218	yebE	b1846 JW1835		reviewed
+P33235	flgK	b1082 JW1069	flaS flaW	reviewed
+P33236	mokC	b0018 JW5879	gefL	reviewed
+P33345	yehF	b2115	dinO molR sosF	reviewed
+P33348	yehL	b2119 JW5349		reviewed
+P33349	yehM	b2120 JW2108	yehN yehO	reviewed
+P33353	yehQ	b2122 JW2110		reviewed
+P33354	yehR	b2123 JW5351		reviewed
+P33366	yohD	b2136 JW2124		reviewed
+P33368	yohF	b2137 JW2125	yohE	reviewed
+P33554	ppdA	b2826 JW2794		reviewed
+P33634	yfiE	b2577 JW2561		reviewed
+P33666	ydbA	b4492 JW5802/JW1402		reviewed
+P33924	yejO	b2190 JW5839		reviewed
+P33997	alpA	b2624 JW2604	alp	reviewed
+P34209	ydcF	b1414 JW1411		reviewed
+P34211	yuaR	ECOK12F030	yddA	reviewed
+P36547	eutR	b2437 JW2430	yfeG	reviewed
+P36554	mdtD	b2077 JW2062	yegB	reviewed
+P36645	hofB	b0107 JW0103	hopB	reviewed
+P36646	hofC	b0106 JW0102	hopC yacD	reviewed
+P36881	yadI	b0129 JW0125		reviewed
+P36928	yegD	b2069 JW2054		reviewed
+P36930	gatR	b4498 JW5340/JW2074		reviewed
+P36943	eaeH	b0297 JW0291		reviewed
+P37007	yagA	b0267 JW0260		reviewed
+P37008	yagB	b0266 JW0259		reviewed
+P37014	yfaD	b2244 JW2238		reviewed
+P37049	yaeI	b0164 JW5014		reviewed
+P37056	yaeF	b0193 JW5016	yaeK	reviewed
+P37057	ogrK	b2082 JW2067		reviewed
+P37305	hokA	b4455 JW3526	yiaZ	reviewed
+P37325	ybcH	b0567 JW0556		reviewed
+P37327	yfdC	b2347 JW2344		reviewed
+P37342	yjjI	b4380 JW4343	yjjH	reviewed
+P37440	ucpA	b2426 JW5394	yfeF	reviewed
+P37443	ycaI	b0913 JW5120		reviewed
+P37626	yhiI	b3487 JW3454		reviewed
+P37629	yhiL	b4660 JW3457		reviewed
+P37630	yhiM	b3491 JW5944		reviewed
+P37640	yhjB	b3520 JW3488		reviewed
+P37641	yhjC	b3521 JW3489		reviewed
+P37642	yhjD	b3522 JW3490		reviewed
+P37643	yhjE	b3523 JW3491		reviewed
+P37648	yhjJ	b3527 JW3495		reviewed
+P37650	bcsC	b3530 JW5942	yhjL	reviewed
+P37655	bcsQ	b3534	yhjQ	reviewed
+P37659	bcsG	b3538 JW3506	yhjU	reviewed
+P37660	yhjV	b3539 JW3508		reviewed
+P37663	yhjY	b3548 JW5659		reviewed
+P37673	yiaL	b3576 JW3548		reviewed
+P37681	yiaT	b3584 JW3556		reviewed
+P37682	yiaU	b3585 JW3557		reviewed
+P37683	yiaV	b3586 JW3558		reviewed
+P37748	wbbH	b2035 JW2020	rfc wzy yefF	reviewed
+P37750	wbbJ	b2033 JW2018	yefH	reviewed
+P37751	wbbK	b2032 JW2017	yefI	reviewed
+P37767	yfhH	b2561 JW2545		reviewed
+P37903	uspF	b1376 JW1370	ynaF yzzL	reviewed
+P37909	ybgD	b0719 JW0709		reviewed
+P38055	ydjE	b1769 JW1758		reviewed
+P38104	rspA	b1581 JW1573		reviewed
+P38105	rspB	b1580 JW1572		reviewed
+P38392	sieB	b1353 JW5209		reviewed
+P39161	uxuR	b4324 JW4287		reviewed
+P39165	ychO	b1220 JW1211	ychP	reviewed
+P39187	ytfJ	b4216 JW4175		reviewed
+P39212	insN2	b4283 JW5771		reviewed
+P39263	yfcC	b2298 JW2295		reviewed
+P39264	fimI	b4315 JW5779		reviewed
+P39270	yjdF	b4121 JW4082		reviewed
+P39282	yjeM	b4156 JW5739		reviewed
+P39284	yjeO	b4158 JW4119		reviewed
+P39314	ytfF	b4210 JW4168		reviewed
+P39332	yjgH	b4248 JW4206		reviewed
+P39336	yjgL	b4253 JW5757		reviewed
+P39337	yjgM	b4256 JW5758		reviewed
+P39338	yjgN	b4257 JW5759		reviewed
+P39343	idnR	b4264 JW4221	yjgS	reviewed
+P39349	yjgX	b4575		reviewed
+P39355	yjhE	b4282		reviewed
+P39356	yjhU	b4295 JW5952		reviewed
+P39357	yjhF	b4296 JW4258		reviewed
+P39360	yjhI	b4299 JW4261		reviewed
+P39361	sgcR	b4300 JW4262	yjhJ	reviewed
+P39363	sgcA	b4302 JW4264	yjhL	reviewed
+P39366	sgcX	b4305 JW5776	yjhO	reviewed
+P39368	yjhQ	b4307 JW4269		reviewed
+P39369	yjhR	b4308 JW4271		reviewed
+P39379	yjiH	b4330 JW5783		reviewed
+P39381	yjiJ	b4332 JW4295		reviewed
+P39382	yjiK	b4333 JW5869		reviewed
+P39383	yjiL	b4334 JW5785		reviewed
+P39384	yjiM	b4335 JW5786		reviewed
+P39389	yjiR	b4340 JW4303		reviewed
+P39393	yjiV	b4486	mcrD	reviewed
+P39407	yjjU	b4377 JW4340		reviewed
+P39834	ygiL	b3043 JW3011		reviewed
+P39836	yfeH	b2410 JW5876		reviewed
+P39901	ybfI	b4636		reviewed
+P41039	ybiI	b0803 JW0788		reviewed
+P41066	traK	ECOK12F077		reviewed
+P41067	traB	ECOK12F078		reviewed
+P41069	traV	ECOK12F082		reviewed
+P42589	ygjH	b3074 JW3045		reviewed
+P42590	ygjI	b3078 JW5512		reviewed
+P42597	ygjP	b3085 JW5514	upp	reviewed
+P42599	ygjR	b3087 JW3058		reviewed
+P42603	ygjV	b3090 JW3061		reviewed
+P42616	yqjC	b3097 JW5516		reviewed
+P42619	yqjF	b3101 JW5850		reviewed
+P42906	agaA	b3135 JW5527		reviewed
+P43340	ycaK	b0901 JW0884		reviewed
+P43531	ynfM	b1596 JW1588	yzyC	reviewed
+P43533	flgN	b1070 JW1057		reviewed
+P43667	ygaH	b2683 JW2658		reviewed
+P45394	yrbG	b3196 JW3163		reviewed
+P45420	yhcD	b3216 JW3183		reviewed
+P45423	yhcG	b3220 JW3189		reviewed
+P45465	yraN	b3148 JW3117		reviewed
+P45468	yraQ	b3151 JW3120		reviewed
+P45472	yhbQ	b3155 JW3124		reviewed
+P45524	yheT	b3353 JW3316		reviewed
+P45537	yhfK	b3358 JW5701		reviewed
+P45546	yhfT	b3377 JW3340		reviewed
+P45549	yhfW	b3380 JW3343		reviewed
+P45566	yhdT	b3257 JW3225		reviewed
+P45570	ybcI	b0527 JW0516		reviewed
+P45581	stfP	b1154 JW1140	ycfK	reviewed
+P45757	gspC	b3324 JW3286	yheE	reviewed
+P45771	yrdD	b3283 JW5949		reviewed
+P45848	yciQ	b1268 JW5197	yciP	reviewed
+P46119	ybjC	b0850 JW0834		reviewed
+P46122	yajI	b0412 JW5056		reviewed
+P46125	yedI	b1958 JW1941		reviewed
+P46141	ygbE	b2749 JW2719		reviewed
+P46478	aaeX	b3242 JW5541	yhcR	reviewed
+P46853	yhhX	b3440 JW3403		reviewed
+P47737	yubQ	ECOK12F070	19 X ygfA	reviewed
+P51024	yaiL	b0354 JW0345		reviewed
+P52007	yecM	b1875 JW5309	yecL	reviewed
+P52044	ygfI	b2921 JW5476		reviewed
+P52052	yggR	b2950 JW2917		reviewed
+P52107	csgC	b1043 JW1026		reviewed
+P52131	yfjP	b2632 JW5419		reviewed
+P52133	yfjR	b2634 JW2615		reviewed
+P52140	yfjY	b2644 JW2625		reviewed
+P52141	yfjZ	b2645 JW2626		reviewed
+P52598	ygbI	b2735 JW2705		reviewed
+P52636	yccM	b0992 JW0977		reviewed
+P52696	ybhD	b0768 JW5896		reviewed
+P55138	ygcE	b2776 JW5444		reviewed
+P55140	ygcG	b2778 JW5445		reviewed
+P56256	ysaA	b3573 JW3545		reviewed
+P56262	ysgA	b3830 JW5853		reviewed
+P56614	ymdF	b4518 JW5136		reviewed
+P56979	intM	ECOK12F032	int	reviewed
+P57998	insB4	b0988 JW0972		reviewed
+P58035	sgcB	b4565 JW5967		reviewed
+P58041	rzoD	b4510 JW5080		reviewed
+P58042	rzoR	b4528 JW5213		reviewed
+P60632	yohJ	b2141 JW2129		reviewed
+P60869	ybjL	b0847 JW0831		reviewed
+P60872	yidE	b3685 JW3662	yibE	reviewed
+P60995	hisL	b2018 JW2000		reviewed
+P62556	sopA	ECOK12F046	A	reviewed
+P62558	sopB	ECOK12F047	B	reviewed
+P62670	flmA	ECOK12F066	ORF52 parB stm	reviewed
+P62723	yeiH	b2158 JW2145		reviewed
+P63264	cbpM	b0999 JW0984	yccD	reviewed
+P63340	yqeG	b2845 JW2813		reviewed
+P64429	ypfJ	b2475 JW2460		reviewed
+P64432	ypjD	b2611 JW2592		reviewed
+P64439	ybjM	b0848 JW0832		reviewed
+P64442	yceO	b1058 JW1045		reviewed
+P64455	ydcY	b1446 JW1441		reviewed
+P64481	ydjM	b1728 JW5281		reviewed
+P64496	yoaG	b1796 JW1785		reviewed
+P64503	yebV	b1836 JW5302		reviewed
+P64508	yobF	b1824 JW1813		reviewed
+P64515	yecN	b1869 JW5308		reviewed
+P64519	yodD	b1953 JW5317		reviewed
+P64545	yfgG	b2504 JW5399		reviewed
+P64548	yfiR	b2603 JW2584		reviewed
+P64564	yggT	b2952 JW2919		reviewed
+P64567	yqgB	b2939 JW2906		reviewed
+P64572	yghR	b2984 JW2952		reviewed
+P64585	yqjE	b3099 JW3070		reviewed
+P64590	yhaH	b3103 JW3074		reviewed
+P64592	yhaI	b3104 JW3075		reviewed
+P64614	yhcN	b3238 JW5540		reviewed
+P65290	yfgH	b2505 JW5400		reviewed
+P65292	ygdI	b2809 JW5448		reviewed
+P65294	ygdR	b2833 JW2801		reviewed
+P65298	yqhH	b3014 JW2982		reviewed
+P65807	ygeY	b2872 JW2840		reviewed
+P67127	ygdQ	b2832 JW2800		reviewed
+P67143	yhgN	b3434 JW3397		reviewed
+P67153	yqfA	b2899 JW2867		reviewed
+P67244	yqhA	b3002 JW2971		reviewed
+P67553	ynfC	b1585 JW5258		reviewed
+P67601	yobD	b1820 JW1809		reviewed
+P67660	yhaJ	b3105 JW3076		reviewed
+P67699	yddM	b1477 JW5908		reviewed
+P67729	yfeO	b2389 JW2386		reviewed
+P67826	cutC	b1874 JW1863		reviewed
+P68206	yjbJ	b4045 JW4005		reviewed
+P68644	fixC	b0043 JW0042	yaaS	reviewed
+P68646	fixX	b0044 JW0043	yaaT	reviewed
+P68661	ybcO	b0549 JW0537		reviewed
+P69789	glvB	b3682 JW3659	glvC yidN	reviewed
+P69824	cmtB	b2934 JW2901		reviewed
+P71237	wcaC	b2057 JW2042		reviewed
+P71238	wcaD	b2056 JW2041		reviewed
+P71239	wcaE	b2055 JW2040		reviewed
+P71242	wcaK	b2045 JW2030		reviewed
+P71243	wcaL	b2044 JW2029	yefL	reviewed
+P71244	wcaM	b2043 JW2028	yefK	reviewed
+P75678	ykfA	b0253 JW0243		reviewed
+P75679	insN1	b0255 JW5024		reviewed
+P75681	afuB	b0263 JW0255	fbpB	reviewed
+P75693	yahN	b0328 JW0320		reviewed
+P75694	yahO	b0329 JW0321		reviewed
+P75697	yaiX	b4579 JW0350/JW5814	yaiF	reviewed
+P75719	rzpD	b0556 JW5079	ybcT	reviewed
+P75734	chiQ	b0682 JW0668	ybfN	reviewed
+P75741	ybfL	b0705 JW0695		reviewed
+P75747	abrB	b0715 JW5097	ybgN	reviewed
+P75748	ybgO	b0716 JW5098		reviewed
+P75749	ybgP	b0717 JW0707		reviewed
+P75750	ybgQ	b0718 JW5099		reviewed
+P75763	ybhI	b0770 JW0753		reviewed
+P75764	ybhJ	b0771 JW5103		reviewed
+P75767	ybhK	b0780 JW0763		reviewed
+P75770	ybhN	b0788 JW0771		reviewed
+P75779	ybiX	b0804 JW5105		reviewed
+P75788	ybiR	b0818 JW0802		reviewed
+P75793	ybiW	b0823 JW0807		reviewed
+P75810	ybjJ	b0845 JW0829		reviewed
+P75818	ybjP	b0865 JW0849		reviewed
+P75822	ybjT	b0869 JW5116		reviewed
+P75828	ybjD	b0876 JW0860		reviewed
+P75835	ycaM	b0899 JW5119		reviewed
+P75836	ycaN	b0900 JW0883		reviewed
+P75859	ycbU	b0942 JW0925		reviewed
+P75860	ycbV	b0943 JW5123		reviewed
+P75867	ycbZ	b0955 JW0938		reviewed
+P75870	yccS	b0960 JW5128		reviewed
+P75874	yccU	b0965 JW5130		reviewed
+P75882	gfcD	b0984 JW0967	ymcA	reviewed
+P75883	gfcC	b0985 JW0968	ymcB	reviewed
+P75884	gfcB	b0986 JW0969	ymcC	reviewed
+P75885	gfcA	b0987 JW5133	ymcD	reviewed
+P75916	ycdZ	b1036 JW5147		reviewed
+P75917	ymdA	b1044 JW1031		reviewed
+P75931	yceM	b1068 JW1055	mviM	reviewed
+P75933	flgA	b1072 JW1059		reviewed
+P75936	flgD	b1075 JW1062	fla FIV flaV	reviewed
+P75937	flgE	b1076 JW1063	fla FV flaK	reviewed
+P75955	ycfT	b1115 JW1101		reviewed
+P75961	ycfZ	b1121 JW1107		reviewed
+P75962	ymfA	b1122 JW5164		reviewed
+P75970	xisE	b1141 JW1127	vxis ymfG	reviewed
+P75971	ymfH	b1142 JW1128		reviewed
+P75974	cohE	b1145 JW1131	ymfK	reviewed
+P75981	jayE	b1152 JW5170	ymfP	reviewed
+P75991	ycgZ	b1164 JW1151		reviewed
+P75992	ymgA	b1165 JW1152		reviewed
+P76000	ycgI	b4521 JW1162/JW5179	ymgH	reviewed
+P76011	ymgE	b1195 JW1184	tag	reviewed
+P76034	yciT	b1284 JW1276		reviewed
+P76049	ycjY	b1327 JW5804		reviewed
+P76053	smrA	b1340 JW1334	ydaL	reviewed
+P76056	intR	b1345 JW1339	ydaP	reviewed
+P76063	ydaS	b1357 JW1352		reviewed
+P76064	ydaT	b1358 JW1353		reviewed
+P76071	insH5	b1370 JW1363		reviewed
+P76072	stfR	b1372 JW1366	ynaB	reviewed
+P76076	ydbL	b1383 JW5216		reviewed
+P76090	ynbA	b1408 JW1405		reviewed
+P76092	ynbC	b1410 JW1407		reviewed
+P76093	ynbD	b1411 JW1408		reviewed
+P76100	ydcK	b1428 JW1424		reviewed
+P76102	insQ	b1432 JW5228	tnpB ydcM	reviewed
+P76103	ydcO	b1433 JW5229		reviewed
+P76111	ydcZ	b1447 JW1442		reviewed
+P76116	yncE	b1452 JW1447		reviewed
+P76117	yncG	b1454 JW1449		reviewed
+P76119	yncI	b1459 JW1453/JW5237	yncM	reviewed
+P76127	bdm	b1481 JW5239	yddX	reviewed
+P76134	ydeM	b1497 JW1492		reviewed
+P76137	ydeT	b1505 JW1499		reviewed
+P76138	yneL	b1506 JW5244		reviewed
+P76146	yneE	b1520 JW5245		reviewed
+P76161	quuQ	b1559 JW1551	ydfT	reviewed
+P76164	ydfW	b1567 JW1559	intK	reviewed
+P76168	intQ	b1579 JW1571		reviewed
+P76169	ynfA	b1582 JW1574		reviewed
+P76170	ynfB	b1583 JW1575		reviewed
+P76172	ynfD	b1586 JW5259		reviewed
+P76176	ydgD	b1598 JW1590		reviewed
+P76180	ydgK	b1626 JW1618		reviewed
+P76185	ydhJ	b1644 JW1636		reviewed
+P76186	ydhK	b1645 JW1637		reviewed
+P76197	ydiM	b1690 JW1680		reviewed
+P76198	ydiN	b1691 JW5274		reviewed
+P76201	ydiQ	b1697 JW5276		reviewed
+P76214	ves	b1742 JW1731	ydjR	reviewed
+P76219	ydjX	b1750 JW1739		reviewed
+P76220	ydjY	b1751 JW5283		reviewed
+P76221	ydjZ	b1752 JW1741		reviewed
+P76223	ynjB	b1754 JW5284		reviewed
+P76226	ynjF	b1758 JW1747		reviewed
+P76228	ynjI	b1762 JW5288		reviewed
+P76230	ydjK	b1775 JW5290		reviewed
+P76235	yeaH	b1784 JW1773		reviewed
+P76269	yebQ	b1828 JW5299		reviewed
+P76297	flhE	b1878 JW1867		reviewed
+P76319	yedL	b1932 JW1917		reviewed
+P76335	yedS	b4496 JW5319/JW1948/JW1949		reviewed
+P76356	yoeA	b4582 JW1980		reviewed
+P76359	yeeP	b1999 JW5327		reviewed
+P76361	yeeR	b2001 JW1983		reviewed
+P76362	yeeS	b2002 JW1984		reviewed
+P76369	yeeY	b2015 JW5834		reviewed
+P76389	yegH	b2063 JW5336		reviewed
+P76402	yegP	b2080 JW5339		reviewed
+P76417	yegT	b2098 JW2085		reviewed
+P76419	yegV	b2100 JW2087		reviewed
+P76421	yegX	b2102 JW5345		reviewed
+P76460	atoE	b2223 JW2217		reviewed
+P76464	yfaS	b4500 JW2221/JW2222	yfaR	reviewed
+P76470	rhmT	b2246 JW2240	yfaV	reviewed
+P76471	yfaZ	b2250 JW5371		reviewed
+P76482	yfbL	b2271 JW2266		reviewed
+P76483	yfbM	b2272 JW2267		reviewed
+P76509	yfdM	b2356 JW2352		reviewed
+P76514	yfdR	b2361 JW2358		reviewed
+P76520	yfdX	b2375 JW2372		reviewed
+P76538	yfeZ	b2433 JW2426		reviewed
+P76539	ypeA	b2434 JW2427		reviewed
+P76542	intZ	b2442		reviewed
+P76561	ypfH	b2473 JW5396		reviewed
+P76569	yfgD	b2495 JW2480		reviewed
+P76573	yfgI	b2506 JW2490		reviewed
+P76584	yphB	b2544 JW2528		reviewed
+P76611	pinH	b2648 JW5423		reviewed
+P76616	ygaQ	b4462 JW2631/JW2633/JW5425/JW5426	ygaR yqaC yqaD	reviewed
+P76628	ygaY	b2681 JW2655		reviewed
+P76630	ygaZ	b2682 JW2657		reviewed
+P76633	ygcW	b2774 JW5443		reviewed
+P76639	ygeH	b2852 JW2820		reviewed
+P76656	yqiI	b3048 JW5509		reviewed
+P76657	yqiJ	b3050 JW3022		reviewed
+P77031	yqcE	b2775 JW2746	yqcF	reviewed
+P77087	tfaX	b0563 JW0552	ylcE	reviewed
+P77091	hokE	b4415 JW5084	ybdY	reviewed
+P77169	yagJ	b0276 JW0270		reviewed
+P77181	paaY	b1400 JW1395	ydbZ	reviewed
+P77187	yahF	b0320 JW0312		reviewed
+P77188	ecpB	b0292 JW0286	matC yagY	reviewed
+P77199	yaiT	b4580 JW0362/JW5051		reviewed
+P77234	ybeQ	b0644 JW5091		reviewed
+P77237	essQ	b1556 JW5255	ydfS	reviewed
+P77252	ykgE	b0306 JW5041		reviewed
+P77260	ydfI	b1542 JW1535		reviewed
+P77263	ecpE	b0289 JW5030	matF yagV	reviewed
+P77277	eutJ	b2454 JW2438	yffW	reviewed
+P77280	ydjJ	b1774 JW1763		reviewed
+P77293	yfdH	b2351 JW2347		reviewed
+P77294	ydeR	b1503 JW1497		reviewed
+P77309	yneJ	b1526 JW1519		reviewed
+P77316	ybdR	b0608 JW0601		reviewed
+P77318	ydeN	b1498 JW5243		reviewed
+P77328	ybbY	b0513 JW0501	glxB4	reviewed
+P77330	borD	b0557 JW0546	ybcU	reviewed
+P77337	ydiS	b1699 JW1689		reviewed
+P77354	yafU	b0218 JW0207		reviewed
+P77360	yphC	b2545 JW5842		reviewed
+P77375	ydhX	b1671 JW5271		reviewed
+P77376	ydgJ	b1624 JW5265		reviewed
+P77378	ydiR	b1698 JW1688		reviewed
+P77381	djlB	b0646 JW0641	ybeS	reviewed
+P77389	ydhP	b1657 JW1649		reviewed
+P77396	ypdC	b2382 JW2379		reviewed
+P77402	ydiP	b1696 JW1686		reviewed
+P77409	ydhU	b1670 JW1660		reviewed
+P77414	wcaA	b2059 JW2044		reviewed
+P77423	hyfH	b2488 JW2473		reviewed
+P77433	ykgG	b0308 JW5042		reviewed
+P77495	prpE	b0335 JW0326	yahU	reviewed
+P77504	ybbP	b0496 JW0485		reviewed
+P77515	stfQ	b1547 JW1540	ydfN	reviewed
+P77519	yddL	b1472 JW1468		reviewed
+P77528	peaD	b4508	ybcD	reviewed
+P77536	ykgF	b0307 JW0300		reviewed
+P77538	yfhR	b2534 JW2518		reviewed
+P77539	ydjL	b1776 JW1765		reviewed
+P77551	rzpR	b1362 JW5212	ydaX	reviewed
+P77552	ydhQ	b1664 JW1656		reviewed
+P77554	yahJ	b0324 JW0316		reviewed
+P77559	ynfL	b1595 JW1587		reviewed
+P77562	yaiW	b0378 JW0369		reviewed
+P77569	mhpR	b0346 JW0337		reviewed
+P77588	ydeQ	b1502 JW1496		reviewed
+P77601	ykgA	b0300 JW5037		reviewed
+P77609	flxA	b1566 JW1558		reviewed
+P77610	ansP	b1453 JW5234	yncF	reviewed
+P77616	yqiH	b3047 JW5508		reviewed
+P77624	yahI	b0323 JW0315		reviewed
+P77634	ybcM	b0546 JW0534		reviewed
+P77668	hyfI	b2489 JW5805		reviewed
+P77694	ecpD	b0290 JW0284	matE yagW	reviewed
+P77695	gnsB	b1550 JW5253	ydfY	reviewed
+P77698	ybcK	b0544 JW0532		reviewed
+P77699	tfaD	b0561	ybcX	reviewed
+P77700	yahB	b0316 JW0308		reviewed
+P77713	yagH	b0271 JW0264		reviewed
+P77714	ydiT	b1700 JW1690		reviewed
+P77717	ybaY	b0453 JW0443		reviewed
+P77721	ydjF	b1770 JW1759		reviewed
+P77726	yajR	b0427 JW5059		reviewed
+P77730	ydcR	b1439 JW1434		reviewed
+P77732	rhmR	b2248 JW2242	yfaX	reviewed
+P77739	yniA	b1725 JW1714		reviewed
+P77746	ybdO	b0603 JW0596		reviewed
+P77779	ybfO	b0703 JW0692		reviewed
+P77789	ydeS	b1504 JW1498		reviewed
+P77802	ecpC	b0291 JW0285	matD yagX	reviewed
+P77808	yfaY	b2249 JW2243		reviewed
+P96329	pifA	ECOK12F040		reviewed
+Q00037	tnpA	ECOK12F010		reviewed
+Q05807	trbE	ECOK12F090		reviewed
+Q2A0K9	sbcB			unreviewed
+Q2A0L0	sbcB			unreviewed
+Q2EEQ2	rpmJ2	b4506 JW5034	ykgO	reviewed
+Q2EES1	yniD	b4535 JW5911		reviewed
+Q2EES6	yohO	b4542 JW5354		reviewed
+Q2EET0	ypdJ	b4545 JW5386		reviewed
+Q2EET2	ypfN	b4547 JW2457		reviewed
+Q2M5U1	ytjA	b4568 JW5891		reviewed
+Q46755	ychQ	b1213 JW1204	sirB2	reviewed
+Q46790	pbl	b2854		reviewed
+Q46791	ygeK	b2856 JW5458/JW2824	ygeL	reviewed
+Q46795	ygeO	b2859 JW5846		reviewed
+Q46797	ygeQ	b2863 JW5461		reviewed
+Q46807	yqeA	b2874 JW2842		reviewed
+Q46812	ssnA	b2879 JW2847	ygfL	reviewed
+Q46832	yghD	b2968 JW2935	ecfC	reviewed
+Q46833	yghE	b2969		reviewed
+Q46834	yghF	b2970 JW5484	ecfA	reviewed
+Q46835	yghG	b2971 JW2938		reviewed
+Q46840	yghO	b2981 JW5848		reviewed
+Q46841	yghQ	b2983 JW5490		reviewed
+Q46844	yghT	b2986 JW2954		reviewed
+Q46861	ygiQ	b4469 JW5501	ygiR	reviewed
+Q46866	ygiV	b3023 JW5502		reviewed
+Q46867	ygiZ	b3027 JW2995		reviewed
+Q46888	ltnD	b2736 JW2706	ygbJ	reviewed
+Q46889	otnK	b2737 JW2707	ygbK	reviewed
+Q46892	ygbN	b2740 JW2710		reviewed
+Q46904	ygcN	b2766 JW2736		reviewed
+Q46905	ygcO	b2767 JW2737		reviewed
+Q46906	ygcP	b2768 JW2738		reviewed
+Q46907	ygcQ	b2769 JW5440		reviewed
+Q46909	ygcS	b2771 JW5845		reviewed
+Q46911	ygcU	b4463 JW5442	ygcT ygcV	reviewed
+Q46942	yqeI	b2847 JW2815		reviewed
+Q47147	yafJ	b0223 JW0213		reviewed
+Q47151	yafL	b0227 JW0217		reviewed
+Q47153	lfhA	b0229 JW5811	fhiA	reviewed
+Q47154	lafU	b0230 JW5812	mbhA	reviewed
+Q47158	yafP	b0234 JW0224		reviewed
+Q47269	ybcN	b0547 JW0535		reviewed
+Q47274	quuD	b0551 JW0539	ybcQ	reviewed
+Q47534	yaiO	b0358 JW0349		reviewed
+Q47536	yaiP	b0363 JW0355		reviewed
+Q47679	yafV	b0219 JW5019		reviewed
+Q47684	yafW	b0246 JW0235		reviewed
+Q47685	ykfG	b0247 JW0236		reviewed
+Q47688	ykfC	b0258 JW5813		reviewed
+Q47718	insO2	b4285		reviewed
+Q57154	repB	ECOK12F033	repA	reviewed
+Q6BF25	ldrD	b4453 JW5966		reviewed
+Q6BF87	ldrB	b4421 JW5958		reviewed
+Q79E92	ykgN	b4505 JW0258		reviewed
+Q9JMS3	yuaQ	ECOK12F028	ychA	reviewed
+Q9JMS5	yuaO	ECOK12F026	ycbB	reviewed
+Q9JMT3	insF7	ECOK12F017	ybfB	reviewed
+Q9JMT8	yuaB	ECOK12F011	ybaA	reviewed
+Q9S4W2	yubM	ECOK12F062	yfjB	reviewed
+Q9S4X2	yubD	ECOK12F052	yfeA	reviewed
+U3PVA8	iroK	b4706		reviewed
+A0A0A6YVN8				unreviewed
+A0A0G3HHZ6	puuA			unreviewed
+A0A0G3HVX2	puuE			unreviewed
+A0A0G3HZV6	puuR			unreviewed
+A0A385XJK5	ypaB	b4605		reviewed
+A0A385XJL2	ygdT	b4610		reviewed
+A0A6G6FTV1	fimH			unreviewed
+A4UR75	chbR			unreviewed
+A4UR76	chbR			unreviewed
+A4UR77	chbR			unreviewed
+A4UR78	chbR			unreviewed
+A4UR79	chbR			unreviewed
+A4UR80	chbR			unreviewed
+A4UR81	chbR			unreviewed
+A4UR83	chbR			unreviewed
+A4UR84	chbR			unreviewed
+A4UR86	chbR			unreviewed
+A5A607	ylcI	b4589		reviewed
+A5A611	ymgI	b4593		reviewed
+A5A612	ymgJ	b4594		reviewed
+A5A613	yciY	b4595		reviewed
+A5A614	yciZ	b4596 JW1277		reviewed
+A5A617	ydgU	b4601 JW1589		reviewed
+A5A619	yojO	b4604		reviewed
+A5A621	ypfM	b4606 JW2454.1		reviewed
+A5A625	yibV	b4615		reviewed
+A5PFJ8	arcA2			unreviewed
+A5PFJ9	tnp10			unreviewed
+A5PFK0	arcA2			unreviewed
+A8DYQ1	ythA	b4655 JW5769.1		reviewed
+B8LFD5				unreviewed
+C0Z3X9	sbcB			unreviewed
+C0Z3Y0	int			unreviewed
+C1P5Z9	ymiB	b4672 JW1278.1		reviewed
+C1P600	ynbG	b4674 JW1395.1		reviewed
+C1P604	yobI	b4677 JW1850.1		reviewed
+C1P606	yoeI	b4678 JW5330.1		reviewed
+C1P612	yqcG	b4682 JW2748.1		reviewed
+C1P613	yqeL	b4683 JW5455.1		reviewed
+C1P614	yqfG	b4684 JW5470.1		reviewed
+C1P618	yrbN	b4685 JW5531.1		reviewed
+C1P619	ilvX	b4669 JW3740.1		reviewed
+C1P620	yshB	b4686 JW3839.1		reviewed
+C1P621	yjeV	b4670 JW5740.1		reviewed
+C3UPD1	smpB			unreviewed
+C3UPD2				unreviewed
+K0JFQ9	int			unreviewed
+P02338	tpr	b1229 JW1219		reviewed
+P07010	rem	b1561 JW1553		reviewed
+P08370	ygdB	b2824 JW5450		reviewed
+P08868	yuaZ	ECOK12F048	yfcA	reviewed
+P09154	ymfS	b1155 JW5171		reviewed
+P09996	yidB	b3698 JW3675		reviewed
+P0A828	smg	b3284 JW3245		reviewed
+P0A8E5	yacL	b0119 JW0115		reviewed
+P0A8K5	yaeP	b4406 JW0185		reviewed
+P0A8L5	ycgN	b1181 JW5180		reviewed
+P0A8R4	slyX	b3348 JW3310		reviewed
+P0AA95	yacC	b0122 JW0118		reviewed
+P0AA97	yaeQ	b0190 JW0186		reviewed
+P0AAL9	ykgJ	b0288 JW0282		reviewed
+P0AAN5	yaiA	b0389 JW0380		reviewed
+P0AAQ6	ybaA	b0456 JW0445		reviewed
+P0AAS9	ybdD	b4512 JW0591		reviewed
+P0AAT2	ybdF	b0579 JW5083		reviewed
+P0AAT9	ybeL	b0643 JW0638		reviewed
+P0AAU2	ybfA	b0699 JW0688		reviewed
+P0AAU5	ybfB	b0702 JW0691		reviewed
+P0AAV6	ybgS	b0753 JW0736		reviewed
+P0AAV8	ybhH	b0769 JW0752		reviewed
+P0AAW1	ybhP	b0790 JW0773		reviewed
+P0AAY4	ybjH	b0843 JW0827		reviewed
+P0AB03	ycbJ	b0919 JW0902		reviewed
+P0AB31	yceK	b1050 JW5151		reviewed
+P0AB43	ycgL	b1179 JW1168		reviewed
+P0AB46	ymgD	b1171 JW5177		reviewed
+P0AB61	yciN	b1273 JW1265		reviewed
+P0ACV8	ymjA	b1295 JW1288		reviewed
+P0ACW0	ydaF	b4527 JW1349		reviewed
+P0ACW2	ydbJ	b4529 JW5215		reviewed
+P0ACW4	ydcA	b1419 JW1416		reviewed
+P0ACW6	ydcH	b1426 JW5823		reviewed
+P0ACW8	ydfA	b1571 JW1563		reviewed
+P0AD05	yecA	b1908 JW1896		reviewed
+P0AD07	yecF	b1915 JW1900		reviewed
+P0AD10	yecJ	b4537 JW1891		reviewed
+P0AD21	yejG	b2181 JW2169		reviewed
+P0AD33	yfcZ	b2343 JW2340		reviewed
+P0AD37	yfeC	b2398 JW2393		reviewed
+P0AD40	ypeB	b4546 JW5877		reviewed
+P0AD53	ygaC	b2671 JW2646		reviewed
+P0AD74	pheM	b1715 JW1705	phtL	reviewed
+P0ADC8	yjiX	b4353 JW4316		reviewed
+P0ADD9	yjjY	b4402 JW4365		reviewed
+P0ADF0	fruL	b0079		reviewed
+P0ADK0	yiaF	b3554 JW5655		reviewed
+P0ADL3	yicN	b3663 JW5637		reviewed
+P0ADM6	yidX	b3696 JW5858		reviewed
+P0ADP9	yihD	b3858 JW3830		reviewed
+P0ADS9	yggN	b2958 JW2925		reviewed
+P0ADU7	yqiB	b3033 JW3001	yzzH	reviewed
+P0ADV5	yhbW	b3160 JW3129		reviewed
+P0ADW8	yheV	b4551 JW3312		reviewed
+P0ADX1	yhfA	b3356 JW3319		reviewed
+P0ADX5	yhfG	b3362 JW3325		reviewed
+P0AEG8	dsrB	b1952 JW1936		reviewed
+P0AF34	yiiR	b3921 JW3892		reviewed
+P0AF48	yjbQ	b4056 JW4017		reviewed
+P0AF50	yjbR	b4057 JW4018		reviewed
+P0AF56	yjcO	b4078 JW4039		reviewed
+P0AF59	yjdI	b4126 JW4087		reviewed
+P0AF70	yjeI	b4144 JW5736		reviewed
+P0AF73	yjeT	b4176 JW4134		reviewed
+P0AF76	yjfI	b4181 JW4139		reviewed
+P0AFT8	yeiW	b4502 JW5361		reviewed
+P0AFU6	yiiF	b3890 JW5563		reviewed
+P0C243	yubJ	ECOK12F058	yfhA	reviewed
+P0CD93	ymjD	b4673 JW5960.1		reviewed
+P0CF86	yfjU	b2638		reviewed
+P0DN74	ytiA	b4715		reviewed
+P0DPC8	ymcF	b4723		reviewed
+P0DPC9	ynfQ	b4724		reviewed
+P0DPM5	yabR	b4726		reviewed
+P0DPM6	yacM	b4727		reviewed
+P0DPM7	yadW	b4728		reviewed
+P0DPM8	ykgS	b4688	ykgU	reviewed
+P0DPM9	ykgV	b4729		reviewed
+P0DPN0	yahV	b4730		reviewed
+P0DPN1	ykiC	b4731		reviewed
+P0DPN2	ykiD	b4732		reviewed
+P0DPN3	ylcJ	b4733		reviewed
+P0DPN4	yldA	b4734		reviewed
+P0DPN5	ybgU	b4735		reviewed
+P0DPN6	yliM	b4736		reviewed
+P0DPN7	ymdG	b4737		reviewed
+P0DPN8	ymgK	b4738		reviewed
+P0DPN9	ymgL	b4739		reviewed
+P0DPO0	ymgM	b4740		reviewed
+P0DPO1	ymiC	b4741		reviewed
+P0DPO2	ymjE	b4742		reviewed
+P0DPO3	ynaL	b4743		reviewed
+P0DPO4	ynaM	b4744		reviewed
+P0DPO5	yncO	b4745		reviewed
+P0DPO6	yddY	b4746		reviewed
+P0DPO7	yneP	b4747		reviewed
+P0DPO9	ynfR	b4749		reviewed
+P0DPP0	ynfS	b4750		reviewed
+P0DPP1	ynfP	b4534	ydfJ_1	reviewed
+P0DPP3	yecU	b4752		reviewed
+P0DPP4	yqfH	b4753		reviewed
+P0DPP5	yqfI	b4754		reviewed
+P0DPP6	yqhI	b4755		reviewed
+P0DPP7	yqiD	b4756		reviewed
+P0DPP8	ysdD	b4757		reviewed
+P0DSE3	yadX	b4765		reviewed
+P0DSE5	ytiB	b4767		reviewed
+P0DSE6	ybgV	b4768		reviewed
+P0DSE7	ybiE	b4769		reviewed
+P0DSE8	yljB	b4770		reviewed
+P0DSE9	ychT	b4771		reviewed
+P0DSF0	ymiD	b4772		reviewed
+P0DSF1	ynaN	b4773		reviewed
+P0DSF2	yncP	b4774		reviewed
+P0DSF3	mgtT	b4775		reviewed
+P0DSF4	ynfU	b4776		reviewed
+P0DSF5	ydgV	b4777		reviewed
+P0DSF6	yecV	b4778		reviewed
+P0DSF7	yoaM	b4779		reviewed
+P0DSF8	yodE	b4780		reviewed
+P0DSF9	evgL	b4781		reviewed
+P0DSG1	yfiS	b4783		reviewed
+P0DSG2	yqgG	b4784		reviewed
+P0DSG3	yqgH	b4785		reviewed
+P0DSG4	yqhJ	b4786		reviewed
+P0DSG5	yqiM	b4787		reviewed
+P0DSG6	yhgO	b4788		reviewed
+P0DSG7	yhgP	b4789		reviewed
+P0DSG8	yhiY	b4790		reviewed
+P0DSG9	yriA	b4791		reviewed
+P0DSH0	yriB	b4792		reviewed
+P0DSH1	ysaE	b4793		reviewed
+P0DSH4	yibY	b4796		reviewed
+P0DSH5	yicU	b4797		reviewed
+P0DSH6	ysdE	b4798		reviewed
+P0DSH7	ysgD	b4799		reviewed
+P0DSH8	ytgA	b4800		reviewed
+P0DSH9	ykiE	b4801		reviewed
+P0DSI0	ythB	b4802		reviewed
+P0DUW0	ykfO	b4815		reviewed
+P0DUW1	ymgN	b4816		reviewed
+P0DUW2	ynhH	b4817		reviewed
+P0DUW3	yoeJ	b4818		reviewed
+P0DUW4	ypeD	b4819		reviewed
+P0DV19	yrfJ	b4820		reviewed
+P0DV20	ytcB	b4821		reviewed
+P0DV21	ytgB	b4822		reviewed
+P0DV22	ytiE	b4823		reviewed
+P0DV23	ytjE	b4824		reviewed
+P10031	psiB	ECOK12F063		reviewed
+P11289	yfiL	b2602 JW5412		reviewed
+P11664	yggC	b2928 JW2895		reviewed
+P11864	yhaC	b3121 JW3092		reviewed
+P11865	yhaB	b3120 JW3091		reviewed
+P13960	repA1			reviewed
+P15033	racC	b1351 JW1345		reviewed
+P15068	trbF	ECOK12F097		reviewed
+P17994	yfaA	b2230 JW2224	pufY	reviewed
+P18005	yubP	ECOK12F069	ygeB	reviewed
+P18032	artA	ECOK12F093		reviewed
+P18034	trbA	ECOK12F092		reviewed
+P18148	psiA	ECOK12F064		reviewed
+P18353	trbJ	ECOK12F096		reviewed
+P18355				reviewed
+P19381	trbH	ECOK12F103		reviewed
+P19768	insJ	b3557 JW3527		reviewed
+P20343	cysX	b4847		reviewed
+P21363	yciE	b1257 JW1249		reviewed
+P21418	ydfC	b1573 JW1565	rzpQ	reviewed
+P23305	yigA	b3810 JW3783		reviewed
+P24238	yebB	b1862 JW5306		reviewed
+P24252	ybgA	b0707 JW0697		reviewed
+P25666	htrL	b3618 JW5644	yibB	reviewed
+P25728	ygbA	b2732 JW2702		reviewed
+P25907	ydbD	b1407 JW5221		reviewed
+P27238	yfeD	b2399 JW2394		reviewed
+P27840	yigE	b4482 JW5591		reviewed
+P27842	yigF	b3817 JW3790		reviewed
+P28247	bicB			reviewed
+P28696	yaaI	b0013 JW0012		reviewed
+P28911	yhhH	b3483 JW3449		reviewed
+P28915	ybfC	b0704 JW0693		reviewed
+P29009	ydfB	b1572 JW1564		reviewed
+P29010	ydfD	b1576 JW1567		reviewed
+P29013	ycgB	b1188 JW1177		reviewed
+P30866	yafE	b0210 JW0200		reviewed
+P31062	nohD	b0560 JW0549	nohB	reviewed
+P31121	marB	b1532 JW1525		reviewed
+P31443	yidF	b3674 JW3650		reviewed
+P31455	yidR	b3689 JW5860		reviewed
+P31991	ydcD	b1457 JW1452		reviewed
+P32106	yibG	b3596 JW3570		reviewed
+P32108	yibI	b3598 JW3572		reviewed
+P32109	yibJ	b3595 JW5647	rhsJ	reviewed
+P32128	yihF	b3861 JW5574		reviewed
+P32134	yihM	b3873 JW3844		reviewed
+P32151	yiiG	b3896 JW3867		reviewed
+P32160	yiiQ	b3920 JW3891		reviewed
+P32162	yiiS	b3922 JW3893		reviewed
+P32167	yiiX	b3937 JW3908		reviewed
+P32668	yijF	b3944 JW3916		reviewed
+P32680	yjaG	b3999 JW3963		reviewed
+P32681	yjaH	b4001 JW3965		reviewed
+P32685	yjbD	b4023 JW3983		reviewed
+P32688	yjbG	b4028 JW3988		reviewed
+P32690	yjbI	b4038 JW3998		reviewed
+P32693	yjbL	b4047 JW4007		reviewed
+P32694	yjbM	b4048 JW4008		reviewed
+P32700	yjcB	b4060 JW5718		reviewed
+P32704	yjcF	b4066 JW4027		reviewed
+P33227	stfE	b1157 JW5172		reviewed
+P33344	yehE	b2112 JW2099		reviewed
+P33346	yehI	b2118 JW2105		reviewed
+P33347	yehK	b4541 JW2106		reviewed
+P33352	yehP	b2121 JW5350		reviewed
+P33355	yehS	b2124 JW2112		reviewed
+P33668	ybbC	b0498 JW0487		reviewed
+P33669	ybbD	b0501 JW0489		reviewed
+P36661	yccE	b1001 JW0986		reviewed
+P36677	yhdN	b3293 JW3255		reviewed
+P36682	yacH	b0117 JW0113		reviewed
+P37003	ybfG	b0691 JW5094/JW5095		reviewed
+P37052	ychJ	b1233 JW1221		reviewed
+P37348	yecE	b1868 JW1857		reviewed
+P37614	yhhL	b3466 JW5683		reviewed
+P37615	yhhM	b3467 JW3432		reviewed
+P37627	yhiJ	b3488 JW3455		reviewed
+P37635	yhiS	b3504 JW3471		reviewed
+P37691	yibQ	b3614 JW5645		reviewed
+P38394	ydaE	b4526 JW1346		reviewed
+P39220	yabP	b0056 JW0055		reviewed
+P39221	yabQ	b0057 b4659 JW0056		reviewed
+P39274	yjdJ	b4127 JW4088		reviewed
+P39279	yjeJ	b4145 JW4105		reviewed
+P39283	yjeN	b4157 JW4118		reviewed
+P39293	yjfK	b4183 JW4141		reviewed
+P39295	yjfM	b4185 JW4143		reviewed
+P39308	yjfZ	b4204 JW4162		reviewed
+P39309	ytfA	b4205 JW4163		reviewed
+P39317	ytfI	b4215 JW5748		reviewed
+P39342	yjgR	b4263 JW4220		reviewed
+P39351	yjgZ	b4277 JW4236		reviewed
+P39354	yjhD	b4281		reviewed
+P39364	sgcQ	b4303 JW4265	yjhM	reviewed
+P39367	yjhP	b4306 JW4268		reviewed
+P39374	yjiC	b4325 JW4288		reviewed
+P39385	yjiN	b4336 JW4299		reviewed
+P39390	yjiS	b4341 JW4304		reviewed
+P39391	yjiT	b4342 JW5787		reviewed
+P41065	traR	ECOK12F083		reviewed
+P41068	traP	ECOK12F079		reviewed
+P41070	trbD	ECOK12F080		reviewed
+P41072	trbG	ECOK12F081		reviewed
+P42591	ygjJ	b3079 JW3050		reviewed
+P42598	ygjQ	b3086 JW3057		reviewed
+P42625	yhaL	b3107 JW5517		reviewed
+P45421	yhcE	b4569		reviewed
+P45422	yhcF	b3219 JW3188		reviewed
+P45469	yraR	b3152 JW5528		reviewed
+P45505	yfaH	b2238 JW2232		reviewed
+P45545	yhfS	b3376 JW3339		reviewed
+P45550	yhfX	b3381 JW3344		reviewed
+P45551	yhfY	b3382 JW5696		reviewed
+P45552	yhfZ	b3383 JW5948		reviewed
+P45564	yfeN	b2408 JW2399		reviewed
+P45736	ycjD	b1289 JW1282		reviewed
+P45795	yrdB	b3280 JW3241		reviewed
+P45804	yhgE	b3402 JW3365		reviewed
+P45807	ybaM	b0466 JW0455		reviewed
+P46126	yfiM	b2586 JW2570		reviewed
+P46142	yggM	b2956 JW2923		reviewed
+P46144	yedJ	b1962 JW1945		reviewed
+P46855	yhhZ	b3442 JW3406		reviewed
+P46856	yrhA	b3443 JW5864		reviewed
+P46857	yrhB	b3446 JW3411		reviewed
+P46879	yqgD	b2941 JW2908		reviewed
+P46887	yecH	b1906 JW1894		reviewed
+P46890	ybaE	b0445 JW0435		reviewed
+P52048	yggP	b4465 JW5477		reviewed
+P52060	yggU	b2953 JW5479		reviewed
+P52096	yaeR	b0187 JW0182		reviewed
+P52123	yfjH	b2623 JW2603		reviewed
+P52124	yfjI	b2625 JW2605		reviewed
+P52125	yfjJ	b2626 JW2607		reviewed
+P52128	yfjM	b2629 JW2610		reviewed
+P52132	yfjQ	b2633 JW2614		reviewed
+P52134	ypjK	b2635 JW5888		reviewed
+P52135	yfjT	b2637 JW2618		reviewed
+P52138	yfjW	b2642 JW2623		reviewed
+P52139	yfjX	b2643 JW2624		reviewed
+P52644	hslJ	b1379 JW1374	ydbI	reviewed
+P54901	csiE	b2535 JW5878		reviewed
+P55914	yjjZ	b4567 JW5797		reviewed
+P56257	ykgL	b0295 JW5033		reviewed
+P56259	yifN	b3777 JW3749		reviewed
+P56980	repL	ECOK12F007		reviewed
+P58033	ypjJ	b4548 JW5421		reviewed
+P58036	yjbS	b4621		reviewed
+P58037	yrhD	b4612		reviewed
+P58094	yciX	b4523 JW5198/JW5199		reviewed
+P58095	ypjI	b4644 JW2623.1		reviewed
+P62066	yceQ	b1085 JW5154		reviewed
+P62522	ilvL	b3766 JW3739		reviewed
+P62672	apaG	b0050 JW0049		reviewed
+P62768	yaeH	b0163 JW0159		reviewed
+P64435	ybcW	b0559 JW0548		reviewed
+P64445	ynaJ	b1332 JW1326		reviewed
+P64451	ydcL	b1431 JW1427		reviewed
+P64459	yncJ	b1436 JW1432		reviewed
+P64463	ydfZ	b1541 JW1534		reviewed
+P64471	ydhI	b1643 JW1635		reviewed
+P64474	ydhL	b1648 JW5827		reviewed
+P64476	ydiH	b1685 JW1675		reviewed
+P64479	ydiZ	b1724 JW1713		reviewed
+P64485	yeaQ	b1795 JW1784		reviewed
+P64488	yeaR	b1797 JW1786		reviewed
+P64490	yoaC	b1810 JW5296		reviewed
+P64493	yoaF	b1793 JW1782		reviewed
+P64499	yebO	b1825 JW1814		reviewed
+P64517	yodC	b1957 JW1940		reviewed
+P64521	yeeT	b2003 JW1985		reviewed
+P64526	yeeW	b2006 JW1988		reviewed
+P64536	yeiS	b2145 JW5359		reviewed
+P64540	yfcL	b2325 JW2322		reviewed
+P64542	ypeC	b2390 JW2387		reviewed
+P64557	ygfM	b2880 JW2848		reviewed
+P64562	yqfE	b2915 JW2882		reviewed
+P64570	yqgC	b2940 JW2907		reviewed
+P64574	yghW	b2998 JW2966		reviewed
+P64610	yrbL	b3207 JW3174		reviewed
+P64616	yhcO	b3239 JW3208		reviewed
+P64619	yhdU	b3263 JW3231		reviewed
+P64622	yhdV	b3267 JW3235		reviewed
+P64624	yheO	b3346 JW5703		reviewed
+P64627	yhfL	b3369 JW3332		reviewed
+P64631	yhfU	b3378 JW5697		reviewed
+P67338	yoaH	b1811 JW1800		reviewed
+P67624	yheU	b3354 JW3317		reviewed
+P67762	yhbP	b3154 JW3123		reviewed
+P71296	yagM	b0279 JW0273		reviewed
+P71297	yagN	b0280 JW0274		reviewed
+P71311	yaiS	b0364 JW0356		reviewed
+P75616	yaaX	b0005 JW0004		reviewed
+P75617	yaaW	b0011 JW0010		reviewed
+P75620	yaaY	b0024 JW5003		reviewed
+P75672	yafS	b0213 JW0203		reviewed
+P75675	ykfJ	b0235 JW0225		reviewed
+P75676	yafX	b0248 JW5022		reviewed
+P75677	ykfF	b0249 JW5023		reviewed
+P75680	insO1	b0257 JW0247		reviewed
+P75684	yagP	b4695 JW0276		reviewed
+P75688		b0309		reviewed
+P75692	yahM	b0327 JW5044		reviewed
+P75704	ykiA	b0392 JW0383		reviewed
+P75711	ybbV	b0510 JW0498		reviewed
+P75717	exoD	b0539 JW0526	ybcC	reviewed
+P75718	renD	b0542 JW0530		reviewed
+P75737	ybfP	b0689 JW0676		reviewed
+P75769	ybhM	b0787 JW0770		reviewed
+P75791	ybiU	b0821 JW0805		reviewed
+P75821	ybjS	b0868 JW5819		reviewed
+P75829	ybjX	b0877 JW0861		reviewed
+P75839	ycaP	b0906 JW0889		reviewed
+P75910	ycdU	b1029 JW1015		reviewed
+P75946	ycfL	b1104 JW1090		reviewed
+P75967	ymfD	b1137 JW1123		reviewed
+P75968	ymfE	b1138 JW5166		reviewed
+P75972	ymfI	b1143 JW5168		reviewed
+P75973	ymfJ	b1144 JW1130		reviewed
+P75975	croE	b1146 JW5169	ymfT	reviewed
+P75976	ymfL	b1147 JW1133		reviewed
+P75977	ymfM	b1148 JW1134		reviewed
+P75978	ymfN	b1149 JW1135		reviewed
+P75979	ymfR	b1150 JW1136		reviewed
+P75980	beeE	b1151 JW1137	ymfO	reviewed
+P75982	ymfQ	b1153 JW1139		reviewed
+P75988	ycgX	b1161 JW1148		reviewed
+P75994	ymgC	b1167 JW1154		reviewed
+P76001	ycgJ	b1177 JW1166		reviewed
+P76012	ycgY	b1196 JW1185		reviewed
+P76023	ychS	b1228 JW5881		reviewed
+P76035	yciW	b1287 JW5200		reviewed
+P76061	ydaG	b1355 JW5210		reviewed
+P76065	ydaU	b1359 JW1354		reviewed
+P76066	ydaW	b1361 JW5211		reviewed
+P76068	ynaK	b1365 JW1359		reviewed
+P76069	ydaY	b1366 JW1360		reviewed
+P76073	ynaE	b1375 JW1369		reviewed
+P76096	mokB	b1420 JW5882		reviewed
+P76118	yncH	b1455 JW5235		reviewed
+P76121	yddH	b1462 JW1457		reviewed
+P76122	yddJ	b1470 JW1466		reviewed
+P76123	yddK	b1471 JW1467		reviewed
+P76148	yneG	b1523 JW1516		reviewed
+P76150	yneK	b1527 JW1520		reviewed
+P76154	ydfK	b1544 JW1537		reviewed
+P76155	tfaQ	b1546 JW1539	ydfM	reviewed
+P76156	ydfO	b1549 JW5252		reviewed
+P76157	ynfN	b1551 JW5254		reviewed
+P76158	rzpQ	b1553 JW1545	ydfP	reviewed
+P76160	ydfR	b1555 JW1547		reviewed
+P76162	ydfU	b1560 JW5909		reviewed
+P76163	ydfV	b1565 JW1557		reviewed
+P76165	ydfX	b1568 JW1560		reviewed
+P76177	ydgH	b1604 JW1596		reviewed
+P76196	ydiL	b1689 JW1679		reviewed
+P76205	arpB	b4494 JW5278/JW1710		reviewed
+P76206	ydiY	b1722 JW1711		reviewed
+P76208	yniB	b1726 JW1715		reviewed
+P76210	ydjO	b1730 JW1719		reviewed
+P76222	ynjA	b1753 JW1742		reviewed
+P76227	ynjH	b1760 JW1749		reviewed
+P76231	yeaC	b1777 JW1766		reviewed
+P76239	yoaI	b1788 JW5885		reviewed
+P76243	yeaO	b1792 JW1781		reviewed
+P76275	yebW	b1837 JW5303		reviewed
+P76280	yobB	b1843 JW1832		reviewed
+P76296	yecT	b1877 JW5310		reviewed
+P76308	yecR	b1904 JW1892		reviewed
+P76322	yedM	b1935 JW1920		reviewed
+P76323	intG	b1936		reviewed
+P76349	yeeL	b4497		reviewed
+P76394	yegJ	b2071 JW2056		reviewed
+P76396	yegL	b2073 JW2058		reviewed
+P76406	yegR	b2085 JW5837		reviewed
+P76418	yegU	b2099 JW2086		reviewed
+P76462	yfaP	b2225 JW2219		reviewed
+P76463	yfaQ	b2226 JW2220		reviewed
+P76466	yfaT	b2229 JW2223		reviewed
+P76481	yfbK	b2270 JW2265		reviewed
+P76484	yfbN	b2273 JW2268		reviewed
+P76485	yfbO	b2274 JW2269		reviewed
+P76486	yfbP	b2275 JW2270		reviewed
+P76505	yfdF	b2345 JW2342		reviewed
+P76507	yfdI	b2352 JW5382		reviewed
+P76508	yfdL	b2355 JW5384		reviewed
+P76510	yfdN	b2357 JW5385	yzyA	reviewed
+P76512	yfdP	b2359 JW2356		reviewed
+P76513	yfdQ	b2360 JW2357		reviewed
+P76515	yfdS	b2362 JW2359		reviewed
+P76516	yfdT	b2363 JW5887		reviewed
+P76521	yfdY	b2377 JW2374		reviewed
+P76537	yfeY	b2432 JW2425		reviewed
+P76543	yffL	b2443		reviewed
+P76544	yffM	b2444		reviewed
+P76545	yffN	b2445		reviewed
+P76546	yffO	b2446		reviewed
+P76547	yffP	b2447		reviewed
+P76548	yffQ	b2448		reviewed
+P76549	yffR	b2449		reviewed
+P76550	yffS	b2450		reviewed
+P76559	ypfG	b2466 JW2450		reviewed
+P76575	yfgJ	b2510 JW5402		reviewed
+P76585	yphG	b2549 JW5405		reviewed
+P76586	yphH	b2550 JW5406		reviewed
+P76612	ypjB	b2649 JW2629		reviewed
+P76613	ypjC	b2650 JW5424		reviewed
+P76692	yzgL	b3427 JW3390		reviewed
+P77136	yqeK	b2849 JW2817		reviewed
+P77147	ydhT	b1669 JW1659		reviewed
+P77148	ydhS	b1668 JW1658		reviewed
+P77162	ykfB	b0250 JW0239		reviewed
+P77163	tfaR	b1373 JW1367	ynaC	reviewed
+P77174	ybdM	b0601 JW0594		reviewed
+P77180	ykgH	b0310 JW0302		reviewed
+P77184	lomR	b4570 JW5884/JW5904		reviewed
+P77206	yafZ	b0252 JW0242		reviewed
+P77216	ybdN	b0602 JW0595		reviewed
+P77219	yahC	b0317 JW0309		reviewed
+P77221	yahG	b0321 JW0313		reviewed
+P77286	ydeU	b1509 JW1502		reviewed
+P77296	ybeT	b0647 JW0642		reviewed
+P77297	yahE	b0319 JW0311		reviewed
+P77301	ybaP	b0482 JW0471		reviewed
+P77326	tfaS	b2353 JW5383		reviewed
+P77339	yafT	b0217 JW0206		reviewed
+P77393	yahL	b0326 JW0318		reviewed
+P77427	ybeU	b0648 JW0643		reviewed
+P77453	hyfJ	b2490 JW2475		reviewed
+P77460	ybcY	b0562 JW0551		reviewed
+P77506	ybdJ	b0580 JW0569		reviewed
+P77546	ydaV	b1360 JW1355		reviewed
+P77564	ydhW	b1672 JW1662		reviewed
+P77598	ybcV	b0558 JW5081		reviewed
+P77607	yagL	b0278 JW0272		reviewed
+P77627	ybeR	b0645 JW0640		reviewed
+P77656	yfdK	b2354 JW2350		reviewed
+P77657	yagK	b0277 JW0271		reviewed
+P77658	ynaA	b1368 JW1361	tmpR	reviewed
+P77688	ylbG	b0502 JW5880		reviewed
+P77736	yahD	b0318 JW0310		reviewed
+P77759	ylbH	b0499 JW0488		reviewed
+P77775	yfcH	b2304 JW2301		reviewed
+P78271	yfeS	b2420 JW2413		reviewed
+Q00042	tnpX	ECOK12F008		reviewed
+Q02885	yubO	ECOK12F068	ygeA	reviewed
+Q2EEP9	yafF	b4503 JW0208		reviewed
+Q2EEQ3	yahH	b0322 JW5893		reviewed
+Q2EEQ8	ybfQ	b4514 JW0694		reviewed
+Q2EER5	ymjC	b4525 JW5960		reviewed
+Q2EES0	ynfO	b4533 JW5251		reviewed
+Q2EES3	yoeF	b4538 JW5328		reviewed
+Q2EEU2	yjhX	b4566 JW5968		reviewed
+Q2M7M3	ysaB	b4553 JW3532		reviewed
+Q2M7R5	yibT	b4554 JW3576		reviewed
+Q2M7X4	yicS	b4555 JW5965		reviewed
+Q2MB16	yobH	b4536 JW5298		reviewed
+Q46786	ygeF	b2850 JW2818		reviewed
+Q46787	ygeG	b2851 JW2819		reviewed
+Q46789	ygeI	b2853 JW5456		reviewed
+Q46793	ygeN	b2858 JW5459/JW5460	ygeM	reviewed
+Q46796	ygeP	b2862 JW2831		reviewed
+Q46808	yqeB	b2875 JW2843		reviewed
+Q46809	yqeC	b2876 JW5464		reviewed
+Q46819	ygfS	b2886 JW5468		reviewed
+Q46831	yqgA	b2966 JW2934		reviewed
+Q46843	yghS	b2985 JW5491		reviewed
+Q46858	yqhG	b3013 JW5500	yqhF	reviewed
+Q46919	yqcC	b2792 JW2763		reviewed
+Q46941	yqeH	b2846 JW5454		reviewed
+Q46943	yqeJ	b2848 JW5455		reviewed
+Q47042	phoA			unreviewed
+Q47138	ydfE	b1577 JW1568		reviewed
+Q47268	ylcH	b4588		reviewed
+Q47270	ninE	b0548 JW0536		reviewed
+Q47272	ylcG	b4509 JW5076		reviewed
+Q47556	pyrI			unreviewed
+Q47702	yfeK	b2419 JW2412		reviewed
+Q47710	yqjK	b3100 JW3071		reviewed
+Q47719	yjhV	b4286 JW4246		reviewed
+Q57049				unreviewed
+Q5H778	puuP			unreviewed
+Q6BEX5	yjdP	b4487 JW5890		reviewed
+Q7DFU6	yghX	b4658 JW5926/JW5496	yghY	reviewed
+Q7DFV3	ymgG	b1172 JW5178		reviewed
+Q7DFV4	ymdE	b1028		reviewed
+Q9JMR2	yubN	ECOK12F067	ygdA	reviewed
+Q9JMR3	yubL	ECOK12F061	yfjA	reviewed
+Q9JMR4	yubK	ECOK12F059	yfhB	reviewed
+Q9JMR5	yubH	ECOK12F056	yfgA	reviewed
+Q9JMR6	yuaY	ECOK12F039	yebB	reviewed
+Q9JMR7	yuaX	ECOK12F038	yebA	reviewed
+Q9JMR8	yuaW	ECOK12F037	yeaA	reviewed
+Q9JMR9	yuaV	ECOK12F036	ydjA	reviewed
+Q9JMS0	yuaU	ECOK12F035	ydiA	reviewed
+Q9JMS1	yuaT	ECOK12F034	ydhA	reviewed
+Q9JMS2	yuaS	ECOK12F031	ydfA	reviewed
+Q9JMS4	yuaP	ECOK12F027	ycgA	reviewed
+Q9JMS6	yuaN	ECOK12F025	ycbA	reviewed
+Q9JMS7	yuaM	ECOK12F024	ycaA	reviewed
+Q9JMS8	yuaL	ECOK12F023	ybjA	reviewed
+Q9JMS9	yuaK	ECOK12F022	ybiB	reviewed
+Q9JMT1	yuaH	ECOK12F019	ybhA	reviewed
+Q9JMT4	yuaF	ECOK12F015	ybdB	reviewed
+Q9JMT5	yuaE	ECOK12F014	ybdA	reviewed
+Q9JMT6	yuaD	ECOK12F013	ybcA	reviewed
+Q9JMT7	yuaC	ECOK12F012	ybbA	reviewed
+Q9JMT9	yuaA	ECOK12F003	yacA	reviewed
+Q9S4W7	yubI	ECOK12F057	yfgB	reviewed
+Q9S4W9	yubG	ECOK12F055	yffB	reviewed
+Q9S4X0	yubF	ECOK12F054	yffA	reviewed
+Q9S4X1	yubE	ECOK12F053	yfeB	reviewed
+Q9S4X3	yubC	ECOK12F051	yfdB	reviewed
+Q9S4X4	yubB	ECOK12F050	yfdA	reviewed
+Q9S4X5	yubA	ECOK12F049	yfcB	reviewed
+Q9XB42	ykfH	b4504 JW5956		reviewed
+Q9Z3A0	yjgW	b4274 JW4233		reviewed
+V9HVX0	ypaA	b4543		reviewed

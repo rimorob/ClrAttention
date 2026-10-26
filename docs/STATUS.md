@@ -55,7 +55,7 @@ Design is fixed in `docs/preregistration_clr_logpt.md` (PI chose option A, 22 Oc
 - [x] `analysis/clr_logpt_test.R` with gates; K562 reproduction check passed (e891f99, 5881335)
 - [x] Label-free t\* phase, M3D (a3r t\* 6) and EcoMAC (a3r t\* 5), committed; attention t\* 9 / 8 match K10; none below 4. RPE1 still running (job 0902, then commit `rpe1_*` files): `--mode selections`; commit to `docs/clr_logpt_selections/` (script committed; jobs 0900 m3d and 0901 ecomac done, 0902 rpe1 in `jobs_pc/sched`, results in `results/clr_logpt_test/<dataset>/`)
   - How to resume: if a job died, requeue `jobs_pc/sched/0902_clrlogpt_sel_rpe1.sh` (the scheduler restarts interrupted jobs; finished splits in `results/clr_logpt_test/<dataset>/splits/` are reused).
-- [ ] EcoCyc complex truth build; commit its SHA-256
+- [x] E. coli complex truth built and its SHA-256 committed (source: EBI Complex Portal 83333, the preregistered fallback, because EcoCyc proteins.dat needs a BioCyc login; no fallback to operon-included needed; M3D 1,150 and EcoMAC 1,148 positive pairs, 54 and 53 complexes; log `docs/clr_logpt_ecoli_truth_log.md`)
 - [ ] Implement the scoring (jackknife, bootstrap, Holm per the preregistration); reviewer who has seen no E. coli result checks script against the file
 - [ ] Truth phase, once: E. coli, then RPE1, then K562 (in-sample)
 - [ ] Write-up: verdict per the preregistration's outcome table
