@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 # CLR(log P^t) test, as preregistered in docs/preregistration_clr_logpt.md (committed 90b0e3d).
-# This file implements: the gates, the a3r operator (and a2r, a1) and the K562 reproduction check.
-# Also implemented: --mode selections (label-free held-out t*, see below).
-# NOT implemented yet: EcoCyc truth build, E. coli / RPE1 / K562 truth phases (gate-then-stop stubs).
+# This file implements: the gates, the a3r operator (and a2r, a1), the K562 reproduction check, --mode selections
+# (label-free held-out t*), and the confirmatory scoring: --mode truth (per dataset), --mode boot (M3D cluster
+# bootstrap) and --mode verdict (decision rules). Implemented, NOT yet reviewed or run on any E. coli / RPE1 truth.
 #
 # Modes (--mode):
 #   repro   K562 implementation check. Reads ONLY the K562 raw-CORUM truth rows and must reproduce the
@@ -18,7 +18,17 @@
 #           two directions (rounded), median over splits (floor(x + 0.5)). Attention t* must equal the committed
 #           K10 selections (m3d 9, ecomac 8) or the run stops. Writes <out>/<dataset>/{selections.csv, ...};
 #           per-split curves are cached (resumable). Then label-free checks at t = 9 and at t* on the full data.
-#   truth   gate-checked stub (see gates below).
+#   truth   --dataset m3d|ecomac|rpe1|k562ess. Full-data scores (a3r, a2r, a1, attention at t = 9; a3r and attention at
+#           the committed t*; CLR; |r|; hub-stratified versions), delete-half gene jackknife (100 replicates, seed
+#           20261022, drawn per truth in table order), one-sided z p-values, endpoint rows (P1-P4, S1-S5), per-complex
+#           AP, r-protein module coherence. Cached per stage (fit, pair scores, each truth's jackknife): resumable.
+#           Writes <out>/truth/<dataset>/ and a DONE marker. Refuses a second run once DONE.
+#   boot    --dataset m3d. 200-draw paired cluster bootstrap (chips_bootstrap.R cluster mode, seeds 20260924 + b), MI, CLR,
+#           attention and a3r refitted per draw at t = 9; P1 and P3 differences; per-draw files (resumable).
+#   verdict Reads the endpoint tables and bootstrap intervals and applies the preregistered rules (intersection-union
+#           adoption, Holm over P1-P4 for single claims, Holm over S1-S5 only if adopted); writes <out>/verdict/verdict.csv.
+#   --synthetic 1  smoke test of truth/boot/verdict on generated data and a generated truth (never confirmatory;
+#           bypasses the repro/selection/E. coli-truth/script-clean gates, keeps the preregistration gate; use a scratch --out).
 #
 # Gates (functions below), each failure is a stop():
 #   gate_prereg()      preregistration tracked in git and identical to HEAD; hash of last commit touching
@@ -27,7 +37,8 @@
 #   gate_selections()  <out>/<dataset>/selections.csv byte-identical to docs/clr_logpt_selections/<dataset>_selections.csv.
 #   gate_ecoli_truth() SHA-256 of the built E. coli complex member list equals the committed one
 #                      (docs/clr_logpt_selections/ecoli_complexes.sha256).
-# Truth phases (E. coli, RPE1, K562 scoring) call all four gates; the repro mode calls only gate_prereg.
+# Truth phases (E. coli, RPE1, K562 scoring) call all four gates plus gate_script_clean (the script is committed) and
+# gate_order (E. coli, then RPE1, then K562); the repro mode calls only gate_prereg.
 #
 # Usage (repo root):
 #   Rscript analysis/clr_logpt_test.R --mode repro [--quick 0|N] [--threads 4] [--out results/clr_logpt_test]
@@ -36,10 +47,11 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(mode = "repro", dataset = "k562ess", out = "results/clr_logpt_test", threads = 4L, quick = 0L,
             t = 9L, alpha = 0.5, keff = 10, cap = 50L, seed = 20261022L,
             workers = 4L, nsplit = NA_integer_, mem_gb = 4, target_frac = 0.01,
+            synthetic = 0L, draws = 200L, jack = 100L, hubstrat = 1L,
             tgrid = "1,2,3,4,5,6,8,10,12,16,20,24,32", h5 = "",
             expr = "results/baselines_k562ess_truthgenes_genie3/expression.tsv",
             members = "results/baselines_k562ess_truthgenes_genie3/regulon_members.csv")
-ints <- c("threads", "quick", "t", "cap", "seed", "workers", "nsplit")
+ints <- c("threads", "quick", "t", "cap", "seed", "workers", "nsplit", "synthetic", "draws", "jack", "hubstrat")
 i <- 1L
 while (i <= length(args)) {
   key <- gsub("-", "_", sub("^--", "", args[i]))
@@ -311,17 +323,570 @@ if (opt$mode == "selections") {
   quit(save = "no")
 }
 
-## ---- mode: selections / truth stubs -------------------------------------------------------------
-if (opt$mode == "truth") {
-  {
-    gate_repro(HASH)
-    if (opt$dataset %in% c("m3d", "ecomac")) {
-      gate_selections(opt$dataset)
-      gate_ecoli_truth(file.path(SELDIR, "ecoli_complexes_members.tsv"))
-    } else if (opt$dataset == "rpe1") gate_selections("rpe1")
-  }
-  stop("mode '", opt$mode, "' is not implemented yet (preregistered steps 3-5 come after the reproduction check)")
+## ======================================================================================================
+## ---- truth phase, bootstrap and verdict (modes truth / boot / verdict) --------------------------------
+## ======================================================================================================
+## Preregistered constants (docs/preregistration_clr_logpt.md, "Statistics" and "Decision rules"). They are
+## fixed here, not options: the truth modes refuse other values (outside --synthetic smoke tests).
+SYN <- opt$synthetic == 1L                  # smoke test on synthetic data and a synthetic truth; never confirmatory
+NI_MARGIN <- 0.005; ALPHA1 <- 0.025; EFFECT_MIN <- 0.005
+JACK_SEED <- 20261022L; JACK_N <- 100L; BOOT_N <- 200L; BOOT_SEED0 <- 20260924L; T_PRIMARY <- 9L
+RP_RE <- "^RP[LS][0-9]+[A-Z]?[0-9]*$|^RPLP[0-2]$|^RPSA$"
+DATASETS <- c("m3d", "ecomac", "rpe1", "k562ess")
+GIT_HEAD <- git("rev-parse", "HEAD")[1]
+SCRIPT_COMMIT <- { h <- git("log", "-1", "--format=%H", "--", "analysis/clr_logpt_test.R"); if (length(h)) h[1] else NA_character_ }
+
+fix_check <- function() {
+  if (SYN) return(invisible(TRUE))
+  if (opt$quick != 0L || opt$jack != JACK_N || opt$draws != BOOT_N || opt$t != T_PRIMARY || opt$seed != JACK_SEED ||
+      opt$alpha != 0.5 || opt$keff != 10 || opt$cap != 50L)
+    stop("truth/boot/verdict modes refuse non-preregistered settings (--quick, --jack, --draws, --t, --seed, --alpha, --keff, --cap)")
 }
+# Extra gate (not in the preregistration, protects its audit trail): the script that produced an output is the committed one.
+gate_script_clean <- function() {
+  f <- "analysis/clr_logpt_test.R"
+  if (system2("git", c("ls-files", "--error-unmatch", f), stdout = FALSE, stderr = FALSE) != 0L ||
+      system2("git", c("diff", "--quiet", "HEAD", "--", f)) != 0L)
+    stop("gate refused: ", f, " is not committed (commit the code before any truth-phase run)")
+}
+# E. coli first, then RPE1, then K562 (preregistration, protocol step 5).
+gate_order <- function(ds) {
+  need <- switch(ds, rpe1 = c("m3d", "ecomac"), k562ess = c("m3d", "ecomac", "rpe1"), character(0))
+  for (n in need) if (!file.exists(file.path(opt$out, "truth", n, "DONE")))
+    stop("truth phase refused: run order is E. coli, then RPE1, then K562; ", n, " is not finished")
+}
+gate_all <- function(ds) {
+  fix_check()
+  if (SYN) return(invisible(TRUE))
+  gate_script_clean(); gate_repro(HASH)
+  if (ds %in% c("m3d", "ecomac")) { gate_selections(ds); gate_ecoli_truth(file.path(SELDIR, "ecoli_complexes_members.tsv")) }
+  else if (ds == "rpe1") gate_selections("rpe1")
+  else if (file.exists(file.path(SELDIR, "k562ess_selections.csv"))) gate_selections("k562ess")
+  gate_order(ds)
+  invisible(TRUE)
+}
+stamp <- function(df) { df$prereg_commit <- HASH; df$git_head <- GIT_HEAD; df$script_commit <- SCRIPT_COMMIT; df$synthetic <- SYN; df }
+wout <- function(x, f) {                      # every output carries the preregistration commit hash (protocol step 1)
+  dir.create(dirname(f), recursive = TRUE, showWarnings = FALSE)
+  tmp <- paste0(f, ".part"); utils::write.csv(stamp(x), tmp, row.names = FALSE); file.rename(tmp, f)
+}
+logger <- function(f) function(...) { m <- sprintf("[%s] %s", format(Sys.time(), "%H:%M:%S"), paste0(...)); cat(m, "\n")
+  dir.create(dirname(f), recursive = TRUE, showWarnings = FALSE); cat(m, "\n", file = f, append = TRUE) }
+none_op <- stats::setNames(character(0), character(0))
+p_sup <- function(d, se) if (is.finite(se) && se > 0) 1 - stats::pnorm(d / se) else NA_real_
+p_ni  <- function(d, se, m = NI_MARGIN) if (is.finite(se) && se > 0) 1 - stats::pnorm((d + m) / se) else NA_real_
+p_loss <- function(d, se) if (is.finite(se) && se > 0) stats::pnorm(d / se) else NA_real_
+
+# Overlap merge (preregistration "Overlap merge"; the rule of analysis/build_ecoli_complex_truth.R, verbatim):
+# (1) drop exact duplicates and proper subsets; (2) complete-linkage hclust on 1 - Jaccard, cutree(h = 0.5), union.
+merge_sets <- function(s) {
+  if (length(s) == 0) return(s)
+  s <- s[order(names(s))]
+  key <- vapply(s, paste, "", collapse = " "); s <- s[!duplicated(key)]
+  drop <- vapply(seq_along(s), function(i) any(vapply(seq_along(s)[-i], function(j)
+    length(s[[j]]) > length(s[[i]]) && all(s[[i]] %in% s[[j]]), TRUE)), TRUE)
+  s <- s[!drop]
+  if (length(s) < 2) return(s)
+  all_g <- sort(unique(unlist(s))); M <- vapply(s, function(g) all_g %in% g, logical(length(all_g)))
+  inter <- crossprod(M); sz <- colSums(M); jac <- inter / (outer(sz, sz, "+") - inter)
+  cl <- stats::cutree(stats::hclust(stats::as.dist(1 - jac), "complete"), h = 0.5)
+  out <- lapply(split(seq_along(s), cl), function(ix) sort(unique(unlist(s[ix]))))
+  names(out) <- vapply(split(names(s), cl), function(n) paste(n, collapse = "+"), "")
+  out
+}
+# Hub-stratified score: within-stratum percentile in 10 strata of pi_i + pi_j (baselines.R, verbatim).
+hub_stratify <- function(S, H, k = 10L) {
+  S[!is.finite(S)] <- 0; ut <- which(upper.tri(S)); h <- H[ut]
+  g <- cut(h, unique(stats::quantile(h, seq(0, 1, length.out = k + 1L))), include.lowest = TRUE)
+  r <- stats::ave(S[ut], g, FUN = function(x) rank(x) / length(x))
+  R <- matrix(0, nrow(S), ncol(S), dimnames = dimnames(S)); R[ut] <- r; R + t(R)
+}
+
+## ---- synthetic data (smoke tests only; needs no truth) --------------------------------------------------
+synth_data <- function(ds, G = 160L, n = 48L) {
+  set.seed(match(ds, DATASETS) * 101L)
+  ecoli <- ds %in% c("m3d", "ecomac")
+  gn <- if (ecoli) sprintf("b%04d", seq_len(G)) else c(sprintf("RPL%d", 1:12), sprintf("GENE%03d", seq_len(G - 12L)))
+  mod <- c(rep(1:20, each = 6L), rep(0L, G - 120L))
+  Fm <- matrix(stats::rnorm(20 * n), 20, n)
+  X <- matrix(stats::rnorm(G * n), G, n); X[mod > 0, ] <- X[mod > 0, ] + 1.2 * Fm[mod[mod > 0], ]
+  rownames(X) <- gn; colnames(X) <- sprintf("s%03d", seq_len(n))
+  cx <- lapply(1:20, function(k) gn[mod == k])
+  cx[[21]] <- gn[13:17]                       # proper subset of module 3 (absorption)
+  cx[[22]] <- cx[[4]]                         # exact duplicate of module 4
+  cx[[23]] <- c(gn[19:23], gn[121])           # Jaccard 5/7 with module 4: merged with it
+  names(cx) <- sprintf("CX%02d", seq_along(cx))
+  regs <- lapply(1:10, function(k) gn[mod %in% c(2 * k - 1, 2 * k)]); names(regs) <- sprintf("REG%02d", 1:10)
+  op <- if (ecoli) stats::setNames(sprintf("op%03d", rep(seq_len(G / 2), each = 2L)), gn) else none_op
+  list(X = X, genes = gn, complexes = cx, regs = regs, operon_of = op)
+}
+synth_chips <- function(sd) {                 # chips of 3 per experiment for the cluster bootstrap smoke test
+  set.seed(7L); X <- sd$X; ch <- lapply(seq_len(ncol(X)), function(j) X[, j] + matrix(stats::rnorm(nrow(X) * 3L, sd = 0.3), nrow(X)))
+  Xc <- do.call(cbind, ch); rownames(Xc) <- rownames(X); colnames(Xc) <- sprintf("chip%03d", seq_len(ncol(Xc)))
+  list(Xc = Xc, Xa = X, exp_of = stats::setNames(rep(colnames(X), each = 3L), colnames(Xc)))
+}
+
+## ---- expression input (the same construction as the committed selections) -------------------------------
+h5_cat <- function(h5, grp, field) {          # anndata categorical, old or new layout (as keff_test.R / baselines.R)
+  x <- rhdf5::h5read(h5, paste0(grp, "/", field))
+  if (is.list(x)) return(as.character(x$categories)[x$codes + 1L])
+  cats <- tryCatch(rhdf5::h5read(h5, paste0(grp, "/__categories/", field)), error = function(e) NULL)
+  if (is.null(cats)) as.character(x) else as.character(cats)[x + 1L]
+}
+half_split <- function(h5) {                  # perturbseq_bulk.R / baselines.R split of the significant knockdowns
+  set.seed(20261015L)
+  pert <- h5_cat(h5, "/obs", "gene_transcript"); pval <- as.numeric(rhdf5::h5read(h5, "/obs/energy_test_p_value"))
+  K <- pert[pval < 1e-3 & !grepl("non-targeting", pert)]; K <- K[sample(length(K))]
+  A <- sort(K[seq_len(floor(length(K) / 2))]); list(A = A, B = setdiff(K, A), pert = pert)
+}
+load_expr <- function(ds) {
+  if (SYN) { s <- synth_data(ds); return(list(X = s$X, h5 = NULL, B = NULL, synth = s)) }
+  if (ds == "m3d") {
+    m3d <- "data/E_coli_v4_Build_6"; base <- basename(m3d)
+    raw <- utils::read.delim(file.path(m3d, paste0("avg_", base, "_exps466probes4297.tab")), check.names = FALSE)
+    X <- as.matrix(raw[, -1]); rownames(X) <- vapply(strsplit(raw[[1]], "_"), function(p) p[length(p) - 1L], ""); rm(raw)
+  } else if (ds == "ecomac") {
+    X <- as.matrix(utils::read.delim("data/ecomac/EcoMAC.tsv", header = FALSE))
+    rownames(X) <- utils::read.delim("data/ecomac/gene_names.tsv", header = FALSE, stringsAsFactors = FALSE)[[2]]
+    plat <- utils::read.csv("data/ecomac/array_platform.csv", stringsAsFactors = FALSE)$platform
+    X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
+    X <- suppressMessages(sva::ComBat(X, batch = factor(plat)))
+  } else if (ds == "rpe1") {
+    h5 <- "data/perturbseq/rpe1_normalized_bulk_01.h5ad"; hs <- half_split(h5)
+    Z <- rhdf5::h5read(h5, "X"); rownames(Z) <- h5_cat(h5, "/var", "gene_name"); colnames(Z) <- hs$pert; X <- Z[, hs$A]; rm(Z); invisible(gc())
+    nf <- !is.finite(X); bad <- rowMeans(nf) > 0.01; X <- X[!bad, , drop = FALSE]; X[!is.finite(X)] <- 0; rm(nf)
+    return(list(X = {X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]; storage.mode(X) <- "double"; X}, h5 = h5, B = hs$B, synth = NULL))
+  } else {                                    # k562ess: network half A, truth-gene subset (baselines.R --gene_subset truths), as repro
+    ex <- utils::read.delim(opt$expr, check.names = FALSE); X <- as.matrix(ex[, -1]); rownames(X) <- ex[[1]]; rm(ex)
+    h5 <- "data/perturbseq/K562_essential_normalized_bulk_01.h5ad"
+    return(list(X = X, h5 = h5, B = half_split(h5)$B, synth = NULL))
+  }
+  X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]; storage.mode(X) <- "double"
+  list(X = X, h5 = NULL, B = NULL, synth = NULL)
+}
+
+## ---- truths ---------------------------------------------------------------------------------------------
+# Returns the ordered list of truths (endpoint-table order first: complexes, regulons SC; then descriptive ones).
+# Each: reg (members = gene row indices), pairs (comembership_pairs), operon, role.
+mk_truth <- function(r, o, genes, role) {
+  if (!length(r$members)) return(NULL)
+  p <- comembership_pairs(r, o, genes); if (sum(p$label) == 0) return(NULL)
+  list(reg = r, pairs = p, operon = o, role = role)
+}
+as_reg <- function(sets, cls) list(members = sets, class = stats::setNames(rep(cls, length(sets)), names(sets)))
+ecoli_regtab <- local({ cache <- NULL; function() {
+  if (is.null(cache)) { to_bn <- make_bnumber_mapper(file.path(script_dir, "ecoli_k12_genes.tsv"))
+    cache <<- list(rtab = build_regulon_table("data/RegulonDBExtract", to_bn), operon_of = build_operon_map("data/RegulonDBExtract", to_bn)) }
+  cache } })
+ecoli_members <- function(ds, genes, synth) {  # long data frame: variant, dataset, complex, bnumber (the SHA-256-gated file)
+  if (!is.null(synth)) {
+    cx <- lapply(synth$complexes, function(g) g)
+    mk <- function(s, v) do.call(rbind, lapply(names(s), function(k) data.frame(variant = v, dataset = ds, complex = k, bnumber = s[[k]])))
+    return(rbind(mk(merge_sets(cx), "main"), mk(cx, "nomerge")))
+  }
+  utils::read.delim(file.path(SELDIR, "ecoli_complexes_members.tsv"), stringsAsFactors = FALSE)
+}
+complexes_with_pos <- function(sets, operon_of, genes, with_operon) {   # as the builder's evaluability count
+  sum(vapply(sets, function(m) { o <- operon_of[genes[m]]
+    if (!with_operon) length(m) >= 2 && (any(is.na(o)) || length(unique(o)) > 1) else length(m) >= 2 }, TRUE))
+}
+build_truths_ecoli <- function(ds, genes, synth = NULL, only = NULL) {
+  if (is.null(synth)) { rt <- ecoli_regtab(); rtab <- rt$rtab; operon_of <- rt$operon_of } else operon_of <- synth$operon_of
+  mem <- ecoli_members(ds, genes, synth); mem <- mem[mem$dataset == ds, ]
+  sets_of <- function(v) { x <- mem[mem$variant == v, ]
+    lapply(split(x$bnumber, x$complex), function(g) sort(stats::na.omit(match(g, genes)))) }
+  cx <- function(v, o, role) { s <- sets_of(v); if (!length(s)) NULL else mk_truth(as_reg(s, "complex"), o, genes, role) }
+  main <- sets_of("main")
+  p_main <- if (length(main)) comembership_pairs(as_reg(main, "complex"), operon_of, genes) else NULL
+  n_pos <- if (is.null(p_main)) 0L else sum(p_main$label)
+  n_cx <- complexes_with_pos(main, operon_of, genes, FALSE)
+  fallback <- !(n_pos >= 200 && n_cx >= 10)    # evaluability, structure only (preregistration "Evaluability")
+  if (!is.null(synth)) fallback <- FALSE
+  reg_sc <- if (is.null(synth)) make_regulons(rtab, genes, conf_keep = c("C", "S")) else
+    { s <- lapply(synth$regs, function(g) match(g, genes)); list(members = s, class = stats::setNames(rep("TF", length(s)), names(s))) }
+  reg_all <- if (is.null(synth)) make_regulons(rtab, genes, conf_keep = c("C", "S", "W", "?")) else
+    { s <- c(lapply(synth$regs, function(g) match(g, genes)), list(EXTRA = match(genes[c(121:132)], genes))); list(members = s, class = stats::setNames(rep("TF", length(s)), names(s))) }
+  B <- list()
+  B$complexes <- cx("main", if (fallback) none_op else operon_of, "primary")
+  B$regulons_SC <- mk_truth(reg_sc, operon_of, genes, "primary")
+  B$complexes_operon_incl <- cx("main", none_op, "sensitivity")
+  B$complexes_size2 <- cx("size2", operon_of, "sensitivity")
+  B$complexes_nomerge <- cx("nomerge", operon_of, "sensitivity")
+  B$complexes_noribo <- cx("noribo", operon_of, "sensitivity")
+  B$regulons_all <- mk_truth(reg_all, operon_of, genes, "descriptive")
+  if (is.null(synth)) {                       # definitions of analysis/granularity.R, as keff_test.R load_truths
+    ra <- make_regulons(rtab, genes, conf_keep = c("C", "S", "W", "?"), max_size = 2000)
+    pick <- function(keep) list(members = ra$members[keep], class = ra$class[keep])
+    B$TF_regulons <- mk_truth(pick(ra$class == "TF" & lengths(ra$members) <= 500 & lengths(ra$members) >= 5), operon_of, genes, "descriptive")
+    B$sigmulons <- mk_truth(pick(ra$class == "sigma" & lengths(ra$members) >= 5 & !names(ra$members) %in% c("sigma:sigma70", "sigma:sigma38")), operon_of, genes, "descriptive")
+    op <- operon_of[names(operon_of) %in% genes]
+    op_sets <- lapply(split(match(names(op), genes), op), unique); op_sets <- op_sets[lengths(op_sets) >= 2]
+    B$operons <- mk_truth(as_reg(op_sets, "operon"), none_op, genes, "descriptive")
+  }
+  B <- Filter(Negate(is.null), B)
+  if (!is.null(only)) B <- B[intersect(only, names(B))]
+  rp <- sets_of("rp_module")
+  list(bench = B, operon_of = operon_of, rp_module = if (length(rp)) as_reg(rp, "rp") else NULL,
+       evaluability = data.frame(dataset = ds, n_positive_pairs_main_operon_excluded = n_pos,
+                                 n_complexes_with_positives = n_cx, fallback_operon_included = fallback),
+       complex_truth = "complexes", sc_truth = "regulons_SC")
+}
+build_truths_human <- function(ds, genes, h5, B_ids, synth = NULL) {
+  raw <- if (is.null(synth)) corum_sets(genes)$members else
+    lapply(synth$complexes, function(g) sort(stats::na.omit(match(g, genes))))
+  raw <- raw[lengths(raw) >= 3L & lengths(raw) <= 200L]
+  mg <- merge_sets(lapply(raw, function(ix) genes[ix]))
+  mg <- lapply(mg, function(g) sort(match(g, genes)))
+  rpfrac <- vapply(mg, function(ix) mean(grepl(RP_RE, genes[ix])), 0)
+  B <- list(CORUM_merged = mk_truth(as_reg(mg, "complex"), none_op, genes, "primary"),
+            CORUM_raw = mk_truth(as_reg(raw, "complex"), none_op, genes, "sensitivity"),
+            CORUM_noRP = mk_truth(as_reg(mg[rpfrac < 0.3], "complex"), none_op, genes, "sensitivity"))
+  if (is.null(synth)) {
+    B$CollecTRI <- mk_truth(collectri_sets(genes), none_op, genes, "descriptive")
+    B$DoRothEA_AB <- mk_truth(dorothea_sets(genes), none_op, genes, "descriptive")
+    B$DoRothEA_ABC <- mk_truth(dorothea_sets(genes, c("A", "B", "C")), none_op, genes, "descriptive")
+    if (!is.null(h5)) B$KD_response <- mk_truth(response_sets(genes, path = h5, use = B_ids), none_op, genes, "descriptive")
+  }
+  list(bench = Filter(Negate(is.null), B), operon_of = none_op, rp_module = NULL, evaluability = NULL,
+       complex_truth = "CORUM_merged", sc_truth = NULL)
+}
+build_truths <- function(ds, genes, ld, only = NULL) {
+  if (ds %in% c("m3d", "ecomac")) build_truths_ecoli(ds, genes, ld$synth, only)
+  else build_truths_human(ds, genes, ld$h5, ld$B, ld$synth)
+}
+truth_counts <- function(TR) do.call(rbind, lapply(names(TR$bench), function(nm) { b <- TR$bench[[nm]]
+  data.frame(truth = nm, role = b$role, n_sets = length(b$reg$members), n_genes = length(b$pairs$genes_in), n_pairs = length(b$pairs$label),
+             n_pos = sum(b$pairs$label), base_rate = mean(b$pairs$label), n_same_operon_removed = b$pairs$n_same_operon_removed) }))
+
+## ---- full-data scores for one dataset (resumable at two points: fit, pair scores) ---------------------
+score_dataset <- function(ds, X, genes, TR, sel, dout, say) {
+  G <- length(genes); md5 <- digest::digest(genes, algo = "md5"); bench <- TR$bench
+  fp <- list(ds = ds, genes_md5 = md5, truths = names(bench), npairs = vapply(bench, function(b) length(b$pairs$label), 0L),
+             prereg = HASH, tstar = sel, alpha = opt$alpha, keff = opt$keff, cap = opt$cap, hubstrat = opt$hubstrat)
+  cf <- file.path(dout, "cache", "scores.rds"); dir.create(file.path(dout, "cache"), recursive = TRUE, showWarnings = FALSE)
+  if (file.exists(cf)) { s <- readRDS(cf); if (!isTRUE(all.equal(s$fp, fp))) stop("cache/scores.rds fingerprint mismatch: use a new --out")
+    say("pair scores: reusing ", cf); return(s) }
+  fitf <- file.path(dout, "cache", "fit.rds")
+  if (file.exists(fitf)) { ft <- readRDS(fitf); stopifnot(identical(ft$genes_md5, md5), identical(ft$prereg, HASH)); say("fit: reusing ", fitf)
+  } else {
+    t0 <- Sys.time()
+    f <- ClrAttention$new(X)$estimate_mi(bins = "hg", transform = "none", threads = opt$threads)$
+      calibrate(method = "normal", combine = "stouffer")
+    f$build_operator(alpha = opt$alpha, softmax_keff = opt$keff, softmax_cap = opt$cap)   # exactly as repro mode (build_fit / build_operator)
+    ft <- list(C = as.matrix(f$clr_scores), A = as.matrix(f$operator), genes_md5 = md5, prereg = HASH)
+    dimnames(ft$C) <- NULL; dimnames(ft$A) <- NULL; f$release(); rm(f); invisible(gc())
+    saveRDS(ft, fitf, compress = FALSE); say(sprintf("MI, CLR, operator in %.1f min", as.numeric(difftime(Sys.time(), t0, units = "mins"))))
+  }
+  A <- ft$A; C <- ft$C; rm(ft)
+  # stationary distribution of the lazy walk (teleport 1e-3), as baselines.R (sparse P)
+  Ps <- Matrix::Diagonal(G, 1 - opt$alpha) + opt$alpha * Matrix::Matrix(A, sparse = TRUE)
+  q0 <- rep(1 / G, G)
+  for (it in 1:20000) { q <- (1 - 1e-3) * as.numeric(q0 %*% Ps) + 1e-3 / G; if (sum(abs(q - q0)) < 1e-13) break; q0 <- q }
+  rm(Ps); Hm <- if (opt$hubstrat == 1L) outer(q, q, "+") else NULL
+  cname <- TR$complex_truth; co <- NULL
+  if (!is.null(cname) && cname %in% names(bench)) co <- comember_matrix(bench[[cname]]$reg, G)
+  rp <- TR$rp_module; co_rp <- if (!is.null(rp)) comember_matrix(rp, G) else NULL
+  HUB <- c("attention_t9", "a3r_t9", "clr", "abs_r"); CORE <- HUB; bench_role <- vapply(bench, function(b) b$role, ""); PCM <- c("attention_t9", "a3r_t9", "clr")
+  SC <- list(); PC <- list(); RPC <- list()
+  consume <- function(S, nm) {
+    S[!is.finite(S)] <- 0; diag(S) <- 0
+    # descriptive truths (huge pair sets on human data) keep only the core methods, to bound memory
+    use <- names(bench)[bench_role != "descriptive" | nm %in% CORE]
+    SC[[nm]] <<- lapply(bench[use], function(b) S[cbind(b$pairs$i, b$pairs$j)])
+    if (!is.null(Hm) && nm %in% HUB) { hs <- hub_stratify(S, Hm)
+      SC[[paste0(nm, "_hubstrat")]] <<- lapply(bench[use], function(b) hs[cbind(b$pairs$i, b$pairs$j)]); rm(hs) }
+    if (nm %in% PCM && !is.null(co)) { b <- bench[[cname]]       # per-complex AP, complexes with >= 10 positive pairs (macro_aupr definitions)
+      x <- regulon_ap_table(S, b$reg, co, b$operon, genes, min_pos = 10L); PC[[nm]] <<- cbind(method = nm, x) }
+    if (nm %in% PCM && !is.null(rp)) RPC[[nm]] <<- data.frame(method = nm,
+      coherence_auroc = regulon_coherence(S, rp, co_rp, TR$operon_of, genes))
+    invisible(NULL)
+  }
+  ts <- sort(unique(c(T_PRIMARY, unlist(sel)))); Pd <- lazy_walk_P(A, opt$alpha); rm(A); Pt <- Pd; lf <- NULL
+  for (t in seq_len(max(ts))) {
+    if (t > 1L) Pt <- Pt %*% Pd
+    if (!(t %in% ts)) next
+    say("depth t = ", t)
+    if (t == T_PRIMARY) { consume(attention(Pt), "attention_t9"); consume(a3r(Pt), "a3r_t9"); consume(a2r(Pt), "a2r_t9"); consume(a1(Pt), "a1_t9")
+      lf <- cbind(dataset = ds, t = t, operator_checks(Pt)) }
+    if (!is.null(sel$a3r) && t == sel$a3r) consume(a3r(Pt), "a3r_tstar")
+    if (!is.null(sel$attention) && t == sel$attention) consume(attention(Pt), "attention_tstar")
+    invisible(gc(verbose = FALSE))
+  }
+  rm(Pt, Pd); consume(C, "clr"); rm(C)
+  r <- abs(stats::cor(t(X))); r[is.na(r)] <- 0; consume(r, "abs_r"); rm(r, Hm)
+  s <- list(SC = SC, PC = PC, RPC = RPC, lf = lf, fp = fp); saveRDS(s, cf); s
+}
+
+## ---- jackknife, metrics, endpoints ---------------------------------------------------------------------
+# Paired delete-half gene jackknife (baselines.R): per truth, 100 replicates; a random half of the truth's genes
+# (genes_in) is kept, AUPR over pairs with both genes kept; the same halves serve every method.
+# Halves are drawn for all truths of this dataset, in table order, right after set.seed(20261022).
+jack_dataset <- function(bench, SC, G, dout, say) {
+  set.seed(JACK_SEED)
+  halves <- lapply(bench, function(b) lapply(seq_len(opt$jack), function(r)
+    sample(b$pairs$genes_in, floor(length(b$pairs$genes_in) / 2))))
+  JR <- list(); dir.create(file.path(dout, "cache"), showWarnings = FALSE)
+  for (nm in names(bench)) {
+    jf <- file.path(dout, "cache", paste0("jack_", nm, ".rds"))
+    methods <- names(SC)[vapply(SC, function(x) nm %in% names(x), NA)]
+    if (file.exists(jf)) { J <- readRDS(jf); if (identical(colnames(J), methods)) { JR[[nm]] <- J; next } }
+    p <- bench[[nm]]$pairs; J <- matrix(NA_real_, opt$jack, length(methods), dimnames = list(NULL, methods))
+    for (r in seq_len(opt$jack)) {
+      inh <- logical(G); inh[halves[[nm]][[r]]] <- TRUE; ix <- which(inh[p$i] & inh[p$j]); lab <- p$label[ix]
+      for (m in methods) J[r, m] <- ap_fast(SC[[m]][[nm]][ix], lab)
+    }
+    saveRDS(J, jf); JR[[nm]] <- J; say("jackknife done: ", nm)
+  }
+  JR
+}
+comparators <- function(m) {                  # same-depth, same-adjustment comparators
+  hs <- endsWith(m, "_hubstrat"); b <- sub("_hubstrat$", "", m)
+  c(att = if (b == "a3r_tstar") paste0("attention_tstar", if (hs) "_hubstrat" else "") else paste0("attention_t9", if (hs) "_hubstrat" else ""),
+    clr = paste0("clr", if (hs) "_hubstrat" else ""))
+}
+metrics_dataset <- function(ds, bench, SC, JR) {
+  rows <- list()
+  for (nm in names(bench)) { p <- bench[[nm]]$pairs; J <- JR[[nm]]
+    ms <- colnames(J); au <- vapply(ms, function(m) ap_fast(SC[[m]][[nm]], p$label), 0)
+    for (m in ms) { cp <- comparators(m); row <- list(dataset = ds, truth = nm, role = bench[[nm]]$role, method = m,
+        aupr = au[[m]], base_rate = mean(p$label), n_pos = sum(p$label))
+      for (k in names(cp)) { c0 <- cp[[k]]
+        if (!c0 %in% ms) { d0 <- se <- NA_real_ } else { d0 <- au[[m]] - au[[c0]]; se <- stats::sd(J[, m] - J[, c0]) }
+        row[[paste0("d_vs_", k)]] <- d0; row[[paste0("se_vs_", k)]] <- se
+        row[[paste0("lo_vs_", k)]] <- d0 - 1.96 * se; row[[paste0("hi_vs_", k)]] <- d0 + 1.96 * se
+        row[[paste0("p_sup_vs_", k)]] <- p_sup(d0, se); row[[paste0("p_ni_vs_", k)]] <- p_ni(d0, se) }
+      rows[[length(rows) + 1L]] <- as.data.frame(row) } }
+  do.call(rbind, rows)
+}
+# endpoint table (preregistration "Endpoints"): new readout a3r at t = 9 minus the comparator
+ENDPOINTS <- data.frame(
+  code = c("P1", "P2", "P3", "P4", "S1", "S2", "S3", "S4", "S5"),
+  dataset = c("m3d", "ecomac", "m3d", "ecomac", "m3d", "ecomac", "m3d", "ecomac", "rpe1"),
+  truth_kind = c("complex", "complex", "sc", "sc", "sc", "sc", "complex", "complex", "complex"),
+  comparator = c("att", "att", "att", "att", "clr", "clr", "clr", "clr", "att"),
+  hypothesis = c("sup", "sup", "ni", "ni", "sup", "sup", "ni", "ni", "sup"), stringsAsFactors = FALSE)
+endpoints_dataset <- function(ds, met, TR) {
+  e <- ENDPOINTS[ENDPOINTS$dataset == ds, ]; if (!nrow(e)) return(NULL)
+  do.call(rbind, lapply(seq_len(nrow(e)), function(k) {
+    tn <- if (e$truth_kind[k] == "complex") TR$complex_truth else TR$sc_truth
+    x <- met[met$truth == tn & met$method == "a3r_t9", ]
+    cmp <- e$comparator[k]; d <- x[[paste0("d_vs_", cmp)]]; se <- x[[paste0("se_vs_", cmp)]]
+    data.frame(code = e$code[k], dataset = ds, truth = tn, comparator = if (cmp == "att") "attention_t9" else "clr", hypothesis = e$hypothesis[k],
+               margin = if (e$hypothesis[k] == "ni") NI_MARGIN else 0, aupr_new = x$aupr, d = d, se = se, lo = d - 1.96 * se, hi = d + 1.96 * se,
+               p_raw = if (e$hypothesis[k] == "sup") p_sup(d, se) else p_ni(d, se), p_loss = p_loss(d, se), stringsAsFactors = FALSE) }))
+}
+per_complex_summary <- function(PC) {
+  if (!all(c("attention_t9", "a3r_t9") %in% names(PC))) return(NULL)
+  a <- PC$attention_t9; b <- PC$a3r_t9; ok <- !is.na(a$ap) & !is.na(b$ap); d <- b$ap[ok] - a$ap[ok]
+  r <- data.frame(comparison = "a3r_t9 minus attention_t9", n_complexes_ge10pos = sum(ok), mean_d_ap = mean(d), median_d_ap = stats::median(d),
+                  n_improved = sum(d > 0), n_worse = sum(d < 0))
+  if ("clr" %in% names(PC)) { cc <- PC$clr; ok2 <- !is.na(a$ap) & !is.na(cc$ap); d2 <- a$ap[ok2] - cc$ap[ok2]
+    r <- rbind(r, data.frame(comparison = "attention_t9 minus clr", n_complexes_ge10pos = sum(ok2), mean_d_ap = mean(d2), median_d_ap = stats::median(d2),
+                             n_improved = sum(d2 > 0), n_worse = sum(d2 < 0))) }
+  r
+}
+
+## ---- mode: truth ---------------------------------------------------------------------------------------
+if (opt$mode == "truth") {
+  ds <- opt$dataset; if (!ds %in% DATASETS) stop("truth: --dataset must be one of ", paste(DATASETS, collapse = ", "))
+  gate_all(ds)
+  dout <- file.path(opt$out, "truth", ds); dir.create(dout, recursive = TRUE, showWarnings = FALSE)
+  say <- logger(file.path(dout, "truth.log")); T0 <- Sys.time()
+  say("truth phase: ", ds, if (SYN) " (SYNTHETIC smoke test)" else "", "; prereg commit ", HASH, "; HEAD ", GIT_HEAD)
+  if (file.exists(file.path(dout, "DONE")) ) stop("truth phase for ", ds, " is already DONE; a rerun needs a logged reason (preregistration step 5)")
+  ld <- load_expr(ds); X <- ld$X; genes <- rownames(X); G <- length(genes)
+  fpf <- file.path(opt$out, ds, "splits", "fingerprint.rds")
+  if (!SYN && ds %in% c("m3d", "ecomac", "rpe1")) {          # same input as the committed selections
+    if (!file.exists(fpf) || !identical(readRDS(fpf)$genes_md5, digest::digest(genes, algo = "md5")))
+      stop("gene set differs from the one the selections were computed on (", fpf, ")")
+  }
+  say(sprintf("%s: %d genes x %d samples", ds, G, ncol(X)))
+  tsel <- list()
+  if (SYN) tsel <- list(a3r = 4L, attention = 9L) else {
+    sf <- file.path(SELDIR, paste0(ds, "_selections.csv"))
+    if (file.exists(sf)) { s <- utils::read.csv(sf); tsel <- list(a3r = s$t_star[s$readout == "a3r"], attention = s$t_star[s$readout == "attention"]) }
+    else say("no committed selections for ", ds, ": t* readouts skipped")
+  }
+  TR <- build_truths(ds, genes, ld)
+  tc <- truth_counts(TR); wout(tc, file.path(dout, "truth_counts.csv"))
+  if (!is.null(TR$evaluability)) { wout(TR$evaluability, file.path(dout, "evaluability.csv"))
+    say("evaluability: ", paste(names(TR$evaluability), unlist(TR$evaluability[1, ]), sep = "=", collapse = " ")) }
+  say("truths: ", paste(sprintf("%s (%d pos / %d pairs)", tc$truth, tc$n_pos, tc$n_pairs), collapse = "; "))
+  need <- c(TR$complex_truth, TR$sc_truth); if (!all(need %in% names(TR$bench))) stop("primary truth missing: ", paste(setdiff(need, names(TR$bench)), collapse = ", "))
+  S <- score_dataset(ds, X, genes, TR, tsel, dout, say); rm(X)
+  wout(S$lf, file.path(dout, "label_free_t9.csv"))
+  JR <- jack_dataset(TR$bench, S$SC, G, dout, say)
+  jr <- do.call(rbind, lapply(names(JR), function(nm) { J <- JR[[nm]]
+    data.frame(truth = nm, method = rep(colnames(J), each = nrow(J)), rep = rep(seq_len(nrow(J)), ncol(J)), aupr = as.vector(J)) }))
+  wout(jr, file.path(dout, "jack_replicates.csv"))
+  met <- metrics_dataset(ds, TR$bench, S$SC, JR); wout(met, file.path(dout, "metrics.csv"))
+  ep <- endpoints_dataset(ds, met, TR); if (!is.null(ep)) wout(ep, file.path(dout, paste0("endpoints_", ds, ".csv")))
+  if (length(S$PC)) { wout(do.call(rbind, S$PC), file.path(dout, "per_complex_ap.csv"))
+    pcs <- per_complex_summary(S$PC); if (!is.null(pcs)) wout(pcs, file.path(dout, "per_complex_summary.csv")) }
+  if (length(S$RPC)) wout(do.call(rbind, S$RPC), file.path(dout, "rp_module_coherence.csv"))
+  m9 <- met[met$method %in% c("a3r_t9", "attention_t9", "clr") & met$role != "descriptive", c("truth", "method", "aupr", "d_vs_att", "se_vs_att", "d_vs_clr", "se_vs_clr")]
+  say("AUPR (primary and sensitivity truths):\n", paste(utils::capture.output(print(m9, row.names = FALSE, digits = 4)), collapse = "\n"))
+  if (!is.null(ep)) say("endpoints:\n", paste(utils::capture.output(print(ep[, c("code", "truth", "comparator", "hypothesis", "d", "se", "p_raw")], row.names = FALSE, digits = 4)), collapse = "\n"))
+  writeLines(sprintf("%s %s %s", HASH, GIT_HEAD, format(Sys.time(), "%Y-%m-%d %H:%M:%S")), file.path(dout, "DONE"))
+  say(sprintf("done in %.1f min", as.numeric(difftime(Sys.time(), T0, units = "mins"))))
+  quit(save = "no")
+}
+
+## ---- mode: boot (M3D experiment-level cluster bootstrap, chips_bootstrap.R cluster mode) ---------------
+if (opt$mode == "boot") {
+  if (opt$dataset != "m3d") stop("boot: M3D only (EcoMAC has no such bootstrap)")
+  gate_all("m3d"); source(file.path(script_dir, "parallel.R"))
+  dout <- file.path(opt$out, "boot"); dir.create(file.path(dout, "draws"), recursive = TRUE, showWarnings = FALSE)
+  say <- logger(file.path(dout, "boot.log")); T0 <- Sys.time()
+  say("cluster bootstrap: ", opt$draws, " draws, seeds ", BOOT_SEED0, " + b; prereg commit ", HASH, if (SYN) " (SYNTHETIC)" else "")
+  if (SYN) { sd0 <- synth_data("m3d"); ch <- synth_chips(sd0); Xc <- ch$Xc; Xa <- ch$Xa; exp_of <- ch$exp_of; synth <- sd0
+  } else {                                    # construction of chips_bootstrap.R
+    m3d <- "data/E_coli_v4_Build_6"; base <- basename(m3d); synth <- NULL
+    rdm <- function(f) { raw <- utils::read.delim(file.path(m3d, f), check.names = FALSE, stringsAsFactors = FALSE)
+      X <- as.matrix(raw[, -1]); storage.mode(X) <- "double"; rownames(X) <- vapply(strsplit(raw[[1]], "_"), function(p) p[length(p) - 1L], ""); X }
+    Xc <- rdm(paste0(base, "_chips907probes4297.tab")); Xa <- rdm(paste0("avg_", base, "_exps466probes4297.tab"))
+    stopifnot(identical(rownames(Xc), rownames(Xa)))
+    keep <- apply(Xc, 1, function(x) diff(range(x))) > 0 & apply(Xa, 1, function(x) diff(range(x))) > 0
+    Xc <- Xc[keep, ]; Xa <- Xa[keep, ]
+    desc <- utils::read.delim(file.path(m3d, paste0(base, ".experiment_descriptions")), stringsAsFactors = FALSE)
+    exp_of <- stats::setNames(desc$experiment_name, desc$chip_name)[colnames(Xc)]; stopifnot(!anyNA(exp_of))
+  }
+  genes <- rownames(Xc); G <- length(genes); chips_by_exp <- split(colnames(Xc), exp_of)
+  say(sprintf("%d genes; %d chips of %d experiments", G, ncol(Xc), length(chips_by_exp)))
+  if (!SYN && !identical(genes, rownames(Xa)[apply(Xa, 1, function(x) diff(range(x))) > 0])) say("note: bootstrap gene set differs from the 466-experiment truth gene set")
+  ld <- list(synth = synth, h5 = NULL, B = NULL)
+  TR <- build_truths("m3d", genes, ld, only = c("complexes", "regulons_SC")); bench <- TR$bench
+  stopifnot(all(c("complexes", "regulons_SC") %in% names(bench)))
+  say("truths: ", paste(sprintf("%s %d pos / %d pairs", names(bench), vapply(bench, function(b) sum(b$pairs$label), 0), vapply(bench, function(b) length(b$pairs$label), 0L)), collapse = "; "))
+  draw_cols <- function() {                   # chips_bootstrap.R draw_cols("cluster"), verbatim
+    ex <- names(chips_by_exp); pick <- sample(ex, length(ex), replace = TRUE); used <- list()
+    vapply(pick, function(e) { ch <- chips_by_exp[[e]]; avail <- setdiff(ch, used[[e]]); if (!length(avail)) avail <- ch
+      c1 <- if (length(avail) == 1L) avail else sample(avail, 1L); used[[e]] <<- c(used[[e]], c1); c1 }, "")
+  }
+  boot_eval <- function(Xm, label) {
+    rng <- apply(Xm, 1, function(x) diff(range(x)))
+    if (any(rng <= 0)) Xm[rng <= 0, ] <- Xm[rng <= 0, ] + matrix(stats::rnorm(sum(rng <= 0) * ncol(Xm), sd = 1e-9), sum(rng <= 0))
+    f <- ClrAttention$new(Xm)$estimate_mi(bins = "hg", transform = "none", threads = opt$threads)$calibrate(method = "normal", combine = "stouffer")
+    f$build_operator(alpha = opt$alpha, softmax_keff = opt$keff, softmax_cap = opt$cap)
+    A <- as.matrix(f$operator); C <- as.matrix(f$clr_scores); f$release(); rm(f)
+    Pt <- power_t(lazy_walk_P(A, opt$alpha), T_PRIMARY); rm(A)
+    S <- list(attention = attention(Pt), a3r = a3r(Pt)); rm(Pt); S$clr <- C; rm(C)
+    out <- list()
+    for (m in names(S)) { s <- S[[m]]; s[!is.finite(s)] <- 0; diag(s) <- 0
+      for (nm in names(bench)) { p <- bench[[nm]]$pairs
+        out[[length(out) + 1L]] <- data.frame(draw = label, truth = nm, method = m, aupr = ap_fast(s[cbind(p$i, p$j)], p$label)) } }
+    do.call(rbind, out)
+  }
+  tasks <- list()
+  for (b in seq_len(opt$draws)) { sd_b <- BOOT_SEED0 + b; set.seed(sd_b)
+    tasks[[b]] <- list(label = sprintf("cluster_%03d", b), seed = sd_b, cols = draw_cols()) }
+  done <- sub("\\.csv$", "", list.files(file.path(dout, "draws"), "\\.csv$"))
+  tasks <- Filter(function(t) !t$label %in% done, tasks)
+  say(sprintf("%d draws done, %d to run", length(done), length(tasks)))
+  if (length(tasks)) {
+    W <- min(opt$workers, length(tasks))
+    pc <- par_start(mem_gb = opt$mem_gb, workers = W, reserve = max(0L, .par_cores() - W * opt$threads), say = say,
+                    export = setdiff(ls(globalenv()), c("pc", "tasks")))
+    st <- foreach::foreach(task = tasks, .inorder = FALSE, .errorhandling = "pass") %dopar% {
+      if (par_should_stop()) return("stopped")
+      set.seed(task$seed); t0 <- Sys.time()
+      d <- boot_eval(Xc[, task$cols, drop = FALSE], task$label)
+      tmp <- file.path(dout, "draws", paste0(task$label, ".csv.part")); utils::write.csv(d, tmp, row.names = FALSE)
+      file.rename(tmp, file.path(dout, "draws", paste0(task$label, ".csv"))); par_release()
+      sprintf("%s %.1f min", task$label, as.numeric(difftime(Sys.time(), t0, units = "mins")))
+    }
+    par_stop(pc)
+    bad <- vapply(st, function(x) inherits(x, "error"), NA)
+    if (any(bad)) say("draws failed: ", paste(vapply(st[bad], conditionMessage, ""), collapse = " | "))
+    if (any(bad) || any(unlist(st[!bad]) == "stopped")) stop("not all draws finished; rerun to resume")
+  }
+  parts <- list.files(file.path(dout, "draws"), "\\.csv$", full.names = TRUE)
+  d <- do.call(rbind, lapply(parts, utils::read.csv)); stopifnot(length(unique(d$draw)) == opt$draws)
+  wout(d, file.path(dout, "boot_draws.csv"))
+  w <- stats::reshape(d, idvar = c("draw", "truth"), timevar = "method", direction = "wide")
+  q <- function(x, p) stats::quantile(x, p, names = FALSE)
+  sm <- do.call(rbind, lapply(c(P1 = "complexes", P3 = "regulons_SC"), function(tn) { x <- w[w$truth == tn, ]
+    data.frame(code = c("P1", "P3")[match(tn, c("complexes", "regulons_SC"))], truth = tn, n_draws = nrow(x),
+               d_vs_attention_mean = mean(x$aupr.a3r - x$aupr.attention), d_vs_attention_lo = q(x$aupr.a3r - x$aupr.attention, .025),
+               d_vs_attention_hi = q(x$aupr.a3r - x$aupr.attention, .975), d_vs_clr_mean = mean(x$aupr.a3r - x$aupr.clr),
+               d_vs_clr_lo = q(x$aupr.a3r - x$aupr.clr, .025), d_vs_clr_hi = q(x$aupr.a3r - x$aupr.clr, .975)) }))
+  wout(sm, file.path(dout, "boot_summary.csv"))
+  say("bootstrap intervals (a3r minus attention, 2.5-97.5%):\n", paste(utils::capture.output(print(sm, row.names = FALSE, digits = 4)), collapse = "\n"))
+  say(sprintf("done in %.1f min", as.numeric(difftime(Sys.time(), T0, units = "mins"))))
+  quit(save = "no")
+}
+
+## ---- mode: verdict (computed from the preregistered rules; no numbers are interpreted here) -----------
+# decide(): pure function of the endpoint table, bootstrap intervals and the repro flag; unit-testable.
+decide <- function(ep, boot, repro_ok) {
+  g <- function(code, col) ep[[col]][ep$code == code]
+  P <- c("P1", "P2", "P3", "P4"); have_p <- all(P %in% ep$code)
+  if (!have_p) stop("verdict needs P1-P4 (run M3D and EcoMAC first)")
+  pP <- vapply(P, function(k) g(k, "p_raw"), 0); dP <- vapply(P, function(k) g(k, "d"), 0)
+  holm_p <- stats::p.adjust(pP, "holm"); loss_holm <- stats::p.adjust(vapply(P, function(k) g(k, "p_loss"), 0), "holm")
+  rej <- pP < ALPHA1; rej[is.na(rej)] <- FALSE
+  r1 <- isTRUE(rej[1] && dP[1] >= EFFECT_MIN && rej[2] && dP[2] >= EFFECT_MIN)
+  r2 <- isTRUE(rej[3] && rej[4])
+  r3 <- if (is.null(boot)) NA else isTRUE(boot$d_vs_attention_lo[boot$code == "P1"] > 0 && boot$d_vs_attention_lo[boot$code == "P3"] > -NI_MARGIN)
+  r4 <- isTRUE(repro_ok)
+  adopt <- if (is.na(r3)) NA else (r1 && r2 && r3 && r4)
+  prim <- data.frame(code = P, d = dP, se = vapply(P, function(k) g(k, "se"), 0), p_raw = pP, reject_alpha = rej,
+                     p_holm_primary = holm_p, p_loss = vapply(P, function(k) g(k, "p_loss"), 0), p_loss_holm = loss_holm,
+                     effect_ge_min = ifelse(P %in% c("P1", "P2"), dP >= EFFECT_MIN, NA), row.names = NULL)
+  loss <- any(dP[3:4] <= -NI_MARGIN & loss_holm[3:4] < ALPHA1, na.rm = TRUE)
+  outc <- data.frame(outcome = c("Complexes improve, regulon NI not shown on M3D or EcoMAC", "Regulon loss on M3D or EcoMAC (d <= -0.005, Holm-adjusted p < 0.025)",
+                                 "Complex superiority not shown on M3D or EcoMAC", "Gene jackknife passes, cluster bootstrap fails (rule 3)", "Implementation check fails"),
+                     applies = c(r1 && !r2, loss, !r1, if (is.na(r3)) NA else (r1 && r2 && !r3), !r4),
+                     conclusion = c("Not adopted. Reported as a complex-specific readout with an unresolved regulon cost.",
+                                    "Not adopted. Reported as a trade-off: the readout harms regulons.",
+                                    "Not adopted. K562 rescue reported as exploratory and not replicated in E. coli. (Attention vs CLR on E. coli complexes is descriptive; see metrics.csv.)",
+                                    "Not adopted. Supported over genes, not robust to resampling experiments.",
+                                    "No E. coli scoring until fixed; fix and cause logged in the preregistration first."), stringsAsFactors = FALSE)
+  S <- ep[ep$code %in% paste0("S", 1:5), ]
+  sec <- NULL
+  if (nrow(S)) { sec <- S[, c("code", "d", "se", "p_raw")]; sec$interpretable <- isTRUE(adopt)
+    sec$p_holm <- NA_real_; sec$reject <- NA
+    if (isTRUE(adopt) && nrow(S) == 5L) { sec$p_holm <- stats::p.adjust(sec$p_raw, "holm"); sec$reject <- sec$p_holm < ALPHA1 } }
+  s_pending <- !(nrow(S) == 5L)
+  notes <- character(0)
+  if (isTRUE(adopt) && !s_pending) {
+    rj <- stats::setNames(sec$reject, sec$code)
+    if (!isTRUE(rj[["S1"]]) || !isTRUE(rj[["S2"]])) notes <- c(notes, "S1 or S2 failed: the paper does not claim the new method beats CLR on regulons; the headline over CLR stays attributed to attention.")
+    if (!isTRUE(rj[["S5"]])) notes <- c(notes, "S5 failed: the human complex result did not replicate in RPE1; the complex claim rests on E. coli plus in-sample K562.")
+    sm <- which(dP[3:4] < 0 & rej[3:4] & !is.na(loss_holm[3:4]) & pP[3:4] < ALPHA1 & vapply(P[3:4], function(k) g(k, "p_loss"), 0) < ALPHA1)
+    if (length(sm)) notes <- c(notes, "A small but significant regulon loss within the margin (NI shown, d < 0 significant) is reported as such.")
+  }
+  list(prim = prim, rules = data.frame(rule1_complexes = r1, rule2_regulon_ni = r2, rule3_bootstrap = r3, rule4_repro = r4, adopt = adopt,
+                                       secondary_pending = s_pending), outcomes = outc, secondary = sec, notes = notes)
+}
+if (opt$mode == "verdict") {
+  fix_check(); if (!SYN) { gate_script_clean(); gate_repro(HASH) }
+  rd1 <- function(f) if (file.exists(f)) utils::read.csv(f) else NULL
+  dd <- function(ds) file.path(opt$out, "truth", ds)
+  for (n in c("m3d", "ecomac")) if (!file.exists(file.path(dd(n), "DONE"))) stop("verdict needs the finished truth phase of ", n)
+  ep <- do.call(rbind, lapply(c("m3d", "ecomac", "rpe1"), function(n) rd1(file.path(dd(n), paste0("endpoints_", n, ".csv")))))
+  hashes <- unique(ep$prereg_commit); if (length(hashes) != 1L || hashes != HASH) stop("an endpoint file was produced under another preregistration commit")
+  boot <- rd1(file.path(opt$out, "boot", "boot_summary.csv"))
+  repro_ok <- if (SYN) TRUE else isTRUE(tryCatch(gate_repro(HASH), error = function(e) FALSE))
+  dec <- decide(ep, boot, repro_ok)
+  vdir <- file.path(opt$out, "verdict"); dir.create(vdir, showWarnings = FALSE, recursive = TRUE)
+  wout(ep, file.path(vdir, "endpoints_all.csv")); wout(dec$prim, file.path(vdir, "primary.csv"))
+  if (!is.null(dec$secondary)) wout(dec$secondary, file.path(vdir, "secondary.csv"))
+  wout(dec$outcomes, file.path(vdir, "outcome_table.csv"))
+  if (!is.null(boot)) wout(boot, file.path(vdir, "bootstrap_intervals.csv"))
+  m3 <- rd1(file.path(dd("m3d"), "metrics.csv")); em <- rd1(file.path(dd("ecomac"), "metrics.csv"))
+  vc <- do.call(rbind, lapply(list(m3d = m3, ecomac = em), function(m) m[m$truth == "complexes" & m$method == "attention_t9", c("dataset", "truth", "method", "d_vs_clr", "se_vs_clr", "lo_vs_clr", "hi_vs_clr")]))
+  wout(vc, file.path(vdir, "descriptive_attention_vs_clr_complexes.csv"))
+  k <- rd1(file.path(dd("k562ess"), "metrics.csv")); kn <- NULL
+  if (!is.null(k)) { x <- k[k$truth == "CORUM_merged" & k$method == "a3r_t9", ]
+    if (nrow(x) && x$d_vs_att <= 0) kn <- "K562 merged-CORUM difference vs attention is <= 0 (descriptive, in-sample): report prominently." }
+  verdict <- if (is.na(dec$rules$adopt)) "PENDING (cluster bootstrap missing)" else if (dec$rules$adopt) "ADOPT CLR(log P^t) as main method; attention is the ablation" else "NOT ADOPTED: failure to confirm; main method stays attention"
+  v <- cbind(data.frame(verdict = verdict), dec$rules, data.frame(notes = paste(c(dec$notes, kn), collapse = " | "),
+        outcomes_applying = paste(dec$outcomes$outcome[which(dec$outcomes$applies %in% TRUE)], collapse = " | ")))
+  wout(v, file.path(vdir, if (SYN) "verdict_SYNTHETIC.csv" else "verdict.csv"))
+  cat(verdict, "\n"); print(dec$prim, digits = 4); print(dec$rules); quit(save = "no")
+}
+
 if (opt$mode != "repro") stop("unknown mode: ", opt$mode)
 
 ## ---- mode: repro ---------------------------------------------------------------------------------
