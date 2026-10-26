@@ -143,6 +143,7 @@ script_dir <- (function() {
   if (length(f)) dirname(normalizePath(sub("^--file=", "", f[1]))) else "analysis"
 })()
 source(file.path(script_dir, "regulondb.R")); source(file.path(script_dir, "regulons.R"))
+source(file.path(script_dir, "human_truths.R"))   # corum_sets, collectri_sets, dorothea_sets, response_sets (RPE1, K562 truths)
 
 ## ---- mode: selections (label-free held-out t*; reads NO truth) ------------------------------------
 if (opt$mode == "selections") {
