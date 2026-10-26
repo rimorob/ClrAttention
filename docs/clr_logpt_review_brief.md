@@ -6,7 +6,7 @@ The job is to find lines that violate the preregistration, not to improve the me
 
 ## What the script does
 
-Modes: `repro` (done, passed), `selections` (done, committed), and new: `truth` (one dataset per run), `boot` (M3D cluster bootstrap), `verdict` (rules applied to the outputs). Lines 336-1000 are the new code (truth block starts at the `## truth phase` banner).
+Modes: `repro` (done, passed), `selections` (done, committed), and new: `truth` (one dataset per run), `boot` (M3D cluster bootstrap), `verdict` (rules applied to the outputs). The new code starts at the banner `## ---- truth phase, bootstrap and verdict` (about l. 330) and runs to the end of the verdict block (about l. 910); everything above is the repro/selections code that already ran.
 
 ## Checklist (preregistration section, then where to look)
 
