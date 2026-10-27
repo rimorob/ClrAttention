@@ -90,6 +90,7 @@ If a job died mid-step, rerun that step; do not skip a gate. No truth may be rea
    - **Blocker for scPRINT:** `import scprint` fails until a lamindb instance is configured (django settings; needs `lamin init`, which writes a database and may fetch ontologies). Left undone; do it at the smoke-test step. Also unverified: scPRINT on torch 2.3.1 (scPRINT does not pin torch).
    - **Checkpoints:** scPRINT `medium-v1.5.ckpt` (222 MB) downloaded to `~/scfm_models/scprint/`, HF repo `jkobject/scPRINT` commit 8e1ad1a1bc40c1fc2f4f1700fe27923eea9a2bed, SHA-256 96ff7c5d9e1ad5076e818bde3c38f498c95cd354cc42029d90691b5ba2964ff8 (log in the preregistration change log before scoring). Not downloaded: `large-v1.ckpt` 1.2 GB and `small-v1.ckpt` 111 MB (secondary, can fetch on request); scGPT `scGPT_human` (source is a Google Drive link, not pinned in the preregistration; fetch after the PI confirms the source).
 5. **GRNBoost2:** read the diagnostic, then decide how to rerun GRNBoost2 fairly (legacy early stopping or none) everywhere it appears.
+   - **Diagnostic read (27 Oct):** `docs/plans/grnboost2_diagnostic.md`. Early stopping explains most of the gap: M3D SC 1.18 → 1.36, BEELINE +0.12/+0.27 log2 vs CLR; wrapper and seed are not at fault. Recommendation: rerun everywhere with legacy early stopping; fix that rule before the new runs. PI to decide.
 6. **Other planned analyses:**
    - log-scale depth vs module size;
    - directed DREAM5-style evaluation with ARACNE;
