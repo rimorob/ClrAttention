@@ -1,0 +1,12 @@
+"dataset","variant","criterion","param_name","param_value","t_star","t_q25","t_q75","t_min","t_max","param_split_min","param_split_max","n_splits","t_secondary","quick"
+"k562ess","K3","crit_A","keff",3,2,2,2,2,2,NA,NA,10,9,0
+"k562ess","K5","crit_A","keff",5,2,2,2,2,2,NA,NA,10,9,0
+"k562ess","K10","crit_A","keff",10,8,8,8.75,8,9,NA,NA,10,9,0
+"k562ess","K25","crit_A","keff",25,8,8,8,8,8,NA,NA,10,9,0
+"k562ess","MH","crit_A","keff_heads",NA,6,5,6,5,6,NA,NA,10,9,0
+"k562ess","O1","crit_A","tau",0.382218238027271,3,3,3,3,4,NA,NA,10,9,0
+"k562ess","O1t","crit_A","tau",4,7,7,7,7,8,4,4,10,9,0
+"k562ess","O2","crit_A","keff_per_gene",NA,2,2,2,2,2,NA,NA,10,9,0
+"k562ess","O2e","crit_A","keff_per_gene",NA,8,8,8,8,8,NA,NA,10,9,0
+"k562ess","O3A","crit_A","keff",40,8,8,8,7,8,40,40,10,9,0
+"k562ess","O3B","crit_B","keff",40,6,6,6,5,6,40,40,10,9,0
