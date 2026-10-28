@@ -1,5 +1,12 @@
 # GRNBoost2 diagnostic: does arboreto's broken early stopping explain last place?
 
+> **DECISION, 27 October 2026 (PI-approved; written before any rerun).**
+> 1. **Legacy early stopping is the fixed GRNBoost2 for every rerun**, because it is the algorithm as published (Moerman et al. 2019; arboreto's profile and stopping rule with the out-of-bag improvement it was written for). The choice rests on fidelity, not on score.
+> 2. **No early stopping (no_es) is a sensitivity analysis only.** It is not rerun anywhere; the existing no_es results (M3D seed 1, hESC_1000, mHSC-E_500) stay in the supplement as sensitivity.
+> 3. **The variant results had been seen when this was chosen:** M3D (TF-node metric, 26 Oct; Table 2 metric, 27 Oct), hESC_1000 and mHSC-E_500. Legacy_es and no_es scored within seed noise of each other, so the choice does not depend on which was higher. Whatever the new numbers are, the variant is not revisited.
+> 4. **Order of events:** GRNBoost2 was reported first (16-21 Oct: `baselines.R` runs from 16 Oct, Table 2 / `sota_table.md` 21 Oct, Supplementary Tables 9 and 10, the Collins checkpoint). The early-stopping fault was found on 22 Oct. The diagnostic was designed and run after that (job 0894, scored 26-27 Oct). The rerun follows the diagnostic and this decision.
+> 5. **Scope:** GRNBoost2 only. No other comparator is rerun (GENIE3 and PIDC are reused from their caches), no tuning is done, and the scoring scripts, seeds, truths and splits are unchanged. All GRNBoost2 outputs are replaced; the superseded outputs are kept in `*_superseded` directories and disclosed.
+
 *27 October 2026. Diagnostic read-out and rerun plan (job 0894 plus rescoring with the main evaluation). It does not edit the paper or tables. Every number below comes from `results/grnboost2_check/` (gitignored; committed copies are in `docs/grnboost2_diagnostic/`).*
 
 > **Order of events (disclose).** We reported GRNBoost2 as a comparator first: in `baselines.R` runs from 16 October, in Table 2 / `sota_table.md` (21 October), in Supplementary Tables 9 and 10, and on the Collins checkpoint. The early-stopping fault was found afterwards, on 22 October. This diagnostic was designed after that and scored after that. The paper already marks every GRNBoost2 result as "not interpreted until the wrapper check" [PENDING].
