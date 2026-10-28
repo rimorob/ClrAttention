@@ -16,17 +16,22 @@
 # so it runs in between, from the job script):
 #   --stage export   write <out>/<case>/expression.tsv (genes x cells) per case
 #   (job script)     julia +1.6 tools/pidc.jl <case>/expression.tsv <case>/pidc_edges.tsv
-#   --stage score    GENIE3, GRNBoost2, read PIDC, score everything
+#   --stage genie3   GENIE3 only, cached per case in <case>/genie3_scores.rds (added 27 Oct 2026 for the
+#                    GRNBoost2 rerun, so that GENIE3 is not recomputed; seed --seed, as in the original run)
+#   --stage score    GENIE3 (from the cache when present), GRNBoost2, read PIDC, score everything
+#   --gb2_seed k     (with --stage score) GRNBoost2 variability run: GRNBoost2 with seed k written to
+#                    <case>/grnboost2_edges_s<k>.tsv, GENIE3 taken from the cache (never recomputed), and the
+#                    outputs written as metrics_gb2s<k>.csv, comembership_gb2s<k>.csv, summary_gb2s<k>.csv.
 # Usage (repo root):
 #   Rscript analysis/beeline_baselines.R --stage export|score [--out results/beeline_baselines]
 #       [--threads 16] [--ntrees 1000]
 
 args0 <- commandArgs(trailingOnly = TRUE)
 bopt <- list(stage = "score", out = "results/beeline_baselines", threads = 16L, ntrees = 1000L, seed = 20261021L,
-             python = "~/venvs/clr-baselines/bin/python")
+             python = "~/venvs/clr-baselines/bin/python", gb2_seed = NA_integer_)
 i <- 1L
 while (i <= length(args0)) { k <- sub("^--", "", args0[i])
-  bopt[[k]] <- if (k %in% c("threads", "ntrees", "seed")) as.integer(args0[i + 1L]) else args0[i + 1L]; i <- i + 2L }
+  bopt[[k]] <- if (k %in% c("threads", "ntrees", "seed", "gb2_seed")) as.integer(args0[i + 1L]) else args0[i + 1L]; i <- i + 2L }
 
 # beeline.R's setup and helpers (everything before its main loop), with our out/threads
 src <- readLines("analysis/beeline.R"); cut_at <- grep("^## ---- main loop", src)[1]
@@ -79,6 +84,30 @@ if (bopt$stage == "export") {
   quit(save = "no")
 }
 
+## ---- GENIE3 cache ------------------------------------------------------------------
+# set.seed(seed) then GENIE3 per case, exactly as the original run; cached so that nothing downstream recomputes it
+genie3_cached <- function(d, X, genes) {
+  cf <- file.path(d, "genie3_scores.rds")
+  if (file.exists(cf)) return(readRDS(cf))
+  if (!is.na(bopt$gb2_seed)) stop("GENIE3 cache missing in ", d, " (run --stage genie3 first)")
+  set.seed(bopt$seed)
+  W <- tryCatch(GENIE3::GENIE3(X, nTrees = bopt$ntrees, K = "sqrt", nCores = bopt$threads, verbose = FALSE),
+                error = function(e) { say("GENIE3 failed on ", d, ": ", conditionMessage(e)); NULL })
+  if (!is.null(W)) { W <- W[genes, genes]; saveRDS(W, paste0(cf, ".part")); file.rename(paste0(cf, ".part"), cf) }
+  W
+}
+if (bopt$stage == "genie3") {
+  for (k in seq_len(nrow(cases))) {
+    ds <- cases$ds[k]; N <- cases$N[k]; d <- case_dir(ds, N); X <- case_X(ds, N); t0 <- Sys.time()
+    W <- genie3_cached(d, X, rownames(X)); rm(W); invisible(gc())
+    say(sprintf("%s TFs+%d: GENIE3 cached (%.1f min)", ds, N, as.numeric(difftime(Sys.time(), t0, units = "mins"))))
+  }
+  quit(save = "no")
+}
+sfx <- if (is.na(bopt$gb2_seed)) "" else paste0("_gb2s", bopt$gb2_seed)
+gb2_seed <- if (is.na(bopt$gb2_seed)) bopt$seed else bopt$gb2_seed
+gb2_file <- if (is.na(bopt$gb2_seed)) "grnboost2_edges.tsv" else paste0("grnboost2_edges_s", bopt$gb2_seed, ".tsv")
+
 ## ---- score -----------------------------------------------------------------------
 edges_to <- function(a, b, w, genes, sym) { M <- matrix(0, length(genes), length(genes), dimnames = list(genes, genes))
   ia <- match(a, genes); ib <- match(b, genes); ok <- !is.na(ia) & !is.na(ib) & ia != ib
@@ -91,16 +120,15 @@ for (k in seq_len(nrow(cases))) {
   S$abs_pearson <- abs(stats::cor(t(X)))
   f <- clr_fit(X); S$clr <- f$clr_scores; f$release(FALSE)
   S$clr_ns <- ns_clr(X)
-  t0 <- Sys.time(); set.seed(bopt$seed)
-  W <- tryCatch(GENIE3::GENIE3(X, nTrees = bopt$ntrees, K = "sqrt", nCores = bopt$threads, verbose = FALSE),
-                error = function(e) { say("GENIE3 failed on ", ds, " ", N, ": ", conditionMessage(e)); NULL })
+  t0 <- Sys.time()
+  W <- genie3_cached(d, X, genes)
   if (!is.null(W)) S$genie3 <- W[genes, genes]           # directed: rows regulators, columns targets
-  say(sprintf("%s TFs+%d: GENIE3 %.1f min", ds, N, as.numeric(difftime(Sys.time(), t0, units = "mins"))))
-  gf <- file.path(d, "grnboost2_edges.tsv")
+  say(sprintf("%s TFs+%d: GENIE3 %.1f min (cached after first computation)", ds, N, as.numeric(difftime(Sys.time(), t0, units = "mins"))))
+  gf <- file.path(d, gb2_file)
   if (!file.exists(gf)) {
     st <- system2(path.expand(bopt$python), c("tools/grnboost2.py", file.path(d, "expression.tsv"), paste0(gf, ".part"),
-                  "--workers", bopt$threads, "--seed", bopt$seed), stdout = file.path(d, "grnboost2.log"), stderr = file.path(d, "grnboost2.log"))
-    if (st == 0 && file.exists(paste0(gf, ".part"))) file.rename(paste0(gf, ".part"), gf) else say("GRNBoost2 failed on ", ds, " ", N, " (see ", d, "/grnboost2.log)")
+                  "--workers", bopt$threads, "--seed", gb2_seed, "--early_stop", "legacy"), stdout = file.path(d, paste0("grnboost2", sfx, ".log")), stderr = file.path(d, paste0("grnboost2", sfx, ".log")))
+    if (st == 0 && file.exists(paste0(gf, ".part"))) file.rename(paste0(gf, ".part"), gf) else say("GRNBoost2 failed on ", ds, " ", N, " (see ", d, "/grnboost2", sfx, ".log)")
   }
   if (file.exists(gf)) { e <- utils::read.delim(gf, stringsAsFactors = FALSE); S$grnboost2 <- edges_to(e$TF, e$target, e$importance, genes, FALSE)
   } else say("GRNBoost2 output missing for ", ds, " ", N)
@@ -119,8 +147,8 @@ for (k in seq_len(nrow(cases))) {
                                             cur$method[j], cur$auprc_ratio[j], cur$epr[j]))
   rm(S, W); invisible(gc())
 }
-res <- do.call(rbind, rows); utils::write.csv(res, file.path(bopt$out, "metrics.csv"), row.names = FALSE)
-if (length(crow)) utils::write.csv(do.call(rbind, crow), file.path(bopt$out, "comembership.csv"), row.names = FALSE)
+res <- do.call(rbind, rows); utils::write.csv(res, file.path(bopt$out, paste0("metrics", sfx, ".csv")), row.names = FALSE)
+if (length(crow)) utils::write.csv(do.call(rbind, crow), file.path(bopt$out, paste0("comembership", sfx, ".csv")), row.names = FALSE)
 
 # Summaries (review 2026-10-21). Primary truths are BEELINE's own (cell-type ChIP,
 # non-specific ChIP, STRING, mESC LOF/GOF); the derived STRING variants are secondary.
@@ -146,7 +174,7 @@ for (refm in c("clr", "clr_ns")) for (tset in c("primary", "celltype_ChIP")) {
       p_wilcoxon_datasets = if (length(lr) >= 3 && any(lr != 0)) stats::wilcox.test(lr, exact = TRUE)$p.value else NA,
       p_sign_datasets = if (length(lr) >= 1) stats::binom.test(sum(lr > 0), sum(lr != 0))$p.value else NA,
       mean_log2_epr_vs_ref = mean(le), datasets_better_epr = sum(le > 0)) } }
-summ <- do.call(rbind, summ); utils::write.csv(summ, file.path(bopt$out, "summary.csv"), row.names = FALSE)
+summ <- do.call(rbind, summ); utils::write.csv(summ, file.path(bopt$out, paste0("summary", sfx, ".csv")), row.names = FALSE)
 say("blocked by dataset (7 datasets; per dataset the mean log2 ratio over gene sets and truths):")
 for (j in seq_len(nrow(summ))) with(summ[j, ], say(sprintf(
   "  vs %-6s %-13s %-12s median AUPRC ratio %.3f  log2 vs ref %+.3f  better in %d/%d datasets  (exact Wilcoxon p = %.3g, sign p = %.3g)  EPR log2 %+.3f",

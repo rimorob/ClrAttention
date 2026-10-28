@@ -1,0 +1,9 @@
+grnboost2[early_stop=sklearn, scikit-learn 1.2.2] seed 1: 807 genes x 383 samples -> 401499 edges, 198.3 s; trees per target median 237 (IQR 172-298)
+grnboost2[early_stop=legacy, scikit-learn 1.9.1] seed 1: 807 genes x 383 samples -> 399695 edges, 157.0 s; trees per target median 239 (IQR 171-294)
+grnboost2[dask] seed 1: 807 genes x 383 samples -> 401533 edges, 807 targets, 255.3 s
+grnboost2[early_stop=sklearn, scikit-learn 1.2.2] seed 2: 807 genes x 383 samples -> 401829 edges, 196.2 s; trees per target median 238 (IQR 168-300)
+grnboost2[early_stop=legacy, scikit-learn 1.9.1] seed 2: 807 genes x 383 samples -> 400761 edges, 159.3 s; trees per target median 236 (IQR 168-300)
+grnboost2[dask] seed 2: 807 genes x 383 samples -> 400751 edges, 807 targets, 258.7 s
+grnboost2[early_stop=sklearn, scikit-learn 1.2.2] seed 3: 807 genes x 383 samples -> 401645 edges, 190.7 s; trees per target median 244 (IQR 170-297)
+grnboost2[early_stop=legacy, scikit-learn 1.9.1] seed 3: 807 genes x 383 samples -> 401194 edges, 152.5 s; trees per target median 243 (IQR 170-295)
+grnboost2[dask] seed 3: 807 genes x 383 samples -> 401386 edges, 807 targets, 248.2 s
