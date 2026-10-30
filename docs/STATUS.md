@@ -34,7 +34,7 @@
 | White paper and supplement | `docs/whitepapers/paper.md`, `supplement.md` | updated 22 Oct, fact-checked |
 | Method table | `docs/whitepapers/sota_table.md` | reviewed; Bonferroni-corrected ties |
 | Abstracts (150-word Nature Machine Intelligence; Nature Communications) and bullet outline | `docs/whitepapers/abstract_draft.md`, `abstract_points.md` | drafted; register of Hayete, Gardner & Collins 2007 |
-| Graphical abstract (code-built) and diffusion prompt | `docs/whitepapers/figures/graphical_abstract.png`, `graphical_abstract_diffusion_prompt.md` | redesigned after fresh-eyes reviews; panel 2 being rebuilt as the CLR criss-cross (PI request) |
+| Graphical abstract (code-built) and diffusion prompt | `docs/whitepapers/figures/graphical_abstract.png`, `graphical_abstract_diffusion_prompt.md` | redesigned after fresh-eyes reviews; panel 2 rebuilt as the CLR criss-cross (done, commit ae050b9) |
 | Checkpoint for Jim Collins | `docs/checkpoint_collins.md`; private page https://claude.ai/artifact/5sbGiidecw7ZqkjbBz4eBT | fact-checked; share from the page's menu |
 | Contributions and AI-use disclosure | `docs/contributions.md` | draft; PI to confirm marked items |
 | Preregistrations | `docs/preregistration_keff.md`, `docs/preregistration_scfm.md` | committed before any scoring |
@@ -81,8 +81,9 @@ If a job died mid-step, rerun that step; do not skip a gate. No truth may be rea
      - **Follow-up (memo section 6):** only after the CLR(log Pᵗ) verdict, preregister C3 as an edge-level readout on E. coli RegulonDB direct edges (M3D, EcoMAC; vs CLR and attention, plus a3r if adopted). Merge it with the planned directed DREAM5-style evaluation (item 6), so that the edge truth is touched once. t_a is chosen label-free; keff 10 is fixed. No C3 computation on real data before that.
 2. **Figures:**
    - finish the revisions from the fresh-eyes reviews (Shapley, MI vs ρ, lexA scatters; one colour key and finding titles);
-   - rebuild graphical-abstract panel 2 as the CLR criss-cross;
-   - build the paper figures that have legends but no images (Figs 1, 2, 4–7).
+   - graphical-abstract panel 2 as the CLR criss-cross: DONE (commit ae050b9);
+   - Fig. 1 (method, `analysis/fig_method.R` -> `docs/whitepapers/figures/fig1_method.png/.pdf`): first draft built from a real 14-gene toy; awaiting fresh-eyes review;
+   - build the remaining paper figures that have legends but no images (Figs 2, 4–7).
 3. **keff test, phase 2: DONE (27 Oct).** K562 (0896 retry), M3D (0897) and EcoMAC (0898) truths scored behind the byte-identity gate; the combined preregistered verdict (32 primary tests, complete) is in `docs/keff_verdict/` (copies of `results/keff_test/verdict.csv`, `primary_holm.csv`): headline unchanged (K10), no variant meets the decision rule. Note: the early `combine` job 0899 ran at 19:10 before EcoMAC finished (its `# after` listed only 0897) and wrote an INCOMPLETE verdict; the EcoMAC run rewrote the complete one at 19:23. Interpretation and write-up (which variants won individual tests) still to do.
 4. **Learned-attention comparator (scPRINT, scGPT):** preregistered. Install a separate environment (`~/venvs/scfm`, PyTorch for CUDA 12.1 to support Pascal) after the GPU move; then run the leakage audit, the smoke test and the runs.
    - **Install done 22 Oct (installs only, nothing run; PI-approved, nice 19, 1 job at a time):** `~/venvs/scfm` (Python 3.10.22, uv). Exact versions in `docs/scfm_env_freeze.txt`. torch 2.3.1+cu121 (sees GTX 1080 and 1060, capability 6.1; `get_arch_list` has sm_60 but no sm_61, so Pascal runs on the sm_60 binary, which only the smoke test can confirm), scprint 1.0.13, scgpt 0.2.4 (installed `--no-deps`), torchtext 0.18.0, datasets 2.21.0, galore-torch 1.0, lightning 2.6.6.

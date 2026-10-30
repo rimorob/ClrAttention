@@ -5,7 +5,8 @@ All figures are generated from cached results by the scripts below (run from the
 | Figure | Script | Message |
 |---|---|---|
 | `graphical_abstract.png/.pdf` | `analysis/fig_graphical_abstract.R` | Published CLR is only the context normalization; adding softmax and a multi-step walk completes it as attention (schematic, with real pooled AUPR bars). |
-| `src/fig1_method.txt` | (drawing brief) | Fig. 1: each step of CLR attention mapped to its transformer counterpart. |
+| `fig1_method.png/.pdf` (main Fig. 1) | `analysis/fig_method.R` (`nice -n 19 Rscript analysis/fig_method.R`) | One traced cell through a real 14-gene toy computed with the package (D, CLR, softmax, lazy walk), each step paired with its transformer counterpart; no learned parameters. |
+| `src/fig1_method.txt` | (drawing brief) | Fig. 1 brief (superseded by the script above). |
 | `fig_shapley_SC.png/.pdf` (main Fig. 3) | `analysis/fig_shapley.R --evidence SC --out docs/whitepapers/figures` | CLR normalization and softmax drive the coherence gain; depth and CLR drive pooled AUPR (strong/confirmed regulons). |
 | `fig_shapley_all.png/.pdf` (Supplementary Fig. 3) | `analysis/fig_shapley.R --evidence all --out docs/whitepapers/figures` | The same decomposition on all-evidence regulons; the caption lists where it disagrees with the strong/confirmed one. |
 | `scatter_lexA_stats.csv`, `mi_vs_rho_summary.csv` | written by the two scripts below | n, r, MI per scatter panel; per-panel shares above/below the Gaussian curve. |
