@@ -23,6 +23,8 @@
 # queue waits for it). Jobs started by the old runner (running/*.sh without a
 # .res file) count with their measured memory (clr-jobs service), at least the
 # default. A job file runs once unchanged for 30 s (copy as .tmp, then mv).
+# Admission memory of a waiting job: 1.1 x the measured peak of its newest successful earlier
+# run (<root>/peaks.tsv, written at every rc=0 END) if there is one, else the declaration.
 # Auto-retry: a job killed for memory (oom-kill) is re-queued once as <job>_retry with
 # mem = 1.5 x max(declared, measured peak), capped at the slice; dependents of <job>
 # accept the retry's success. A retry that is killed again is not retried.
@@ -80,6 +82,13 @@ dep_state() {   # dep dependent_file -> ok | wait | failed | unknown
   case "$line" in *" rc=0 "*|*" rc=0") echo ok ;; *) echo failed ;; esac
 }
 
+# a job that has finished successfully before (same name, or its _retry) is admitted at
+# 1.1 x its newest measured peak instead of the declaration (<root>/peaks.tsv: job<TAB>peak GB)
+hist_mem() {   # job declared_mem -> memory to admit with
+  local p; p=$(awk -F'\t' -v j="${1%_retry}" '$1 == j { v = $2 } END { if (v != "") printf "%d", v * 1.1 + 0.999 }' "$ROOT/peaks.tsv" 2>/dev/null)
+  [ -n "$p" ] && [ "$p" -ge 1 ] && echo "$p" || echo "$2"
+}
+
 start_job() {   # name mem cpus
   local b=$1 mem=$2 cpu=$3 cap
   cap=$(awk -v m="$mem" -v s="$SLICE_CAP" 'BEGIN { c = int(m * 1.3 + 0.999); print (c > s) ? s : c }')
@@ -108,6 +117,7 @@ finalize() {    # job whose scope has ended
   systemctl --user reset-failed "clrjob-$b.scope" 2>/dev/null
   mv "$ROOT/running/$b.sh" "$ROOT/done/$b.sh"; rm -f "$ROOT/running/$b.res" "$ROOT/running/$b.peak" "$ROOT/running/$b.rc"
   log "END $b rc=$rc result=${res:-?} peak=${peak:-?}GB declared=${mem}GB"
+  [ "$rc" = 0 ] && [ -n "$peak" ] && printf '%s\t%s\n' "${b%_retry}" "$peak" >> "$ROOT/peaks.tsv"
   if [ "$res" = oom-kill ] && ! grep -q "^# retry-of:" "$ROOT/done/$b.sh" && [ ! -e "$QDIR/${b}_retry.sh" ]; then
     local nm; nm=$(awk -v d="$mem" -v p="${peak:-0}" -v s="$SLICE_CAP" 'BEGIN { m = (p > d) ? p : d; m = int(m * 1.5 + 0.999); print (m > s) ? s : m }')
     sed -E "s/^# mem: .*/# mem: $nm/" "$ROOT/done/$b.sh" > "$QDIR/${b}_retry.sh.tmp"
@@ -150,6 +160,7 @@ while true; do
     b=$(basename "$f" .sh)
     rm_=$(decl "$f" mem); rc_=$(decl "$f" cpus); check "$rm_" "$b"; check "$rc_" "$b"
     mem=$(num "$rm_" $DEF_MEM); cpu=$(num "$rc_" $DEF_CPU); deps=$(decl "$f" after)
+    mem=$(hist_mem "$b" "$mem")
     ok=1
     for d in ${deps//,/ }; do
       s=$(dep_state "$d" "$f")

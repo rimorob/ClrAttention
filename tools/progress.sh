@@ -4,6 +4,8 @@
 # A job script may declare, in comment lines:
 #   # expect: <minutes>               expected run time (time-based bar, marked ~)
 #   # progress: <total> <regex>       count log lines matching regex (log-based bar)
+# Scripts that are already running (never edit those) can instead be listed in
+# <root>/progress_files.tsv as  job<TAB>total<TAB>glob  : the bar counts the files matching glob.
 # Usage (repo root):  tools/progress.sh        or   watch -n 30 tools/progress.sh
 cd "$(dirname "$0")/.." || exit 1
 now=$(date +%s)
@@ -33,7 +35,16 @@ for root in jobs_pc jobs_pc2; do
     st=$(grep -E " START $b( |$)" "$root/runner.log" | tail -1 | cut -d' ' -f1,2)
     s=$(date -d "$st" +%s 2>/dev/null || echo $now); el=$(( (now - s) / 60 ))
     exp=$(field "$f" expect); prog=$(field "$f" progress)
-    if [ -n "$prog" ]; then
+    pf=$(awk -F'\t' -v j="$b" '$1 == j { print $2 "\t" $3 }' "$root/progress_files.tsv" 2>/dev/null)
+    if [ -n "$pf" ]; then
+      tot=${pf%%$'\t'*}; gl=${pf#*$'\t'}
+      cnt=$(ls -d $gl 2>/dev/null | wc -l)
+      fr=$(awk -v c="$cnt" -v t="$tot" 'BEGIN { print c / t }')
+      # rate of the last 3 h of files: ETA from recent speed, not from the average
+      rate=$(find $gl -maxdepth 0 -newermt "$(date -d '3 hours ago' '+%F %T')" 2>/dev/null | wc -l)
+      eta=$(awk -v c="$cnt" -v t="$tot" -v r="$rate" 'BEGIN { print (r > 0) ? int((t - c) / (r / 180)) : -1 }')
+      lab="$cnt/$tot files"
+    elif [ -n "$prog" ]; then
       tot=${prog%% *}; re=${prog#* }
       cnt=$(grep -c -E "$re" "$root/done/$b.log" 2>/dev/null); cnt=${cnt:-0}
       fr=$(awk -v c="$cnt" -v t="$tot" 'BEGIN { print c / t }')
