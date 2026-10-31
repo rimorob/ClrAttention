@@ -300,7 +300,7 @@ draw_abstract <- function() {
   txt(lab, X[1] + 0.18, 0.53, 11.5, face = "bold", just = "left")
   lw <- convertWidth(grobWidth(textGrob(lab, gp = gpar(fontfamily = FONT, fontsize = 11.5,
                                                          fontface = "bold"))), "native", TRUE)
-  txt("MI ≈ query·key score;  CLR z-score ≈ scaled logit;  softmax and walk ≈ attention and stacked layers",
+  txt("MI ≈ query·key score;  CLR z-score ≈ scaled logit;  softmax ≈ softmax;  walk ≈ repeated attention with residual",
       X[1] + 0.18 + lw + 0.1, 0.53, 11.5, ink[["secondary"]], just = "left")
 
   # ---------------- panel 5: results -------------------------------------------
