@@ -1,0 +1,25 @@
+[16:52:10] clean seed 1: 174 s; O2 pi0 1.000; EB graphon pi0 0.917, additive pi0 0.986; RMT spikes 20 (localized 3)
+[16:54:58] clean seed 2: 168 s; O2 pi0 1.000; EB graphon pi0 0.872, additive pi0 0.990; RMT spikes 21 (localized 5)
+[16:57:46] clean seed 3: 167 s; O2 pi0 1.000; EB graphon pi0 0.952, additive pi0 0.985; RMT spikes 21 (localized 6)
+[17:00:33] clean seed 4: 167 s; O2 pi0 1.000; EB graphon pi0 0.921, additive pi0 0.985; RMT spikes 21 (localized 4)
+          role n_genes_per_seed    O2  EB EB_q90 Q_EB Q_EB_additive Q_EVT
+    background             1016  2.00 100    100  153          83.0  11.0
+ complex_20-40              160 19.33 100    100  174         105.5  40.3
+   complex_3-6              132  3.56 100    100  157          86.0  15.5
+  complex_8-15              146  9.00 100    100  161          90.6  23.4
+    complex_80               80 24.03 100    100  230         166.9  14.2
+           hub               30  3.44 100    100  192         112.6  21.6
+     regulator               12 14.35 100    100  187         113.4  31.2
+     satellite               25  2.00 100    100  231         166.0  25.2
+        target              398  4.31 100    100  211         123.1  17.5
+ Q_EVT_q90 RMT recip_kept repro_n repro_zero oracle
+      19.4  10      0.991     1.0    0.23069     10
+      53.8  10      1.000    21.0    0.00313     29
+      26.3  10      0.949     4.0    0.03220      4
+      33.0  10      0.989    10.0    0.00685      9
+      20.0 100      1.000    45.0    0.00000     79
+      40.4  10      0.996     6.0    0.01667     10
+      59.8  10      0.998    14.5    0.00000     10
+      37.8 100      0.618    23.0    0.00000     10
+      33.6  10      0.987     6.0    0.04078     10
+[17:00:33] done

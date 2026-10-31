@@ -1,0 +1,48 @@
+[16:39:47] messy seed 1: 173 s; O2 pi0 1.000; EB graphon pi0 0.833, additive pi0 0.787; RMT spikes 24 (localized 3)
+[16:42:38] messy seed 2: 171 s; O2 pi0 1.000; EB graphon pi0 0.793, additive pi0 0.808; RMT spikes 24 (localized 2)
+[16:45:27] messy seed 3: 169 s; O2 pi0 1.000; EB graphon pi0 0.760, additive pi0 0.808; RMT spikes 24 (localized 5)
+[16:48:15] messy seed 4: 168 s; O2 pi0 1.000; EB graphon pi0 0.779, additive pi0 0.788; RMT spikes 25 (localized 7)
+background genes: Spearman with lab-effect SD: Q_EB 0.11, Q_EB_additive 0.29, Q_EVT -0.01, keff_O2 0.26
+          role n_genes_per_seed    O2  EB EB_q90 Q_EB Q_EB_additive Q_EVT
+    background             1016  2.00 100    100  421           393  10.7
+ complex_20-40              160  9.14 100    100  409           398  26.3
+   complex_3-6              132  2.00 100    100  405           393  11.6
+  complex_8-15              146  4.00 100    100  403           391  15.5
+    complex_80               80 10.81 100    100  441           429  41.2
+           hub               30  2.00 100    100  420           405  12.2
+     regulator               12  3.79 100    100  425           398  15.9
+     satellite               25  2.00 100    100  451           434  22.9
+        target              398  2.00 100    100  427           409  11.7
+ Q_EVT_q90 RMT recip_kept repro_n repro_zero oracle
+      19.2  10      0.932       2    0.12887     10
+      47.0  10      0.989      17    0.00937     29
+      21.9  10      0.914       4    0.03220      4
+      30.0  10      0.951       8    0.02055      9
+      57.3 100      0.998      36    0.00000     79
+      22.6  10      0.958       5    0.01667     10
+      25.6  10      0.968      10    0.00000     10
+      48.6 100      0.939      23    0.00000     10
+      22.7  10      0.963       5    0.03764     10
+   N         role Q_EB_median Q_EVT_median keff_O2_median pi0_EB
+ 125   background         393        11.12           2.00  0.802
+ 125  complex_<20         388        12.22           2.00  0.802
+ 125 complex_>=20         401        15.45           2.00  0.802
+ 125          hub         383        12.15           2.00  0.802
+ 125    regulator         400         8.64           2.00  0.802
+ 125    satellite         419         9.15           2.00  0.802
+ 125       target         398        10.66           2.00  0.802
+ 250   background         311        11.38           2.00  0.845
+ 250  complex_<20         299        13.08           2.00  0.845
+ 250 complex_>=20         316        24.46           2.36  0.845
+ 250          hub         312        10.56           2.00  0.845
+ 250    regulator         293         8.92           2.00  0.845
+ 250    satellite         341        18.17           2.00  0.845
+ 250       target         319        11.53           2.00  0.845
+ 500   background         335        10.64           2.00  0.833
+ 500  complex_<20         327        13.92           2.61  0.833
+ 500 complex_>=20         328        27.81           7.40  0.833
+ 500          hub         322        14.09           2.00  0.833
+ 500    regulator         322        17.86           4.49  0.833
+ 500    satellite         386        21.28           2.00  0.833
+ 500       target         347        12.18           2.00  0.833
+[16:49:14] done
