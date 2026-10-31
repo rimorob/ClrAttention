@@ -1,0 +1,27 @@
+[14:18:35] k562: 5671 genes x 707 samples
+[14:19:11] full MI and GE done
+[14:19:13] cluster sizes: 95 / 450 / 90 / 22 / 50
+[14:19:51] fold 1 done
+[14:20:29] fold 2 done
+[14:21:07] fold 3 done
+[14:21:44] fold 4 done
+[14:22:20] fold 5 done
+                 [,1]               
+dataset          "k562"             
+G                "5671"             
+N                "707"              
+clusters         "95/450/90/22/50"  
+GE_E_q10_med_q90 "0.0 / 16.0 / 91.0"
+GE_open          "0.7559513"        
+GE_E0            "0.1592312"        
+GR_S_q10_med_q90 "1.0 / 5.0 / 25.0" 
+GR_threshold     "6"                
+GR_open          "0.4729325"        
+GR_S0            "0.03438547"       
+both_open        "0.4108623"        
+GE_only          "0.345089"         
+GR_only          "0.06207018"       
+both_closed      "0.1819785"        
+kappa            "0.2076393"        
+spearman_E_S     "0.486851"         
+[14:22:20] done

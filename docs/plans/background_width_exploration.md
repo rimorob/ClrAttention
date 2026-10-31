@@ -464,3 +464,79 @@ Partner-less fractions of 5%, 25% and 50% are **reported for robustness and do n
 - From round-1 tables: the gate + reciprocity operator, the Poisson rule for k₀, and the use of a symmetric sink.
 - From the PI after round 1: the choice of small complexes as the target, the f grid, the batch grid, the regulon-heavy generator and the empirical-null gate.
 - Chosen by me in this section, before running: the exact threshold rules above, the regulon-heavy parameters, and C4.
+
+### 8.5 Round-2 results (run 31 Oct 2026 after 8.1–8.4 were committed in c141332)
+
+**What ran.**
+
+- 56 synthetic runs: standard generator f ∈ {5, 10, 25, 50}% × b ∈ {0, 1, 2} × 4 seeds, plus the regulon-heavy generator at f = 10% × b ∈ {0, 1} × 4 seeds.
+- Script: `sim_round2.R`, 16 single-thread runs in parallel, about 61 s each.
+- The real-data gate agreement on M3D and K562: `realdata_gates.R`, 8 threads, expression only.
+- Summaries in `out/round2/`: `carry_forward.csv`, `ratios_vs_K10.csv`, `cosine_falsifier.csv`, `gate_detection.csv`, `gate_open_by_role.csv`, `realdata_gates_*.csv`; per-run files in `out/round2/runs/`.
+- The realised partner-less fraction matched the target in every cell (0.05, 0.10, 0.25, 0.50).
+
+**Carry-forward rule (8.1), applied mechanically. No realizable variant is carried forward.** Ratios to K10 at f = 10% for b = 0 / 1 / 2, with seeds better in brackets:
+
+| Variant | C1 small 3–6 | C2 all complexes | C3 regulons (std; reg-heavy b0/b1) | C4 edges, reg-heavy b0/b1 | Carried forward |
+|---|---|---|---|---|---|
+| Reciprocity | **2.37 (4) / 1.95 (4) / 4.16 (4)** ✓ | 0.99 (2) / 0.96 (0) / 1.04 (4) ✗ | 1.09 / 1.07 / 1.08; 1.04 / 1.02 ✓ | 1.02 / 1.01 ✓ | no (fails C2) |
+| Reproducibility gate (GR), symmetric sink | 1.22 (4) / 0.86 (1) / 0.69 (0) ✗ | 0.99 / 0.98 / 1.13 ✗ | 0.83 / 0.72 / 0.87 ✗ | 1.03 / 0.93 ✗ | no |
+| GR + reciprocity | 1.95 (4) / 1.31 (4) / 1.30 (4) ✓ | 1.00 (1) / 0.98 (1) / 1.16 (4) ✗ | **0.94 / 0.77 / 0.90** ✗ | 1.06 / 0.94 ✗ | no |
+| Empirical-null gate (GE), symmetric sink | 1.00 / 1.00 / 1.00 ✗ | 1.00 ✗ | 1.00 ✓ | 1.00 ✓ | no (identical to K10) |
+| GE + reciprocity | identical to reciprocity | ✗ | ✓ | ✓ | no |
+| ORACLE symmetric sink (not realizable) | 1.31 (4) / 1.10 (4) / 1.08 (3) ✓ | 1.04 (4) / 1.01 (3) / 1.02 (3) ✓ | 1.20 / 1.22 / 1.23; 1.16 / 1.17 ✓ | 1.08 / 1.08 ✓ | yes |
+| ORACLE sink + reciprocity | 2.42 / 1.94 / 4.12 ✓ | 1.02 (3) / 0.98 (0) / 1.07 (4) ✗ | 1.31 / 1.31 / 1.33 ✓ | 1.10 / 1.09 ✓ | no (fails C2) |
+
+**Decision-relevant findings.**
+
+1. **The empirical-null gate (the PI's candidate) does not detect partner-less genes in the synthetic data.**
+   - The AUC for separating partner-less from small-complex genes is 0.48–0.54 in all 14 cells; the lfdr-sum version gives 0.51–0.54.
+   - It opens for 99–100% of partner-less genes: their median excess tail count is 42–61 against the rule's threshold of 3.
+   - Mechanism: the central 50% of a Stouffer CLR row is close to Gaussian, but the right tail is heavy even without modules. Dense weak dependence (global programs, batches, zero-inflation) makes it heavy, so "what lies outside the central mode" is never near 0.
+   - This is the O2e failure (94% at the ceiling on M3D) seen from the other side. As specified, the gate equals K10.
+2. **The reproducibility gate detects partner-less genes only moderately, and at f = 10% it costs more than it gains.**
+   - AUC 0.67–0.72 at b ≤ 1 and 0.60–0.62 at b = 2.
+   - At f = 10% (b = 0 / 1 / 2) it closes 65 / 71 / 74% of partner-less genes, but also 27 / 37 / 57% of small-complex genes and 31 / 45 / 61% of regulon targets.
+   - With only 10% partner-less genes, the false closures dominate: regulons ×0.72–0.87 for GR and ×0.77–0.94 for GR + reciprocity; edges as low as 0.93–0.94 in the regulon-heavy generator.
+   - It becomes net-positive only at f = 50% (GR + reciprocity, regulons 1.36 at b0).
+   - Round 1's positive gate result (regulons ×1.19 / ×1.40) depended on the generator's 51% partner-less genes. Round 1 also left about 22% of pool genes unassigned, which counted as partner-less.
+3. **Even a perfect gate has a small complex ceiling at a realistic fraction.** At f = 10% the oracle sink gives:
+   - all complexes 1.01–1.04, small complexes 1.08–1.31;
+   - regulons ×1.20–1.23 (×1.16–1.17 in the regulon-heavy generator), edges ×1.08;
+   - its gains grow steeply with f (small complexes 1.14 / 1.31 / 1.86 / 4.97 at f = 5 / 10 / 25 / 50%, b0).
+
+   So in K562-like data (about 10% partner-less) a sink is mostly a regulon lever, not a small-complex lever.
+4. **Reciprocity alone is the only realizable variant with a consistent small-complex gain and no regulon or edge cost.**
+   - Small complexes ×1.86–6.24 (4/4) in all 12 standard cells.
+   - Regulons ×1.05–1.09 (4/4) everywhere; regulon-heavy ×1.02–1.04; edges ×1.01–1.02.
+   - It fails C2 because of the large complexes: ribosome ×0.80–0.83, 20-gene complexes ×0.88 (b ≤ 1), all complexes 0.94–1.04. That is the mechanistic limitation the PI chose to document, not fix.
+   - **Caveat.** In round 1's clean (Gaussian, no global programs) scenario, reciprocity cost regulons ×0.95 (0/4). Every round-2 cell has the messy noise features, so that borderline is not covered here.
+5. **The cosine falsifier fires: the profile cosine is dropped.** On the gate + reciprocity operators at f = 10%, cosine/a3r is 0.79–0.81 for small complexes (b0 and b1), so it loses to a3r even though it is 1.12–1.32 on regulons.
+6. **a3r (descriptive; not adopted earlier).** On K10, at f = 10%: small complexes 1.42–1.77, all complexes 1.59–1.75, regulons 0.98–1.02. It remains the largest complex lever, and it acts on the readout.
+7. **Real data, label-free: the two partner-less calls barely agree.**
+
+   | | M3D | K562 essential half A |
+   |---|---|---|
+   | k-means cluster sizes (k = 5, top 10 PCs) | 206 / 40 / 83 / 86 / 51 | 95 / 450 / 90 / 22 / 50 |
+   | GE excess count, median [q10, q90]; share open (E ≥ 3) | 32 [0, 161]; 81% open | 16 [0, 91]; 76% open |
+   | GR summed cluster overlap S, median [q10, q90]; threshold; share open | 30 [12, 70]; ≥ 7; 98% open | 5 [1, 25]; ≥ 6; 47% open |
+   | both open / GE only / GR only / both closed | 80% / 1.5% / 19% / 0.3% | 41% / 35% / 6% / 18% |
+   | Cohen's κ; Spearman(E, S) | −0.004; 0.24 | 0.21; 0.49 |
+
+   - On real data the empirical null does close some rows (E = 0 for 11% of M3D and 16% of K562 genes), unlike in the synthetic data.
+   - But it flags different genes from the reproducibility call: κ ≈ 0 on M3D and 0.21 on K562.
+   - The cluster split is strict (conditions, not batches) and unbalanced: K562 has a 22-profile cluster. It keeps 98% of M3D rows and 47% of K562 rows open, consistent with round 1's lab-split picture (M3D almost no partner-less genes, K562 many).
+   - Without a truth there is no way to say which call is right. The synthetic AUCs (GE at chance, GR 0.60–0.72) favour the reproducibility call.
+
+**Recommendation for the PI's readout.**
+
+- **Stop the gate line.** Neither a background-defined (empirical-null) gate nor a reproducibility gate improves on K10 at a realistic partner-less fraction once regulons and edges are protected. Even a perfect gate gives small complexes only ×1.1–1.3 there.
+- **Report reciprocity as the one label-free operator change that targets small complexes without a regulon or edge cost in these synthetic data.**
+  - It did not meet the pre-set rule, because of the documented large-complex limitation (ribosome ×0.8).
+  - Any decision to treat C2 as non-binding, given the PI's target, would be a rule change made after seeing these tables, and must be labelled as such. If made, reciprocity would need its own preregistered test on held-out data (yeast, section 5) before any claim.
+- **For the paper:**
+  - the mass-conservation limitation for large complexes;
+  - the non-identifiability of "partners above background" under batch or dense dependence (O2, O2e, graphon and empirical-null gates all fail the same way);
+  - the competition-across-rows mechanism behind K25's ribosome gain.
+
+**Disclosure.** All of 8.1–8.4 was committed before this round ran (c141332). After seeing the tables: only the slices shown above (f grid by operator, size classes, open rates by role) and their wording. No threshold, operator or metric was changed after the runs.

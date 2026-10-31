@@ -1,0 +1,27 @@
+[14:18:22] m3d: 4297 genes x 466 samples
+[14:18:39] full MI and GE done
+[14:18:40] cluster sizes: 206 / 40 / 83 / 86 / 51
+[14:18:59] fold 1 done
+[14:19:17] fold 2 done
+[14:19:35] fold 3 done
+[14:19:53] fold 4 done
+[14:20:12] fold 5 done
+                 [,1]                
+dataset          "m3d"               
+G                "4297"              
+N                "466"               
+clusters         "206/40/83/86/51"   
+GE_E_q10_med_q90 "0.0 / 32.0 / 161.0"
+GE_open          "0.8103328"         
+GE_E0            "0.108215"          
+GR_S_q10_med_q90 "12.0 / 30.0 / 70.0"
+GR_threshold     "7"                 
+GR_open          "0.9820805"         
+GR_S0            "0.0002327205"      
+both_open        "0.7954387"         
+GE_only          "0.01489411"        
+GR_only          "0.1866418"         
+both_closed      "0.003025367"       
+kappa            "-0.003719034"      
+spearman_E_S     "0.2402038"         
+[14:20:12] done

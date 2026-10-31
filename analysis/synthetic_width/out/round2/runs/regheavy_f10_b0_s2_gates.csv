@@ -1,0 +1,2 @@
+"gen","f","b","seed","f_real","k0","auc_repro","auc_efronE","auc_efron_lfdr","spearman_E_repro","agree_open","kappa"
+"regheavy",0.1,0,2,0.1,4,0.719920634920635,0.601547619047619,0.50468253968254,0.526030010924375,0.8335,0.00497809756593124
