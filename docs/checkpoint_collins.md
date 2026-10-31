@@ -1,6 +1,6 @@
 # CLR as attention: checkpoint for Jim Collins
 
-*Boris, 21 October 2026. Status of the project, what we have in hand, what did not work, and the decisions ahead. The key results below have been checked by an independent statistical review; numbers are from the reviewed outputs.*
+*Boris, 21 October 2026. Status of the project, what we have in hand, what did not work, and the decisions ahead. The key results below have been checked by an independent statistical review; numbers are from the reviewed outputs. **GRNBoost2 rows regenerated 29–31 Oct 2026 (legacy early stopping, after an early-stopping fault was found on 22 Oct); statistical review pending. This local file is ahead of the shared claude.ai page, which still carries the 21 Oct GRNBoost2 values.***
 
 ## In one paragraph
 
@@ -27,15 +27,15 @@ Pooled AUPR over the base rate; bold is best in the full row (|r| is best on COR
 
 | Data | Truth | Attention | CLR | GENIE3 | PIDC | GRNBoost2 |
 |---|---|---|---|---|---|---|
-| M3D | RegulonDB strong evidence | **1.68** | 1.44 | 1.51 | 1.45 | 1.18 |
-| EcoMAC (2,198 arrays, mixed platforms) | strong evidence | **1.68** | 1.39 | 1.50 | 1.43 | 1.21 |
-| M3D, hub-controlled | strong evidence | **1.56** | 1.40 | 1.47 | 1.40 | 1.28 |
-| Human K562 Perturb-seq | DoRothEA A–B | **1.09** | **1.06**† | **1.08** | **1.07** | 1.02 |
-| Human K562 Perturb-seq | CORUM complexes | 3.51 | **6.39** | 6.32 | **6.33** | 2.18 |
+| M3D | RegulonDB strong evidence | **1.68** | 1.44 | 1.51 | 1.45 | 1.36 |
+| EcoMAC (2,198 arrays, mixed platforms) | strong evidence | **1.68** | 1.39 | 1.50 | 1.43 | 1.36 |
+| M3D, hub-controlled | strong evidence | **1.56** | 1.40 | 1.47 | 1.40 | 1.37 |
+| Human K562 Perturb-seq | DoRothEA A–B | **1.09** | **1.06**† | **1.08** | **1.07** | 1.05 |
+| Human K562 Perturb-seq | CORUM complexes | 3.51 | **6.39** | 6.32 | **6.33** | 3.66 |
 
 Full table, with all truths and footnotes: `docs/whitepapers/sota_table.md`.
 
-- **Per regulon** (each regulon weighted equally): attention ties CLR and GENIE3. Its mean AP is higher than GRNBoost2's (4 of 4 comparisons), |r|'s (3 of 4) and PIDC's (1 of 4 after correction); medians are about equal. Its win rate is highest in regulons of 100 or more genes, though the gaps there are tiny.
+- **Per regulon** (each regulon weighted equally): attention ties CLR and GENIE3. Its mean AP is higher than |r|'s (3 of 4 comparisons after correction), PIDC's (1 of 4) and GRNBoost2's (1 of 4 after correction, EcoMAC strong evidence, Holm P = 0.004; the sign favours attention in 4 of 4); medians are about equal. Its win rate is highest in regulons of 100 or more genes, though the gaps there are tiny.
 - **Direct TF→target edges:** attention trails CLR. The walk trades edge precision for module recovery.
 
 **5. Human data**
@@ -62,7 +62,7 @@ Full table, with all truths and footnotes: `docs/whitepapers/sota_table.md`.
 
 ## In progress
 - Learned attention: scPRINT (built for network inference from attention) and scGPT, against CLR-NS and CLR attention, on human and mouse single cells. To be preregistered before scoring, with leakage audits. About two weeks.
-- GENIE3, GRNBoost2 and PIDC on the BEELINE single-cell benchmark (queued).
+- GENIE3, GRNBoost2 and PIDC on the BEELINE single-cell benchmark: done. GRNBoost2 (legacy early stopping) is below CLR in 6 of 7 datasets (mean log2 −0.15; Wilcoxon P = 0.031, sign P = 0.125; hESC is the exception); review pending.
 - Preregistered attention-width test, including multi-head attention as the candidate fix for the complex loss.
 - Directed DREAM5-style evaluation with ARACNE; log-scale depth analysis; perturbation-diversity learning curves; differential CLR.
 
