@@ -157,18 +157,21 @@ dist_panel <- function(x0, x1, ybase, h, zz, obs_idx, line, fill, who) {
 }
 
 # ---- the figure ---------------------------------------------------------------------------------
-draw_fig <- function() {
+# win = c(x0, x1, y0, y1) in canvas inches crops the drawing to one window (used for per-panel exports)
+draw_fig <- function(win = c(0, W, 0, H), solo = FALSE) {   # solo: omit inter-panel dividers, arrows, connector
   grid.newpage(); grid.rect(gp = gpar(fill = "white", col = NA))
-  pushViewport(viewport(xscale = c(0, W), yscale = c(0, H)))
+  pushViewport(viewport(xscale = win[1:2], yscale = win[3:4], clip = "on"))
   short_tags <- function(x0, ytop, cell, n, i, j) {   # short i / j tags (long ones appear in panel 1)
     txt("i", x0 - 0.09, ytop - (i - 0.5) * cell, 8, col_i, "bold.italic", just = "right")
     txt("j", x0 + (j - 0.5) * cell, ytop + 0.09, 8, col_j, "bold.italic")
   }
   XD <- 3.6                                          # vertical divider between the two columns
   sep <- H - 3.75                                    # horizontal divider between the two rows
-  seg(0.1, sep, W - 0.1, sep, ink[["grid"]], 1)
-  seg(XD, H - 0.08, XD, sep + 0.0, ink[["grid"]], 1)
-  seg(XD, sep, XD, 0.62, ink[["grid"]], 1)
+  if (!solo) {
+    seg(0.1, sep, W - 0.1, sep, ink[["grid"]], 1)
+    seg(XD, H - 0.08, XD, sep + 0.0, ink[["grid"]], 1)
+    seg(XD, sep, XD, 0.62, ink[["grid"]], 1)
+  }
 
   # ============ ROW 1 =====================================================================
   yh <- H - 0.17
@@ -181,7 +184,7 @@ draw_fig <- function() {
   gene_tags(x1, ytop1, c1, G, I, J)
   ptext(substitute(D[ij] == MI(i, j) ~ "=" ~ v, list(v = sprintf("%.2f", D[I, J]))), x1 + m1 / 2,
         ytop1 - m1 - 0.25, 8)
-  big_arrow(3.0, 3.74, ytop1 - m1 / 2, pal[["orange"]], h = 0.24, hl = 0.17)
+  if (!solo) big_arrow(3.0, 3.74, ytop1 - m1 / 2, pal[["orange"]], h = 0.24, hl = 0.17)
 
   # ---- panel 2: CLR ------------------------------------------------------------------------
   panel_head("2", "Context normalization (CLR)", XD + 0.1, yh, "scaling the logits", pal[["orange"]])
@@ -230,11 +233,13 @@ draw_fig <- function() {
   txt("A", xa3 + gw / 2, ytop3 + 0.09, 8, ink[["primary"]], "bold")
   # S (panel 2) -> S (panel 3): same matrix, elbow connector
   cx_ <- 2.12; ye <- ytop3 + 0.22; xe <- 1.62
-  grid.lines(c(x2 + m2 - 0.12, x2 + m2 - 0.12, cx_, cx_, xe, xe),
-             c(ytop2m - m2 - 0.05, sep, sep, ye, ye, ytop3 + 0.03), default.units = "native",
-             arrow = arrow(length = unit(0.075, "inches"), type = "closed"),
-             gp = gpar(col = pal[["orange"]], lwd = 1.6, fill = pal[["orange"]], linejoin = "mitre"))
-  txt("same S matrix", (x2 + m2 - 0.12 + cx_) / 2, sep + 0.1, 7, pal[["orange"]], "bold")
+  if (!solo) {
+    grid.lines(c(x2 + m2 - 0.12, x2 + m2 - 0.12, cx_, cx_, xe, xe),
+               c(ytop2m - m2 - 0.05, sep, sep, ye, ye, ytop3 + 0.03), default.units = "native",
+               arrow = arrow(length = unit(0.075, "inches"), type = "closed"),
+               gp = gpar(col = pal[["orange"]], lwd = 1.6, fill = pal[["orange"]], linejoin = "mitre"))
+    txt("same S matrix", (x2 + m2 - 0.12 + cx_) / 2, sep + 0.1, 7, pal[["orange"]], "bold")
+  }
   # arrow S -> A
   ay <- ytop3 - 0.5 * gw
   big_arrow(xs3 + gw + 0.08, xa3 - 0.08, ay, pal[["violet"]], h = 0.2, hl = 0.11)
@@ -267,7 +272,7 @@ draw_fig <- function() {
 
   # ---- panel 4: walk -----------------------------------------------------------------------
   x4 <- XD + 0.25; c4 <- 0.072; gw4 <- G * c4; step4 <- 1.12
-  big_arrow(xa3 + gw + 0.07, x4 + 0.0, ytop3 - gw / 2 + 0.0, pal[["magenta"]], h = 0.2, hl = 0.11)
+  if (!solo) big_arrow(xa3 + gw + 0.07, x4 + 0.0, ytop3 - gw / 2 + 0.0, pal[["magenta"]], h = 0.2, hl = 0.11)
   panel_head("4", "Walk: depth", XD + 0.1, yh2, "stacked attention layers", pal[["magenta"]])
   ptext(expression(P == 0.5 * I + 0.5 * A), XD + 3.5 - 0.1, yh2 - 0.02, 8, just = "right")
   xs4 <- x4 + (0:2) * step4
@@ -314,6 +319,23 @@ draw_fig <- function() {
   popViewport()
 }
 
+# Optional per-panel export (reference images for the PaperBanana panel-by-panel track):
+#   FIG_PANELS_DIR=<dir> Rscript analysis/fig_method.R   writes <dir>/panel{1..4}.png (the same
+#   drawing cropped to each quadrant, 300 dpi) and exits without touching fig1_method.{png,pdf}.
+pdir <- Sys.getenv("FIG_PANELS_DIR")
+if (nzchar(pdir)) {
+  dir.create(pdir, recursive = TRUE, showWarnings = FALSE)
+  sepy <- H - 3.75; m <- 0.04
+  wins <- list(c(m, 3.6 - m, sepy + m, H - m), c(3.6 + m, W - m, sepy + m, H - m),
+               c(m, 3.6 - m, 0.6, sepy - m), c(3.6 + m, W - m, 0.6, sepy - m))
+  for (q in 1:4) {
+    w <- wins[[q]]
+    png(file.path(pdir, sprintf("panel%d.png", q)), width = (w[2] - w[1]) * 300,
+        height = (w[4] - w[3]) * 300, res = 300, type = "cairo", bg = "white")
+    draw_fig(w, solo = TRUE); invisible(dev.off())
+  }
+  cat("wrote", file.path(pdir, "panel{1..4}.png"), "\n"); quit(save = "no")
+}
 dev_png <- function() png(file.path(out_dir, "fig1_method.png"), width = W * 300, height = H * 300,
                           res = 300, type = "cairo", bg = "white")
 dev_png(); draw_fig(); invisible(dev.off())
