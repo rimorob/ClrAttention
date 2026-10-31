@@ -1,6 +1,6 @@
 # CLR as attention: checkpoint for Jim Collins
 
-*Boris, 21 October 2026. Status of the project, what we have in hand, what did not work, and the decisions ahead. The key results below have been checked by an independent statistical review; numbers are from the reviewed outputs. **GRNBoost2 rows regenerated 29–31 Oct 2026 (legacy early stopping, after an early-stopping fault was found on 22 Oct); GRNBoost2 claims reviewed 31 Oct. This local file is ahead of the shared claude.ai page, which still carries the 21 Oct GRNBoost2 values.***
+*Boris, 21 October 2026. Status of the project, what we have in hand, what did not work, and the decisions ahead. The key results below have been checked by an independent statistical review; numbers are from the reviewed outputs. **GRNBoost2 rows regenerated 29–31 Oct 2026 (legacy early stopping, after an early-stopping fault was found on 22 Oct); GRNBoost2 claims reviewed 31 Oct. The shared claude.ai page was republished with these values on 31 Oct 2026 (version 3; it also carries the draft abstract and graphical abstract, which are not in this file).***
 
 ## In one paragraph
 
