@@ -1,6 +1,6 @@
 # CLR as attention: checkpoint for Jim Collins
 
-*Boris, 21 October 2026. Status of the project, what we have in hand, what did not work, and the decisions ahead. The key results below have been checked by an independent statistical review; numbers are from the reviewed outputs. **GRNBoost2 rows regenerated 29–31 Oct 2026 (legacy early stopping, after an early-stopping fault was found on 22 Oct); statistical review pending. This local file is ahead of the shared claude.ai page, which still carries the 21 Oct GRNBoost2 values.***
+*Boris, 21 October 2026. Status of the project, what we have in hand, what did not work, and the decisions ahead. The key results below have been checked by an independent statistical review; numbers are from the reviewed outputs. **GRNBoost2 rows regenerated 29–31 Oct 2026 (legacy early stopping, after an early-stopping fault was found on 22 Oct); GRNBoost2 claims reviewed 31 Oct. This local file is ahead of the shared claude.ai page, which still carries the 21 Oct GRNBoost2 values.***
 
 ## In one paragraph
 
@@ -35,12 +35,12 @@ Pooled AUPR over the base rate; bold is best in the full row (|r| is best on COR
 
 Full table, with all truths and footnotes: `docs/whitepapers/sota_table.md`.
 
-- **Per regulon** (each regulon weighted equally): attention ties CLR and GENIE3. Its mean AP is higher than |r|'s (3 of 4 comparisons after correction), PIDC's (1 of 4) and GRNBoost2's (1 of 4 after correction, EcoMAC strong evidence, Holm P = 0.004; the sign favours attention in 4 of 4); medians are about equal. Its win rate is highest in regulons of 100 or more genes, though the gaps there are tiny.
+- **Per regulon** (each regulon weighted equally): attention ties CLR and GENIE3. Its mean AP is higher than |r|'s in 3 of 4 comparisons after correction and than PIDC's and GRNBoost2's in 1 of 4 each; medians are about equal. Its win rate is highest in regulons of 25 or more genes.
 - **Direct TF→target edges:** attention trails CLR. The walk trades edge precision for module recovery.
 
 **5. Human data**
-- K562 Perturb-seq pseudobulk: every method is within 10% of random on TF truths. Attention's small DoRothEA lead over CLR survives hub control (it ties GENIE3 and PIDC). It loses on protein complexes, and on knockdown-response modules per module and after hub control; 86% of the complex loss comes from ten ribosomal and pre-rRNA complexes.
-- Single cells (BEELINE: human ESC and hepatocytes, plus five mouse datasets): CLR on normal scores (CLR-NS) is the best of the correlation- and MI-based methods tested so far. Attention adds nothing there.
+- K562 Perturb-seq pseudobulk: every method is within 10% of random on TF truths. Attention's small DoRothEA lead over CLR survives hub control (it ties GENIE3 and PIDC). It loses to CLR, GENIE3 and PIDC on protein complexes, and on knockdown-response modules per module and after hub control; 86% of the complex loss comes from ten ribosomal and pre-rRNA complexes. GRNBoost2, which does not aggregate, does about as poorly as attention on these complexes, so the loss is not specific to the walk.
+- Single cells (BEELINE: human ESC and hepatocytes, plus five mouse datasets): CLR on normal scores (CLR-NS) has the highest per-dataset mean of the methods tested, including GENIE3, PIDC and GRNBoost2, but it was chosen on these truths, it is not significantly ahead of GENIE3 or PIDC, and GENIE3 has the higher median. Attention adds nothing there.
 
 **6. Perturbation targets (likely a second paper)**
 - Attention-based influence ranks a perturbed TF's targets above differential expression in 12 of 15 perturbations (p = 0.015; 9 of 15, p = 0.095, under a laboratory-matched null). Suggestive, not established.
@@ -62,7 +62,7 @@ Full table, with all truths and footnotes: `docs/whitepapers/sota_table.md`.
 
 ## In progress
 - Learned attention: scPRINT (built for network inference from attention) and scGPT, against CLR-NS and CLR attention, on human and mouse single cells. To be preregistered before scoring, with leakage audits. About two weeks.
-- GENIE3, GRNBoost2 and PIDC on the BEELINE single-cell benchmark: done. GRNBoost2 (legacy early stopping) is below CLR in 6 of 7 datasets (mean log2 −0.15; Wilcoxon P = 0.031, sign P = 0.125; hESC is the exception); review pending.
+- GENIE3, GRNBoost2 and PIDC on the BEELINE single-cell benchmark: done. CLR is comparable to GENIE3 and PIDC. GRNBoost2 (legacy early stopping) is below CLR in 6 of 7 datasets (mean log2 −0.15; Wilcoxon P = 0.031, sign P = 0.125; hESC is the exception), a descriptive count, not a significant difference.
 - Preregistered attention-width test, including multi-head attention as the candidate fix for the complex loss.
 - Directed DREAM5-style evaluation with ARACNE; log-scale depth analysis; perturbation-diversity learning curves; differential CLR.
 
