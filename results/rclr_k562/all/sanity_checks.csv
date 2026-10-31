@@ -1,0 +1,4 @@
+"check","value"
+"genes md5 equals keff_test fingerprint","TRUE"
+"max |CLR recomputed - cached CLR|","0"
+"cor(CLR, rCLR) over upper-triangle pairs","0.796"

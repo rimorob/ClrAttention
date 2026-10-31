@@ -1,0 +1,4 @@
+"check","value"
+"documented CLR CORUM AUPR / enrichment","0.0847 / 6.39"
+"documented attention (t = 9, K10) CORUM AUPR / enrichment","0.0465 / 3.51"
+"cor(CLR, rCLR) over upper-triangle pairs","0.7942"
