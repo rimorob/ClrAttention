@@ -50,7 +50,7 @@
 **c4. Competitors and hub control (*E. coli*).**
 - **Raw pooled AUPR: attention is highest.** +0.010 to +0.017 over GENIE3 and +0.008 to +0.028 over CLR; jackknife intervals exclude 0. Status: **mixed, QC**.
   - The gain is concentrated in global regulons: CRP, σS, Fur, IHF and FNR carry 62% of positive pair incidences.
-  - The same comparison as fold over the base rate (M3D SC, `sota_table.md`): attention 1.68, GENIE3 1.51, PIDC 1.45, CLR 1.44, |r| 1.23, GRNBoost2 1.18, hub score alone 1.08.
+  - The same comparison as fold over the base rate (M3D SC, `sota_table.md`): attention 1.68, GENIE3 1.51, PIDC 1.45, CLR 1.44, GRNBoost2 1.36, |r| 1.23, hub score alone 1.08. GRNBoost2 regenerated 29–31 Oct with legacy early stopping (it was 1.18 in the 16–21 Oct runs); statistical review pending.
 - **Under hub control (within-hub-stratum percentile), attention still leads on SC truths.** Status: **mixed, QC**.
   - AUPR lead on M3D: over CLR 0.015, GENIE3 0.009, PIDC 0.015.
   - AUPR lead on EcoMAC: over CLR 0.020, GENIE3 0.009.
@@ -59,21 +59,22 @@
   - An earlier QC check against CLR on M3D SC gave +0.016 [0.012, 0.020], ahead in all 10 hub deciles in every jackknife replicate. Status: **worked, QC**.
 - **Per regulon: parity, not superiority.** The comparison uses mean and median AP differences, Holm-corrected, and requires both the regulon and the gene uncertainty to exclude 0. Status: **mixed, QC**.
   - No difference from CLR, GENIE3 or PIDC on *E. coli* (Holm p ≥ 0.21).
-  - Attention beats GRNBoost2 (4 of 4 cells) and |r| (3 of 4) on the mean.
+  - Attention beats |r| (3 of 4) and GRNBoost2 (1 of 4 cells after Holm correction, EcoMAC SC, Holm P = 0.004; the sign favours attention in 4 of 4) on the mean. GRNBoost2 regenerated 29–31 Oct; statistical review pending.
   - Share of regulons improving over CLR under hub control: EcoMAC 66% (p = 0.002); M3D 54% (p = 0.11, not significant). Status: **QC**.
 - **Direct edges: attention is not the better GRN inferrer.** Status: **mixed, QC**. The claim is module recovery, not GRN inference.
   - It is last of the top three on direct TF→target pairs (TF-node AUPR ratio on M3D: CLR 6.75, GENIE3 6.54, attention 5.17).
   - GENIE3 wins median per-regulon coherence and per-TF AUROC (EcoMAC 0.690 against 0.596).
+  - GRNBoost2 (regenerated 29–31 Oct; review pending) TF-node AUPR ratio, SC truths: M3D 5.174 (attention 5.170), EcoMAC 5.819 (attention 4.788, GENIE3 5.769).
 
 **c5. Human (K562 essential-gene Perturb-seq pseudobulk compendium; Replogle et al. 2022).**
 - **DoRothEA A–B.** The lead over CLR survives hub control: +0.006 [0.002, 0.010] AUPR. Status: **mixed, QC**. Before hub control the leads were +0.008 (DoRothEA) and +0.009 (CollecTRI). Status: **worked**, but now superseded.
 - **CollecTRI.** No signal under hub control; the hub score alone is at least as good as attention. Status: **QC**.
 - **TF truths per regulon.** The differences are tiny (|ΔAP| ≤ 0.0025). Status: **QC**.
-- **CORUM complexes.** −0.041 AUPR against CLR. Status: **did not work**. Per complex, CLR and GENIE3 beat attention; this is fragile (the delete-50% jackknife interval includes 0).
-- **Knockdown-response modules.** Mean per-module AP is higher than attention's for CLR (+0.097), GENIE3 (+0.084) and |r| (+0.091); attention wins only 2% of modules. Status: **mixed, QC**. Two caveats: 62% of the modules are near-duplicates, and they are built from a held-out replicate of the same signal, which favours direct similarity.
+- **CORUM complexes.** −0.041 AUPR against CLR. Status: **did not work**. Per complex, CLR and GENIE3 beat attention; this is fragile (the delete-50% jackknife interval includes 0). GRNBoost2's pooled CORUM ratio is 3.66, above attention's 3.51 (paired difference +0.0020, jackknife 95% interval −0.0057 to +0.0096, which includes 0; regenerated 29–31 Oct, review pending).
+- **Knockdown-response modules.** Mean per-module AP is higher than attention's for CLR (+0.097), GENIE3 (+0.084) and |r| (+0.091); attention wins only 2% of modules. GRNBoost2 (regenerated 29–31 Oct; review pending) is also higher than attention by +0.0348 (Holm P = 0.0045; attention wins 9%). Status: **mixed, QC**. Two caveats: 62% of the modules are near-duplicates, and they are built from a held-out replicate of the same signal, which favours direct similarity.
 
 **c6. Single cell (BEELINE: 7 datasets × 2 gene sets, 72 dataset–truth combinations).**
-- **CLR is the strongest method tested.** Median AUPRC ratio 1.58, against 1.32 for correlation, 1.20 for mutual information and 1.08 for partial correlation. Status: **worked**. GENIE3, GRNBoost2 and PIDC have not yet been run on BEELINE (job 0890, queued).
+- **CLR is the strongest method tested.** Median AUPRC ratio 1.58, against 1.32 for correlation, 1.20 for mutual information and 1.08 for partial correlation. Status: **worked**. GENIE3, GRNBoost2 and PIDC have since been run on the 14 BEELINE cases (Supplementary Table 10; GRNBoost2 rerun with legacy early stopping 27–31 Oct, review pending): median AUPRC ratio GENIE3 1.69, CLR-NS 1.60, PIDC 1.56, CLR 1.48, GRNBoost2 1.47, |r| 1.20. Mean log2 relative to CLR (datasets better than CLR of 7): GENIE3 −0.04 (3), PIDC −0.02 (4), GRNBoost2 −0.15 (1, hESC; Wilcoxon P = 0.031, sign P = 0.125).
 - **Normal-score CLR beats MI-based CLR in every gene context.** CLR-NS is CLR on |r| of Blom scores. Gain +0.07 to +0.12 in median AUPRC ratio (53–57 of 72). Status: **worked, QC**. QC caveat: the 72 combinations come from 7 datasets, so report per-dataset blocked tests, not a paired p over 72.
 - **Attention adds nothing over CLR-NS.** Status: **did not work, QC**. Wider gene contexts give no gain either. Status: **did not work, QC**.
 - **Held-out depth transfers.** t* = 5–11 in all 14 cases, bracketing the *E. coli* depth (from `paper.md`; not a separate item in the plan).
@@ -136,17 +137,17 @@
    - If it beats keff = 10 on CORUM without losing on regulons (the decision rule), the trade-off sentence becomes: "multi-head attention, another language-model component, recovers tight complexes without losing regulons". This would be the largest possible upgrade to the abstract.
    - If not, the trade-off sentence stands as written.
 3. **Other keff variants (O1, O2, O3).** The headline changes only under the preregistered rule.
-4. **BEELINE baselines (GENIE3, GRNBoost2, PIDC; job 0890, queued).** These decide whether "normal-score CLR is the strongest method tested on single-cell data" can be said. The PI's summary "CLR-NS best" depends on this.
+4. **BEELINE baselines (GENIE3, GRNBoost2, PIDC; done: job 0890, and the GRNBoost2 rerun 0923–0924; see c6).** These decide whether "normal-score CLR is the strongest method tested on single-cell data" can be said. The PI's summary "CLR-NS best" depends on this.
 5. **BEELINE nested cell bootstrap and per-dataset blocked tests.** The bootstrap is job 110, about 29% done; the blocked tests are plan §3, not started. Together they give intervals for every single-cell statement.
-6. **Macro rerun with PIDC on EcoMAC (`results/macro_aupr_v2`, 2026-10-21; not yet reviewed).**
-   - Per-regulon mean AP favours attention over PIDC on EcoMAC at all evidence levels (Holm p = 0.0066; both intervals exclude 0; attention wins 59%).
-   - EcoMAC SC (p = 0.14) and both M3D cells (p = 0.20 and 0.23) do not.
+6. **Macro rerun with PIDC on EcoMAC (`results/macro_aupr_v2`, 2026-10-21; not yet reviewed; Holm values below refreshed from `results/macro_aupr_v3` after the GRNBoost2 inputs were replaced).**
+   - Per-regulon mean AP favours attention over PIDC on EcoMAC at all evidence levels (Holm p = 0.0072; both intervals exclude 0; attention wins 59%).
+   - EcoMAC SC (p = 0.15) and both M3D cells (p = 0.20 and 0.23) do not.
    - If QC confirms this, "on par" in the abstract still holds, but the plan's "Holm p ≥ 0.21" needs updating.
    - The hub-controlled EcoMAC PIDC cell (`sota_table.md`: 1.57 against 1.40) is also not yet in the reviewed plan text.
 7. **Hub-control follow-ups.** These are: the macro view under hub control, a method-neutral hub stratifier, a cluster bootstrap for the knockdown-response modules and a no-ribosome sensitivity check. They could soften or sharpen the clique-loss sentence.
 8. **EcoMAC core analysis plus the M3D/EcoMAC array-overlap audit.** Together these would license "two compendia".
 9. **Genome-wide K562 and RPE1 compendia (jobs 0871, 0872).** These turn "K562" into "human cell lines", or show that the effect is specific to K562.
-10. **Remaining human baselines.** The GENIE3 and GRNBoost2 K562 rerun (jobs 0878, 0879) and PIDC on K562 complete the human competitor table.
+10. **Remaining human baselines.** Done: GENIE3, PIDC and GRNBoost2 are in the human competitor table (Table 2, 5,671 genes); GRNBoost2 was regenerated with legacy early stopping (jobs 0925 on 5,671 genes, 0929 on 8,559 genes; PIDC was not run on 8,559 genes).
 11. **Remaining analyses.** None of these changes the abstract unless it reverses a result:
     - the FDR bootstrap (job 100), which gives intervals for the hard-threshold control;
     - directed DREAM5-style evaluation and ARACNE;
