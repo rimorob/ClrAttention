@@ -270,41 +270,41 @@ Removing the first two or three principal components improves both CLR and atten
 
 ## Supplementary Note 10 | Per-regulon (macro) average precision
 
-**Definition (fixed with the statistics reviewer before scoring; `analysis/macro_aupr.R`).**  For every regulon with at least 10 positive non-operon pairs, AP is computed over the same candidates as coherence, with ties broken in expectation.  A gene in several regulons counts in each; regulons are not merged, because multi-membership is meaningful.  The paired difference ΔAP = AP(comparator) − AP(attention) is computed within one run, so negative values favour attention.  Uncertainty has two sources and both must exclude 0:  regulons (BCa bootstrap for the mean, Wilcoxon signed rank for the median) and genes (delete-20% gene jackknife, 200 replicates, regulon set fixed to regulons keeping at least three positive pairs in every replicate; delete-50% as a stability check).  Holm correction is applied to the larger P within families fixed in advance (*E. coli* 40 tests; K562 primary 50; K562 secondary 40, of which 30 are present, missing tests counted).  The gene jackknife keeps only regulons scored in every replicate, which drops small regulons, so the two intervals of the decision rule cover different regulon sets.
+**Definition (fixed with the statistics reviewer before scoring; `analysis/macro_aupr.R`).**  For every regulon with at least 10 positive non-operon pairs, AP is computed over the same candidates as coherence, with ties broken in expectation.  A gene in several regulons counts in each; regulons are not merged, because multi-membership is meaningful.  The paired difference ΔAP = AP(comparator) − AP(attention) is computed within one run, so negative values favour attention.  Uncertainty has two sources and both must exclude 0:  regulons (BCa bootstrap for the mean, Wilcoxon signed rank for the median) and genes (delete-20% gene jackknife, 200 replicates, regulon set fixed to regulons keeping at least three positive pairs in every replicate; delete-50% as a stability check).  Holm correction is applied to the larger P within families fixed in advance (*E. coli* 40 tests; K562 primary 50; K562 secondary 40; in the current version all 40 secondary tests are present, because the secondary run was repeated with GENIE3 rows and has four comparators, |r|, CLR, GENIE3 and GRNBoost2, on five truths).  The GRNBoost2 inputs were replaced after the first run (Supplementary Note 13), so the adjusted P values of the other comparators moved through the step-down (for example |r| on M3D SC, mean 0.056 to 0.062, and on M3D all, mean 0.037 to 0.040, median 0.028 to 0.030; CLR on EcoMAC SC, median 0.86 to 0.94; PIDC on EcoMAC all, mean 0.0066 to 0.0072; |r| on EcoMAC all, median 0.63 to 0.69); their point estimates and intervals are identical to the earlier version, and no decision changed.  The gene jackknife keeps only regulons scored in every replicate, which drops small regulons, so the two intervals of the decision rule cover different regulon sets.
 
-**Supplementary Table 9 | Per-regulon ΔAP against attention, *E. coli*** (`results/macro_aupr_v2`; t = 9; negative favours attention).  Intervals are 95% over regulons and over genes; P values are Holm-adjusted within the family of 40; values of 0.004 are at the resampling floor and are bounds.
+**Supplementary Table 9 | Per-regulon ΔAP against attention, *E. coli*** (`results/macro_aupr_v3`, GRNBoost2 regenerated 29–31 Oct 2026, statistical review pending; t = 9; negative favours attention).  Intervals are 95% over regulons and over genes; P values are Holm-adjusted within the family of 40; values of 0.004 are at the resampling floor and are bounds.
 
 | Data | Evidence | Comparator | Regulons | Mean ΔAP | Regulon interval | Gene interval | Holm P, mean | Median ΔAP | Holm P, median | Attention wins |
 |---|---|---|---|---|---|---|---|---|---|---|
-| M3D | SC | \|r\| | 123 | −0.0205 | [−0.0387, −0.0109] | [−0.0213, −0.0049] | 0.056 | −0.0011 | 0.15 | 75% |
+| M3D | SC | \|r\| | 123 | −0.0205 | [−0.0387, −0.0109] | [−0.0213, −0.0049] | 0.062 | −0.0011 | 0.16 | 75% |
 | M3D | SC | CLR | 123 | −0.0084 | [−0.0229, −0.0013] | [−0.0047, +0.0069] | 1 | −0.0001 | 1 | 54% |
 | M3D | SC | GENIE3 | 123 | −0.0041 | [−0.0173, +0.0013] | [−0.0062, +0.0082] | 1 | +0.0001 | 1 | 46% |
-| M3D | SC | GRNBoost2 | 123 | −0.0269 | [−0.0484, −0.0164] | [−0.0293, −0.0125] | 0.004 | −0.0009 | 0.33 | 71% |
+| M3D | SC | GRNBoost2 | 123 | −0.0153 | [−0.0284, −0.0084] | [−0.0202, −0.0042] | 0.092 | −0.0002 | 1 | 56% |
 | M3D | SC | PIDC | 123 | −0.0221 | [−0.0433, −0.0115] | [−0.0216, −0.0034] | 0.20 | −0.0003 | 1 | 62% |
-| M3D | all | \|r\| | 157 | −0.0204 | [−0.0350, −0.0117] | [−0.0243, −0.0060] | 0.037 | −0.0017 | 0.028 | 76% |
+| M3D | all | \|r\| | 157 | −0.0204 | [−0.0350, −0.0117] | [−0.0243, −0.0060] | 0.040 | −0.0017 | 0.030 | 76% |
 | M3D | all | CLR | 157 | −0.0084 | [−0.0197, −0.0021] | [−0.0080, +0.0054] | 1 | −0.0001 | 1 | 53% |
 | M3D | all | GENIE3 | 157 | −0.0016 | [−0.0115, +0.0029] | [−0.0066, +0.0089] | 1 | +0.0001 | 1 | 43% |
-| M3D | all | GRNBoost2 | 157 | −0.0240 | [−0.0389, −0.0155] | [−0.0254, −0.0099] | 0.004 | −0.0022 | 0.30 | 71% |
+| M3D | all | GRNBoost2 | 157 | −0.0117 | [−0.0213, −0.0066] | [−0.0175, −0.0029] | 0.18 | −0.0002 | 1 | 56% |
 | M3D | all | PIDC | 157 | −0.0199 | [−0.0363, −0.0098] | [−0.0180, −0.0026] | 0.23 | −0.0002 | 1 | 55% |
 | EcoMAC | SC | \|r\| | 119 | −0.0281 | [−0.0435, −0.0188] | [−0.0307, −0.0121] | 0.004 | −0.0024 | 0.21 | 81% |
-| EcoMAC | SC | CLR | 119 | −0.0131 | [−0.0210, −0.0071] | [−0.0119, +0.0001] | 1 | −0.0008 | 0.86 | 66% |
+| EcoMAC | SC | CLR | 119 | −0.0131 | [−0.0210, −0.0071] | [−0.0119, +0.0001] | 1 | −0.0008 | 0.94 | 66% |
 | EcoMAC | SC | GENIE3 | 119 | −0.0012 | [−0.0071, +0.0038] | [−0.0081, +0.0055] | 1 | +0.0003 | 1 | 43% |
-| EcoMAC | SC | GRNBoost2 | 119 | −0.0292 | [−0.0473, −0.0194] | [−0.0261, −0.0114] | 0.004 | −0.0012 | 1 | 68% |
-| EcoMAC | SC | PIDC | 119 | −0.0182 | [−0.0311, −0.0100] | [−0.0196, −0.0035] | 0.14 | −0.0006 | 1 | 66% |
-| EcoMAC | all | \|r\| | 155 | −0.0230 | [−0.0356, −0.0153] | [−0.0338, −0.0154] | 0.004 | −0.0021 | 0.63 | 74% |
+| EcoMAC | SC | GRNBoost2 | 119 | −0.0181 | [−0.0290, −0.0102] | [−0.0252, −0.0097] | 0.004 | −0.0004 | 1 | 56% |
+| EcoMAC | SC | PIDC | 119 | −0.0182 | [−0.0311, −0.0100] | [−0.0196, −0.0035] | 0.15 | −0.0006 | 1 | 66% |
+| EcoMAC | all | \|r\| | 155 | −0.0230 | [−0.0356, −0.0153] | [−0.0338, −0.0154] | 0.004 | −0.0021 | 0.69 | 74% |
 | EcoMAC | all | CLR | 155 | −0.0104 | [−0.0176, −0.0052] | [−0.0155, −0.0020] | 0.28 | −0.0005 | 1 | 61% |
 | EcoMAC | all | GENIE3 | 155 | +0.0016 | [−0.0029, +0.0084] | [−0.0073, +0.0049] | 1 | +0.0002 | 1 | 44% |
-| EcoMAC | all | GRNBoost2 | 155 | −0.0224 | [−0.0356, −0.0143] | [−0.0299, −0.0136] | 0.004 | −0.0013 | 0.87 | 65% |
-| EcoMAC | all | PIDC | 155 | −0.0173 | [−0.0277, −0.0100] | [−0.0235, −0.0073] | 0.0066 | −0.0003 | 1 | 59% |
+| EcoMAC | all | GRNBoost2 | 155 | −0.0114 | [−0.0196, −0.0040] | [−0.0224, −0.0083] | 0.092 | −0.0001 | 1 | 54% |
+| EcoMAC | all | PIDC | 155 | −0.0173 | [−0.0277, −0.0100] | [−0.0235, −0.0073] | 0.0072 | −0.0003 | 1 | 59% |
 
 **Reading.**
 
 1. **Parity with CLR and GENIE3.**  No difference from CLR or GENIE3 survives the decision rule in any cell.  Against CLR the regulon interval of the mean often excludes 0 but the gene interval does not.
-2. **Attention ahead of |r| (3 of 4 cells) and PIDC (1 of 4, EcoMAC all evidence) on the mean,** and of our GRNBoost2 runs (4 of 4), which we do not interpret until the wrapper check (Supplementary Note 13); medians are about zero throughout.
-3. **Where the differences sit.**  The mean gaps come from regulons of 5–24 genes, whereas attention's win rate is highest (60–90%) in regulons of 100 genes or more, where the gaps are tiny.  The pooled gain therefore comes from ranking across regulons, not within them.
-4. **Stability.**  Across all families, one cell is flagged by the delete-50% check (about 13 were flagged in the first run).
+2. **Attention ahead of |r| (3 of 4 cells) and PIDC (1 of 4, EcoMAC all evidence) on the mean,** and of GRNBoost2 on the mean in 1 of 4 cells (EcoMAC, SC evidence, Holm P = 0.004; the other three cells have Holm P 0.0916, 0.184 and 0.0916).  For GRNBoost2 the sign of the mean difference favours attention in 4 of 4 cells and both unadjusted intervals exclude 0 in 4 of 4; medians are about zero throughout (Holm P = 1 for GRNBoost2 in 4 of 4).
+3. **Where the differences sit.**  The mean gaps come from regulons of 5–24 genes, whereas attention's win rate is highest (60–100%) in regulons of 100 genes or more, where the gaps are tiny.  For GRNBoost2 (`macro_strata.csv`) attention's win share is 100%, 88%, 90% and 88% in regulons of 100 genes or more (M3D SC, M3D all, EcoMAC SC, EcoMAC all; n = 10, 17, 10, 16) and 46%, 38%, 47% and 30% in regulons of 5–9 genes; in EcoMAC at all evidence levels the mean ΔAP of GRNBoost2 in regulons of 5–9 genes is +0.0011.  The pooled gain therefore comes from ranking across regulons, not within them.
+4. **Stability.**  Across all families, three cells are flagged by the delete-50% check, all in the K562 secondary (all-genes) family on DoRothEA A–B (CLR, GENIE3 and GRNBoost2; the GRNBoost2 cell has mean ΔAP −0.0001, Holm P = 1).  The previous version of Table 9 (`macro_aupr_v2`) flagged one cell (CLR), and about 13 were flagged in the first run.  In the current run 2 BCa intervals were undefined and are counted as not excluding 0.
 
-**K562.**  On transcription-factor truths the per-regulon differences are tiny (|ΔAP| ≤ 0.0025) and none is established.  On CORUM, PIDC (+0.007), CLR (+0.005) and GENIE3 (+0.004) beat attention; the CLR and GENIE3 differences were fragile in the first run (the delete-50% gene interval included 0), and no CORUM comparison is flagged in the rerun.  On knockdown-response modules, CLR (+0.097), GENIE3 (+0.084), |r| (+0.091) and PIDC (+0.100) all beat attention, which wins only 2% of modules against CLR (Supplementary Note 11).  The secondary all-genes K562 run predates the GENIE3 and PIDC rows and is to be rerun or dropped [PENDING].
+**K562.**  On transcription-factor truths the per-regulon differences are tiny (|ΔAP| ≤ 0.0025) and none is established.  On CORUM, PIDC (+0.007), CLR (+0.005) and GENIE3 (+0.004) beat attention; the CLR and GENIE3 differences were fragile in the first run (the delete-50% gene interval included 0), and no CORUM comparison is flagged in the rerun.  On knockdown-response modules, CLR (+0.097), GENIE3 (+0.084), |r| (+0.091), PIDC (+0.100) and GRNBoost2 (+0.0348, Holm P = 0.0045) all beat attention, which wins only 2% of modules against CLR and 9% against GRNBoost2 (Supplementary Note 11).  For GRNBoost2 minus attention the CORUM mean difference is +0.0013 (Holm P = 1) and the transcription-factor truths give −0.0005, −0.0002 and −0.0004 (DoRothEA A–B, A–C, CollecTRI; Holm P = 1).  The secondary all-genes K562 run (8,559 genes; |r|, CLR, GENIE3 and GRNBoost2, no PIDC, 40 tests) was rerun with GENIE3 rows; there GRNBoost2 minus attention is +0.0290 on knockdown-response modules (Holm P = 0.0035; attention wins 12%), +0.0011 on CORUM and −0.0001 to −0.0005 on the transcription-factor truths (Holm P = 1).  These K562 GRNBoost2 values come from a single seed (`results/macro_aupr_v3`).
 
 ## Supplementary Note 11 | Resolution against reach:  where attention gains and loses
 
@@ -345,7 +345,7 @@ Size, not regulatory type, predicts the optimum.  This is a generic property of 
 
 ## Supplementary Note 13 | BEELINE:  competitor methods
 
-GENIE3, GRNBoost2 and PIDC were run on all 14 BEELINE cases (7 datasets × 2 gene sets) with the same genes and truths as CLR, CLR-NS and |r| (`analysis/beeline_baselines.R`).  Per dataset, log2 AUPRC ratios are averaged over gene sets and truths, and methods are compared over the seven datasets with exact Wilcoxon signed-rank and sign tests (smallest attainable P = 0.0156).  CLR was fixed in advance; CLR-NS was chosen on these truths, so comparisons against it are not confirmatory.
+GENIE3, GRNBoost2 and PIDC were run on all 14 BEELINE cases (7 datasets × 2 gene sets) with the same genes and truths as CLR, CLR-NS and |r| (`analysis/beeline_baselines.R`).  Per dataset, log2 AUPRC ratios are averaged over gene sets and truths, and methods are compared over the seven datasets with exact Wilcoxon signed-rank and sign tests (smallest attainable P = 0.0156).  CLR was fixed in advance; CLR-NS was chosen on these truths, so comparisons against it are not confirmatory.  GRNBoost2 was run with arboreto 0.1.6 and legacy early stopping (`tools/grnboost2.py --early_stop legacy`), production seed 20261021, and rerun with seeds 1–3; the rerun was gated on the other methods' rows reproducing exactly (see the order of events below).  The GRNBoost2 rows regenerated on 29–31 October are awaiting statistical review.
 
 **Supplementary Table 10 | BEELINE primary truths (44 dataset × gene set × truth cells, 7 datasets).**
 
@@ -355,17 +355,73 @@ GENIE3, GRNBoost2 and PIDC were run on all 14 BEELINE cases (7 datasets × 2 gen
 | CLR-NS | 1.60 | +0.06 | 7/7 | 0.016 | — | — | — |
 | GENIE3 | 1.69 | −0.04 | 3/7 | 0.69 | −0.10 | 1/7 | 0.11 |
 | PIDC | 1.56 | −0.02 | 4/7 | 0.81 | −0.08 | 1/7 | 0.16 |
-| GRNBoost2 | 1.26 | −0.35 | 0/7 | 0.016 | −0.42 | 0/7 | 0.016 |
+| GRNBoost2 | 1.47 | −0.15 | 1/7 | 0.031 | −0.21 | 0/7 | 0.016 |
 | \|r\| | 1.20 | −0.23 | 0/7 | 0.016 | −0.29 | 0/7 | 0.016 |
 
 **Reading.**
 
-- CLR is comparable to GENIE3 and PIDC and beats |r| in 7 of 7 datasets.  Our GRNBoost2 runs also score below CLR in 7 of 7, a result we do not interpret until the wrapper check below.  GENIE3 has the highest median over the 44 cells, but its per-dataset mean is below CLR's.
+- CLR is comparable to GENIE3 and PIDC and beats |r| in 7 of 7 datasets.  GRNBoost2 scores below CLR in 6 of 7 datasets (mean log2 −0.15; hESC is the exception, +0.015; Wilcoxon P = 0.031, sign P = 0.125).  With seeds 1, 2 and 3 the mean log2 relative to CLR is −0.157, −0.157 and −0.159, hESC is again the only dataset above CLR in every seed, and the median AUPRC ratio is 1.456, 1.485 and 1.483 (`results/beeline_baselines/summary_gb2s{1,2,3}.csv`; no gate on these runs).  Relative to CLR-NS, GRNBoost2 is better in 0 of 7 datasets for the production seed and seed 1 and in 1 of 7 for seeds 2 and 3.  GENIE3 has the highest median over the 44 cells, but its per-dataset mean is below CLR's.
 - CLR-NS has the highest per-dataset mean, but it was selected on these truths.
 - The human datasets split:  on hESC, GENIE3 and PIDC beat CLR-NS, driven by STRING; on hHep, CLR-NS beats all three.  We do not claim that CLR-NS beats learned methods on human data.
 - Cell-type-specific ChIP-seq truths are near random for every method (median AUPRC ratio 0.98–1.02; |r| equals CLR-NS), as BEELINE reported.
 
-**GRNBoost2 discrepancy.**  In our hands GRNBoost2 is last everywhere, on bulk and single-cell data and on early precision, whereas BEELINE placed it near GENIE3.  We are checking our wrapper (`tools/grnboost2.py`:  per-target routine, early stopping, edge orientation), several seeds, the dask arboreto path and BEELINE's own GRNBoost2 output on one case before making any claim that involves GRNBoost2 [PENDING].  **PIDC.**  On human single-cell data, PIDC falls back from a gamma to a normal approximation for under 1% of pairs, including pairs involving SOX3 and PAX6.
+**GRNBoost2: order of events, fault and rerun.**  GRNBoost2 was first run and reported with arboreto 0.1.6 under scikit-learn 1.9.1, and those results appeared in our working tables between 16 and 21 October 2026 (Table 2, Supplementary Tables 9 and 10, and a progress checkpoint).  In those runs GRNBoost2 ranked last everywhere, on bulk and single-cell data and on early precision.  On 22 October 2026 we found that arboreto's early-stopping rule is broken under scikit-learn 1.3 and later:  the out-of-bag improvement it monitors changed meaning, so most targets stopped after 25–36 trees.  A diagnostic designed after that discovery (job 0894, scored 26–27 October; arboreto's own `grnboost2()`, the current wrapper, a legacy monitor and no early stopping; three seeds) showed that neither our wrapper nor the seed explained the low scores.  On 27 October 2026, before any rerun, we fixed the rule in writing (commit 050695d, `docs/plans/grnboost2_diagnostic.md`):  all GRNBoost2 results are rerun with legacy early stopping (arboreto's published stopping rule with the pre-1.3 out-of-bag improvement); no early stopping is a sensitivity analysis only; the diagnostic's variant results had been seen when this was chosen; no other comparator, truth, split, seed or scoring script is changed.  Legacy early stopping reproduced stock arboreto 0.1.6 under scikit-learn 1.2.2 on BEELINE mDC_500 (3 seeds; trees per target and AUPRC ratios within one seed SD; commit 45a183b, `docs/grnboost2_equivalence/`).  The rerun (27–31 October 2026) replaced every GRNBoost2 result.  Gate:  in every rerun that recomputed other methods (M3D, EcoMAC, K562 on 5,671 genes and on 8,559 genes, and the 14 BEELINE cases) every non-GRNBoost2 row reproduced the earlier result to within 1e-6 (observed difference 0, `analysis/rerun_gate.R`).  The seed runs on M3D and BEELINE (seeds 1–3) had no gate.  The K562 8,559-gene run was added on 28 October.  The per-regulon comparison was recomputed on 31 October (`results/macro_aupr_v3`).  The superseded outputs are kept in `results/grnboost2_superseded/`.  The arboreto fault concerns the early-stopping monitor under scikit-learn 1.3 and later (observed here with 1.9.1).
+
+Share of off-diagonal pairs tied at zero after symmetrization, first run and rerun:  M3D 94.05% and 45.67%, EcoMAC 93.72% and 29.39%, K562 (5,671 genes) 94.93% and 70.56% (`grnboost2_scores.rds`).  Trees per target in the rerun (median, interquartile range):  M3D 494 (450–535), EcoMAC 839 (747–936), K562 (5,671 genes) 240 (173–310), K562 (8,559 genes) 233 (170–304) (`baselines.log`).
+
+**Supplementary Table 10a | GRNBoost2, first run and rerun: pooled AUPR over the base rate (Table 2 metric).**  The EcoMAC, M3D and K562 5,671-gene rows are those of Table 2; the 8,559-gene K562 run (secondary) is not in Table 2.
+
+| Run | Truth | Raw, first run | Raw, rerun | Hub-controlled, first run | Hub-controlled, rerun |
+|---|---|---|---|---|---|
+| M3D | SC | 1.18 | 1.36 | 1.28 | 1.37 |
+| M3D | all | 1.13 | 1.26 | 1.18 | 1.28 |
+| EcoMAC | SC | 1.21 | 1.36 | 1.19 | 1.37 |
+| EcoMAC | all | 1.14 | 1.26 | 1.09 | 1.27 |
+| K562, 5,671 genes | DoRothEA A–B | 1.02 | 1.05 | 1.02 | 1.05 |
+| K562, 5,671 genes | DoRothEA A–C | 1.01 | 1.03 | 1.00 | 1.03 |
+| K562, 5,671 genes | CollecTRI | 1.01 | 1.04 | 0.94 | 1.01 |
+| K562, 5,671 genes | CORUM | 2.18 | 3.66 | 1.70 | 2.51 |
+| K562, 5,671 genes | KD response | 1.37 | 1.84 | 1.08 | 1.55 |
+| K562, 8,559 genes | DoRothEA A–B | 1.01 | 1.04 | 1.00 | 1.04 |
+| K562, 8,559 genes | DoRothEA A–C | 1.01 | 1.03 | 0.99 | 1.03 |
+| K562, 8,559 genes | CollecTRI | 1.01 | 1.04 | 0.94 | 1.01 |
+| K562, 8,559 genes | CORUM | 2.21 | 3.76 | 1.72 | 2.61 |
+| K562, 8,559 genes | KD response | 1.33 | 1.80 | 1.03 | 1.49 |
+
+Source: `metrics.csv` of the four baseline runs, first run in `results/grnboost2_superseded/`.  Attention (Table 2) is 1.68, 1.44, 1.68 and 1.47 on the four *E. coli* cells, and 3.51 on K562 CORUM against GRNBoost2 3.66 (paired difference GRNBoost2 minus attention +0.0020, jackknife 95% interval −0.0057 to +0.0096).
+
+**Supplementary Table 10b | GRNBoost2 minus attention per regulon, first run and rerun** (`results/macro_aupr_v2` and `results/macro_aupr_v3`; positive values favour GRNBoost2; Holm P for the mean).
+
+| Family | Truth | Regulons | Mean ΔAP, first run | Mean ΔAP, rerun | Holm P, first run | Holm P, rerun | Attention wins, first run | Attention wins, rerun |
+|---|---|---|---|---|---|---|---|---|
+| *E. coli* M3D | SC | 123 | −0.0269 | −0.0153 | 0.004 | 0.0916 | 71% | 56% |
+| *E. coli* M3D | all | 157 | −0.0240 | −0.0117 | 0.004 | 0.184 | 71% | 56% |
+| *E. coli* EcoMAC | SC | 119 | −0.0292 | −0.0181 | 0.004 | 0.004 | 68% | 56% |
+| *E. coli* EcoMAC | all | 155 | −0.0224 | −0.0114 | 0.004 | 0.0916 | 65% | 54% |
+| K562 primary | DoRothEA A–B | 105 | −0.0025 | −0.0005 | 0.664 | 1 | 79% | 66% |
+| K562 primary | DoRothEA A–C | 271 | −0.0008 | −0.0002 | 1 | 1 | 77% | 63% |
+| K562 primary | CollecTRI | 491 | −0.0016 | −0.0004 | 0.132 | 1 | 69% | 60% |
+| K562 primary | CORUM | 499 | −0.0022 | +0.0013 | 0.164 | 1 | 46% | 36% |
+| K562 primary | KD response | 566 | −0.0178 | +0.0348 | 0.0127 | 0.0045 | 88% | 9% |
+| K562 secondary | DoRothEA A–B | 105 | −0.0021 | −0.0001 | 0.729 | 1 | 79% | 66% |
+| K562 secondary | DoRothEA A–C | 269 | −0.0008 | −0.0001 | 0.306 | 1 | 82% | 72% |
+| K562 secondary | CollecTRI | 490 | −0.0010 | −0.0005 | 0.141 | 1 | 72% | 64% |
+| K562 secondary | CORUM | 499 | −0.0018 | +0.0011 | 0.254 | 1 | 44% | 38% |
+| K562 secondary | KD response | 585 | −0.0173 | +0.0290 | 0.00903 | 0.0035 | 90% | 12% |
+
+**Supplementary Table 10c | GRNBoost2 on BEELINE (primary truths, 44 cells, 7 datasets), first run and rerun** (`results/grnboost2_superseded/beeline_baselines/summary.csv`, `results/beeline_baselines/summary.csv`).
+
+| Statistic | First run | Rerun, seed 20261021 | Rerun, seeds 1 / 2 / 3 |
+|---|---|---|---|
+| Median AUPRC ratio | 1.26 | 1.47 | 1.456 / 1.485 / 1.483 |
+| Mean log2 vs CLR | −0.353 | −0.152 | −0.157 / −0.157 / −0.159 |
+| Datasets better than CLR | 0/7 | 1/7 (hESC) | 1 / 1 / 1 |
+| Wilcoxon P, sign P (vs CLR) | 0.0156, 0.0156 | 0.0312, 0.125 | 0.0312, 0.125 (all three) |
+| Mean log2 vs CLR-NS | −0.415 | −0.213 | −0.219 / −0.218 / −0.221 |
+| Datasets better than CLR-NS | 0/7 | 0/7 | 0 / 1 / 1 |
+| Wilcoxon P (vs CLR-NS) | 0.0156 | 0.0156 | 0.0156 / 0.0312 / 0.0312 |
+
+**PIDC.**  On human single-cell data, PIDC falls back from a gamma to a normal approximation for under 1% of pairs, including pairs involving SOX3 and PAX6.
 
 ## Supplementary Note 14 | Hard FDR operators inside the cluster bootstrap
 
