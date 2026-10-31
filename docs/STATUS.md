@@ -1,6 +1,6 @@
 # Project status
 
-*Thursday 22 October 2026, 21:45, before a second shutdown (GPUs back in place and visible, both x16, both report NUMA node 0 where node 1 was expected). Living file: update at each checkpoint. Everything is committed and pushed; the jobs resume from their caches (GRNBoost2 8 runs, K562 keff splits 3-4 saved, BEELINE 17%, RPE1 t\* splits in `results/clr_logpt_test/rpe1/splits/`). The CLR(log P^t) checklist below says where to continue; the next step is the EcoCyc truth build. GPU work is set up (`~/venvs/scfm`, checkpoints hashed in the scfm preregistration change log) but the lamindb setup, leakage audit and smoke test are not started: run them only when the CPU jobs are light.*
+*Saturday 31 October 2026, 12:00. Living file: update at each checkpoint. The job queue is empty (all GRNBoost2 legacy reruns, BEELINE 110c and the exploratory rCLR runs have finished). The sections "Restarting after the shutdown" and "Open items as of 22 Oct" below are historical.*
 
 ## Restarting after the shutdown
 
@@ -9,13 +9,16 @@
 3. GPU check after the move: `nvidia-smi --query-gpu=index,name,pci.bus_id --format=csv` and, per card, `cat /sys/bus/pci/devices/<bus>/current_link_width` (expect 16) and `numa_node` (expect 1 for the moved card).
 4. Start the CORUM order-of-operations expert (planned for noon; see "Next").
 
-## Jobs
+## Jobs (31 Oct)
 
-| Job | Data | What it tests | State at shutdown | After restart |
-|---|---|---|---|---|
-| 0893b keff selections, K562 | Human K562 Perturb-seq pseudobulk | Preregistered keff test, phase 1: held-out depth per width variant (no truths) | 2/10 splits done (cached) | resumes; about 1 day at 2 workers |
-| 0894 GRNBoost2 diagnostic | hESC_1000, mHSC-E_500 (BEELINE), E. coli M3D | Whether arboreto's early stopping (broken by scikit-learn ≥ 1.3) explains GRNBoost2's last place | 8 runs done (kept) | resumes; about 15 h left |
-| 110c BEELINE bootstrap | Human scRNA-seq (hESC, hHep) + 5 mouse | Bootstrap over cells for CLR-NS vs CLR and \|r\| and attention, 5,000-gene context | 1,577/3,080 tasks (51%) | resumes at 5 workers; raise to 12 when the keff jobs end |
+Nothing running, nothing queued. Finished since 22 Oct:
+
+- 110c BEELINE bootstrap: 3,080/3,080 tasks, done 30 Oct 19:18 (peak 20 GB).
+- GRNBoost2 legacy reruns 0920-0926, 0929 (K562 all genes; OOM at 78 GB, retried at 85 GB, peak 76 GB, done 31 Oct 08:07): all non-GRNBoost2 gates passed (0920, 0923, 0925, 0926, 0929; the seeds jobs 0921/0924 have no gate).
+- 0930 macro v3 (four runs): crashed 31 Oct 08:28 (an undefined BCa interval in `boot_mean`); `analysis/macro_aupr.R` made NA-safe (undefined interval counts as not excluding 0, count reported; 2 cases) and rerun as 0930b, done 11:42. Results in `results/macro_aupr_v3`, unreviewed.
+- 0950b/c rCLR on K562 CORUM (exploratory, see Next item 7).
+
+Scheduler: admission uses 1.1x the newest successful peak from `jobs_pc/peaks.tsv` (`tools/scheduler.sh`, commit 1a69c57); `tools/progress.sh` counts files for jobs listed in `jobs_pc/progress_files.tsv`. A retry's memory can never exceed the 90 GB admission budget, so set `# mem` by hand if a retry would.
 
 ## Results in hand (all reviewed; details in `docs/paper_plan.md`)
 
@@ -102,6 +105,12 @@ If a job died mid-step, rerun that step; do not skip a gate. No truth may be rea
    - a method-neutral hub stratifier;
    - the EcoMAC core result, after checking array overlap with M3D;
    - diffCLR (paper 2).
+
+7. **Exploratory work, 30-31 Oct (nothing preregistered, nothing in paper/):**
+   - **Background-adaptive width** (`docs/plans/background_width_exploration.md`, `analysis/synthetic_width/`; synthetic plus label-free real data, no truth opened). Width from a background count is the wrong lever. Mass conservation caps large complexes at about 1/(n-1) per pair whatever the width; the usable lever is genes with no reproducible partner, which spend their attention on junk partners (oracle silencing: small complexes x2.61 messy / x1.79 clean). A reproducibility gate plus reciprocity recovers part of it (complexes x1.08 / x1.04, regulons x1.19 / x1.40; 20-gene complexes x0.82 / x0.87). Real data: 10.1% of K562 genes have no reproducible partner, 0.3% of M3D. Disclosed: operators were added after one seed and follow-ups after 4-seed tables. PI decisions (31 Oct): small complexes are the target; the ribosome is documented as a mechanistic limitation (limitations paragraph plus the synthetic evidence) instead of fixed; no more confirmatory complex-oriented attempts before the Jim readout; a k-way non-hierarchical cluster split (lab-like) for reproducibility on K562, with a note in (supplementary) Methods. Open: add an empirical-null (central-mode) count as one more gate candidate in a next synthetic round.
+   - **rCLR on K562 CORUM** (`analysis/rclr_k562/rclr_k562.R`, `results/rclr_k562/`; exploratory, K562 CORUM is not held out): reproduces CLR 6.39x and K10 3.51x. Against K10 on CLR (5,671 genes): K10 on rCLR x1.08 all CORUM [0.95, 1.25], x1.10 excluding ribosome [1.00, 1.19], x1.08 large, x1.10 small [0.93, 1.32]; no ribosome lift and no small-complex loss as predicted synthetically; rCLR flags the same partner-less genes as CLR (Spearman 0.94). Not evidence for adopting it.
+   - **Fig. 1 (method)** rev 2 (15670cc) is code-built; PaperBanana (planner `gemini-3.8-flash`, image `gemini-nano-banana-2.1`) is used for layout inspiration only, since its output invents matrices and numbers; the per-panel track drifted in all four panels. Agent `figure-illustrator` (`.claude/agents/figure-illustrator.md`) runs the track. Pending: fresh-eyes review at 7.2 in, optional typography restyle, `pb_runs/` hygiene (keep only the round-4 layout reference).
+   - **GRNBoost2 change inventory** (`docs/plans/grnboost2_rerun_change_inventory.md`, in progress): every place the paper repo states a GRNBoost2 number, old vs new. Paper, tables and the Collins page stay untouched until it is reviewed.
 
 ## Machine rules (see `HANDOFF_crayon.md`)
 
