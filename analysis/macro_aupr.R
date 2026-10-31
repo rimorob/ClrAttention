@@ -74,12 +74,16 @@ pr$ap_norm <- (pr$ap - pr$base_rate) / (1 - pr$base_rate)
 pr$size_bin <- cut(pr$size, c(0, 9, 24, 99, Inf), labels = c("5-9", "10-24", "25-99", ">=100"))
 say("per-regulon rows: ", nrow(pr), " from ", paste(dirs, collapse = ", "))
 
+n_bca_na <- 0L
 boot_mean <- function(d) {
   if (length(d) < 5 || all(d == d[1])) return(c(lo = NA, hi = NA, p = NA))
   b <- boot::boot(d, function(x, i) mean(x[i]), R = opt$B)
   ci <- function(a) boot::boot.ci(b, conf = 1 - a, type = "bca")$bca[4:5]
   lohi <- ci(0.05)
-  excl <- function(a) { r <- ci(a); r[1] > 0 || r[2] < 0 }       # BCa interval at level 1 - a excludes 0
+  excl <- function(a) {                                           # BCa interval at level 1 - a excludes 0
+    r <- tryCatch(ci(a), error = function(e) c(NA_real_, NA_real_))
+    if (anyNA(r)) { n_bca_na <<- n_bca_na + 1L; return(FALSE) }   # undefined BCa interval: counted as not excluding 0 (conservative), reported at the end
+    r[1] > 0 || r[2] < 0 }
   if (!excl(1 - 1e-9)) p <- 1 else if (excl(1 / opt$B)) p <- 1 / opt$B else {
     lo <- 1 / opt$B; hi <- 1 - 1e-9                                 # smallest a at which it excludes 0
     for (it in 1:30) { mid <- sqrt(lo * hi); if (excl(mid)) hi <- mid else lo <- mid }
@@ -172,4 +176,5 @@ for (k in seq_len(nrow(res))) with(res[k, ], say(sprintf(
   "%-36s %-12s %-10s n=%3d  mean %+.4f regulons [%+.4f, %+.4f] genes [%+.4f, %+.4f] p_holm %.3g | median %+.4f p_holm %.3g | attention wins %.0f%%, tied %.0f%%%s",
   run, truth, comparator, n_regulons, mean_d, mean_lo_regulons, mean_hi_regulons, mean_lo_genes, mean_hi_genes, p_mean_holm,
   median_d, p_median_holm, 100 * attention_wins, 100 * tied, if (isTRUE(jack_unstable)) "  [gene jackknife unstable: d50/d20 SE ratio outside +-25%]" else "")))
+say("BCa intervals undefined (counted as not excluding 0): ", n_bca_na)
 say("done")
