@@ -392,3 +392,75 @@ So the gate is imperfect in both directions, and lab-driven spurious reproducibi
 - `analysis/synthetic_width/m3d_label_free.R [m3d|k562]`: the label-free real-data diagnostic.
 - `analysis/synthetic_width/out/`: `summary_*.csv`, `paired_vs_K10_*.csv`, `<scenario>/{metrics_by_seed, widths_by_role, mechanism_by_size, width_vs_N, rclr_vs_K10, gate_vs_K10, gate_open_by_role}.csv`, `{m3d,k562}_label_free_*.csv` and run logs.
 - Run with `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 nice -n 19`, under `systemd-run --user --scope -p MemoryMax=4G`. Each sim_width seed takes about 170 s.
+
+## 8. Round 2 (PI-approved, 31 Oct 2026): carry-forward rule and design, written before any round-2 run
+
+*Still exploratory, synthetic and label-free only. No truth set is opened and nothing is preregistered.*
+
+**PI decisions this round builds on.**
+
+1. The target is **small complexes**. The ribosome and other large complexes are documented as a mechanistic limitation (mass conservation, about m/(n − 1) per pair), not fixed.
+2. Genes may keep their own attention mass: a partner-less gene parks it on itself as a self-loop, which is what the symmetric sink does.
+3. Real-data "lab-like" splits use a k-way non-hierarchical cluster cut: k-means on the top PCs of the samples, k = 5, leave-one-cluster-out. The synthetic generator keeps lab halves. Cluster splits separate *conditions*, not batches, so they are a stricter test of reproducibility than lab halves.
+4. No confirmatory attempt follows this round. rCLR is closed: it was run on K562 CORUM elsewhere (`results/rclr_k562/`), and no rCLR work is done here.
+
+### 8.1 Carry-forward rule (fixed before running)
+
+Every operator is compared with K10. All ratios are geometric means over 4 paired seeds at t = 9 with the attention readout (Pᵗ + Pᵗ′)/2. "Seeds better" counts the paired seeds above K10.
+
+A gate or operator variant is **carried forward** only if all four conditions hold:
+
+- **(C1) Small complexes.** The small-complex ratio (complexes of 3–6 genes, all non-complex pairs as negatives) is > 1.00 with ≥ 3/4 seeds better. This must hold in each of the three batch strengths (×0, ×1, ×2) of the standard generator at a partner-less fraction of 10%.
+- **(C2) All complexes.** The pooled all-complex ratio is > 1.00 with ≥ 3/4 seeds better, in the same three cells.
+- **(C3) Regulons.** The regulon co-membership ratio is ≥ 0.95 in the same three cells and in the regulon-heavy generator (partner-less 10%; batch ×0 and ×1).
+- **(C4) Edges.** In the regulon-heavy generator (both batch levels), the TF–target edge ratio is ≥ 0.95. The universe is pairs containing exactly one regulator gene, and the positives are the generator's TF–target edges.
+
+Partner-less fractions of 5%, 25% and 50% are **reported for robustness and do not gate**. 10% is the realistic fraction: the K562 label-free count of genes with no reproducible partner was 10.1%.
+
+**Readouts.**
+
+- The a3r and profile-cosine readouts are descriptive comparators. The carry-forward rule applies only to the method's attention readout, because a3r was preregistered and not adopted.
+- **Cosine falsifier** (defined in S3): the profile-cosine readout on the gate + reciprocity operator is dropped unless it beats a3r on the same operator, on both small complexes and regulons, at f = 10% in both batch ×0 and batch ×1.
+
+### 8.2 Generator changes
+
+- **Partner-less fraction f.**
+  - G stays at 2,000 and N at 500. The ribosome (80 genes) and its 25 satellites are fixed.
+  - The rest of the module structure is scaled by a factor m so that module genes ≈ (1 − f)·G. The scaled part is the complex size spectrum, the number of regulators, the target pool and the hubs.
+  - Every pool gene is assigned to at least one regulon (a partition first, then overlapping extra targets), so undrawn pool genes no longer join the partner-less set.
+  - The realised f is reported.
+  - f ∈ {5%, 10%, 25%, 50%}.
+- **Batch strength b.** Lab-effect SD is U(0, 0.8·b) over 10 labs, b ∈ {0, 1, 2}. The other messy features (two global programs, t₄ noise, zero-inflation in 20% of genes) are on in every cell.
+- **Regulon-heavy generator** (f = 10%, b ∈ {0, 1}):
+  - the complex spectrum at half its standard counts;
+  - 30 regulators (mRNA loading U(0.4, 0.8)) with log-uniform 50–400 targets from a pool that fills the remaining module genes (heavy overlap);
+  - target loadings U(0.15, 0.45).
+- **Seeds:** 20261031 + s, s = 1–4. The round-1 seeds are not reused, and the round-1 tables are not comparable cell-for-cell.
+
+### 8.3 Gates (all thresholds fixed by rule, not tuned)
+
+- **Reproducibility gate (GR), as in round 1.**
+  - Statistic: repro_nᵢ, the number of row i's top-50 positive CLR candidates shared by the two lab halves.
+  - The gate is open if repro_nᵢ ≥ k₀, where k₀ is the smallest k with P(Poisson(50²/(G − 1)) ≥ k) < 0.05.
+- **Empirical-null gate (GE), the PI's idea.**
+  - Row i of the *unclipped* Stouffer CLR scores: uᵢⱼ = (zᵢⱼ + zⱼᵢ)/√2, with zᵢⱼ the row-standardized MI.
+  - Efron central matching: fit a quadratic to the log kernel density over the row's central 50%, giving the null mode δ₀, SD σ₀ and π₀ (if the fitted curvature is not negative: median, IQR/1.349, π₀ = 1).
+  - Primary statistic: the excess tail count Eᵢ = #{j : uᵢⱼ > δ₀ + c·σ₀}, with c = Φ⁻¹(1 − 0.5/(G − 1)), so that 0.5 null values are expected per row.
+  - The gate is open if Eᵢ ≥ 3, the smallest k with P(Poisson(0.5) ≥ k) < 0.05.
+  - Secondary statistic, reported only: the right-tail local-fdr sum, Σ over j with uᵢⱼ > δ₀ of (1 − lfdrᵢⱼ).
+- **Judging the two gates.**
+  - Detection: the AUC of each continuous statistic for separating partner-less genes from small-complex (3–6) genes, and open rates by gene role.
+  - Downstream: the carry-forward rule, applied to the gate's symmetric sink with and without reciprocity.
+- **Real data (label-free).**
+  - On M3D and K562, compute GE on the full data. Compute GR from the 5-fold k-means cluster split as follows:
+    - for each held-out cluster c, repro_c = |top-50 of the other four clusters ∩ top-50 of cluster c|;
+    - Sᵢ = Σ_c repro_c;
+    - the gate is open if Sᵢ ≥ the smallest s with P(Poisson(5 · 50²/(G − 1)) ≥ s) < 0.05.
+  - The folds are dependent, so this threshold is approximate; the dependence makes it lenient (opens too many rows).
+  - Report the agreement of the two calls: a 2 × 2 table, Cohen's κ, and the Spearman correlation of Eᵢ with Sᵢ.
+
+### 8.4 What was decided after seeing earlier tables (disclosure)
+
+- From round-1 tables: the gate + reciprocity operator, the Poisson rule for k₀, and the use of a symmetric sink.
+- From the PI after round 1: the choice of small complexes as the target, the f grid, the batch grid, the regulon-heavy generator and the empirical-null gate.
+- Chosen by me in this section, before running: the exact threshold rules above, the regulon-heavy parameters, and C4.
