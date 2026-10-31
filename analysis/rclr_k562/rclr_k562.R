@@ -32,9 +32,15 @@
 #   positive candidates between two halves of the knockdown profiles; the split and rule of
 #   analysis/synthetic_width/m3d_label_free.R k562 mode), CLR vs rCLR.
 #
-# Usage (repo root): Rscript analysis/rclr_k562/rclr_k562.R --out results/rclr_k562 [--quick N] [--threads 8]
+# Gene universe: 'truthgenes' (5,671 genes, results/baselines_k562ess_truthgenes_genie3/expression.tsv;
+#   the data of analysis/corum_exploratory/, source of the CLR 6.39x / attention 3.51x numbers; PRIMARY here)
+#   or 'all' (8,559 genes, the keff-test data loaded from the h5ad exactly as keff_test.R; its cached CLR
+#   results/keff_test/k562ess/cache/fulldata.rds is used and checked against a recomputation; SECONDARY).
+#   The CORUM truth (1,185 complexes, base rate 0.0133) is identical in both.
+#
+# Usage (repo root): Rscript analysis/rclr_k562/rclr_k562.R --out results/rclr_k562/<universe> --universe truthgenes|all [--quick N] [--threads 8]
 args <- commandArgs(TRUE)
-opt <- list(out = "results/rclr_k562", quick = 0L, threads = 8L, jack = 100L)
+opt <- list(out = "results/rclr_k562/truthgenes", universe = "truthgenes", quick = 0L, threads = 8L, jack = 100L)
 for (k in seq(1, length(args), by = 2)) opt[[sub("^--", "", args[k])]] <- if (is.numeric(opt[[sub("^--", "", args[k])]])) as.integer(args[k + 1]) else args[k + 1]
 say <- function(...) cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S"), paste0(...)))
 dir.create(opt$out, showWarnings = FALSE, recursive = TRUE)
@@ -43,9 +49,29 @@ source("analysis/regulondb.R"); source("analysis/regulons.R"); source("analysis/
 QUICK <- opt$quick > 0L
 
 ## ---- data (K562 half A pseudobulk, as keff_test.R / m3d_label_free.R k562 mode) ----------
-raw <- utils::read.delim("results/baselines_k562ess_truthgenes_genie3/expression.tsv", check.names = FALSE, stringsAsFactors = FALSE)
-X <- as.matrix(raw[, -1]); rownames(X) <- raw[[1]]; storage.mode(X) <- "double"; rm(raw)
-X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
+stopifnot(opt$universe %in% c("truthgenes", "all"))
+if (opt$universe == "truthgenes") {
+  raw <- utils::read.delim("results/baselines_k562ess_truthgenes_genie3/expression.tsv", check.names = FALSE, stringsAsFactors = FALSE)
+  X <- as.matrix(raw[, -1]); rownames(X) <- raw[[1]]; storage.mode(X) <- "double"; rm(raw)
+  X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
+} else {            # data loading copied from analysis/keff_test.R (k562ess branch)
+  h5 <- "data/perturbseq/K562_essential_normalized_bulk_01.h5ad"
+  set.seed(20261015L)
+  rd <- function(p) rhdf5::h5read(h5, p)
+  cat_of <- function(grp, field) { x <- rd(paste0(grp, "/", field))
+    if (is.list(x)) return(as.character(x$categories)[x$codes + 1L])
+    cats <- tryCatch(rd(paste0(grp, "/__categories/", field)), error = function(e) NULL)
+    if (is.null(cats)) as.character(x) else as.character(cats)[x + 1L] }
+  Z <- rd("X"); rownames(Z) <- cat_of("/var", "gene_name"); pert <- cat_of("/obs", "gene_transcript"); colnames(Z) <- pert
+  pval <- as.numeric(rd("/obs/energy_test_p_value"))
+  K <- pert[pval < 1e-3 & !grepl("non-targeting", pert)]; K <- K[sample(length(K))]
+  A <- sort(K[seq_len(floor(length(K) / 2))])
+  X <- Z[, A]; rm(Z); X[!is.finite(X)] <- 0
+  X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
+  dup <- rownames(X) %in% rownames(X)[duplicated(rownames(X))]
+  if (any(dup)) X <- X[!dup, ]
+  storage.mode(X) <- "double"; rm(rd, cat_of, pert, pval, K, A, dup)
+}
 if (QUICK) { v <- apply(X, 1, stats::var); X <- X[sort(order(-v)[seq_len(opt$quick)]), ]; rm(v) }
 genes <- rownames(X); G <- length(genes)
 say(sprintf("%d genes x %d profiles (quick = %d)", G, ncol(X), opt$quick))
@@ -74,7 +100,7 @@ f <- fit_of(X); M <- f$mi; C <- f$clr_scores; f$release(); rm(f)
 say(sprintf("MI + CLR: %.1f s", as.numeric(difftime(Sys.time(), t0, units = "secs"))))
 cache_f <- "results/keff_test/k562ess/cache/fulldata.rds"
 chk <- data.frame(check = character(), value = character())
-if (!QUICK) {
+if (!QUICK && opt$universe == "all") {
   full <- readRDS(cache_f)
   chk <- rbind(chk, data.frame(check = c("genes md5 equals keff_test fingerprint", "max |CLR recomputed - cached CLR|"),
     value = c(as.character(identical(digest::digest(genes, algo = "md5"), full$fingerprint$genes_md5)),
@@ -83,6 +109,11 @@ if (!QUICK) {
 }
 t0 <- Sys.time(); U <- rclr_of(M); rm(M); invisible(gc(verbose = FALSE))
 say(sprintf("rCLR: %.1f s", as.numeric(difftime(Sys.time(), t0, units = "secs"))))
+if (!QUICK && opt$universe == "truthgenes") {       # documented earlier numbers (analysis/corum_exploratory/metrics_exploratory.csv)
+  me <- utils::read.csv("analysis/corum_exploratory/metrics_exploratory.csv", stringsAsFactors = FALSE)
+  chk <- rbind(chk, data.frame(check = c("documented CLR CORUM AUPR / enrichment", "documented attention (t = 9, K10) CORUM AUPR / enrichment"),
+    value = sapply(c("clr", "att_t9"), function(k) { r <- me[me[[1]] == k & me[[2]] == "CORUM", ]; sprintf("%.4f / %.2f", r[[3]], r[[5]]) })))
+}
 chk <- rbind(chk, data.frame(check = "cor(CLR, rCLR) over upper-triangle pairs", value = format(stats::cor(C[upper.tri(C)], U[upper.tri(U)]), digits = 4)))
 
 ## ---- truth: CORUM and the five fixed endpoints ----------------------------------------------
