@@ -452,6 +452,76 @@ CLR scores carry a permutation null, so hard selection at a false-discovery rate
 
 **Learned attention (`docs/preregistration_scfm.md`; fixed 2026-10-21, before any foundation-model network was computed).**  The primary contrast is CLR-NS against zero-shot scPRINT v1 attention (mean over layers, heads and cells; special tokens removed; rows renormalized; target as query and transcription factor as key) on the seven BEELINE datasets, all cells, scored on genes that every method covers.  The primary hypothesis is non-inferiority with a margin of 0.15 log2 units of AUPRC ratio, read from the exact Wilcoxon (Hodges–Lehmann) interval of the per-dataset differences (coverage 92.2%), with superiority tested next in a fixed sequence.  Key secondary contrasts (CLR against scPRINT; CLR-NS against scPRINT on early precision) are confirmatory only if the primary holds, with Holm over two tests.  scGPT, readouts other than the primary one, the controls (random weights, permuted expression, data-free gene embeddings), CLR applied to learned attention, fine-tuning and K562 control cells are descriptive.  A leakage audit of each model's pretraining corpus against the evaluation accessions precedes scoring; leakage would favour the foundation models and so make a non-inferiority result conservative.  CLR-NS was chosen on these truths, which the preregistration discloses.
 
+## Supplementary Note 16 | Sensitivity of Table 2 to the tie convention
+
+**Why.**  Several scores contain many exact ties, and a reviewer asked whether the tie convention of the pooled AUPR changes Table 2.  We ran the check on 31 October 2026.  It is a sensitivity analysis:  the primary convention is unchanged, was fixed before this check, and every number in Table 2 and the main text is as reported.
+
+**Conventions (`analysis/tie_check/`; results in `results/tie_check/`).**  *Existing* (the convention of `ap_fast` in `analysis/regulondb.R`, used throughout):  every pair in a block of tied scores receives the precision at the end of the block, which is pessimistic for methods with ties.  *Expected ties*:  the exact expectation of average precision when the order within each tied block is uniformly random (a hypergeometric number of earlier positives within the block, evaluated analytically, no Monte Carlo).  *Optimistic* (positives first in every block) and *strict* (negatives first) are the extreme orders and are reported as bounds only.  The marks (bold, †) were recomputed under each convention by the rule of `analysis/sota_table.R` (paired delete-half jackknife, the same 100 splits).
+
+**The existing convention is reproduced exactly.**  Rescoring from the cached scores gives every cell of the pooled AUPR and of the 100 jackknife replicates of the existing convention to within 5e-16 of `metrics.csv` (172 method-truth-dataset checks).
+
+**Where ties occur.**  Over the benchmark pairs (pairs between annotated genes of a truth), attention, GENIE3, PIDC and |r| have no ties, except that attention has 2 to 30 tied positives on the K562 truths (4 to 33 on the 8,559-gene run); the hub-only score has at most 2.2% tied positives.  CLR has 43.5 to 49.7% of benchmark pairs tied (43.0 to 49.7% including the 8,559-gene K562 run), one large block of near-zero scores containing about 45% of the positives on the *E. coli* and K562 transcription-factor truths (27 to 31% on CORUM and knockdown-response modules).  GRNBoost2 has 28 to 71% of benchmark pairs tied (up to 79% on the 8,559-gene K562 run).
+
+**Result under expected ties.**  No cell of Table 2 (raw or hub-controlled) changes by more than 0.11 in ratio over the base rate (largest:  GRNBoost2 on K562 CORUM, 3.76 to 3.87 on the 8,559-gene run and 3.66 to 3.74 on the 5,671-gene run); the ratios of GENIE3, PIDC, |r| and attention are unchanged.  The changes that alter a mark or a rank are:
+
+- *Marks (5,671-gene K562):*  GRNBoost2 gains a † on DoRothEA A–B and A–C; PIDC on knockdown-response modules loses its †.  On the 8,559-gene run CLR gains a † on DoRothEA A–B and |r| on knockdown-response modules loses its †.
+- *Rank swaps without a change of mark:*  CLR and PIDC on M3D SC (CLR 4th to 3rd); CLR and GRNBoost2 on EcoMAC SC after hub control; GRNBoost2 on K562 CollecTRI from 5th to 3rd (raw); and a number of swaps among near-tied K562 columns (all changes are listed in `results/tie_check/table2_changes_vs_old.csv`).
+- *Knockdown-response modules:*  CLR rises from 3rd to 1st on the 5,671-gene run (2.42 to 2.46), with GENIE3 and |r| shifting down by one place; all three are marked best in both conventions.
+- *K562 CORUM:*  the order is unchanged (CLR 6.39 to 6.42; attention 3.51).
+- *Attention against CLR (paired jackknife, pooled AUPR):*  on M3D strong-evidence regulons the difference goes from +0.0220 (95% interval +0.0159 to +0.0281; ratio 1.162) to +0.0205 (+0.0144 to +0.0265; ratio 1.149), so the gain remains clearly significant.  Every other attention-over-CLR difference that excluded 0 still does (for example EcoMAC SC +0.0278 to +0.0263; K562 DoRothEA A–B +0.0064 to +0.0056, whose lower limit moves from +0.0013 to +0.0005), the K562 CORUM loss is unchanged (−0.0382 to −0.0385), and the knockdown-response difference includes 0 under both conventions (−0.0039 to −0.0065).
+
+**The extreme conventions are not credible estimates.**  Because the largest block of CLR's scores contains about 45% of its positives and 45 to 50% of all benchmark pairs, the order within it is decisive, and the two extremes differ greatly:  with positives first CLR on M3D SC reaches 1.65 (attention 1.68; on M3D all evidence levels 1.56 against attention's 1.44), with negatives first 1.35.  Neither order is realistic, since the positives are not systematically first or last among pairs with an identical score.  We report them as bounds on what the tie-breaking rule could do, not as alternatives to the reported numbers.
+
+**Raw Table 2 under both conventions** (pooled AUPR over the base rate; bold and † as in Table 2, recomputed per convention; the hub-controlled version and the two extreme conventions are in `results/tie_check/summary.md`).
+
+*M3D*
+
+| Truth | Convention | Attention | CLR | GENIE3 | PIDC | GRNBoost2 | \|r\| | Hub only |
+|---|---|---|---|---|---|---|---|---|
+| SC | existing | **1.68** | 1.44 | 1.51 | 1.45 | 1.36 | 1.23 | 1.08 |
+| SC | expected ties | **1.68** | 1.46 | 1.51 | 1.45 | 1.38 | 1.23 | 1.08 |
+| all | existing | **1.44** | 1.37 | **1.40**† | **1.40**† | 1.26 | 1.23 | 1.22 |
+| all | expected ties | **1.44** | 1.38 | **1.40**† | **1.40**† | 1.27 | 1.23 | 1.22 |
+
+*EcoMAC*
+
+| Truth | Convention | Attention | CLR | GENIE3 | PIDC | GRNBoost2 | \|r\| | Hub only |
+|---|---|---|---|---|---|---|---|---|
+| SC | existing | **1.68** | 1.39 | 1.50 | 1.43 | 1.36 | 1.18 | 1.04 |
+| SC | expected ties | **1.68** | 1.40 | 1.50 | 1.43 | 1.37 | 1.18 | 1.04 |
+| all | existing | **1.47** | 1.33 | 1.38 | 1.39 | 1.26 | 1.19 | 1.20 |
+| all | expected ties | **1.47** | 1.35 | 1.38 | 1.39 | 1.26 | 1.19 | 1.20 |
+
+*K562 (5,671 genes)*
+
+| Truth | Convention | Attention | CLR | GENIE3 | PIDC | GRNBoost2 | \|r\| | Hub only |
+|---|---|---|---|---|---|---|---|---|
+| DoRothEA AB | existing | **1.09** | **1.06**† | **1.08** | **1.07** | 1.05 | **1.05**† | 1.00 |
+| DoRothEA AB | expected ties | **1.09** | **1.06**† | **1.08** | **1.07** | **1.06**† | **1.05**† | 1.00 |
+| DoRothEA ABC | existing | **1.07** | 1.03 | **1.04**† | **1.04**† | 1.03 | 1.03 | 1.02 |
+| DoRothEA ABC | expected ties | **1.07** | 1.03 | **1.04**† | **1.04**† | **1.04**† | 1.03 | 1.02 |
+| CollecTRI | existing | **1.10** | 1.03 | 1.04 | 1.05 | 1.04 | 1.01 | **1.14** |
+| CollecTRI | expected ties | **1.10** | 1.03 | 1.04 | 1.05 | 1.05 | 1.01 | **1.14** |
+| CORUM | existing | 3.51 | **6.39** | 6.32 | **6.33** | 3.66 | **7.00** | 1.55 |
+| CORUM | expected ties | 3.51 | **6.42** | 6.32 | **6.33** | 3.74 | **7.00** | 1.55 |
+| KD response | existing | **2.38** | **2.42** | **2.45** | **2.35**† | 1.84 | **2.45** | **2.42** |
+| KD response | expected ties | **2.38** | **2.46** | **2.45** | 2.35 | 1.91 | **2.45** | **2.42** |
+
+*K562 (8,559 genes; no PIDC)*
+
+| Truth | Convention | Attention | CLR | GENIE3 | PIDC | GRNBoost2 | \|r\| | Hub only |
+|---|---|---|---|---|---|---|---|---|
+| DoRothEA AB | existing | **1.10** | 1.06 | **1.08** | - | 1.04 | 1.05 | 1.01 |
+| DoRothEA AB | expected ties | **1.10** | **1.07**† | **1.08** | - | 1.05 | 1.05 | 1.01 |
+| DoRothEA ABC | existing | **1.08** | 1.04 | **1.05** | - | 1.03 | 1.03 | 1.03 |
+| DoRothEA ABC | expected ties | **1.08** | 1.04 | **1.05** | - | 1.04 | 1.03 | 1.03 |
+| CollecTRI | existing | **1.13** | 1.04 | **1.06**† | - | 1.04 | 1.02 | **1.15** |
+| CollecTRI | expected ties | **1.13** | 1.04 | **1.06**† | - | 1.06 | 1.02 | **1.15** |
+| CORUM | existing | 3.72 | **6.75** | **6.63** | - | 3.76 | **7.00** | 1.54 |
+| CORUM | expected ties | 3.72 | **6.78** | **6.63** | - | 3.87 | **7.00** | 1.54 |
+| KD response | existing | **2.54** | **2.55** | **2.55** | - | 1.80 | **2.47**† | **2.47** |
+| KD response | expected ties | **2.54** | **2.58** | **2.55** | - | 1.90 | 2.47 | **2.47** |
+
 ---
 
 ## Supplementary Figures
