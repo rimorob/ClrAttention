@@ -2,7 +2,7 @@
 
 **Context-normalized attention without learning recovers gene regulatory programs**
 
-*Draft, updated 2026-10-22.  Results have been checked by an independent statistical review unless marked otherwise (record in `docs/paper_plan.md`); [PENDING] marks analyses that are preregistered or running.  Figures are in `figures/`.  Notes 1–8 keep their earlier numbering; Notes 9–15 are new.*
+*Draft, updated 2026-10-22.  Results have been checked by an independent statistical review unless marked otherwise (record in `docs/paper_plan.md`); [PENDING] marks analyses that are preregistered or running.  Figures are in `figures/`.  Notes 1–8 keep their earlier numbering; Notes 9–16 are new (Note 16, the tie-convention sensitivity analysis, added 2026-10-31).*
 
 ---
 
