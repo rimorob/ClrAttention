@@ -1,0 +1,304 @@
+# GRNBoost2 rerun: change inventory (old vs new), 31 October 2026
+
+*Read-only inventory. Nothing in `docs/whitepapers/`, tables or result files was edited. Repo state: branch `accuracy-review`, HEAD 365c769. Facts only; no statement here says which method is better. "Old" = values printed in the repo text, `results/macro_aupr_v2`, `results/grnboost2_superseded/`. "New" = `results/baselines_{m3d,ecomac,k562ess_truthgenes_genie3,k562ess_genie3}/metrics.csv`, `results/beeline_baselines/`, `results/macro_aupr_v3/`, `results/sota_table_gb2_legacy.md`. Line numbers are at HEAD; STATUS.md was edited (commit 365c769) while this inventory was being written, so STATUS line numbers are from the new version.*
+
+Notes on locations. There is no `paper/` directory; the manuscript is `docs/whitepapers/paper.md` and `supplement.md`. The BEELINE output directory is `results/beeline_baselines/` (there is no `results/baselines_beeline*`). `results/` is gitignored, so old result files are not in git history; the old values survive only in `results/grnboost2_superseded/`, `results/macro_aupr_v2/`, the committed text, `docs/grnboost2_diagnostic/` and `docs/plans/grnboost2_diagnostic.md`.
+
+---
+
+## 0. Gate status per source job
+
+Gate = `analysis/rerun_gate.R`: every non-GRNBoost2 row must equal the old result within 1e-6 (exit 1 otherwise). "GATE PASSED" is printed in these logs; every compared row shows max |old - new| = 0.00e+00 (exact reproduction).
+
+| Job | Content | Log | Gate |
+|---|---|---|---|
+| 0920 | M3D production seed 20261016 (`results/baselines_m3d`) | `jobs_pc/done/0920_gb2_rerun_m3d.log` | PASSED (11 non-GRNBoost2 rows, all 0) |
+| 0921 | M3D GRNBoost2 seeds 1-3 (`results/grnboost2_rerun/m3d_s{1,2,3}.tsv`) | `0921_gb2_seeds_m3d.log` | no gate; log says seeds 1, 2, 3 "identical to job 0894 legacy_es" |
+| 0922 (+retry) | BEELINE GENIE3 cache | `0922_*.log` | no gate (OOM at 10.8 GB, retried at 17 GB, rc 0) |
+| 0923 | BEELINE 14 cases, production seed 20261021 (`results/beeline_baselines`) | `0923_gb2_beeline_score.log` | PASSED (|r|, CLR, CLR-NS, GENIE3, PIDC: AUPRC ratio, EPR, AUROC all 0) |
+| 0924 | BEELINE GRNBoost2 seeds 1-3 | `0924_gb2_beeline_seeds.log` | no gate |
+| 0925 (+retry) | K562 5,671 truth genes (`results/baselines_k562ess_truthgenes_genie3`) | first attempt OOM-killed at 38.6 GB; `0925_gb2_rerun_k562_retry.log` | PASSED in the retry log (the first log has no gate line) |
+| 0926 | EcoMAC (`results/baselines_ecomac`) | `0926_gb2_rerun_ecomac.log` | PASSED |
+| 0927 | macro v3 without the K562 all-genes family | `0927_gb2_macro.log` | no gate; overwritten by 0930b |
+| 0928 | sota table to `results/sota_table_gb2_legacy.md` | `0928_gb2_sota_table.log` | no gate |
+| 0929 (+retry) | K562 all 8,559 genes (`results/baselines_k562ess_genie3`) | first attempt OOM-killed at 77.9 GB; `0929_gb2_rerun_k562_allgenes_retry.log` | PASSED in the retry log (9 non-GRNBoost2 rows; no PIDC in this run) |
+| 0930 | macro v3, four runs | `0930_...log` | crashed (undefined BCa interval); no result |
+| 0930b | macro v3, four runs, `macro_aupr.R` made NA-safe (commit c5df7d2) | `0930b_...log` | no gate; "BCa intervals undefined (counted as not excluding 0): 2" |
+
+Independent check done for this inventory (not a job): between `macro_aupr_v2` and `macro_aupr_v3` the non-GRNBoost2 rows have identical mean ΔAP, median ΔAP, gene-jackknife P values, size-stratum tables and attention-win shares (max difference 0.0). Their regulon-bootstrap P values are identical on the E. coli runs and differ by up to 0.027 on K562 rows (bootstrap RNG), none of which changes a Holm decision except as listed in section 1.7.
+
+Equivalence gate for the algorithm itself (27 Oct, `docs/grnboost2_equivalence/`): legacy early stopping vs stock arboreto 0.1.6 + scikit-learn 1.2.2 on BEELINE mDC_500, 3 seeds; trees per target and AUPRC ratios within one seed SD. Passed (as recorded in `docs/plans/grnboost2_diagnostic.md`).
+
+GRNBoost2 network size, new vs old (symmetric matrices as stored in `grnboost2_scores.rds`, share of off-diagonal pairs exactly zero):
+
+| Run | Old | New | Trees per target, new (median, IQR; from `baselines.log`) |
+|---|---|---|---|
+| M3D | 94.05% | 45.67% | 494 (450-535) |
+| EcoMAC | 93.72% | 29.39% | 839 (747-936) |
+| K562 5,671 genes | 94.93% | 70.56% | 240 (173-310) |
+| K562 8,559 genes | not computed | not computed (8,743,434 directed non-zero edges of 73.2M) | 233 (170-304) |
+
+---
+
+## 1. Every place in the repo that states a GRNBoost2 number or a dependent claim
+
+### 1.1 `docs/whitepapers/paper.md`
+
+| Line | Old value / claim | New value (source) | Direction or ranking change |
+|---|---|---|---|
+| 3 | Header "updated 2026-10-22; every result ... checked by an independent statistical review unless marked" | Needs a new date and a note that GRNBoost2 rows were regenerated and not yet reviewed | n/a |
+| 88 | GRNBoost2 named as a comparator ("its gradient-boosting variant") | no number | none |
+| 90 (caption) | "Generated by `analysis/sota_table.R`; full version in `sota_table.md`" | regenerated file is `results/sota_table_gb2_legacy.md` (unreviewed, generated 2026-10-29 14:57) | none |
+| 96 M3D SC raw | GRNBoost2 1.18 | 1.36 (`results/sota_table_gb2_legacy.md`; 1.3635 in `baselines_m3d/metrics.csv`) | Place in row 6th of 7 -> 5th of 7; best/bold pattern unchanged |
+| 97 M3D all raw | 1.13 | 1.26 (1.2589) | 7th of 7 -> 5th of 7 (above |r| 1.23 and Hub only 1.22) |
+| 98 EcoMAC SC raw | 1.21 | 1.36 (1.3635) | 5th -> 5th (ties in rank; now above |r| 1.18 by a wider margin, below PIDC 1.43) |
+| 99 EcoMAC all raw | 1.14 | 1.26 (1.2554) | 7th -> 5th |
+| 100 K562 DoRothEA AB raw | 1.02 | 1.05 (1.0510) | 6th -> 5th; bold pattern unchanged (GRNBoost2 not bold) |
+| 101 K562 DoRothEA ABC raw | 1.01 | 1.03 (1.0304) | 7th -> 5th; not bold |
+| 102 K562 CollecTRI raw | 1.01 | 1.04 (1.0414) | 6th -> 5th (ties GENIE3 1.04); not bold |
+| 103 K562 CORUM raw | 2.18 | 3.66 (3.6600) | **Pooled order vs attention reverses: attention 3.51 < GRNBoost2 3.66** (was 3.51 > 2.18). Paired difference GRNBoost2 - attention +0.0020, jackknife 95% interval [-0.0057, +0.0096] (`baselines_k562ess_truthgenes_genie3/metrics.csv`), so the interval includes 0. GRNBoost2 stays below CLR/GENIE3/PIDC/|r| (6.32-7.00). Attention drops from 5th to 6th of 7 |
+| 104 K562 KD response raw | 1.37 | 1.84 (1.8364) | Still last of 7; attention (2.38) still above |
+| 110 M3D SC hub-controlled | 1.28 | 1.37 (1.3748) | 5th of 6 -> 5th of 6; with the new value the paired difference to CLR is -0.0028 (hub-strat metrics) |
+| 111 M3D all hub | 1.18 | 1.28 (1.2770) | 6th of 6 -> 5th of 6 |
+| 112 EcoMAC SC hub | 1.19 | 1.37 (1.3675) | 5th -> 5th |
+| 113 EcoMAC all hub | 1.09 | 1.27 (1.2652) | 6th of 6 -> 5th of 6 |
+| 114 K562 AB hub | 1.02 | 1.05 (1.0544) | 6th -> 5th |
+| 115 K562 ABC hub | 1.00 | 1.03 (1.0290) | **New bold dagger: GRNBoost2 becomes "tied with the best after Bonferroni correction" (**1.03**†)** in `results/sota_table_gb2_legacy.md` |
+| 116 K562 CollecTRI hub | 0.94 | 1.01 (1.0142) | **New bold dagger (**1.01**†)**; previously below 1.0 |
+| 117 K562 CORUM hub | 1.70 | 2.51 (2.5089) | **Reverses vs attention: attention 2.08 < GRNBoost2 2.51.** Difference +0.0057, interval [+0.0007, +0.0108] (excludes 0, uncorrected 95%) |
+| 118 K562 KD hub | 1.08 | 1.55 (1.5501) | Attention 1.60 vs GRNBoost2 1.55: gap shrinks; attention still ahead; last of 6 |
+| 120 (Table 2 footnote) | "GRNBoost2 returns a sparse network (87-93% of pairs tied at zero) ... rows not like-for-like" | Zero share of pairs is 45.7% (M3D), 29.4% (EcoMAC), 70.6% (K562) (computed from `grnboost2_scores.rds`); old stored share was 94.05%/93.72%/94.93% | **Statement becomes false/misleading.** The old "87-93%" also does not match the stored old matrices (see section 3) |
+| 122 | "attention has the highest pooled AUPR in all four cells (Table 2a)"; hub-controlled leads | Unchanged: attention is still first in all four E. coli raw cells (1.68, 1.44, 1.68, 1.47 vs GRNBoost2 1.36, 1.26, 1.36, 1.26) | none |
+| 124 | "Its mean AP is higher than ... our GRNBoost2 runs (4 of 4; not interpreted until the audit ...)" | Per regulon, mean ΔAP (GRNBoost2 - attention): M3D SC -0.0153, M3D all -0.0117, EcoMAC SC -0.0181, EcoMAC all -0.0114 (`macro_aupr_v3/macro_vs_attention.csv`). Both intervals (regulon and gene) exclude 0 in 4 of 4, but the Holm-adjusted P is below 0.05 only in 1 of 4 (EcoMAC SC, 0.004); the other three are 0.092, 0.184, 0.092. The paper's rule (both intervals exclude 0 and Holm P) counted 4 of 4 for old values (all 0.004) | **Count changes from 4 of 4 to 1 of 4 under the paper's own decision rule.** Sign of every mean ΔAP is unchanged (favours attention). Medians: Holm P 1 in 4 of 4 (old 0.30-1) |
+| 124 (other comparators in same sentence) | |r| 3 of 4, PIDC 1 of 4 (EcoMAC all) | Still 3 of 4 (Holm 0.062, 0.040, 0.004, 0.004) and 1 of 4 (0.0072) | Counts unchanged; P values moved (section 1.7) |
+| 126 | "every method is within 10% of random on transcription-factor truths" | GRNBoost2 raw 1.05, 1.03, 1.04 on DoRothEA AB, ABC, CollecTRI | still holds |
+| 126-136 K562 per-regulon (paper text does not mention GRNBoost2) | n/a | K562 truth-gene run, GRNBoost2 - attention: KD response mean ΔAP -0.0178 -> **+0.0348** (Holm 0.013 -> 0.0045; attention wins 88% -> 9%); CORUM -0.0022 -> +0.0013 (Holm 0.16 -> 1); TF truths -0.0005, -0.0002, -0.0004 (Holm 1) | **KD response flips sign: GRNBoost2 now has higher per-regulon AP than attention.** Not currently stated in the text; becomes relevant if the paper lists all comparators on KD response |
+| 132-134 | "On this task [TF-node AUPR] attention is last of the top three: CLR 6.75, GENIE3 6.54, attention 5.17 on M3D"; "GENIE3 has the best median per-TF AUROC (EcoMAC 0.690 against 0.596)" and best per-regulon coherence | GRNBoost2 TF-node AUPR ratio (SC): M3D 3.79 -> **5.174** (attention 5.170, PIDC 5.533); EcoMAC 3.41 -> **5.819** (highest of all methods; GENIE3 5.769, CLR 5.168, attention 4.788). Per-TF AUROC EcoMAC SC: GRNBoost2 0.679 (GENIE3 0.690). Coherence EcoMAC SC: GRNBoost2 0.636 vs attention 0.617 (GENIE3 0.650) (`baselines_*/metrics.csv`) | The quoted claim is textually unaffected (GRNBoost2 not named), but on this metric GRNBoost2 now sits above or level with attention (M3D) and above all methods (EcoMAC TF-node AUPR) |
+| 152 | "our GRNBoost2 runs score below [CLR] in 7 of 7 datasets (-0.35; P = 0.016; see below)" | **-0.152, better than CLR in 1 of 7 (hESC, +0.015), Wilcoxon P = 0.031, sign P = 0.125** (`results/beeline_baselines/summary.csv`). Seeds 1-3: -0.157, -0.157, -0.159 (`summary_gb2s{1,2,3}.csv`); hESC is the only dataset above CLR in every seed (+0.005, +0.021, +0.024) | **Count changes 7/7 -> 6/7 below CLR; P changes 0.016 -> 0.031; magnitude -0.35 -> -0.15** |
+| 152 | "CLR-NS has the highest mean (GENIE3 -0.10 and PIDC -0.08 relative to it ...)" | unchanged; GRNBoost2 vs CLR-NS -0.42 -> -0.21, still 0 of 7 better (P 0.016) (production seed; seed 2 and 3: 1 of 7, P 0.031) | none for GENIE3/PIDC; GRNBoost2 count depends on seed |
+| 152 | "GRNBoost2 ranks last everywhere in our hands, bulk and single cell, whereas BEELINE placed it near GENIE3; we are checking our implementation ... [PENDING]" | Table 2 raw: GRNBoost2 last of 7 only on K562 KD response (raw 1.84; hub-controlled 1.55, last of 6); 5th of 7 in the other eight raw rows. BEELINE: mean log2 vs CLR -0.152 (GENIE3 -0.038, PIDC -0.022, |r| -0.233); median AUPRC ratio 1.47 vs GENIE3 1.69, PIDC 1.56, CLR 1.48, |r| 1.20 | **"Last everywhere" no longer holds.** The "[PENDING]" wrapper check is resolved by the diagnostic (`docs/plans/grnboost2_diagnostic.md`) |
+| 186 | "GRNBoost2 returns most pairs tied at zero (87-93% on bulk data); an audit of our implementation against BEELINE's own output is running [PENDING]" | Zero share 45.7%/29.4%/70.6%; audit replaced by the diagnostic (wrapper not at fault; arboreto early stopping broken with scikit-learn >= 1.3) and the legacy rerun | Statement to be replaced; versions needed: arboreto 0.1.6, scikit-learn 1.9.1 (broken run), legacy monitor with scikit-learn-1.2.2-equivalent behaviour (rerun) |
+| 186 (first sentence) | "GRNBoost2 (arboreto)" with no version or stopping rule | Must name arboreto 0.1.6, `tools/grnboost2.py --early_stop legacy`, production seed 20261016 (bulk), 20261021 (BEELINE) | n/a |
+| 222 (Fig. 7 legend) | "(b) Per-dataset log2 AUPRC ratio of GENIE3, PIDC and GRNBoost2 relative to CLR and CLR-NS" | Figure not built; no plotting script for Fig. 7b exists in `analysis/`. Source data: `results/beeline_baselines/metrics.csv`, `summary.csv` (per-dataset GRNBoost2 values in section 2.4) | Fig. 7b would show the new values |
+
+### 1.2 `docs/whitepapers/supplement.md`
+
+| Line | Old | New | Direction or ranking change |
+|---|---|---|---|
+| 273 (Note 10 definition) | "Holm ... E. coli 40 tests; K562 primary 50; K562 secondary 40, of which 30 are present, missing tests counted" | v3 has 40 E. coli rows-tests (20 rows x 2), 50 K562 primary (25 x 2), 40 K562 secondary all present (20 rows x 2: |r|, CLR, GENIE3, GRNBoost2 on five truths; no PIDC in the secondary family) | "30 are present" becomes 40; GRNBoost2 inputs replaced after the first run (needed in the note, per the diagnostic memo section 6) |
+| 275 (Table 9 title) | source `results/macro_aupr_v2` | `results/macro_aupr_v3` | n/a |
+| 282 Table 9, M3D SC GRNBoost2 | 123 regulons; -0.0269; regulon [-0.0484, -0.0164]; gene [-0.0293, -0.0125]; Holm P mean 0.004; median -0.0009, Holm 0.33; attention wins 71% | 123; **-0.0153**; [-0.0284, -0.0084]; [-0.0202, -0.0042]; Holm **0.0916**; median -0.0002, Holm 1; wins 56% (`macro_aupr_v3/macro_vs_attention.csv`) | Intervals still exclude 0; Holm P no longer < 0.05 |
+| 287 M3D all | 157; -0.0240; [-0.0389, -0.0155]; [-0.0254, -0.0099]; 0.004; -0.0022, 0.30; 71% | 157; **-0.0117**; [-0.0213, -0.0066]; [-0.0175, -0.0029]; **0.184**; -0.0002, 1; 56% | same |
+| 292 EcoMAC SC | 119; -0.0292; [-0.0473, -0.0194]; [-0.0261, -0.0114]; 0.004; -0.0012, 1; 68% | 119; **-0.0181**; [-0.0290, -0.0102]; [-0.0252, -0.0097]; 0.004; -0.0004, 1; 56% | stays Holm-significant |
+| 297 EcoMAC all | 155; -0.0224; [-0.0356, -0.0143]; [-0.0299, -0.0136]; 0.004; -0.0013, 0.87; 65% | 155; **-0.0114**; [-0.0196, -0.0040]; [-0.0224, -0.0083]; **0.0916**; -0.0001, 1; 54% | Holm no longer < 0.05 |
+| 277-298 other Table 9 rows | Holm values as printed | Holm values move in step-down because GRNBoost2 P values changed: M3D SC |r| mean 0.056 -> 0.062; M3D all |r| mean 0.037 -> 0.040, median 0.028 -> 0.030; EcoMAC SC CLR median 0.86 -> 0.94; EcoMAC SC PIDC mean 0.141 -> 0.145; EcoMAC all |r| median 0.63 -> 0.69; EcoMAC all PIDC mean 0.0066 -> 0.0072. Point estimates and intervals of non-GRNBoost2 rows are identical | No decision changes (|r| remains 3 of 4, PIDC 1 of 4); P values to be refreshed |
+| 303 (Reading 2) | "... and of our GRNBoost2 runs (4 of 4), which we do not interpret until the wrapper check" | 1 of 4 Holm-significant (EcoMAC SC); 4 of 4 favour attention in sign with both unadjusted intervals excluding 0 | Count change as in paper line 124 |
+| 304 (Reading 3) | "mean gaps come from regulons of 5-24 genes; win rate highest (60-90%) in regulons >= 100 genes" | GRNBoost2 strata (`macro_strata.csv`): attention win share in size >=100 is now 100% (M3D SC, n = 10), 88%, 90%, 88%; in size 5-9 it is 46%, 38%, 47%, 30% (was 60%, 51%, 62%, 46%); EcoMAC all size 5-9 mean ΔAP now +0.0011 (was -0.0229) | Statement is across comparators; whether "60-90%" and "5-24 genes" still describe the pooled picture was not recomputed |
+| 305 (Reading 4) | "Across all families, one cell is flagged by the delete-50% check" | 3 cells flagged in v3, all K562 secondary DoRothEA_AB: CLR, GENIE3, GRNBoost2 (v2: 1, CLR) | Count changes 1 -> 3 (one is a new GRNBoost2 flag) |
+| 307 (K562 paragraph) | "The secondary all-genes K562 run predates the GENIE3 and PIDC rows and is to be rerun or dropped [PENDING]" | Rerun done (job 0929): GENIE3 present, PIDC absent (not run on 8,559 genes). GRNBoost2 vs attention secondary: KD response mean ΔAP -0.0173 -> **+0.0290** (Holm 0.009 -> 0.0035), CORUM -0.0018 -> +0.0011 (Holm 1), TF truths -0.0001 to -0.0005 (Holm 1) | KD response sign flips as in the primary run |
+| 348 (Note 13 intro) | GRNBoost2 run on 14 cases | unchanged text, but needs the stopping rule and seeds | n/a |
+| 358 (Table 10, GRNBoost2 row) | median AUPRC ratio 1.26; mean log2 vs CLR -0.35; better than CLR 0/7; P 0.016; vs CLR-NS -0.42; 0/7; P 0.016 | **1.47** (1.4734); **-0.15** (-0.1517); **1/7** (hESC); Wilcoxon P **0.031** (sign P 0.125); vs CLR-NS **-0.21** (-0.2134); 0/7; P 0.016 (`results/beeline_baselines/summary.csv`) | Counts and P change. Position by median: below GENIE3 1.69, CLR-NS 1.60, PIDC 1.56, CLR 1.48 (1.4788); above |r| 1.20 (as before: old 1.26 was also above |r|). By mean log2 vs CLR it moves from below |r| (-0.353 vs -0.233) to above it (-0.152) |
+| 354-357, 359 (Table 10, other rows) | CLR 1.48, CLR-NS 1.60, GENIE3 1.69, PIDC 1.56, |r| 1.20 | unchanged (gate 0923 passed) | none |
+| 363 (Reading 1) | "Our GRNBoost2 runs also score below CLR in 7 of 7, a result we do not interpret until the wrapper check below" | 6 of 7 below CLR (hESC +0.015); see 358 | Count change |
+| 368 (GRNBoost2 discrepancy paragraph) | "last everywhere ... we are checking our wrapper ... [PENDING]" | Cause found and fixed; replace with the disclosure text in section 4 | Claim replaced |
+
+Supplementary Table 9 and 10 are the only supplementary tables with GRNBoost2. No other supplementary note mentions GRNBoost2 (the hub-control note and Note 9 do not name it).
+
+### 1.3 `docs/whitepapers/sota_table.md` (the Table 2 source; generated 2026-10-21 10:48)
+
+| Line | Old | New |
+|---|---|---|
+| 3 | "Generated 2026-10-21 10:48" | regenerated copy `results/sota_table_gb2_legacy.md`, "Generated 2026-10-29 14:57" |
+| 9-17 (raw) | GRNBoost2 column 1.18, 1.13, 1.21, 1.14, 1.02, 1.01, 1.01, 2.18, 1.37 | 1.36, 1.26, 1.36, 1.26, 1.05, 1.03, 1.04, 3.66, 1.84 |
+| 23-31 (hub-controlled) | 1.28, 1.18, 1.19, 1.09, 1.02, 1.00, 0.94, 1.70, 1.08 | 1.37, 1.28, 1.37, 1.27, 1.05, **1.03†**, **1.01†**, 2.51, 1.55 |
+| 39 (note) | "GRNBoost2 returns a sparse network (most pairs tied at zero), which lowers its pooled AUPR." | No longer true as stated (45.7% / 29.4% / 70.6% zero); also unchanged in the new file (the footnote text is the same in `results/sota_table_gb2_legacy.md`) |
+
+`diff docs/whitepapers/sota_table.md results/sota_table_gb2_legacy.md` shows only the timestamp and the GRNBoost2 column (raw: 9 rows; hub: 9 rows); every other method's value and bold/dagger mark is identical. Bold/dagger changes are only the two new daggers on GRNBoost2 (hub ABC, hub CollecTRI). Both tables use the 5,671-gene K562 run; the 8,559-gene run is not in the sota table.
+
+### 1.4 `docs/whitepapers/abstract_points.md`
+
+| Line | Old | New | Change |
+|---|---|---|---|
+| 53 | "M3D SC fold over base rate ...: attention 1.68, GENIE3 1.51, PIDC 1.45, CLR 1.44, |r| 1.23, GRNBoost2 1.18, hub score alone 1.08" | GRNBoost2 1.36 (between CLR 1.44 and |r| 1.23) | Order of the listed sequence changes: GRNBoost2 moves from below |r| to above it |
+| 62 | "Attention beats GRNBoost2 (4 of 4 cells) and |r| (3 of 4) on the mean." | GRNBoost2: 1 of 4 Holm-significant (EcoMAC SC); |r| 3 of 4 | Count change |
+| 65-66 | "last of the top three on direct TF-target pairs ... GENIE3 wins median per-regulon coherence and per-TF AUROC" | see paper lines 132-134 (GRNBoost2 TF-node values now ~ equal to or above attention) | claim unchanged textually |
+| 76 | "CLR is the strongest method tested [on BEELINE]. ... GENIE3, GRNBoost2 and PIDC have not yet been run on BEELINE (job 0890, queued)" | They have been run (job 0890 and the rerun). Median AUPRC ratio: GENIE3 1.69, CLR-NS 1.60, PIDC 1.56, CLR 1.48, GRNBoost2 1.47, |r| 1.20. "Strongest of the correlation- and MI-based methods" wording is the paper's | Line is stale independent of the rerun; GRNBoost2 does not change it |
+| 8 | CLR "strongest of the methods we tested on BEELINE (see c6)" | same data as above | Same remark |
+| 139 | "BEELINE baselines (GENIE3, GRNBoost2, PIDC; job 0890, queued)" | run and rerun | stale status |
+| 141-145 | macro rerun with PIDC (`macro_aupr_v2`) | v2 values for GRNBoost2 superseded by v3 | n/a |
+| 149 | "GENIE3 and GRNBoost2 K562 rerun (jobs 0878, 0879) and PIDC on K562 complete the human competitor table" | K562 GRNBoost2 now from jobs 0925 (truth genes) and 0929 (all genes) | stale status |
+
+### 1.5 `docs/checkpoint_collins.md` (and the private page https://claude.ai/artifact/5sbGiidecw7ZqkjbBz4eBT, read-only check: its text and table are identical to this file, version 1792693228-c7a3)
+
+| Line | Old | New | Change |
+|---|---|---|---|
+| 7 | "recovers strong-evidence regulons better than CLR, GENIE3, PIDC and GRNBoost2 in pooled ranking" | still true for the four E. coli raw cells (attention 1.68/1.44/1.68/1.47 vs GRNBoost2 1.36/1.26/1.36/1.26); statement is limited to E. coli | no change in direction |
+| 30 | M3D SC GRNBoost2 1.18 | 1.36 | |
+| 31 | EcoMAC SC 1.21 | 1.36 | |
+| 32 | M3D hub-controlled 1.28 | 1.37 | |
+| 33 | K562 DoRothEA A-B 1.02 | 1.05 | |
+| 34 | K562 CORUM 2.18 | **3.66, above attention's 3.51** (the table's attention cell is not bold) | Ranking vs attention reverses in this row |
+| 38 | "mean AP is higher than GRNBoost2's (4 of 4 comparisons), |r|'s (3 of 4) and PIDC's (1 of 4 after correction)" | GRNBoost2: 1 of 4 after correction | Count change |
+| 65 | "GENIE3, GRNBoost2 and PIDC on the BEELINE single-cell benchmark (queued)" | done; GRNBoost2 -0.15 vs CLR, 1 of 7 above CLR | stale status |
+
+The Collins page also carries the "In one paragraph" sentence (line 7) and the graphical abstract (no GRNBoost2 content; alt text lists CLR, GENIE3, PIDC only).
+
+### 1.6 `docs/paper_plan.md`
+
+| Line | Old | New |
+|---|---|---|
+| 71 | "GRNBoost2 is sparse (87-93% tied zeros), not like-for-like" | 45.7% / 29.4% zero; no longer sparse relative to the others in the same sense |
+| 73 | "it beats GRNBoost2 (all 4 cells) and |r| (3 of 4) on the mean" | 1 of 4 Holm-significant for GRNBoost2 |
+| 74 | "... GRNBoost2's (4/4) and |r|'s (3/4) ... K562 all-genes macro run is stale (Oct 18; no GENIE3/PIDC rows): rerun or drop" | 1/4; K562 all-genes rerun done with GENIE3 (no PIDC) |
+| 75 | method table "now ... GRNBoost2 hub-controlled columns, footnotes (... GRNBoost2 sparsity)" | numbers and sparsity footnote superseded |
+| 79 | "GENIE3 + GRNBoost2 on K562 rerun with duplicated symbols dropped (jobs 0878, 0879)" | superseded by 0925 / 0929 |
+| 93 | "beats GRNBoost2 in 7/7 (-0.35, p = 0.016)" | 6/7 (hESC exception), -0.15, Wilcoxon P = 0.031 |
+| 94 | open item "GRNBoost2 discrepancy - cause found (2026-10-22) ... [ ]" | to be ticked: diagnostic done, rule committed 27 Oct, rerun done, gates passed |
+
+### 1.7 Other repo text
+
+| File:line | Content | Change |
+|---|---|---|
+| `docs/preregistration_scfm.md:90` | "GENIE3, GRNBoost2 and PIDC from results/beeline_baselines, descriptive." Change log (line 153 onward) has no GRNBoost2 entry | Source directory now holds the legacy-early-stopping GRNBoost2. The diagnostic memo (section 6) says to add a change-log entry before any scfm scoring: not yet present. No scfm test uses GRNBoost2 as a comparator (descriptive only) |
+| `docs/plans/scfm_comparator.md:16` | "existing baselines (GENIE3, GRNBoost2, PIDC, |r|)" as a control | text only; baseline file is the rerun |
+| `docs/STATUS.md` lines 3, 17, 49, 96-101, 113 | Line 49: "GRNBoost2 diagnostic: early sign that no early stopping fixes GRNBoost2 (mHSC-E AUPRC ratio 2.75); wait for the full run" (stale). Lines 96-101: item 5 "rerun running since 27 Oct 19:58", queue and "queued" status for 0929/0930 (stale: all finished, 0930 crashed and 0930b done) | Update status text once the paper edits are decided; no GRNBoost2 headline numbers in STATUS "Results in hand" |
+| `docs/whitepapers/beeline.md:102` | "Baselines ... should be tabulated from the paper's supplementary tables rather than rerun. That still needs doing" | Stale: GENIE3, GRNBoost2, PIDC were run on all 14 cases here (`results/beeline_baselines`) |
+| `docs/whitepapers/paper_draft_notes.md:304` | Venue table lists "published BEELINE baselines tabulated (GENIE3, GRNBoost2, PIDC, PPCOR)" | no number; unaffected |
+| `README.md`, `CITATION_LOG.md`, `HANDOFF_crayon.md`, `docs/whitepapers/abstract_draft.md`, `methods.md`, `ecoli_m3d.md` | no GRNBoost2 mention (grep) | none |
+| `docs/plans/grnboost2_diagnostic.md` | contains the decision (27 Oct) and the disclosure outline (section 6) | source of the disclosure order of events; its section 4 predictions are compared with the results in section 3 below |
+| `analysis/*.R`, `tools/*` | no numbers | none |
+
+---
+
+## 2. Old vs new headline numbers
+
+All "ratio" = pooled co-membership AUPR / base rate. Old = `results/grnboost2_superseded/<run>/metrics.csv`; new = `results/<run>/metrics.csv`. Non-GRNBoost2 rows in both files are identical (max |ΔAUPR| = 0 for every run).
+
+### 2.1 Pooled AUPR ratio, GRNBoost2 only
+
+| Run (gate job) | Truth | Raw old | Raw new | Hub-controlled old | Hub-controlled new | Attention raw (unchanged) |
+|---|---|---|---|---|---|---|
+| M3D (0920 passed) | SC | 1.180 | 1.364 | 1.282 | 1.375 | 1.68 |
+| M3D | all | 1.129 | 1.259 | 1.175 | 1.277 | 1.44 |
+| EcoMAC (0926 passed) | SC | 1.210 | 1.364 | 1.193 | 1.368 | 1.68 |
+| EcoMAC | all | 1.144 | 1.255 | 1.087 | 1.265 | 1.47 |
+| K562 5,671 genes (0925 retry passed) | DoRothEA AB | 1.016 | 1.051 | 1.018 | 1.054 | 1.09 |
+| | DoRothEA ABC | 1.008 | 1.030 | 0.996 | 1.029 | 1.07 |
+| | CollecTRI | 1.011 | 1.041 | 0.945 | 1.014 | 1.10 |
+| | CORUM | 2.184 | 3.660 | 1.704 | 2.509 | 3.51 |
+| | KD response | 1.366 | 1.836 | 1.081 | 1.550 | 2.38 |
+| K562 8,559 genes, secondary (0929 retry passed; not in sota table) | DoRothEA AB | 1.014 | 1.043 | 0.999 | 1.041 | |
+| | DoRothEA ABC | 1.008 | 1.029 | 0.990 | 1.025 | |
+| | CollecTRI | 1.012 | 1.043 | 0.937 | 1.009 | |
+| | CORUM | 2.205 | 3.758 | 1.717 | 2.611 | |
+| | KD response | 1.331 | 1.800 | 1.029 | 1.488 | |
+
+Paired AUPR differences, GRNBoost2 minus attention (old -> new; jackknife intervals are in the metrics files): M3D SC -0.0466 -> -0.0294; M3D all -0.0373 -> -0.0217; EcoMAC SC -0.0444 -> -0.0300; EcoMAC all -0.0395 -> -0.0260; K562 CORUM -0.0176 -> +0.0020 (interval [-0.0057, +0.0096]); K562 KD response -0.0794 -> -0.0424. Versus CLR: M3D SC -0.0246 -> -0.0073; M3D all -0.0288 -> -0.0131; EcoMAC SC -0.0166 -> -0.0022; K562 CORUM -0.0558 -> -0.0362.
+
+Seed variability (M3D only; 0921 seeds 1-3 are identical to job 0894 legacy_es): ratio SD about 0.002 (memo: SC 1.361 +/- 0.002, range 1.359-1.363; all 1.258 +/- 0.001). The production-seed values above (1.3635 SC, 1.2589 all) are within 0.001 of that range. EcoMAC and K562 have a single production seed.
+
+### 2.2 TF-node AUPR ratio (secondary benchmark in `baselines.R`), GRNBoost2
+
+| Run | Truth | Old | New |
+|---|---|---|---|
+| M3D | SC / all | 3.79 / 2.83 | 5.17 / 3.76 |
+| EcoMAC | SC / all | 3.41 / 2.56 | 5.82 / 3.99 |
+
+### 2.3 Per-regulon (macro), GRNBoost2 minus attention, all four runs
+
+Source old: `results/macro_aupr_v2/macro_vs_attention.csv`; new: `results/macro_aupr_v3/macro_vs_attention.csv`. Holm families: E. coli 40, K562 primary 50, K562 secondary 40 (all rows present in v3).
+
+| Run | Truth | n regulons | Mean ΔAP old -> new | Holm P (mean) old -> new | Median ΔAP old -> new | Attention wins old -> new |
+|---|---|---|---|---|---|---|
+| M3D | SC | 123 | -0.0269 -> -0.0153 | 0.004 -> 0.0916 | -0.0009 -> -0.0002 | 71% -> 56% |
+| M3D | all | 157 | -0.0240 -> -0.0117 | 0.004 -> 0.184 | -0.0022 -> -0.0002 | 71% -> 56% |
+| EcoMAC | SC | 119 | -0.0292 -> -0.0181 | 0.004 -> 0.004 | -0.0012 -> -0.0004 | 68% -> 56% |
+| EcoMAC | all | 155 | -0.0224 -> -0.0114 | 0.004 -> 0.0916 | -0.0013 -> -0.0001 | 65% -> 54% |
+| K562 truth genes | DoRothEA AB | 105 | -0.0025 -> -0.0005 | 0.66 -> 1 | -0.0006 -> -0.0002 | 79% -> 66% |
+| | DoRothEA ABC | 271 | -0.0008 -> -0.0002 | 1 -> 1 | -0.0005 -> -0.0002 | 77% -> 63% |
+| | CollecTRI | 491 | -0.0016 -> -0.0004 | 0.13 -> 1 | -0.0003 -> -0.0001 | 69% -> 60% |
+| | CORUM | 499 | -0.0022 -> +0.0013 | 0.16 -> 1 | 0.0000 -> +0.0001 | 46% -> 36% |
+| | KD response | 566 | -0.0178 -> +0.0348 | 0.013 -> 0.0045 | -0.0095 -> +0.0251 | 88% -> 9% |
+| K562 all genes (secondary) | DoRothEA AB | 105 | -0.0021 -> -0.0001 | 0.73 -> 1 | | 79% -> 66% |
+| | DoRothEA ABC | 269 | -0.0008 -> -0.0001 | 0.31 -> 1 | | 82% -> 72% |
+| | CollecTRI | 490 | -0.0010 -> -0.0005 | 0.14 -> 1 | | 72% -> 64% |
+| | CORUM | 499 | -0.0018 -> +0.0011 | 0.25 -> 1 | | 44% -> 38% |
+| | KD response | 585 | -0.0173 -> +0.0290 | 0.009 -> 0.0035 | | 90% -> 12% |
+
+Negative mean ΔAP = attention higher. Old K562 values here are from v2 (the 0878/0879-era GRNBoost2).
+
+### 2.4 BEELINE (14 cases, primary truths cell-type ChIP, non-specific ChIP, STRING, LOFGOF; 44 cells; gate 0923 passed)
+
+| Statistic | Old | New (seed 20261021) | New seeds 1 / 2 / 3 (0924, no gate) |
+|---|---|---|---|
+| Median AUPRC ratio | 1.26 (1.2555) | 1.47 (1.4734) | 1.456 / 1.485 / 1.483 |
+| Mean log2 vs CLR | -0.353 | -0.152 | -0.157 / -0.157 / -0.159 |
+| Datasets better than CLR | 0/7 | 1/7 (hESC) | 1 / 1 / 1 |
+| Wilcoxon P (vs CLR) | 0.0156 | 0.0312 | 0.0312 / 0.0312 / 0.0312 |
+| Sign P (vs CLR) | 0.0156 | 0.125 | 0.125 / 0.125 / 0.125 |
+| Mean log2 vs CLR-NS | -0.415 | -0.213 | -0.219 / -0.218 / -0.221 |
+| Datasets better than CLR-NS | 0/7 | 0/7 | 0 / 1 / 1 |
+| Wilcoxon P (vs CLR-NS) | 0.0156 | 0.0156 | 0.0156 / 0.0312 / 0.0312 |
+| Mean log2 EPR vs CLR | -0.306 | -0.137 | -0.124 / -0.133 / -0.117 |
+| Cell-type ChIP only: mean log2 vs CLR | +0.0095 | +0.0305 | |
+
+Per dataset, mean log2(GRNBoost2 / CLR) over gene sets and primary truths (old -> new): hESC -0.106 -> +0.015; hHep -0.275 -> -0.146; mDC -0.241 -> -0.069; mESC -0.266 -> -0.055; mHSC-E -0.622 -> -0.345; mHSC-GM -0.558 -> -0.285; mHSC-L -0.406 -> -0.178. Versus CLR-NS (old -> new): hESC -0.124 -> -0.003; hHep -0.298 -> -0.169; mDC -0.394 -> -0.222; mESC -0.294 -> -0.083; mHSC-E -0.709 -> -0.432; mHSC-GM -0.650 -> -0.377; mHSC-L -0.436 -> -0.208. (Computed from `metrics.csv` of both directories; the means reproduce `summary.csv` exactly.)
+
+Other methods on the same scale (unchanged): GENIE3 -0.038, PIDC -0.022, |r| -0.233, CLR-NS +0.062 vs CLR; medians GENIE3 1.69, CLR-NS 1.60, PIDC 1.56, CLR 1.479, |r| 1.20.
+
+---
+
+## 3. Inconsistent, surprising, and unverified items
+
+Inconsistent or surprising:
+
+1. **Per-regulon 4-of-4 count falls to 1-of-4 and the K562 KD-response sign flips.** The E. coli lead of attention over GRNBoost2 per regulon keeps its sign in 4 of 4 cells and both unadjusted intervals still exclude 0, but only EcoMAC SC stays Holm-significant. On K562 KD response the per-regulon difference changes sign (attention wins 88% -> 9% of regulons), whereas the pooled AUPR ratio still has attention above GRNBoost2 on that truth (2.38 vs 1.84). This pooled/per-regulon split is the same pattern already reported for CLR, GENIE3, PIDC and |r| on KD response.
+2. **CORUM pooled order reversal.** GRNBoost2 (3.66) is now above attention (3.51) on K562 CORUM raw, and 2.51 vs 2.08 hub-controlled. Raw difference interval includes 0; the hub-controlled interval ([+0.0007, +0.0108]) excludes 0 at the uncorrected 95% level used in `metrics.csv`. In the per-regulon CORUM row GRNBoost2 - attention is +0.0013 (Holm 1). The text at paper line 136 ("attention loses to CLR, GENIE3, PIDC and |r| on CORUM") does not name GRNBoost2 and remains literally true.
+3. **Old "87-93% zeros" does not match the stored old matrices.** Old `grnboost2_scores.rds` have 94.05% (M3D), 93.72% (EcoMAC), 94.93% (K562) zero off-diagonal pairs after sym-max; the diagnostic memo also gives 6.0% non-zero on M3D (= 94.0% zero). The "87-93%" figure in paper.md:120/186 and paper_plan.md:71 originates elsewhere (not traced).
+4. **Test counts are consistent.** v3: E. coli 20 rows x 2 = 40, K562 primary 25 x 2 = 50, K562 secondary 20 x 2 = 40, matching the pre-fixed Holm families. v2 had 70 rows including 10 "diagnostic" rows (hub and attention_dehub, K562 secondary only) and a 15-row secondary family (no GENIE3), so 30 of 40 present. v3 has 65 rows: the 10 diagnostic rows are not produced in v3 and are not in the supplement.
+5. **Regulon counts.** Identical between v2 and v3 for every E. coli row and for K562 primary (105/271/491/499/566) and secondary (105/269/490/499/585). Paper/supplement figures of 123/157/119/155 regulons match.
+6. **Sota table vs metrics vs macro.** Every GRNBoost2 cell in `results/sota_table_gb2_legacy.md` equals round(ratio, 2) of `metrics.csv` (checked 18 cells). The sota table uses the 5,671-gene K562 run, consistent with macro "K562 primary". Macro v3 (0930b) and the sota table (0928, 29 Oct 14:57) were built from the same `metrics.csv` files; the sota table predates 0929, which does not feed it.
+7. **Stability flags.** v3 flags 3 cells with the delete-50% jackknife check (all K562 secondary DoRothEA_AB: CLR, GENIE3, GRNBoost2); the supplement says one. The flagged GRNBoost2 row has mean ΔAP -0.0001, Holm 1.
+8. **BEELINE count is seed-sensitive in two places.** Versus CLR-NS the "0 of 7 datasets" holds for the production seed and seed 1 but becomes 1 of 7 for seeds 2 and 3 (hESC). The GRNBoost2 vs CLR median AUPRC ratio (1.456-1.485) straddles CLR's 1.479, so its order relative to CLR by median depends on the seed.
+9. **Ordering in the E. coli rows.** In all four raw E. coli cells GRNBoost2 is 5th of 7 (above |r| and Hub only), as the diagnostic memo predicted. The memo's other predictions also held: best method and bold pattern unchanged on M3D; EcoMAC still below attention (1.68, 1.47); K562 had several cells that could change, and two hub-controlled cells gained a dagger, CORUM reversed against attention, and KD response gained +0.47.
+10. **Other metrics.** GRNBoost2 EcoMAC SC TF-node AUPR ratio (5.82) is the highest of all methods; coherence on EcoMAC SC (0.636) is above attention (0.617). Not stated in the paper for GRNBoost2.
+11. **Seeds.** Tables use production seeds (20261016 bulk, 20261021 BEELINE); the production M3D SC value 1.3635 is 0.0005 above the diagnostic memo's 3-seed range (1.359-1.363). Not a discrepancy of substance, listed for completeness.
+12. **Hub-controlled paired differences and sota daggers.** The new daggers on GRNBoost2 (hub-controlled DoRothEA ABC, CollecTRI) use the Bonferroni rule in `sota_table.R`; the paired difference to CLR in those cells is +0.0005 and +0.0012 (interval includes 0) in `metrics.csv`.
+
+Could NOT verify:
+
+- Which two BCa intervals in `macro_aupr.R` were undefined (the counter reports 2 calls to `excl()`, not rows; the CSV has no NA, and the Holm P of the affected tests cannot be identified). The 0930 crash message does not name the row either.
+- The origin of the "87-93%" zero-share figure (item 3).
+- Whether the paper's size-stratum statements ("5-24 genes", "60-90%") are pooled across all comparators or per comparator; GRNBoost2 strata moved (section 1.2, line 304).
+- The 0925 and 0929 first attempts: OOM-killed; I read only the retry logs for gate lines. Cache integrity after a kill is covered by the gate passing in the retry, but I did not inspect partial files.
+- Whether `results/macro_aupr_v2` is exactly the file used for the printed Supplementary Table 9 (the printed non-GRNBoost2 rows match v2 to the digits compared; the printed GRNBoost2 rows match v2).
+- Seeds 1-3 on EcoMAC and K562: none exist (single production seed), so variability of the new K562 and EcoMAC GRNBoost2 numbers is not measured.
+- Fig. 7b: no script exists in `analysis/`; the figure has not been built, so nothing to compare.
+- I did not rerun any job or gate; all gate statements come from the logs listed in section 0. I did not open the paper in a rendered form.
+- The "PIDC" K562 all-genes rows do not exist (PIDC not run on 8,559 genes), so the secondary family has four comparators.
+
+---
+
+## 4. Proposed ordered edit list (NOT applied) and disclosure text
+
+Order matters because later items quote earlier ones. All edits to be reviewed by the PI; the Collins page is the PI's.
+
+1. **Freeze the new sources.** Decide that `results/sota_table_gb2_legacy.md` and `results/macro_aupr_v3/` are the sources of record; copy the final `sota_table_gb2_legacy.md` over `docs/whitepapers/sota_table.md` (timestamp 2026-10-29 14:57) and fix its footnote line 39 (sparsity). Do not hand-edit the numbers.
+2. **`docs/whitepapers/paper.md` Table 2** (lines 96-104, 110-118): replace the GRNBoost2 column and add the two daggers (hub ABC 1.03†, CollecTRI 1.01†) exactly as generated. Rewrite the footnote at line 120 (remove the sparse-network statement; state the new zero shares if desired).
+3. **paper.md line 124:** replace "4 of 4; not interpreted until the audit" by the Holm result (1 of 4: EcoMAC SC; 4 of 4 favour attention in sign). Optionally add the K562 KD-response flip where K562 per-regulon results are described (line 126-136).
+4. **paper.md line 152:** replace the BEELINE sentence with: GRNBoost2 below CLR in 6 of 7 datasets (mean log2 -0.15, Wilcoxon P = 0.031, sign P = 0.125; hESC +0.015). Delete "GRNBoost2 ranks last everywhere ... [PENDING]" and replace by the explanation of the earlier discrepancy (see disclosure below).
+5. **paper.md Methods line 186:** versions (arboreto 0.1.6, scikit-learn), legacy early stopping, seeds, 94% -> 46/29/71% zero shares if kept, disclosure sentence; remove the "audit is running [PENDING]".
+6. **`docs/whitepapers/supplement.md`:** Table 9 title (line 275) to `macro_aupr_v3`; replace the four GRNBoost2 rows (282, 287, 292, 297) and refresh the moved Holm values of the other rows (section 1.2); update Reading 2, 3 and 4 (lines 303-305) and the K562 paragraph (line 307: the secondary run is done; GENIE3 present, PIDC absent); change "30 are present" to 40 in line 273 and add that GRNBoost2 inputs were replaced after the first run, so other comparators' adjusted P values moved. Table 10 row (line 358), Reading 1 (363), and replace the "GRNBoost2 discrepancy" paragraph (368) with the disclosure text; add the old-vs-new comparison as a supplementary item (numbers in section 2).
+7. **Fig. 7b:** build from `results/beeline_baselines/metrics.csv` (and `summary.csv`) with the new GRNBoost2; the figure legend (paper.md:222) needs no wording change.
+8. **`docs/whitepapers/abstract_points.md`:** lines 53, 62; update the stale BEELINE lines 76, 139 and 149.
+9. **`docs/checkpoint_collins.md`:** table rows 30-34 (1.36, 1.36, 1.37, 1.05, 3.66), line 38 ("1 of 4 after correction"), line 65 (BEELINE done); the PI then updates the private claude.ai page (https://claude.ai/artifact/5sbGiidecw7ZqkjbBz4eBT), which mirrors this file.
+10. **`docs/preregistration_scfm.md`:** add a change-log entry (before any scfm scoring) stating that the GRNBoost2 baseline in `results/beeline_baselines` is the legacy-early-stopping rerun (date to be set by the PI; the BEELINE rerun finished 28 Oct 2026 06:07; reason in the disclosure). No test or decision rule changes.
+11. **`docs/paper_plan.md`** lines 71, 73-75, 79, 93-94 and **`docs/STATUS.md`** items (lines 49, 96-101, 113): update counts and statuses; tick the GRNBoost2 discrepancy item.
+12. **`docs/whitepapers/beeline.md:102`:** remove or update the "still needs doing" baseline note.
+13. **Fact-check pass** (worker) over every changed sentence against the files named in this inventory, then an independent statistical review of the regenerated Table 2, Supplementary Tables 9 and 10 (they carry the "reviewed" label in the paper header and Collins page).
+
+### Disclosure text (for Methods and the supplement; wording to be edited by the PI)
+
+> GRNBoost2 was first run and reported with arboreto 0.1.6 under scikit-learn 1.9.1, and those results appeared in our working tables between 16 and 21 October 2026 (Table 2, Supplementary Tables 9 and 10, and a progress checkpoint). On 22 October 2026 we found that arboreto's early-stopping rule is broken under scikit-learn 1.3 and later: the out-of-bag improvement it monitors changed meaning, so most targets stopped after 25-36 trees. A diagnostic designed after that discovery (job 0894; current, arboreto's own `grnboost2()`, legacy monitor and no early stopping; three seeds) showed that our wrapper and the seed did not explain the low scores. On 27 October 2026, before any rerun, we fixed the rule in writing: all GRNBoost2 results are rerun with legacy early stopping (arboreto's published stopping rule with the pre-1.3 out-of-bag improvement); no early stopping is a sensitivity analysis only; the diagnostic's variant results had been seen when this was chosen; no other comparator, truth, split, seed or scoring script was changed. Legacy early stopping reproduced stock arboreto 0.1.6 under scikit-learn 1.2.2 on BEELINE mDC_500 (trees per target and AUPRC ratios within one seed SD). The rerun (jobs 0920-0929, 27-31 October 2026) replaced every GRNBoost2 result. Gate: in every rerun that recomputed other methods (M3D, EcoMAC, K562 5,671 and 8,559 genes, BEELINE 14 cases) the |r|, CLR, attention, GENIE3 and PIDC rows reproduced the earlier results to within 1e-6 (observed difference 0). The superseded GRNBoost2 outputs and the diagnostic are retained in the supplement. Any arboreto or pySCENIC GRNBoost2 run under scikit-learn 1.3 or later is affected by the same fault.
+
+Facts to cite with it: GRNBoost2 reported 16-21 Oct; fault found 22 Oct; diagnostic job 0894 scored 26-27 Oct; rule committed 27 Oct (commit 050695d) before the rerun (STATUS: rerun began 27 Oct 19:58); equivalence gate passed 27 Oct (commit 45a183b); gates passed in 0920, 0923, 0925 (retry), 0926, 0929 (retry); seeds jobs 0921 and 0924 had no gate; the K562 8,559-gene run was added on 28 Oct (PI-approved); final macro v3 produced 31 Oct 11:42 (0930b) with 2 undefined BCa intervals counted as not excluding 0.
