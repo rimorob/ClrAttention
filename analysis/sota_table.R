@@ -61,6 +61,6 @@ lines <- c(lines, "## Raw scores", "", table_for(FALSE), "",
            "- Hub control: each method's scores are converted to percentiles within 10 strata of pi_i + pi_j, where pi is the stationary distribution of the attention walk (an attention-derived stratifier; a method-neutral one is planned). \"Hub only\" ranks pairs by pi_i + pi_j alone (a degree baseline).",
            "- K562: the Perturb-seq essential compendium, network built from knockdown half A on the 5,671 genes in at least one literature truth; the knockdown-response truth comes from the other half (B). All K562 TF-truth rows are within 10% of random.",
            "- EcoMAC may share arrays with M3D, so it is not yet an independent replication.",
-           "- GRNBoost2 returns a sparse network (most pairs tied at zero), which lowers its pooled AUPR.")
+           "- GRNBoost2 rows: arboreto 0.1.6 with legacy early stopping (tools/grnboost2.py --early_stop legacy), rerun 29-31 Oct 2026; the 16-21 Oct values (broken early stopping under scikit-learn >= 1.3) are superseded. Pairs tied at zero after symmetrization, from grnboost2_scores.rds: M3D 45.7%, EcoMAC 29.4%, K562 (5,671 genes) 70.6%; ties lower pooled AUPR somewhat.")
 writeLines(lines, opt$out)
 cat(lines, sep = "\n")
