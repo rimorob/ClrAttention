@@ -1,11 +1,13 @@
 #!/usr/bin/env Rscript
-# Data acquisition and label-free preparation for docs/preregistration_reciprocity_yeast.md (DRAFT rev 4).
-# Written 2026-11-01; parse-checked and gate self-tested; NOT yet run on real data (nothing downloaded).
+# Data acquisition and label-free preparation for docs/preregistration_reciprocity_yeast.md (DRAFT rev 5).
+# Written 2026-11-01; parse-checked; self-tests selftest_gate and selftest_git pass; NOT yet run on real data.
 #
 # Stages, in protocol order (outputs in data/yeast/ [not committed; hashes are] or
 # docs/reciprocity_yeast_selections/ [committed]):
-#   selftest_gate      tests the positive fixed-date marker check on the preregistration (expects "draft" now)
-#                      and on a temporary fixed copy (expects "fixed")
+#   selftest_gate      reports "fixed" or "draft" for the preregistration (or --prereg <file>) and checks the marker
+#                      logic on derived copies (fixed <-> draft, invalid date 2026-99-99, placeholder date)
+#   selftest_git       builds a throw-away git repository and checks the commit-order gates (strict ancestry,
+#                      adding commit, same-commit refusal, re-committed log refusal, shallow-clone refusal)
 #   download           expression + wild-type controls + annotation only (no truth). SHA-256 -> data/yeast/SHA256SUMS
 #   matrix             700 responsive mutants (published M) -> ORF x mutant matrix; deleted gene resolved via SGD
 #                      (unique aliases), verified by its own M (<= -1 and in the column's lowest 1%), else dropped;
@@ -21,28 +23,31 @@
 #                      median R'_mut > median R'_wt and Q <= 0.5; WT-percentile diagnostic
 #   complex_structure  8a, GATED: Complex Portal (+ CYC2008 fallback) membership, evidence filter, merge,
 #                      P1/S1 evaluability, n_eff(P1), power gate; never builds regulon membership
-#   regulon_structure  8c, GATED (8a committed; export log committed after 8a and steps 4-7, by git ancestry):
-#                      committed converter output -> computed mode, E + reanalysis screen, regulons, TF edges,
-#                      contamination audit, P2/S6 evaluability, n_eff(P2)
+#   regulon_structure  8c, GATED (8a committed and pushed; the commit ADDING the export log strictly after 8a and
+#                      steps 4-7): runs the committed converter on the raw export files whose SHA-256 are listed in
+#                      the export log -> computed mode, E + reanalysis screen, regulons, TF edges, audit, n_eff(P2)
 # No stage scores anything. Stages before complex_structure never download or open a truth. Truth stages read
 # membership and the universe's row names only.
 # Usage: Rscript analysis/yeast_prep.R <stage> [--threads 4]
 #        complex_structure: [--cyc2008 <file>]
-#        regulon_structure: --yeastract <normalized TSV from analysis/yeastract_convert.R> --yeastract_mode refs|binding_only
+#        regulon_structure: --yeastract_mode refs|binding_only (cross-check only); raw export files are read from the
+#                           export log lines "raw_export: <sha256> <kind> <path>" (kind: table|binding_matrix|expression_matrix)
+# Before any truth stage: git fetch origin (the gates require every gate commit to be on the upstream branch).
 
 invisible(Sys.setlocale("LC_COLLATE", "C"))
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 args <- commandArgs(trailingOnly = TRUE)
-STAGES <- c("selftest_gate", "download", "matrix", "check", "rebuild", "wt", "splits", "feasibility",
+STAGES <- c("selftest_gate", "selftest_git", "download", "matrix", "check", "rebuild", "wt", "splits", "feasibility",
             "complex_structure", "regulon_structure")
 if (!length(args) || !args[1] %in% STAGES) stop("usage: Rscript analysis/yeast_prep.R <", paste(STAGES, collapse = "|"), "> [options]")
 stage <- args[1]
-opt <- list(threads = 4L, yeastract = NA_character_, yeastract_mode = NA_character_, cyc2008 = NA_character_)
+opt <- list(threads = 4L, yeastract_mode = NA_character_, cyc2008 = NA_character_, prereg = NA_character_)
 i <- 2L
 while (i < length(args)) { k <- sub("^--", "", args[i]); v <- args[i + 1L]
   opt[[k]] <- if (k == "threads") as.integer(v) else v; i <- i + 2L }
 
 PREREG <- "docs/preregistration_reciprocity_yeast.md"
+PREP_SCRIPT <- "analysis/yeast_prep.R"
 TEST_SCRIPT <- "analysis/reciprocity_yeast_test.R"
 CONVERTER <- "analysis/yeastract_convert.R"
 D <- "data/yeast"; SEL <- "docs/reciprocity_yeast_selections"
@@ -68,16 +73,36 @@ record_hashes <- function() {
   writeLines(sprintf("%s  %s", vapply(fs, sha, ""), sub(paste0("^", D, "/"), "", fs)), file.path(D, "SHA256SUMS"))
   say("hashes: ", length(fs), " files -> ", file.path(D, "SHA256SUMS"))
 }
-git1 <- function(...) suppressWarnings(system2("git", c(...), stdout = TRUE, stderr = FALSE))
-tracked <- function(f) system2("git", c("ls-files", "--error-unmatch", f), stdout = FALSE, stderr = FALSE) == 0L
-clean <- function(f) tracked(f) && system2("git", c("diff", "--quiet", "HEAD", "--", f)) == 0L
+GITC <- character(0)            # set to c("-C", dir) by selftest_git
+git1 <- function(...) suppressWarnings(system2("git", c(GITC, ...), stdout = TRUE, stderr = FALSE))
+gitq <- function(...) system2("git", c(GITC, ...), stdout = FALSE, stderr = FALSE) == 0L
+tracked <- function(f) gitq("ls-files", "--error-unmatch", f)
+clean <- function(f) tracked(f) && gitq("diff", "--quiet", "HEAD", "--", f)
 last_commit <- function(f) { h <- git1("log", "-1", "--format=%H", "--", f); if (length(h)) h[1] else NA_character_ }
-is_ancestor <- function(a, b) system2("git", c("merge-base", "--is-ancestor", a, b), stdout = FALSE, stderr = FALSE) == 0L
-prereg_is_fixed <- function(lines) any(grepl(FIXED_RE, lines))
+adding_commit <- function(f) { h <- git1("log", "--diff-filter=A", "--format=%H", "--", f); if (length(h)) h[length(h)] else NA_character_ }
+is_ancestor <- function(a, b) gitq("merge-base", "--is-ancestor", a, b)
+strictly_before <- function(a, b) !is.na(a) && !is.na(b) && a != b && is_ancestor(a, b)
+refuse_shallow <- function() if (identical(git1("rev-parse", "--is-shallow-repository"), "true")) stop("gate: shallow clone; commit-order gates cannot be verified")
+on_upstream <- function(cmt) { up <- git1("rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}")
+  if (!length(up) || !nzchar(up[1])) stop("gate: no upstream branch; push gate commits and git fetch first")
+  is_ancestor(cmt, up[1]) }
+DRAFT_HDR_RE <- "^> \\*\\*STATUS: DRAFT"
+prereg_status <- function(lines) {   # "fixed" iff exactly one valid fixed-date marker with a real date and no DRAFT header line
+  m <- grep(FIXED_RE, lines, value = TRUE)
+  ok <- length(m) == 1L && !any(grepl(DRAFT_HDR_RE, lines)) && {
+    d <- sub("^> \\*Fixed ([0-9-]+)\\*$", "\\1", m); dd <- suppressWarnings(as.Date(d, format = "%Y-%m-%d"))
+    !is.na(dd) && format(dd, "%Y-%m-%d") == d }
+  if (ok) "fixed" else "draft"
+}
+prereg_is_fixed <- function(lines) prereg_status(lines) == "fixed"
 gate_prereg <- function() {
+  refuse_shallow()
   if (!clean(PREREG)) stop("gate: ", PREREG, " not tracked or differs from HEAD")
-  if (!prereg_is_fixed(readLines(PREREG))) stop("gate: ", PREREG, " carries no fixed-date marker; no truth may be touched")
-  last_commit(PREREG)
+  if (!prereg_is_fixed(readLines(PREREG))) stop("gate: ", PREREG, " carries no valid fixed-date marker; no truth may be touched")
+  h <- last_commit(PREREG)
+  ex <- file.path(SEL, "excluded_pmids.txt")             # E committed at or before the fixing commit
+  if (!clean(ex) || !is_ancestor(adding_commit(ex), h)) stop("gate: ", ex, " must be committed at or before the commit that fixed ", PREREG)
+  h
 }
 need_clean <- function(fs) for (f in fs) if (!clean(f)) stop("gate: ", f, " not committed or differs from HEAD")
 ORF_RE <- "^(Y[A-P][LR][0-9]{3}[WC](-[A-Z])?|Q[0-9]{4}|R[0-9]{4}[WC]?)$"
@@ -90,15 +115,46 @@ SEL_FILES <- file.path(SEL, c("yeast_selections.csv", "hepg2_selections.csv", "j
 
 ## ---- stage: selftest_gate (BL1) -----------------------------------------------------------------
 if (stage == "selftest_gate") {
-  L <- readLines(PREREG); now <- prereg_is_fixed(L)
-  hdr <- grep("^> \\*\\*STATUS: DRAFT", L)
-  if (length(hdr) != 1L) stop("selftest: expected exactly one DRAFT status block line, found ", length(hdr))
-  Lf <- L; Lf[hdr] <- "> *Fixed 2026-11-02*"
-  Lbad <- L; Lbad[hdr] <- "> *Fixed YYYY-MM-DD*"
-  res <- c(current = now, fixed_copy = prereg_is_fixed(Lf), placeholder_copy = prereg_is_fixed(Lbad))
+  f <- if (is.na(opt$prereg)) PREREG else opt$prereg
+  L <- readLines(f); now <- prereg_status(L)
+  hdr <- grep(DRAFT_HDR_RE, L); fx <- grep(FIXED_RE, L)
+  k <- if (length(hdr)) hdr[1] else if (length(fx)) fx[1] else stop("selftest: neither a DRAFT header nor a fixed marker found")
+  mk <- function(line) { x <- L; x[k] <- line; x[setdiff(c(hdr, fx), k)] <- "" ; x }
+  res <- c(fixed_copy = prereg_status(mk("> *Fixed 2026-11-02*")) == "fixed",
+           draft_copy = prereg_status(mk("> **STATUS: DRAFT (selftest copy).**")) == "draft",
+           invalid_date = prereg_status(mk("> *Fixed 2026-99-99*")) == "draft",
+           feb30 = prereg_status(mk("> *Fixed 2026-02-30*")) == "draft",
+           placeholder = prereg_status(mk("> *Fixed YYYY-MM-DD*")) == "draft",
+           marker_plus_draft = prereg_status(c(mk("> *Fixed 2026-11-02*"), "> **STATUS: DRAFT stray**")) == "draft")
   print(res)
-  if (res[["fixed_copy"]] != TRUE || res[["placeholder_copy"]] != FALSE) stop("selftest FAILED: marker check is wrong")
-  say("selftest passed; this file is ", if (now) "FIXED" else "a DRAFT (truth stages will refuse)")
+  if (!all(res)) stop("selftest FAILED: marker logic is wrong")
+  cat(now, "\n"); say("selftest passed; ", f, " is ", toupper(now))
+}
+
+## ---- stage: selftest_git (commit-order gates in a throw-away repository) ------------------------
+if (stage == "selftest_git") {
+  td <- tempfile("gitgate"); dir.create(td); GITC <<- c("-C", td)
+  g <- function(...) { r <- system2("git", c(GITC, ...), stdout = TRUE, stderr = TRUE); r }
+  g("init", "-q"); g("config", "user.email", "t@t"); g("config", "user.name", "t")
+  w <- function(f, txt) writeLines(txt, file.path(td, f))
+  w("a.txt", "a"); g("add", "a.txt"); g("commit", "-q", "-m", "a")
+  w("log.md", "log"); g("add", "log.md"); g("commit", "-q", "-m", "log_after_a")
+  t_strict <- strictly_before(last_commit("a.txt"), adding_commit("log.md"))
+  w("b.txt", "b"); w("log2.md", "log2"); g("add", "b.txt", "log2.md"); g("commit", "-q", "-m", "same_commit")
+  t_same <- !strictly_before(last_commit("b.txt"), adding_commit("log2.md"))
+  w("log3.md", "early"); g("add", "log3.md"); g("commit", "-q", "-m", "log3_early")
+  w("c.txt", "c"); g("add", "c.txt"); g("commit", "-q", "-m", "c")
+  w("log3.md", "touched later"); g("add", "log3.md"); g("commit", "-q", "-m", "log3_touched")
+  t_adding <- !strictly_before(last_commit("c.txt"), adding_commit("log3.md")) && strictly_before(last_commit("c.txt"), last_commit("log3.md"))
+  t_recommit <- adding_commit("log3.md") != last_commit("log3.md")
+  sh <- tempfile("shallow"); system2("git", c("clone", "-q", "--depth", "1", paste0("file://", td), sh), stdout = FALSE, stderr = FALSE)
+  GITC <<- c("-C", sh); t_shallow <- inherits(tryCatch(refuse_shallow(), error = function(e) e), "error")
+  GITC <<- c("-C", td); t_deep <- !inherits(tryCatch(refuse_shallow(), error = function(e) e), "error")
+  res <- c(strict_order_passes = t_strict, same_commit_refused = t_same, adding_commit_used = t_adding,
+           recommitted_log_detected = t_recommit, shallow_refused = t_shallow, full_clone_accepted = t_deep)
+  print(res); unlink(c(td, sh), recursive = TRUE)
+  if (!all(res)) stop("selftest_git FAILED")
+  say("selftest_git passed")
 }
 
 ## ---- annotation helpers -------------------------------------------------------------------------
@@ -377,25 +433,36 @@ gate_pre_truth <- function() {    # steps 1 and 4-7 committed; universe matrix a
   hash <- gate_prereg()
   need_clean(c(file.path(SEL, c("excluded_pmids.txt", "feasibility_gate.csv", "splits.csv", "mutant_clusters.csv",
                                 "experiment_jackknife_replicates.csv", "R_check.csv", "deleteome_matrix.sha256",
-                                "masking_log.csv", "dropped_columns.csv")), SEL_FILES, TEST_SCRIPT, CONVERTER))
+                                "masking_log.csv", "dropped_columns.csv")), SEL_FILES, TEST_SCRIPT, CONVERTER, PREP_SCRIPT))
   if (!isTRUE(as.logical(utils::read.csv(file.path(SEL, "feasibility_gate.csv"))$pass))) stop("gate F failed: verdict 1, stop")
   if (!all(as.logical(utils::read.csv(file.path(SEL, "R_check.csv"))$passed))) stop("synthetic R check not passed: no verdict, fix first")
   want <- strsplit(readLines(file.path(SEL, "deleteome_matrix.sha256"), 1L), "[[:space:]]+")[[1]][1]
   if (!identical(want, sha(file.path(D, "deleteome_responsive_700.tsv")))) stop("gate: expression matrix differs from committed SHA-256")
-  list(prereg = hash, test_blob = git1("rev-parse", paste0("HEAD:", TEST_SCRIPT)), conv_blob = git1("rev-parse", paste0("HEAD:", CONVERTER)))
+  pre <- c(file.path(SEL, c("feasibility_gate.csv", "splits.csv", "mutant_clusters.csv", "experiment_jackknife_replicates.csv", "R_check.csv")),
+           SEL_FILES, TEST_SCRIPT, CONVERTER)
+  for (f in pre) if (!on_upstream(last_commit(f))) stop("gate: the commit of ", f, " is not on the upstream branch (push and git fetch first)")
+  list(prereg = hash, test_blob = git1("rev-parse", paste0("HEAD:", TEST_SCRIPT)), conv_blob = git1("rev-parse", paste0("HEAD:", CONVERTER)),
+       prep_blob = git1("rev-parse", paste0("HEAD:", PREP_SCRIPT)),
+       push_record = paste(vapply(pre, function(f) paste0(basename(f), "=", substr(last_commit(f), 1, 12)), ""), collapse = ";"))
 }
-gate_after <- function(later, earlier) {   # SF2: every `earlier` file's last commit is an ancestor of `later`'s
-  cl <- last_commit(later); if (is.na(cl)) stop("gate: ", later, " not committed")
-  for (f in earlier) { ce <- last_commit(f)
-    if (is.na(ce) || !is_ancestor(ce, cl)) stop("gate: ", later, " must be committed after ", f, " (git ancestry)") }
-  invisible(TRUE)
+gate_after <- function(later, earlier, allow_touch = FALSE) {   # SF2 (review3): the commit ADDING `later` is strictly after
+  ca <- adding_commit(later); if (is.na(ca)) stop("gate: ", later, " not committed")   # the last commit of every `earlier`
+  if (!allow_touch && last_commit(later) != ca) stop("gate: ", later, " was changed after the commit that added it (log a deviation instead)")
+  for (f in earlier) if (!strictly_before(last_commit(f), ca)) stop("gate: ", later, " must be ADDED in a commit strictly after ", f)
+  if (!on_upstream(ca)) stop("gate: the commit adding ", later, " is not on the upstream branch (push and git fetch first)")
+  invisible(ca)
 }
-PRE_TRUTH_FILES <- c(file.path(SEL, c("feasibility_gate.csv", "R_check.csv")), SEL_FILES, TEST_SCRIPT, CONVERTER)
+PRE_TRUTH_FILES <- c(file.path(SEL, c("feasibility_gate.csv", "R_check.csv")), SEL_FILES, TEST_SCRIPT, PREP_SCRIPT)
 
 ## ---- stage: complex_structure (8a; GATED; SF3 provisional: before any regulon membership) -------
 if (stage == "complex_structure") {
   g <- gate_pre_truth(); E <- readLines(file.path(SEL, "excluded_pmids.txt")); E <- E[grepl("^[0-9]+$", E)]
-  if (!is.na(opt$cyc2008)) { lg <- file.path(SEL, "cyc2008_download_log.md"); gate_after(lg, PRE_TRUTH_FILES) }
+  cnt_f <- file.path(SEL, "complex_structure_counts.csv")
+  if (!is.na(opt$cyc2008)) {        # re-run of 8a after a committed first run that required the fallback (review3 note)
+    lg <- file.path(SEL, "cyc2008_download_log.md"); need_clean(c(lg, cnt_f))
+    if (!grepl("CYC2008 required", utils::read.csv(cnt_f)$fallback[1])) stop("gate: CYC2008 used only after a committed first 8a run that required it")
+    gate_after(lg, c(PRE_TRUTH_FILES, cnt_f))
+    if (!any(grepl(sha(opt$cyc2008), readLines(lg), fixed = TRUE))) stop("gate: CYC2008 file SHA-256 not listed in ", lg) }
   universe <- universe_rows(); Tdir <- file.path(D, "truth_raw"); dir.create(Tdir, showWarnings = FALSE)
   fetch("https://ftp.ebi.ac.uk/pub/databases/intact/complex/current/complextab/559292.tsv", file.path(Tdir, "559292.tsv"))
   fetch("https://rest.uniprot.org/uniprotkb/stream?query=organism_id:559292&format=tsv&fields=accession,gene_oln,gene_primary",
@@ -444,7 +511,8 @@ if (stage == "complex_structure") {
   out <- cbind(fin, fallback = fallback, complexes_dropped_only_E = sum(only_E),
     evaluable_P1 = fin$P1_positive_pairs >= 200 && fin$P1_complexes_with_pos >= 30,
     evaluable_S1 = fin$S1_positive_pairs >= 200 && fin$S1_complexes_with_pos >= 30,
-    power_gate_pass = fin$P1_neff >= 100, prereg_commit = g$prereg, test_script_blob = g$test_blob, converter_blob = g$conv_blob, t(env_info()))
+    power_gate_pass = fin$P1_neff >= 100, prereg_commit = g$prereg, test_script_blob = g$test_blob, converter_blob = g$conv_blob,
+    prep_blob = g$prep_blob, push_record = g$push_record, checked_at = format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"), t(env_info()))
   out$reciprocity_verdict1 <- !(out$power_gate_pass && out$evaluable_P1)
   mem <- do.call(rbind, lapply(names(merged), function(k) data.frame(complex = k, orf = merged[[k]])))
   utils::write.table(mem, file.path(SEL, "yeast_complexes_members.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
@@ -462,9 +530,28 @@ if (stage == "complex_structure") {
 ## ---- stage: regulon_structure (8c; GATED; SF1, SF2) ---------------------------------------------
 if (stage == "regulon_structure") {
   g <- gate_pre_truth()
+  lg <- file.path(SEL, "yeastract_export_log.md")
   need_clean(file.path(SEL, c("complex_structure_counts.csv", "yeast_complexes.sha256", "yeastract_export_log.md")))
-  gate_after(file.path(SEL, "yeastract_export_log.md"), c(PRE_TRUTH_FILES, file.path(SEL, "complex_structure_counts.csv")))
-  if (is.na(opt$yeastract) || !file.exists(opt$yeastract)) stop("--yeastract <normalized TSV from ", CONVERTER, ">")
+  for (f in file.path(SEL, c("complex_structure_counts.csv", "yeast_complexes.sha256")))
+    if (!on_upstream(last_commit(f))) stop("gate: 8a commit not on the upstream branch (push and git fetch first)")
+  ca <- gate_after(lg, c(PRE_TRUTH_FILES, file.path(SEL, "complex_structure_counts.csv")))
+  # converter: committed strictly before the export log, or a committed deviation route (review3 SF2 e)
+  dev <- file.path(SEL, "converter_deviation.md")
+  if (!strictly_before(last_commit(CONVERTER), ca)) {
+    need_clean(dev); cd <- adding_commit(dev)
+    if (!strictly_before(ca, cd) || !is_ancestor(last_commit(CONVERTER), cd))
+      stop("gate: converter changed after the export without a converter_deviation.md committed after the export log and with the change")
+    say("converter deviation route used: ", dev) }
+  # raw export files listed in the log with SHA-256; 8c runs the committed converter itself (review3 SF2 f)
+  ll <- grep("^raw_export: [0-9a-f]{64} (table|binding_matrix|expression_matrix) ", readLines(lg), value = TRUE)
+  if (!length(ll)) stop("gate: ", lg, " lists no raw_export lines")
+  cargs <- character(0)
+  for (x in ll) { p <- strsplit(x, " ", fixed = TRUE)[[1]]; fpath <- paste(p[-(1:3)], collapse = " ")
+    if (!file.exists(fpath) || sha(fpath) != p[2]) stop("gate: raw export ", fpath, " missing or SHA-256 differs from the log")
+    cargs <- c(cargs, paste0("--", p[3]), fpath) }
+  norm <- file.path(D, "yeastract_normalized.tsv")
+  rc <- system2("Rscript", c(CONVERTER, cargs, "--out", norm)); if (rc != 0L) stop("converter failed (rc ", rc, "): log a converter deviation")
+  opt$yeastract <- norm
   E <- readLines(file.path(SEL, "excluded_pmids.txt")); E <- E[grepl("^[0-9]+$", E)]
   universe <- universe_rows(); s <- sgd(); to_orf <- name_to_orf(s, file.path(SEL, "ambiguous_aliases_yeastract.txt"))
   yx <- utils::read.delim(opt$yeastract, stringsAsFactors = FALSE, colClasses = "character")
@@ -517,7 +604,8 @@ if (stage == "regulon_structure") {
   out <- data.frame(P2_regulons = length(regs), P2_genes = length(unique(unlist(regs))), P2_positive_pairs = cp_prim,
     P2_neff = neff_of(lengths(regs)), S6_regulators = length(regulators), S6_positive_edges = length(edges),
     evaluable_P2 = cp_prim >= 200, evaluable_S6 = length(edges) >= 200, mode = mode,
-    prereg_commit = g$prereg, test_script_blob = g$test_blob, converter_blob = g$conv_blob, t(env_info()))
+    prereg_commit = g$prereg, test_script_blob = g$test_blob, converter_blob = g$conv_blob, prep_blob = g$prep_blob,
+    export_log_adding_commit = ca, push_record = g$push_record, checked_at = format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"), t(env_info()))
   rmem <- do.call(rbind, lapply(names(regs), function(k) data.frame(regulator = k, orf = regs[[k]])))
   utils::write.table(rmem, file.path(SEL, "yeast_regulons_members.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
   utils::write.table(do.call(rbind, strsplit(edges, " ")), file.path(SEL, "yeast_tf_edges.tsv"), sep = "\t", quote = FALSE,
@@ -528,7 +616,8 @@ if (stage == "regulon_structure") {
   writeLines(c(sprintf("%s  yeast_regulons_members.tsv", sha(file.path(SEL, "yeast_regulons_members.tsv"))),
                sprintf("%s  yeast_tf_edges.tsv", sha(file.path(SEL, "yeast_tf_edges.tsv"))),
                sprintf("%s  %s", sha(opt$yeastract), basename(opt$yeastract)),
-               sprintf("%s  %s", sha(CONVERTER), CONVERTER)), file.path(SEL, "yeast_regulons.sha256"))
+               sprintf("%s  %s", sha(CONVERTER), CONVERTER), sprintf("%s  %s", sha(PREP_SCRIPT), PREP_SCRIPT)),
+             file.path(SEL, "yeast_regulons.sha256"))
   say("8c: mode ", mode, sprintf(" (attributed share %.3f); P2 evaluable %s, n_eff %.1f; S6 evaluable %s", share_attr,
       out$evaluable_P2, out$P2_neff, out$evaluable_S6), "; commit ", SEL, " before any scoring")
 }

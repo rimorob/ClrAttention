@@ -30,4 +30,4 @@
 28049706
 28637236
 30203048
-# (c) reanalysis screen additions are written by truth_structure to excluded_pmids_screen_additions.txt
+# (c) reanalysis screen additions are written by regulon_structure (step 8c) to excluded_pmids_screen_additions.txt
