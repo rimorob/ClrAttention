@@ -1,6 +1,8 @@
 # Project status
 
-*Saturday 31 October 2026, 12:00. Living file: update at each checkpoint. The job queue is empty (all GRNBoost2 legacy reruns, BEELINE 110c and the exploratory rCLR runs have finished). The sections "Restarting after the shutdown" and "Open items as of 22 Oct" below are historical.*
+*Sunday 1 November 2026, 09:30. Living file: update at each checkpoint. The job queue is empty (all GRNBoost2 legacy reruns, BEELINE 110c, the tie-convention check and the exploratory rCLR runs have finished). PI decision 1 Nov: complete the computables first (scFM step 2 and 3 first), then revisit the Jim readout and the graphical abstract. The sections "Restarting after the shutdown" and "Open items as of 22 Oct" below are historical.*
+
+**Since 31 Oct 12:00 (all committed):** width exploration round 2 closed negatively, reciprocity kept as a documented candidate (`docs/plans/background_width_exploration.md` section 8, c141332, f0de951); tie-convention sensitivity (`analysis/tie_check/`, `results/tie_check/`; Supplementary Note 16, headline unchanged; db062ad, 407bcbb); self-loop trace, no effect (`docs/plans/self_loop_trace.md`, 09fd6d2); scFM smoke test passed with caveats (`docs/scfm_smoke_test.md`, d981044); Fig. 1 rev 3 after two fresh-eyes reviews (4fdfe7a); Collins page republished as v4 (private; PI shares from the Share menu). Housekeeping: `docs/whitepapers/figures/pb_runs/` is untracked (keep only the round-4 layout reference). **Open wording item (PI, 1 Nov):** the 2007 CLR combined z-scores with the Euclidean formula; the Stouffer combination was in the released 2007 code with a recommendation to use it, so Fig. 1, the graphical abstract and paper.md must not say "Stouffer added here" (PI to supply the code-release reference; 2007 MI estimator still unconfirmed).
 
 ## Restarting after the shutdown
 
