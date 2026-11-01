@@ -165,7 +165,7 @@ Reciprocity (S2) has never been computed on any real dataset (only `analysis/syn
 - **Yeast complexes.** EBI Complex Portal `complextab/559292.tsv` (913 KB, release 2026-10-17). It uses the same builder as *E. coli* (`analysis/build_ecoli_complex_truth.R`), with ORF mapping from UniProt 559292.
   - Fallback rule, fixed now: if Complex Portal gives n_eff < 100, take its union with CYC2008 (if obtainable) **before any scoring**. If n_eff is still < 100, the result is verdict 1.
 - **Yeast regulons.** YEASTRACT+ "Generate Regulation Matrix" (documented regulations, filtered by evidence type). The bulk export format is unverified. Log the export date and parameters.
-- **Human (key secondary).** Nadig et al. 2025 HepG2 and Jurkat essential Perturb-seq, reported as GSE220095 by a secondary source. **Unverified:** the accession, and whether a pseudobulk is distributed or must be built from single cells (roughly 10–20 GB each). Truths: the existing CORUM and CollecTRI files, unchanged.
+- **Human (key secondary).** Nadig et al. 2025 HepG2 and Jurkat essential Perturb-seq. *Correction (1 Nov, later the same day):* GSE220095, the accession a secondary source gave, is an unrelated prostate-cancer study. The correct series is **GSE264667** (PMID 40259084). It distributes only single-cell files, `GSE264667_hepg2_raw_singlecell_01.h5ad` (5.6 GB) and `GSE264667_jurkat_raw_singlecell_01.h5ad`, plus a 16 GB RAW tar, so the pseudobulk must be built. Truths: the existing CORUM and CollecTRI files, unchanged.
 
 **What must be built:**
 
@@ -226,5 +226,5 @@ At 40 threads (70–80% of 56), the wall time is about 6–8 h of compute, after
 ## 7. Open decisions for the PI
 
 1. **Go or no-go, and what the single yeast shot contains.** Running the test means accepting three things: C2 is relaxed after the fact (disclosed), the test is the last of its kind, and it runs after the Collins readout. The yeast truths can be touched once, so the same preregistration must also decide whether it includes H1 (recommended), a3r's last test (the interpretation memo's §7.3 asked for yeast), and the C3 asymmetry edge test. Whatever is left out cannot use yeast later.
-2. **The human arms.** Keep HepG2 and Jurkat as gated key secondary (recommended: they reuse CORUM, and an extra primary arm costs about 20% of joint power), or promote HepG2 to co-primary for a stronger human readout. Either way, verify GSE220095 and the pseudobulk first.
+2. **The human arms.** Keep HepG2 and Jurkat as gated key secondary (recommended: they reuse CORUM, and an extra primary arm costs about 20% of joint power), or promote HepG2 to co-primary for a stronger human readout. PI decision (1 Nov): secondary. The data are GSE264667 (see the correction in §3).
 3. **The yeast compendium and the power gate.** The deleteome (perturbation design, single lab) or a condition compendium (closer to M3D). The n_eff ≥ 100 threshold (MDE about 0.010) and the CYC2008 fallback rule. And whether to adopt the combined jackknife + bootstrap SE as decisive (recommended) instead of the house "jackknife decisive, bootstrap necessary" rule.
