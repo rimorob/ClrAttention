@@ -35,7 +35,8 @@ args <- commandArgs(trailingOnly = TRUE)
 opt <- list(dataset = "m3d", methods = "genie3,grnboost2,pidc", t = 9L, workers = 24L, out = NULL,
             jack = 100L, seed = 20261016L, alpha = 0.5, ntrees = 1000L, quick = 0L,
             python = "~/venvs/clr-baselines/bin/python", julia = "~/.juliaup/bin/julia",
-            gene_subset = "none", export_only = 0L, jack_reg = 200L, macro = 1L)
+            gene_subset = "none", export_only = 0L, jack_reg = 200L, macro = 1L,
+            array_subset = "")
 i <- 1L
 while (i <= length(args)) {
   key <- sub("^--", "", args[i]); if (!key %in% names(opt)) stop("unknown argument: ", args[i])
@@ -63,8 +64,17 @@ if (opt$dataset %in% c("m3d", "ecomac")) {
     X <- as.matrix(utils::read.delim("data/ecomac/EcoMAC.tsv", header = FALSE))
     rownames(X) <- utils::read.delim("data/ecomac/gene_names.tsv", header = FALSE, stringsAsFactors = FALSE)[[2]]
     plat <- utils::read.csv("data/ecomac/array_platform.csv", stringsAsFactors = FALSE)$platform
+    # --array_subset <file>: one 1-based EcoMAC array index per line (sensitivity analyses on array
+    # subsets, e.g. analysis/ecomac_nonoverlap.R); ComBat is re-fitted by platform within the subset
+    # and skipped when only one platform remains. Default "" = all 2,198 arrays (unchanged).
+    if (nzchar(opt$array_subset)) {
+      ai <- sort(unique(as.integer(readLines(opt$array_subset)))); stopifnot(!anyNA(ai), all(ai >= 1L & ai <= ncol(X)))
+      X <- X[, ai, drop = FALSE]; plat <- plat[ai]
+      say(sprintf("array subset %s: %d arrays; platforms %s", opt$array_subset, length(ai),
+                  paste(sprintf("%s=%d", names(table(plat)), as.integer(table(plat))), collapse = "; ")))
+    }
     X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
-    X <- suppressMessages(sva::ComBat(X, batch = factor(plat)))
+    if (length(unique(plat)) > 1L) X <- suppressMessages(sva::ComBat(X, batch = factor(plat)))
   }
   X <- X[apply(X, 1, function(x) diff(range(x))) > 0, ]
   if (opt$quick > 0L) { v <- apply(X, 1, stats::var); X <- X[sort(order(-v)[seq_len(opt$quick)]), ] }
