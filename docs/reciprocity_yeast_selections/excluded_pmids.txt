@@ -23,6 +23,8 @@
 34520050
 36066422
 # (b) PubMed IDs of S. cerevisiae GEO series with Holstege F or Kemmeren P as author on other platforms
+#     (esearch db=gds term=(Holstege F[Author] OR Kemmeren P[Author] OR GPL11232[Accession]) AND gse[ETYP] AND saccharomyces[Organism],
+#     2026-11-01; 44 series; PMIDs not already in (a))
 19713935
 21971086
 28049706

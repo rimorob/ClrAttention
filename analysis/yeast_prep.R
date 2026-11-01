@@ -1,34 +1,40 @@
 #!/usr/bin/env Rscript
-# Data acquisition and label-free preparation for docs/preregistration_reciprocity_yeast.md (DRAFT rev 2).
-# Written 2026-11-01; parse-checked; NOT yet run on real data (nothing downloaded).
+# Data acquisition and label-free preparation for docs/preregistration_reciprocity_yeast.md (DRAFT rev 4).
+# Written 2026-11-01; parse-checked and gate self-tested; NOT yet run on real data (nothing downloaded).
 #
 # Stages, in protocol order (outputs in data/yeast/ [not committed; hashes are] or
 # docs/reciprocity_yeast_selections/ [committed]):
-#   download         expression + wild-type controls + annotation only (no truth). SHA-256 -> data/yeast/SHA256SUMS
-#   matrix           700 responsive mutants (GSE42527 published M) -> ORF x mutant matrix; deleted-gene resolution
-#                    via SGD names/aliases (unresolvable columns dropped); masking of the deleted ORF and ORFs
-#                    overlapping / within 500 bp; divergent-pair list (label-free, for a descriptive sensitivity)
-#   check            orientation rule + reproduction of the published M for the first 10 mutants
-#   rebuild          only if check failed: sample tables of a fixed random 376 mutants (seed 20261105), rebuilt
-#   wt               wild-type controls (GSE45115 sample tables) -> ORF x culture matrix
-#   splits           10 random halves (seed 20261101) + label-free mutant clusters (complete linkage, 1 - r, h 0.5)
-#   feasibility      gate F (sanity check): chance-corrected cross-half reproducibility R' (mutants vs WT) and
-#                    overlap share Q of mutant top-1% pairs in the WT top-1%; pass iff median R'_mut > median R'_wt
-#                    and Q <= 0.5
-#   truth_structure  GATED: preregistration fixed (tracked, == HEAD, no "STATUS: DRAFT"); F passed and committed;
-#                    splits/clusters, selections, R check and the test script committed (blob hash recorded);
-#                    excluded_pmids.txt and the YEASTRACT export log committed. Builds member lists with the
-#                    exclusion (E) and evidence filters, the contamination audit, evaluability counts, n_eff for
-#                    P1/S1/P2, the CYC2008 fallback and the power-gate line. Reads membership only; never loads a
-#                    network or expression values (only the universe row names).
-# No stage scores anything. Stages other than truth_structure never download or open a truth.
+#   selftest_gate      tests the positive fixed-date marker check on the preregistration (expects "draft" now)
+#                      and on a temporary fixed copy (expects "fixed")
+#   download           expression + wild-type controls + annotation only (no truth). SHA-256 -> data/yeast/SHA256SUMS
+#   matrix             700 responsive mutants (published M) -> ORF x mutant matrix; deleted gene resolved via SGD
+#                      (unique aliases), verified by its own M (<= -1 and in the column's lowest 1%), else dropped;
+#                      masking of the deleted ORF and ORFs overlapping / within 500 bp; divergent-pair list
+#   check              three dye-orientation rules vs published M (first 10 mutants, C-locale order); floor r 0.8;
+#                      structural dye-balance check
+#   rebuild            only after a failed (but floor-passing) check: 376 random mutants (seed 20261105) rebuilt
+#   wt                 wild-type controls (GSE45115 sample tables) with the same rule and the structural check
+#   splits             10 random halves (seed 20261101); label-free mutant clusters (complete linkage, 1 - r,
+#                      h 0.5); the 200 experiment-jackknife replicates (seeds 20262000 + b; cluster-stratified
+#                      fallback if K < 20 or a cluster holds > 25% of mutants)
+#   feasibility        gate F (sanity check): chance-corrected R' (mutants vs WT) and overlap share Q; pass iff
+#                      median R'_mut > median R'_wt and Q <= 0.5; WT-percentile diagnostic
+#   complex_structure  8a, GATED: Complex Portal (+ CYC2008 fallback) membership, evidence filter, merge,
+#                      P1/S1 evaluability, n_eff(P1), power gate; never builds regulon membership
+#   regulon_structure  8c, GATED (8a committed; export log committed after 8a and steps 4-7, by git ancestry):
+#                      committed converter output -> computed mode, E + reanalysis screen, regulons, TF edges,
+#                      contamination audit, P2/S6 evaluability, n_eff(P2)
+# No stage scores anything. Stages before complex_structure never download or open a truth. Truth stages read
+# membership and the universe's row names only.
 # Usage: Rscript analysis/yeast_prep.R <stage> [--threads 4]
-#        truth_structure: --yeastract <normalized TSV> --yeastract_mode refs|binding_only [--cyc2008 <file>]
-#   normalized YEASTRACT TSV (produced from the logged export; columns): tf, target, evidence
-#   (binding|expression), pmids (";"-separated, may be empty in binding_only mode), value (as exported).
+#        complex_structure: [--cyc2008 <file>]
+#        regulon_structure: --yeastract <normalized TSV from analysis/yeastract_convert.R> --yeastract_mode refs|binding_only
 
+invisible(Sys.setlocale("LC_COLLATE", "C"))
+RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 args <- commandArgs(trailingOnly = TRUE)
-STAGES <- c("download", "matrix", "check", "rebuild", "wt", "splits", "feasibility", "truth_structure")
+STAGES <- c("selftest_gate", "download", "matrix", "check", "rebuild", "wt", "splits", "feasibility",
+            "complex_structure", "regulon_structure")
 if (!length(args) || !args[1] %in% STAGES) stop("usage: Rscript analysis/yeast_prep.R <", paste(STAGES, collapse = "|"), "> [options]")
 stage <- args[1]
 opt <- list(threads = 4L, yeastract = NA_character_, yeastract_mode = NA_character_, cyc2008 = NA_character_)
@@ -38,12 +44,15 @@ while (i < length(args)) { k <- sub("^--", "", args[i]); v <- args[i + 1L]
 
 PREREG <- "docs/preregistration_reciprocity_yeast.md"
 TEST_SCRIPT <- "analysis/reciprocity_yeast_test.R"
+CONVERTER <- "analysis/yeastract_convert.R"
 D <- "data/yeast"; SEL <- "docs/reciprocity_yeast_selections"
 GEO <- "https://ftp.ncbi.nlm.nih.gov/geo"
 ACC <- "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi"
+FIXED_RE <- "^> \\*Fixed [0-9]{4}-[0-9]{2}-[0-9]{2}\\*$"
 say <- function(...) cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S"), paste0(...)))
 sha <- function(f) digest::digest(file = f, algo = "sha256")
 mkd <- function() { dir.create(D, showWarnings = FALSE, recursive = TRUE); dir.create(SEL, showWarnings = FALSE, recursive = TRUE) }
+env_info <- function() c(R = R.version.string, RNG = paste(RNGkind(), collapse = "/"), collate = Sys.getlocale("LC_COLLATE"))
 fetch <- function(url, dest, tries = 4L) {
   if (file.exists(dest) && file.info(dest)$size > 0) return(invisible(dest))
   for (k in seq_len(tries)) {
@@ -59,37 +68,64 @@ record_hashes <- function() {
   writeLines(sprintf("%s  %s", vapply(fs, sha, ""), sub(paste0("^", D, "/"), "", fs)), file.path(D, "SHA256SUMS"))
   say("hashes: ", length(fs), " files -> ", file.path(D, "SHA256SUMS"))
 }
+git1 <- function(...) suppressWarnings(system2("git", c(...), stdout = TRUE, stderr = FALSE))
 tracked <- function(f) system2("git", c("ls-files", "--error-unmatch", f), stdout = FALSE, stderr = FALSE) == 0L
+clean <- function(f) tracked(f) && system2("git", c("diff", "--quiet", "HEAD", "--", f)) == 0L
+last_commit <- function(f) { h <- git1("log", "-1", "--format=%H", "--", f); if (length(h)) h[1] else NA_character_ }
+is_ancestor <- function(a, b) system2("git", c("merge-base", "--is-ancestor", a, b), stdout = FALSE, stderr = FALSE) == 0L
+prereg_is_fixed <- function(lines) any(grepl(FIXED_RE, lines))
+gate_prereg <- function() {
+  if (!clean(PREREG)) stop("gate: ", PREREG, " not tracked or differs from HEAD")
+  if (!prereg_is_fixed(readLines(PREREG))) stop("gate: ", PREREG, " carries no fixed-date marker; no truth may be touched")
+  last_commit(PREREG)
+}
+need_clean <- function(fs) for (f in fs) if (!clean(f)) stop("gate: ", f, " not committed or differs from HEAD")
 ORF_RE <- "^(Y[A-P][LR][0-9]{3}[WC](-[A-Z])?|Q[0-9]{4}|R[0-9]{4}[WC]?)$"
-# replicate grouping: mutants by deleted gene (the two cultures may be different isolates, e.g.
-# rad18-del-4-b with rad18-del-3-a), wild types by dye-swap pair (wt-SV013-a / -b)
+REF_RE <- "ref"
 group_key <- function(title) ifelse(grepl("-del-", title), sub("-del-.*$", "", title), sub("-[ab]$", "", title))
 rd_mat <- function(f) { x <- utils::read.delim(f, check.names = FALSE); m <- as.matrix(x[, -1]); rownames(m) <- x$orf; m }
 wr_mat <- function(m, f) utils::write.table(data.frame(orf = rownames(m), m, check.names = FALSE), f, sep = "\t", quote = FALSE, row.names = FALSE)
+universe_rows <- function() { L <- readLines(file.path(D, "deleteome_responsive_700.tsv")); sub("\t.*$", "", L[-1]) }  # row names only
+SEL_FILES <- file.path(SEL, c("yeast_selections.csv", "hepg2_selections.csv", "jurkat_selections.csv", "k562_selections.csv"))
+
+## ---- stage: selftest_gate (BL1) -----------------------------------------------------------------
+if (stage == "selftest_gate") {
+  L <- readLines(PREREG); now <- prereg_is_fixed(L)
+  hdr <- grep("^> \\*\\*STATUS: DRAFT", L)
+  if (length(hdr) != 1L) stop("selftest: expected exactly one DRAFT status block line, found ", length(hdr))
+  Lf <- L; Lf[hdr] <- "> *Fixed 2026-11-02*"
+  Lbad <- L; Lbad[hdr] <- "> *Fixed YYYY-MM-DD*"
+  res <- c(current = now, fixed_copy = prereg_is_fixed(Lf), placeholder_copy = prereg_is_fixed(Lbad))
+  print(res)
+  if (res[["fixed_copy"]] != TRUE || res[["placeholder_copy"]] != FALSE) stop("selftest FAILED: marker check is wrong")
+  say("selftest passed; this file is ", if (now) "FIXED" else "a DRAFT (truth stages will refuse)")
+}
 
 ## ---- annotation helpers -------------------------------------------------------------------------
-sgd <- function() {      # SGD_features.tab: 4 ORF name, 5 standard name, 6 aliases (|), 9 chromosome, 10/11 coords, 12 strand
+sgd <- function() {      # SGD_features.tab: 3 qualifier, 4 ORF name, 5 standard name, 6 aliases (|), 9 chr, 10/11 coords, 12 strand
   x <- utils::read.delim(file.path(D, "SGD_features.tab"), header = FALSE, stringsAsFactors = FALSE, quote = "", comment.char = "")
   x <- x[grepl(ORF_RE, x$V4), ]
-  data.frame(orf = x$V4, name = toupper(x$V5), alias = toupper(x$V6), chr = x$V9,
+  data.frame(orf = x$V4, name = toupper(x$V5), alias = toupper(x$V6), chr = x$V9, dubious = grepl("Dubious", x$V3),
              lo = pmin(as.numeric(x$V10), as.numeric(x$V11)), hi = pmax(as.numeric(x$V10), as.numeric(x$V11)),
              strand = x$V12, stringsAsFactors = FALSE)
 }
-name_to_orf <- function(s) {   # standard name, then systematic, then alias (only if the alias is unique)
+name_to_orf <- function(s, log_file = NULL) {   # standard name, then systematic, then alias (unique aliases only)
   m <- stats::setNames(s$orf, s$name); m <- m[nzchar(names(m))]
   al <- do.call(rbind, lapply(seq_len(nrow(s)), function(k) if (nzchar(s$alias[k]))
     data.frame(a = strsplit(s$alias[k], "|", fixed = TRUE)[[1]], orf = s$orf[k]) else NULL))
-  al <- al[!al$a %in% al$a[duplicated(al$a)], ]
+  amb <- unique(al$a[duplicated(al$a)])
+  if (!is.null(log_file)) writeLines(sort(amb), log_file)
+  al <- al[!al$a %in% amb, ]
   function(x) { x <- toupper(x); out <- unname(m[x]); out[is.na(out) & x %in% s$orf] <- x[is.na(out) & x %in% s$orf]
     miss <- is.na(out); out[miss] <- al$orf[match(x[miss], al$a)]; out }
 }
-neighbours <- function(s, orf, win = 500) {   # ORFs overlapping or within `win` bp of `orf` (same chromosome)
+neighbours <- function(s, orf, win = 500) {
   k <- match(orf, s$orf); if (is.na(k)) return(character(0))
   same <- s$chr == s$chr[k]; gap <- pmax(0, pmax(s$lo, s$lo[k]) - pmin(s$hi, s$hi[k]))
   s$orf[same & gap <= win]
 }
-divergent_pairs <- function(s) {   # adjacent genes on opposite strands with 5' ends facing (shared intergenic region)
-  out <- list()
+divergent_pairs <- function(s) {   # adjacent non-dubious genes on opposite strands with 5' ends facing
+  s <- s[!s$dubious, ]; out <- list()
   for (ch in unique(s$chr)) { x <- s[s$chr == ch, ]; x <- x[order(x$lo), ]
     if (nrow(x) < 2) next
     for (k in seq_len(nrow(x) - 1L)) if (x$strand[k] == "C" && x$strand[k + 1L] == "W")
@@ -105,6 +141,18 @@ series_meta <- function(gse) {
     gsub('^"|"$', "", strsplit(x[1], "\t")[[1]][-1]) }
   data.frame(title = get("!Sample_title"), gsm = get("!Sample_geo_accession"),
              src1 = get("!Sample_source_name_ch1"), src2 = get("!Sample_source_name_ch2"), stringsAsFactors = FALSE)
+}
+dye_check <- function(meta) {      # SF4 (iii): one reference channel per hybridization; each pair has both orientations
+  r1 <- grepl(REF_RE, meta$src1, ignore.case = TRUE); r2 <- grepl(REF_RE, meta$src2, ignore.case = TRUE)
+  bad_hyb <- meta$gsm[xor(r1, r2) == FALSE]
+  pair <- sub("-[ab]$", "", meta$title)
+  bad_pair <- names(which(tapply(r1, pair, function(v) !(length(v) == 2 && sum(v) == 1))))
+  if (length(bad_hyb) || length(bad_pair)) {
+    writeLines(c("hybridizations without exactly one reference channel:", bad_hyb, "pairs without one hybridization of each orientation:", bad_pair),
+               file.path(SEL, "dye_check_failures.txt"))
+    stop("structural dye check failed (", length(bad_hyb), " hybridizations, ", length(bad_pair), " pairs); see dye_check_failures.txt")
+  }
+  invisible(TRUE)
 }
 gsm_table <- function(gsm) {
   f <- file.path(D, "gsm", paste0(gsm, ".txt"))
@@ -139,16 +187,17 @@ read_final <- function(g) {
   colnames(M) <- colnames(P) <- sub("-del-.*$", "", lab)
   list(M = M, P = P, label = names(x)[mcol])
 }
+RULES <- c("asis", "flip_test_ch1", "flip_ref_ch1")
 rebuild <- function(meta, rule, pf) {   # mean of the oriented hybridizations per group, then per ORF
-  key <- group_key(meta$title)
+  key <- group_key(meta$title); r1 <- grepl(REF_RE, meta$src1, ignore.case = TRUE)
   vals <- lapply(seq_len(nrow(meta)), function(k) { v <- gsm_table(meta$gsm[k])
-    if (rule == "flip_ch1" && !grepl("ref", meta$src1[k], ignore.case = TRUE)) v <- -v; v })
-  ids <- Reduce(union, lapply(vals, names))
+    if ((rule == "flip_test_ch1" && !r1[k]) || (rule == "flip_ref_ch1" && r1[k])) v <- -v; v })
+  ids <- sort(Reduce(union, lapply(vals, names)))
   V <- vapply(vals, function(v) v[ids], numeric(length(ids))); rownames(V) <- ids
   V <- vapply(split(seq_len(ncol(V)), key), function(ix) rowMeans(V[, ix, drop = FALSE], na.rm = TRUE), numeric(nrow(V)))
   rownames(V) <- ids; by_orf(V, pf$orf[match(rownames(V), pf$id)])
 }
-finish_matrix <- function(X, mask) {   # missing filter (masked entries not counted), median imputation, constant rows
+finish_matrix <- function(X, mask) {
   miss <- rowMeans(is.na(X) & !mask); keep <- miss <= 0.05; X <- X[keep, , drop = FALSE]; mask <- mask[keep, , drop = FALSE]
   X[mask] <- NA; med <- apply(X, 1, stats::median, na.rm = TRUE); ix <- which(is.na(X), arr.ind = TRUE); X[ix] <- med[ix[, 1]]
   X <- X[apply(X, 1, function(v) diff(range(v))) > 0, , drop = FALSE]
@@ -180,98 +229,119 @@ if (stage == "download") {
 
 ## ---- stage: matrix ------------------------------------------------------------------------------
 if (stage == "matrix") {
-  mkd(); pf <- platform(); s <- sgd(); to_orf <- name_to_orf(s)
+  mkd(); pf <- platform(); s <- sgd(); to_orf <- name_to_orf(s, file.path(SEL, "ambiguous_aliases.txt"))
   build <- function(g) {
     r <- read_final(g); X <- by_orf(r$M, pf$orf[match(rownames(r$M), pf$scab)])
-    del <- to_orf(colnames(X)); ok <- !is.na(del) & del %in% rownames(X)
-    dropped <- data.frame(series = g, column = r$label[!ok], deleted_gene = colnames(X)[!ok])
-    X <- X[, ok, drop = FALSE]; del <- del[ok]
+    del <- to_orf(colnames(X)); res <- rep("ok", ncol(X)); ownM <- rep(NA_real_, ncol(X)); q01 <- rep(NA_real_, ncol(X))
+    res[is.na(del) | !del %in% rownames(X)] <- "unresolved"
+    for (j in which(res == "ok")) { v <- X[, j]; ownM[j] <- v[del[j]]; q01[j] <- stats::quantile(v, 0.01, na.rm = TRUE)
+      if (!is.finite(ownM[j]) || ownM[j] > -1 || ownM[j] > q01[j]) res[j] <- "own_M_not_verified" }   # SF6
+    log <- data.frame(series = g, column = r$label, deleted_gene = colnames(X), deleted_orf = del, own_M = ownM,
+                      column_q01 = q01, status = res)
+    ok <- res == "ok"; X <- X[, ok, drop = FALSE]; del <- del[ok]
     mask <- matrix(FALSE, nrow(X), ncol(X), dimnames = dimnames(X)); nmask <- integer(ncol(X))
     for (j in seq_len(ncol(X))) { nb <- intersect(neighbours(s, del[j], 500), rownames(X)); mask[nb, j] <- TRUE; nmask[j] <- length(nb) }
     f <- finish_matrix(X, mask)
-    list(X = f$X, dropped = dropped, dropped_missing = f$dropped_missing, nmask = nmask, del = del)
+    list(X = f$X, log = log, dropped_missing = f$dropped_missing, nmask = nmask, del = del)
   }
   b <- build("GSE42527")
   wr_mat(b$X, file.path(D, "deleteome_responsive_700.tsv"))
-  utils::write.csv(b$dropped, file.path(SEL, "dropped_columns.csv"), row.names = FALSE)
-  utils::write.csv(data.frame(mutant = colnames(b$X), deleted_orf = b$del, n_masked = b$nmask), file.path(SEL, "masking_log.csv"), row.names = FALSE)
-  say(sprintf("responsive matrix: %d ORFs x %d mutants; %d columns dropped (unresolvable deleted gene); %d ORFs dropped (>5%% missing); masked per column median %d",
-              nrow(b$X), ncol(b$X), nrow(b$dropped), b$dropped_missing, stats::median(b$nmask)))
+  utils::write.csv(b$log[b$log$status != "ok", ], file.path(SEL, "dropped_columns.csv"), row.names = FALSE)
+  utils::write.csv(cbind(b$log[b$log$status == "ok", ], n_masked = b$nmask), file.path(SEL, "masking_log.csv"), row.names = FALSE)
+  say(sprintf("responsive matrix: %d ORFs x %d mutants; dropped columns: %d unresolved, %d own-M not verified; %d ORFs dropped (>5%% missing)",
+              nrow(b$X), ncol(b$X), sum(b$log$status == "unresolved"), sum(b$log$status == "own_M_not_verified"), b$dropped_missing))
   a <- build("GSE42526"); common <- intersect(rownames(b$X), rownames(a$X))           # descriptive sensitivity set
   wr_mat(cbind(b$X[common, ], a$X[common, ]), file.path(D, "deleteome_all_1484.tsv"))
-  utils::write.csv(divergent_pairs(s), file.path(SEL, "divergent_pairs.csv"), row.names = FALSE)   # label-free annotation
+  utils::write.csv(divergent_pairs(s), file.path(SEL, "divergent_pairs.csv"), row.names = FALSE)
   writeLines(sprintf("%s  %s", sha(file.path(D, "deleteome_responsive_700.tsv")), "deleteome_responsive_700.tsv"),
              file.path(SEL, "deleteome_matrix.sha256"))
-  say("commit ", SEL, "/{deleteome_matrix.sha256, dropped_columns.csv, masking_log.csv, divergent_pairs.csv}")
+  record_hashes()
+  say("commit ", SEL, "/{deleteome_matrix.sha256, dropped_columns.csv, masking_log.csv, divergent_pairs.csv, ambiguous_aliases.txt}")
 }
 
-## ---- stage: check -------------------------------------------------------------------------------
-# Candidate rules (fixed in advance): "asis" = VALUE as deposited for both hybridizations;
-# "flip_ch1" = negate VALUE of the hybridization whose channel-1 source is the test strain.
+## ---- stage: check (SF4) -------------------------------------------------------------------------
 if (stage == "check") {
-  pf <- platform(); mu <- series_meta("GSE42527"); key <- group_key(mu$title)
+  pf <- platform(); mu <- series_meta("GSE42527"); dye_check(mu); key <- group_key(mu$title)
   first10 <- sort(unique(key))[1:10]; meta <- mu[key %in% first10, ]
   pub <- read_final("GSE42527"); Mo <- by_orf(pub$M, pf$orf[match(rownames(pub$M), pf$scab)])
-  res <- do.call(rbind, lapply(c("asis", "flip_ch1"), function(rule) { R <- rebuild(meta, rule, pf)
+  res <- do.call(rbind, lapply(RULES, function(rule) { R <- rebuild(meta, rule, pf)
     do.call(rbind, lapply(colnames(R), function(s) { j <- which(tolower(colnames(Mo)) == tolower(s))[1]
       g <- intersect(rownames(R), rownames(Mo)); a <- R[g, s]; b <- Mo[g, j]
       data.frame(rule = rule, mutant = s, r = stats::cor(a, b, use = "complete.obs"), med_abs = stats::median(abs(a - b), na.rm = TRUE)) })) }))
   pass <- tapply(res$r >= 0.99 & res$med_abs <= 0.02, res$rule, all)
-  rule <- if (any(pass)) names(pass)[pass][1] else names(which.max(tapply(res$r, res$rule, stats::median)))
-  res$chosen <- res$rule == rule; res$passed <- any(pass)
+  medr <- tapply(res$r, res$rule, stats::median)
+  rule <- if (any(pass)) names(pass)[pass][1] else names(which.max(medr))
+  status <- if (any(pass)) "published_M_reproduced" else if (medr[[rule]] >= 0.8) "NOT_reproduced_run_stage_rebuild" else "F_NOT_COMPUTABLE_verdict_1"
+  res$chosen <- res$rule == rule; res$status <- status
   utils::write.csv(res, file.path(SEL, "implementation_check.csv"), row.names = FALSE)
-  writeLines(c(rule, if (any(pass)) "published_M_reproduced" else "NOT_reproduced_run_stage_rebuild"), file.path(SEL, "orientation_rule.txt"))
-  say("orientation rule: ", rule, "; reproduction ", if (any(pass)) "PASSED" else "FAILED: run stage rebuild (gate F then uses rebuilt mutants)")
+  writeLines(c(rule, status, env_info()), file.path(SEL, "orientation_rule.txt"))
+  say("orientation rule: ", rule, " (median r ", round(medr[[rule]], 3), "); status ", status)
 }
 
-## ---- stage: rebuild (only after a failed check) -------------------------------------------------
+## ---- stage: rebuild (only after a failed, floor-passing check) ----------------------------------
 if (stage == "rebuild") {
   rr <- readLines(file.path(SEL, "orientation_rule.txt"))
-  if (rr[2] == "published_M_reproduced") stop("check passed; rebuild is not used")
+  if (rr[2] != "NOT_reproduced_run_stage_rebuild") stop("rebuild is used only after a failed but floor-passing check (status: ", rr[2], ")")
   pf <- platform(); mu <- series_meta("GSE42527"); key <- group_key(mu$title)
   X <- rd_mat(file.path(D, "deleteome_responsive_700.tsv"))
-  cand <- intersect(sort(unique(key)), tolower(colnames(X))); Nw <- length(unique(group_key(series_meta("GSE45115")$title)))
-  set.seed(20261105); pick <- sort(sample(cand, min(Nw, length(cand))))
-  R <- rebuild(mu[key %in% pick, ], rr[1], pf)
-  m <- read.csv(file.path(SEL, "masking_log.csv")); s <- sgd()
+  cand <- sort(intersect(unique(key), tolower(colnames(X)))); Nw <- length(unique(group_key(series_meta("GSE45115")$title)))
+  set.seed(20261105); pick <- sort(cand[sample.int(length(cand), min(Nw, length(cand)))])
+  meta <- mu[key %in% pick, ]; dye_check(meta)
+  R <- rebuild(meta, rr[1], pf)
+  m <- utils::read.csv(file.path(SEL, "masking_log.csv")); s <- sgd()
   R <- R[intersect(rownames(X), rownames(R)), , drop = FALSE]
   mask <- matrix(FALSE, nrow(R), ncol(R), dimnames = dimnames(R))
-  for (j in seq_len(ncol(R))) { d <- m$deleted_orf[match(tolower(colnames(R)[j]), tolower(m$mutant))]
+  for (j in seq_len(ncol(R))) { d <- m$deleted_orf[match(tolower(colnames(R)[j]), tolower(m$deleted_gene))]
     if (!is.na(d)) mask[intersect(neighbours(s, d, 500), rownames(R)), j] <- TRUE }
   f <- finish_matrix(R, mask); wr_mat(f$X, file.path(D, "mutants_rebuilt_376.tsv"))
-  writeLines(pick, file.path(SEL, "rebuilt_mutants.txt"))
+  writeLines(pick, file.path(SEL, "rebuilt_mutants.txt")); record_hashes()
   say(sprintf("rebuilt %d mutants (rule %s) for gate F", ncol(f$X), rr[1]))
 }
 
 ## ---- stage: wt ----------------------------------------------------------------------------------
 if (stage == "wt") {
   rf <- file.path(SEL, "orientation_rule.txt"); if (!file.exists(rf)) stop("run stage check first")
-  rule <- readLines(rf, 1L); pf <- platform(); W <- rebuild(series_meta("GSE45115"), rule, pf)
-  X <- rd_mat(file.path(D, "deleteome_responsive_700.tsv"))
-  W <- W[intersect(rownames(X), rownames(W)), , drop = FALSE]
+  rr <- readLines(rf); if (rr[2] == "F_NOT_COMPUTABLE_verdict_1") stop("orientation floor failed: gate F not computable (verdict 1)")
+  pf <- platform(); meta <- series_meta("GSE45115"); dye_check(meta); W <- rebuild(meta, rr[1], pf)
+  W <- W[intersect(universe_rows(), rownames(W)), , drop = FALSE]
   f <- finish_matrix(W, matrix(FALSE, nrow(W), ncol(W)))
-  wr_mat(f$X, file.path(D, "wt_controls_GSE45115.tsv"))
-  say(sprintf("wild-type matrix: %d ORFs x %d cultures (rule %s)", nrow(f$X), ncol(f$X), rule))
+  wr_mat(f$X, file.path(D, "wt_controls_GSE45115.tsv")); record_hashes()
+  say(sprintf("wild-type matrix: %d ORFs x %d cultures (rule %s)", nrow(f$X), ncol(f$X), rr[1]))
 }
 
-## ---- stage: splits (halves + label-free mutant clusters) ---------------------------------------
+## ---- stage: splits (halves, clusters, experiment-jackknife replicates; SF5) ---------------------
 if (stage == "splits") {
-  X <- rd_mat(file.path(D, "deleteome_responsive_700.tsv")); mut <- colnames(X); set.seed(20261101)
-  sp <- vapply(1:10, function(s) { h <- integer(length(mut)); h[sample(length(mut), floor(length(mut) / 2))] <- 1L; h + 1L },
-               integer(length(mut)))
+  X <- rd_mat(file.path(D, "deleteome_responsive_700.tsv")); mut <- colnames(X); n <- length(mut)
+  set.seed(20261101)
+  sp <- vapply(1:10, function(s) { h <- integer(n); h[sample.int(n, floor(n / 2))] <- 1L; h + 1L }, integer(n))
   colnames(sp) <- sprintf("split_%02d", 1:10)
   utils::write.csv(data.frame(mutant = mut, sp), file.path(SEL, "splits.csv"), row.names = FALSE)
   cl <- stats::cutree(stats::hclust(stats::as.dist(1 - stats::cor(X)), "complete"), h = 0.5)
   utils::write.csv(data.frame(mutant = mut, cluster = unname(cl)), file.path(SEL, "mutant_clusters.csv"), row.names = FALSE)
-  sz <- table(cl); utils::write.csv(data.frame(n_clusters = length(sz), singletons = sum(sz == 1), largest = max(sz),
-    t(stats::quantile(as.integer(sz), c(.5, .9, .99)))), file.path(SEL, "mutant_clusters_summary.csv"), row.names = FALSE)
-  say("10 random halves of ", length(mut), " mutants; ", length(sz), " mutant clusters (largest ", max(sz), ") -> commit")
+  sz <- table(cl); K <- length(sz); fallback <- K < 20 || max(sz) / n > 0.25
+  ids <- sort(unique(unname(cl)))
+  reps <- vapply(1:200, function(b) { set.seed(20262000 + b)
+    keep <- if (!fallback) cl %in% ids[sample.int(K, floor(K / 2))] else {
+      k <- logical(n); for (c in ids) { m <- which(cl == c); h <- if (stats::runif(1) < 0.5) floor(length(m) / 2) else ceiling(length(m) / 2)
+        if (h > 0) k[m[sample.int(length(m), h)]] <- TRUE }; k }
+    as.integer(keep) }, integer(n))
+  colnames(reps) <- sprintf("rep_%03d", 1:200)
+  utils::write.csv(data.frame(mutant = mut, reps), file.path(SEL, "experiment_jackknife_replicates.csv"), row.names = FALSE)
+  utils::write.csv(data.frame(n_clusters = K, singletons = sum(sz == 1), largest = max(sz), largest_share = max(sz) / n,
+    stratified_fallback = fallback, rep_N_min = min(colSums(reps)), rep_N_max = max(colSums(reps)),
+    t(stats::quantile(as.integer(sz), c(.5, .9, .99))), t(env_info())),
+    file.path(SEL, "mutant_clusters_summary.csv"), row.names = FALSE)
+  say(sprintf("10 halves; %d clusters (largest %d = %.0f%%); %s; replicate N %d-%d -> commit", K, max(sz), 100 * max(sz) / n,
+              if (fallback) "STRATIFIED FALLBACK" else "cluster delete-half", min(colSums(reps)), max(colSums(reps))))
 }
 
 ## ---- stage: feasibility (gate F, sanity check) --------------------------------------------------
 if (stage == "feasibility") {
   suppressPackageStartupMessages(library(clr))
   rr <- readLines(file.path(SEL, "orientation_rule.txt"))
+  if (rr[2] == "F_NOT_COMPUTABLE_verdict_1") {
+    utils::write.csv(data.frame(pass = FALSE, reason = "orientation floor failed: F not computable"), file.path(SEL, "feasibility_gate.csv"), row.names = FALSE)
+    stop("gate F not computable (verdict 1)") }
   Xm <- if (rr[2] == "published_M_reproduced") rd_mat(file.path(D, "deleteome_responsive_700.tsv")) else {
     f <- file.path(D, "mutants_rebuilt_376.tsv"); if (!file.exists(f)) stop("check failed: run stage rebuild first"); rd_mat(f) }
   W <- rd_mat(file.path(D, "wt_controls_GSE45115.tsv"))
@@ -281,15 +351,19 @@ if (stage == "feasibility") {
     f <- ClrAttention$new(M)$estimate_mi(bins = "hg", transform = "none", threads = opt$threads)
     f$calibrate(method = "normal", combine = "stouffer"); C <- f$clr_scores; C[lower.tri(C, diag = TRUE)] <- NA; C }
   top <- function(C) { v <- which(!is.na(C)); k <- ceiling(0.01 * length(v)); v[order(C[v], decreasing = TRUE)[seq_len(k)]] }
-  repro <- function(M, cols) { h <- sample(cols, floor(length(cols) / 2)); a <- top(fitC(M[, h])); b <- top(fitC(M[, setdiff(cols, h)]))
-    (length(intersect(a, b)) / length(a) - 0.01) / 0.99 }
+  repro <- function(M, cols) { h <- cols[sample.int(length(cols), floor(length(cols) / 2))]
+    a <- top(fitC(M[, h])); b <- top(fitC(M[, setdiff(cols, h)])); (length(intersect(a, b)) / length(a) - 0.01) / 0.99 }
   Nw <- min(ncol(W), ncol(Xm)); set.seed(20261199)
-  Rm <- vapply(1:10, function(s) repro(Xm, sample(ncol(Xm), Nw)), 0)
+  Rm <- vapply(1:10, function(s) repro(Xm, sample.int(ncol(Xm), Nw)), 0)
   Rw <- vapply(1:10, function(s) repro(W, seq_len(ncol(W))), 0)
   tm <- top(fitC(Xm)); tw <- top(fitC(W)); Q <- length(intersect(tm, tw)) / length(tm)
+  lo <- apply(W, 1, stats::quantile, 0.005); hi <- apply(W, 1, stats::quantile, 0.995)
+  beyond <- colSums(Xm < lo | Xm > hi)                                   # genes per mutant outside the WT range
   out <- data.frame(mutant_source = if (rr[2] == "published_M_reproduced") "published_M" else "rebuilt_376",
                     N_matched = Nw, genes = length(g), median_Rprime_mut = stats::median(Rm), median_Rprime_wt = stats::median(Rw),
-                    iqr_Rprime_mut = stats::IQR(Rm), iqr_Rprime_wt = stats::IQR(Rw), Q_overlap_share = Q)
+                    iqr_Rprime_mut = stats::IQR(Rm), iqr_Rprime_wt = stats::IQR(Rw), Q_overlap_share = Q,
+                    genes_beyond_wt_median = stats::median(beyond), genes_beyond_wt_q10 = stats::quantile(beyond, 0.1),
+                    genes_beyond_wt_q90 = stats::quantile(beyond, 0.9), t(env_info()))
   out$pass <- out$median_Rprime_mut > out$median_Rprime_wt && Q <= 0.5
   utils::write.csv(out, file.path(SEL, "feasibility_gate.csv"), row.names = FALSE)
   utils::write.csv(data.frame(draw = 1:10, Rprime_mut = Rm, Rprime_wt = Rw), file.path(SEL, "feasibility_draws.csv"), row.names = FALSE)
@@ -297,74 +371,32 @@ if (stage == "feasibility") {
       sprintf(" (median R' mut %.3f vs wt %.3f; Q %.3f)", out$median_Rprime_mut, out$median_Rprime_wt, Q))
 }
 
-## ---- stage: truth_structure (GATED) --------------------------------------------------------------
-if (stage == "truth_structure") {
-  ## gates
-  if (!tracked(PREREG)) stop("gate: ", PREREG, " not tracked")
-  if (system2("git", c("diff", "--quiet", "HEAD", "--", PREREG)) != 0L) stop("gate: ", PREREG, " differs from HEAD")
-  if (any(grepl("STATUS: DRAFT", readLines(PREREG), fixed = TRUE))) stop("gate: ", PREREG, " is still a DRAFT; no truth may be downloaded")
-  need <- file.path(SEL, c("excluded_pmids.txt", "feasibility_gate.csv", "splits.csv", "mutant_clusters.csv",
-                           "yeast_selections.csv", "R_check.csv", "yeastract_export_log.md"))
-  for (f in need) if (!tracked(f)) stop("gate: ", f, " not committed")
-  for (f in need) if (system2("git", c("diff", "--quiet", "HEAD", "--", f)) != 0L) stop("gate: ", f, " differs from HEAD")
+## ---- shared truth-stage helpers ------------------------------------------------------------------
+neff_of <- function(sizes) { p <- choose(sizes, 2); p <- p[p > 0]; if (!length(p)) return(0); sum(p)^2 / sum(p^2) }
+gate_pre_truth <- function() {    # steps 1 and 4-7 committed; universe matrix and logs verified
+  hash <- gate_prereg()
+  need_clean(c(file.path(SEL, c("excluded_pmids.txt", "feasibility_gate.csv", "splits.csv", "mutant_clusters.csv",
+                                "experiment_jackknife_replicates.csv", "R_check.csv", "deleteome_matrix.sha256",
+                                "masking_log.csv", "dropped_columns.csv")), SEL_FILES, TEST_SCRIPT, CONVERTER))
   if (!isTRUE(as.logical(utils::read.csv(file.path(SEL, "feasibility_gate.csv"))$pass))) stop("gate F failed: verdict 1, stop")
   if (!all(as.logical(utils::read.csv(file.path(SEL, "R_check.csv"))$passed))) stop("synthetic R check not passed: no verdict, fix first")
-  if (!tracked(TEST_SCRIPT) || system2("git", c("diff", "--quiet", "HEAD", "--", TEST_SCRIPT)) != 0L)
-    stop("gate: the complete test script ", TEST_SCRIPT, " must be committed before any truth is built")
-  if (!opt$yeastract_mode %in% c("refs", "binding_only")) stop("--yeastract_mode refs|binding_only (as logged in yeastract_export_log.md)")
-  if (is.na(opt$yeastract) || !file.exists(opt$yeastract)) stop("--yeastract <normalized TSV from the logged export>")
-  hash <- system2("git", c("log", "-1", "--format=%H", "--", PREREG), stdout = TRUE)
-  test_blob <- system2("git", c("rev-parse", paste0("HEAD:", TEST_SCRIPT)), stdout = TRUE)
-  E <- readLines(file.path(SEL, "excluded_pmids.txt")); E <- E[grepl("^[0-9]+$", E)]
-  universe <- utils::read.delim(file.path(D, "deleteome_responsive_700.tsv"), check.names = FALSE)$orf   # row names only
-  s <- sgd(); to_orf <- name_to_orf(s)
-  Tdir <- file.path(D, "truth_raw"); dir.create(Tdir, showWarnings = FALSE)
-  neff_of <- function(sizes) { p <- choose(sizes, 2); p <- p[p > 0]; if (!length(p)) return(0); sum(p)^2 / sum(p^2) }
+  want <- strsplit(readLines(file.path(SEL, "deleteome_matrix.sha256"), 1L), "[[:space:]]+")[[1]][1]
+  if (!identical(want, sha(file.path(D, "deleteome_responsive_700.tsv")))) stop("gate: expression matrix differs from committed SHA-256")
+  list(prereg = hash, test_blob = git1("rev-parse", paste0("HEAD:", TEST_SCRIPT)), conv_blob = git1("rev-parse", paste0("HEAD:", CONVERTER)))
+}
+gate_after <- function(later, earlier) {   # SF2: every `earlier` file's last commit is an ancestor of `later`'s
+  cl <- last_commit(later); if (is.na(cl)) stop("gate: ", later, " not committed")
+  for (f in earlier) { ce <- last_commit(f)
+    if (is.na(ce) || !is_ancestor(ce, cl)) stop("gate: ", later, " must be committed after ", f, " (git ancestry)") }
+  invisible(TRUE)
+}
+PRE_TRUTH_FILES <- c(file.path(SEL, c("feasibility_gate.csv", "R_check.csv")), SEL_FILES, TEST_SCRIPT, CONVERTER)
 
-  ## regulons (YEASTRACT, normalized export)
-  yx <- utils::read.delim(opt$yeastract, stringsAsFactors = FALSE, colClasses = "character")
-  stopifnot(all(c("tf", "target", "evidence", "pmids", "value") %in% names(yx)))
-  value_table <- as.data.frame(table(yx$value))
-  yx <- yx[yx$value != "0" & nzchar(yx$value), ]                          # any non-zero entry (incl. -1) counts
-  yx$tf_orf <- to_orf(yx$tf); yx$target_orf <- to_orf(yx$target)
-  pm <- strsplit(yx$pmids, "[;, ]+")
-  # reanalysis screen (c): PubMed title/abstract of every expression PMID not already in E
-  if (opt$yeastract_mode == "refs") {
-    cand <- setdiff(unique(unlist(pm[yx$evidence == "expression"])), c(E, "")); hit <- character(0)
-    for (ch in split(cand, ceiling(seq_along(cand) / 150))) {
-      f <- tempfile(); fetch(sprintf("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=%s&rettype=abstract&retmode=xml",
-                                     paste(ch, collapse = ",")), f)
-      x <- paste(readLines(f, warn = FALSE), collapse = " "); arts <- strsplit(x, "<PubmedArticle>", fixed = TRUE)[[1]][-1]
-      for (a in arts) { id <- sub(".*?<PMID[^>]*>([0-9]+)</PMID>.*", "\\1", a)
-        if (grepl("deleteome|GSE42526|GSE42527|GSE42528|GSE45115", a, ignore.case = TRUE)) hit <- c(hit, id) }
-      Sys.sleep(0.4) }
-    E2 <- unique(c(E, hit)); writeLines(sort(hit), file.path(SEL, "excluded_pmids_screen_additions.txt"))
-  } else E2 <- E
-  key <- paste(yx$tf_orf, yx$target_orf)
-  bind <- unique(key[yx$evidence == "binding"])
-  expr_any <- unique(key[yx$evidence == "expression"])
-  expr_clean <- unique(key[yx$evidence == "expression" & vapply(pm, function(v) any(nzchar(v) & !v %in% E2), TRUE)])
-  primary <- if (opt$yeastract_mode == "refs") intersect(bind, expr_clean) else bind
-  circular <- intersect(bind, expr_any)
-  regs_of <- function(keys) { p <- do.call(rbind, strsplit(keys, " ")); p <- p[!is.na(p[, 1]) & !is.na(p[, 2]) & p[, 1] != "NA" & p[, 2] != "NA", , drop = FALSE]
-    r <- lapply(split(p[, 2], p[, 1]), function(v) intersect(unique(v), universe)); r[lengths(r) >= 5 & lengths(r) <= 500] }
-  comem_pairs <- function(r) { if (!length(r)) return(0); g <- sort(unique(unlist(r)))
-    M <- Matrix::sparseMatrix(i = match(unlist(r), g), j = rep(seq_along(r), lengths(r)), x = 1, dims = c(length(g), length(r)))
-    C <- Matrix::tcrossprod(M); (Matrix::nnzero(C) - length(g)) / 2 }
-  regs <- regs_of(primary); regs_circ <- regs_of(circular)
-  regulators <- intersect(names(regs), universe)
-  edges <- unique(primary[vapply(strsplit(primary, " "), function(v) v[1] %in% regulators && v[2] %in% universe && v[1] != v[2], TRUE)])
-  audit <- data.frame(mode = opt$yeastract_mode, E_size = length(E2), screen_additions = length(E2) - length(E),
-    assoc_binding = length(bind), assoc_expression_any = length(expr_any), assoc_binding_and_any_expression = length(circular),
-    primary_assoc = length(primary),
-    share_circular_removed = if (length(circular)) 1 - length(intersect(circular, primary)) / length(circular) else NA,
-    share_expression_only_E = if (opt$yeastract_mode == "refs" && length(expr_any)) 1 - length(expr_clean) / length(expr_any) else NA,
-    share_binding_with_expression = if (length(bind)) length(intersect(bind, expr_any)) / length(bind) else NA,
-    comem_pos_primary = comem_pairs(regs), comem_pos_circular = comem_pairs(regs_circ),
-    share_comem_pos_removed = if (comem_pairs(regs_circ) > 0) 1 - comem_pairs(regs) / comem_pairs(regs_circ) else NA,
-    tf_unmapped = sum(is.na(unique(yx$tf_orf))), target_unmapped = sum(is.na(unique(yx$target_orf))))
-
-  ## complexes (Complex Portal 559292 + evidence filter; CYC2008 fallback)
+## ---- stage: complex_structure (8a; GATED; SF3 provisional: before any regulon membership) -------
+if (stage == "complex_structure") {
+  g <- gate_pre_truth(); E <- readLines(file.path(SEL, "excluded_pmids.txt")); E <- E[grepl("^[0-9]+$", E)]
+  if (!is.na(opt$cyc2008)) { lg <- file.path(SEL, "cyc2008_download_log.md"); gate_after(lg, PRE_TRUTH_FILES) }
+  universe <- universe_rows(); Tdir <- file.path(D, "truth_raw"); dir.create(Tdir, showWarnings = FALSE)
   fetch("https://ftp.ebi.ac.uk/pub/databases/intact/complex/current/complextab/559292.tsv", file.path(Tdir, "559292.tsv"))
   fetch("https://rest.uniprot.org/uniprotkb/stream?query=organism_id:559292&format=tsv&fields=accession,gene_oln,gene_primary",
         file.path(Tdir, "uniprot_559292.tsv"))
@@ -374,13 +406,13 @@ if (stage == "truth_structure") {
   xcol <- grep("cross.?ref", names(cp), ignore.case = TRUE)[1]; ecol <- grep("evidence code", names(cp), ignore.case = TRUE)[1]
   cid <- sub("\\..*$", "", cp[[1]]); parts <- lapply(strsplit(cp[[5]], "|", fixed = TRUE), function(v) sub("\\(.*$", "", v)); names(parts) <- cid
   cpm <- lapply(regmatches(cp[[xcol]], gregexpr("pubmed:[0-9]+", cp[[xcol]])), function(v) sub("pubmed:", "", v)); names(cpm) <- cid
-  only_E <- vapply(cpm, function(v) length(v) > 0 && all(v %in% E2), TRUE)
+  only_E <- vapply(cpm, function(v) length(v) > 0 && all(v %in% E), TRUE)
   flatten <- function(id, seen = character(0)) { if (id %in% seen) return(character(0)); out <- character(0)
     for (p in parts[[id]]) { if (grepl("^CPX-", p)) { if (p %in% names(parts)) out <- c(out, flatten(p, c(seen, id))) }
       else if (grepl("^(CHEBI|URS|EBI|SIGNOR|CHEMBL)", p)) next else out <- c(out, sub("-[0-9]+$|-PRO_[0-9]+$", "", p)) }; out }
   acc_of <- lapply(names(parts), flatten); names(acc_of) <- names(parts)
   sets <- lapply(acc_of, function(a) sort(unique(unlist(orf_of[a[a %in% names(orf_of)]]))))
-  keep_ids <- names(sets)[!duplicated(names(sets)) & !only_E[names(sets)]]
+  keep_ids <- sort(names(sets)[!duplicated(names(sets)) & !only_E[names(sets)]])
   filt <- function(x, lo = 3L, hi = 200L) { x <- lapply(x, intersect, universe); x[lengths(x) >= lo & lengths(x) <= hi] }
   merge_sets <- function(x) {                                   # as analysis/build_ecoli_complex_truth.R
     if (length(x) == 0) return(x); x <- x[order(names(x))]
@@ -410,31 +442,93 @@ if (stage == "truth_structure") {
       fallback <- "union used" } }
   fin <- cnt[nrow(cnt), ]
   out <- cbind(fin, fallback = fallback, complexes_dropped_only_E = sum(only_E),
-    P2_regulons = length(regs), P2_genes = length(unique(unlist(regs))), P2_positive_pairs = audit$comem_pos_primary,
-    P2_neff = neff_of(lengths(regs)), S6_regulators = length(regulators), S6_positive_edges = length(edges),
     evaluable_P1 = fin$P1_positive_pairs >= 200 && fin$P1_complexes_with_pos >= 30,
     evaluable_S1 = fin$S1_positive_pairs >= 200 && fin$S1_complexes_with_pos >= 30,
-    evaluable_P2 = audit$comem_pos_primary >= 200, evaluable_S6 = length(edges) >= 200,
-    power_gate_pass = fin$P1_neff >= 100, prereg_commit = hash, test_script_blob = test_blob)
-  out$verdict1 <- !(out$power_gate_pass && out$evaluable_P1 && out$evaluable_P2)
-  ## write
+    power_gate_pass = fin$P1_neff >= 100, prereg_commit = g$prereg, test_script_blob = g$test_blob, converter_blob = g$conv_blob, t(env_info()))
+  out$reciprocity_verdict1 <- !(out$power_gate_pass && out$evaluable_P1)
   mem <- do.call(rbind, lapply(names(merged), function(k) data.frame(complex = k, orf = merged[[k]])))
   utils::write.table(mem, file.path(SEL, "yeast_complexes_members.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
+  utils::write.csv(out, file.path(SEL, "complex_structure_counts.csv"), row.names = FALSE)
+  utils::write.csv(data.frame(complex = cid, eco = if (!is.na(ecol)) cp[[ecol]] else NA, pmids = vapply(cpm, paste, "", collapse = ";"),
+                              only_E = only_E), file.path(SEL, "complex_evidence.csv"), row.names = FALSE)
+  writeLines(c(sprintf("%s  yeast_complexes_members.tsv", sha(file.path(SEL, "yeast_complexes_members.tsv"))),
+               sprintf("%s  truth_raw/559292.tsv", sha(file.path(Tdir, "559292.tsv"))),
+               sprintf("%s  truth_raw/uniprot_559292.tsv", sha(file.path(Tdir, "uniprot_559292.tsv"))),
+               if (!is.na(opt$cyc2008)) sprintf("%s  %s", sha(opt$cyc2008), basename(opt$cyc2008))), file.path(SEL, "yeast_complexes.sha256"))
+  say("8a power gate: ", if (out$power_gate_pass) "PASS" else "FAIL", "; reciprocity verdict 1: ", out$reciprocity_verdict1,
+      sprintf(" (P1 n_eff %.1f)", out$P1_neff), "; commit ", SEL, " BEFORE the YEASTRACT export (8b)")
+}
+
+## ---- stage: regulon_structure (8c; GATED; SF1, SF2) ---------------------------------------------
+if (stage == "regulon_structure") {
+  g <- gate_pre_truth()
+  need_clean(file.path(SEL, c("complex_structure_counts.csv", "yeast_complexes.sha256", "yeastract_export_log.md")))
+  gate_after(file.path(SEL, "yeastract_export_log.md"), c(PRE_TRUTH_FILES, file.path(SEL, "complex_structure_counts.csv")))
+  if (is.na(opt$yeastract) || !file.exists(opt$yeastract)) stop("--yeastract <normalized TSV from ", CONVERTER, ">")
+  E <- readLines(file.path(SEL, "excluded_pmids.txt")); E <- E[grepl("^[0-9]+$", E)]
+  universe <- universe_rows(); s <- sgd(); to_orf <- name_to_orf(s, file.path(SEL, "ambiguous_aliases_yeastract.txt"))
+  yx <- utils::read.delim(opt$yeastract, stringsAsFactors = FALSE, colClasses = "character")
+  stopifnot(all(c("tf", "target", "evidence", "pmids", "pmids_unattributed", "value") %in% names(yx)))
+  value_table <- as.data.frame(table(yx$value))
+  yx <- yx[yx$value != "0" & nzchar(yx$value), ]                          # any non-zero entry (incl. -1) counts
+  yx$tf_orf <- to_orf(yx$tf); yx$target_orf <- to_orf(yx$target); yx$key <- paste(yx$tf_orf, yx$target_orf)
+  pm <- strsplit(yx$pmids, "[;, ]+"); has_pm <- vapply(pm, function(v) any(grepl("^[0-9]+$", v)), TRUE)
+  ex <- yx$evidence == "expression"
+  ex_keys <- unique(yx$key[ex]); ex_keys_attr <- unique(yx$key[ex & has_pm])
+  share_attr <- if (length(ex_keys)) length(ex_keys_attr) / length(ex_keys) else 0
+  mode <- if (share_attr >= 0.95) "refs" else "binding_only"                # SF1 (i)-(ii): computed, never chosen
+  if (!identical(mode, opt$yeastract_mode)) stop("computed mode '", mode, "' (attributed share ", round(share_attr, 3),
+                                                  ") disagrees with --yeastract_mode '", opt$yeastract_mode, "': stop and log")
+  if (mode == "refs") {     # reanalysis screen (c): anywhere in the PubMed XML record
+    cand <- sort(setdiff(unique(unlist(pm[ex])), c(E, ""))); cand <- cand[grepl("^[0-9]+$", cand)]; hit <- character(0)
+    for (ch in split(cand, ceiling(seq_along(cand) / 150))) {
+      f <- tempfile(); fetch(sprintf("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=%s&retmode=xml",
+                                     paste(ch, collapse = ",")), f)
+      x <- paste(readLines(f, warn = FALSE), collapse = " "); arts <- strsplit(x, "<PubmedArticle>", fixed = TRUE)[[1]][-1]
+      for (a in arts) { id <- sub(".*?<PMID[^>]*>([0-9]+)</PMID>.*", "\\1", a)
+        if (grepl("deleteome|GSE42526|GSE42527|GSE42528|GSE45115", a, ignore.case = TRUE)) hit <- c(hit, id) }
+      Sys.sleep(0.4) }
+    E2 <- sort(unique(c(E, hit))); writeLines(sort(hit), file.path(SEL, "excluded_pmids_screen_additions.txt"))
+  } else E2 <- E
+  bind <- unique(yx$key[yx$evidence == "binding"])
+  expr_any <- unique(yx$key[ex])
+  expr_clean <- unique(yx$key[ex & vapply(pm, function(v) any(grepl("^[0-9]+$", v) & !v %in% E2), TRUE)])
+  primary <- if (mode == "refs") intersect(bind, expr_clean) else bind
+  circular <- intersect(bind, expr_any)
+  regs_of <- function(keys) { p <- do.call(rbind, strsplit(keys, " ")); p <- p[p[, 1] != "NA" & p[, 2] != "NA", , drop = FALSE]
+    r <- lapply(split(p[, 2], p[, 1]), function(v) intersect(unique(v), universe)); r[lengths(r) >= 5 & lengths(r) <= 500] }
+  comem_pairs <- function(r) { if (!length(r)) return(0); gg <- sort(unique(unlist(r)))
+    M <- Matrix::sparseMatrix(i = match(unlist(r), gg), j = rep(seq_along(r), lengths(r)), x = 1, dims = c(length(gg), length(r)))
+    C <- Matrix::tcrossprod(M); (Matrix::nnzero(C) - length(gg)) / 2 }
+  regs <- regs_of(primary); regs_circ <- regs_of(circular)
+  regulators <- intersect(names(regs), universe)
+  edges <- unique(primary[vapply(strsplit(primary, " "), function(v)
+    v[1] %in% regulators && v[2] %in% universe && !v[2] %in% regulators, TRUE)])       # SF8 (d): TF-TF outside the universe
+  cp_prim <- comem_pairs(regs); cp_circ <- comem_pairs(regs_circ)
+  audit <- data.frame(mode = mode, attributed_share = share_attr, E_size = length(E2), screen_additions = length(E2) - length(E),
+    assoc_binding = length(bind), assoc_expression_any = length(expr_any), assoc_binding_and_any_expression = length(circular),
+    primary_assoc = length(primary),
+    share_circular_removed = if (mode == "refs" && length(circular)) 1 - length(intersect(circular, primary)) / length(circular) else NA,
+    share_expression_only_E = if (mode == "refs" && length(expr_any)) 1 - length(expr_clean) / length(expr_any) else NA,
+    share_comem_pos_removed = if (mode == "refs" && cp_circ > 0) 1 - cp_prim / cp_circ else NA,
+    share_binding_with_expression = if (length(bind)) length(intersect(bind, expr_any)) / length(bind) else NA,
+    comem_pos_primary = cp_prim, comem_pos_circular = cp_circ,
+    tf_unmapped = sum(is.na(unique(yx$tf_orf))), target_unmapped = sum(is.na(unique(yx$target_orf))))
+  out <- data.frame(P2_regulons = length(regs), P2_genes = length(unique(unlist(regs))), P2_positive_pairs = cp_prim,
+    P2_neff = neff_of(lengths(regs)), S6_regulators = length(regulators), S6_positive_edges = length(edges),
+    evaluable_P2 = cp_prim >= 200, evaluable_S6 = length(edges) >= 200, mode = mode,
+    prereg_commit = g$prereg, test_script_blob = g$test_blob, converter_blob = g$conv_blob, t(env_info()))
   rmem <- do.call(rbind, lapply(names(regs), function(k) data.frame(regulator = k, orf = regs[[k]])))
   utils::write.table(rmem, file.path(SEL, "yeast_regulons_members.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
   utils::write.table(do.call(rbind, strsplit(edges, " ")), file.path(SEL, "yeast_tf_edges.tsv"), sep = "\t", quote = FALSE,
                      row.names = FALSE, col.names = c("tf", "target"))
-  utils::write.csv(out, file.path(SEL, "truth_structure_counts.csv"), row.names = FALSE)
+  utils::write.csv(out, file.path(SEL, "regulon_structure_counts.csv"), row.names = FALSE)
   utils::write.csv(audit, file.path(SEL, "contamination_audit.csv"), row.names = FALSE)
   utils::write.csv(value_table, file.path(SEL, "yeastract_value_table.csv"), row.names = FALSE)
-  utils::write.csv(data.frame(complex = cid, eco = if (!is.na(ecol)) cp[[ecol]] else NA, pmids = vapply(cpm, paste, "", collapse = ";"),
-                              only_E = only_E), file.path(SEL, "complex_evidence.csv"), row.names = FALSE)
-  writeLines(c(sprintf("%s  yeast_complexes_members.tsv", sha(file.path(SEL, "yeast_complexes_members.tsv"))),
-               sprintf("%s  yeast_regulons_members.tsv", sha(file.path(SEL, "yeast_regulons_members.tsv"))),
+  writeLines(c(sprintf("%s  yeast_regulons_members.tsv", sha(file.path(SEL, "yeast_regulons_members.tsv"))),
                sprintf("%s  yeast_tf_edges.tsv", sha(file.path(SEL, "yeast_tf_edges.tsv"))),
-               sprintf("%s  truth_raw/559292.tsv", sha(file.path(Tdir, "559292.tsv"))),
-               sprintf("%s  truth_raw/uniprot_559292.tsv", sha(file.path(Tdir, "uniprot_559292.tsv"))),
-               sprintf("%s  %s", sha(opt$yeastract), basename(opt$yeastract))), file.path(SEL, "yeast_truths.sha256"))
-  say("power gate: ", if (out$power_gate_pass) "PASS" else "FAIL", "; verdict 1: ", out$verdict1,
-      sprintf(" (P1 n_eff %.1f, P2 n_eff %.1f)", out$P1_neff, out$P2_neff), "; commit ", SEL, " before any scoring")
+               sprintf("%s  %s", sha(opt$yeastract), basename(opt$yeastract)),
+               sprintf("%s  %s", sha(CONVERTER), CONVERTER)), file.path(SEL, "yeast_regulons.sha256"))
+  say("8c: mode ", mode, sprintf(" (attributed share %.3f); P2 evaluable %s, n_eff %.1f; S6 evaluable %s", share_attr,
+      out$evaluable_P2, out$P2_neff, out$evaluable_S6), "; commit ", SEL, " before any scoring")
 }
