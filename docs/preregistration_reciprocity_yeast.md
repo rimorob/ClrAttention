@@ -1,11 +1,12 @@
 # Preregistration: reciprocal attention and headline replication on a held-out yeast deletion compendium
 
-> **STATUS: DRAFT rev 2, under review (1 Nov 2026). Not fixed.** This file becomes a preregistration only when this block is replaced by "*Fixed YYYY-MM-DD*" in a commit. Every truth-touching gate in `analysis/yeast_prep.R` and in the test script refuses to run while this file contains the string `STATUS: DRAFT`.
+> **STATUS: DRAFT rev 3, under review (1 Nov 2026). Not fixed.** This file becomes a preregistration only when this block is replaced by "*Fixed YYYY-MM-DD*" in a commit. Every truth-touching gate in `analysis/yeast_prep.R` and in the test script refuses to run while this file contains the string `STATUS: DRAFT`.
 
 *Drafted by Claude (Opus, high effort, statistics lead).*
 
 - *Rev 1 (18babdb) came from the design memo `docs/plans/reciprocity_heldout_design.md` and the PI decisions of 1 Nov 2026.*
 - *Rev 2 answers the independent review `docs/plans/yeast_prereg_review.md` (fd9c827): three blockers (B1–B3), should-fix items S1–S9 and notes N1–N10. Where the review offered options, the PI chose them on 1 Nov; see "Changes from rev 1" at the end.*
+- *Rev 3 records the PI decisions of 1 Nov 2026 on the four flags raised after rev 2 (see the disclosure rows "Primary depth rule" and "Flags resolved").*
 - *No yeast or HepG2/Jurkat truth has been downloaded, opened or scored.*
 - *No reciprocity score has been computed on any real dataset with any truth.*
 - *After this file is fixed, any change is logged in the change log with its date and reason. A change made after the first truth-phase run is a deviation and is reported as one.*
@@ -29,7 +30,9 @@
 | **Timing (PI decision, 1 Nov 2026)** | The design memo made "runs after the Collins readout" a condition. **The PI relaxed it on 1 Nov 2026:** the Collins message goes out on Tuesday at the earliest, and this test may run before it. |
 | **K562 in-sample** | About 20 operators and readouts were scored on K562 CORUM, including `d_geomean_t9` (√(PᵢⱼPⱼᵢ), a mutual-attention *readout*, not this operator; `analysis/corum_exploratory/metrics_exploratory.csv`). The drafter saw that row. K562 shaped the PI's focus on complexes. K562 is descriptive here. |
 | **No R score on a real truth before the yeast phase** | No reciprocity score is computed against any real truth (K562, *E. coli*, human or yeast) before the yeast truth phase (protocol step 10). Label-free R quantities (mass removed, criterion-A curves) are allowed. |
-| **E. coli** | M3D and EcoMAC truths are consumed (headline, keff, CLR(log Pᵗ)); descriptive only (regulon no-harm). The measured M3D–EcoMAC array overlap does not matter here. |
+| **E. coli** | M3D and EcoMAC truths are consumed (headline, keff, CLR(log Pᵗ)); descriptive only (regulon no-harm). **EcoMAC overlaps M3D in 828 of its 2,198 arrays (37.7%)**, so all *E. coli* evidence (M3D and EcoMAC) counts as **one compendium**. A pass of H1 on yeast would therefore be the **first organism-independent replication** of the headline. |
+| **Primary depth rule (PI decision, 1 Nov 2026)** | The synthetic rescore showed that much of R's own-t\* advantage is a depth effect, and that R's deeper t\* costs regulons under strong batch. **The primary depth rule (each operator at its own label-free t\*, for P1, P2 and H1) was reviewed after the rescore and kept unchanged by PI decision on 1 Nov 2026 (option A).** A same-depth contrast (both operators at t\*_K10) was added as a fixed, pre-specified **descriptive** secondary with no inferential role (see "Depth"). |
+| **Flags resolved (PI decision, 1 Nov 2026)** | Kept as written: (i) the S3 "stop" branch (S2–S6 are tested only if S1 is rejected, so under verdicts 3a and 3b the human arms are descriptive); (ii) the power assumption ρ = SE_B/SE_J ≈ 0.44 is disclosed as is, with the ρ = 1 and ρ = 2 sensitivity rows (power at +0.010: 0.50 and 0.24); (iii) the gate F thresholds (median R′_mut > median R′_wt; Q ≤ 0.5) stay as judgment calls, as the reviewer noted. |
 | **Yeast is single-use** | The deleteome expression and every yeast truth below are untouched in this project. Once the truth phase runs, yeast is consumed for good. The a3r follow-up (interpretation memo section 7.3) and the C3 asymmetry edge test (`docs/plans/asymmetry_expert.md`) are **not** included and therefore can never use these yeast truths (PI decision). A failure of gate F or of the power gate does **not** consume yeast, because no truth is opened before them. |
 | **Truth–data independence (review B1)** | YEASTRACT's expression evidence is mostly wild-type vs TF-mutant microarrays and may include the deleteome itself or its constituent Holstege-lab datasets. The primary regulon truth therefore requires expression evidence from a reference outside a fixed exclusion list, or falls back to DNA-binding evidence alone (see "Truths"). A contamination audit is committed before scoring. |
 | **What the drafter has seen of the yeast data** | The column headers and the first 1–3 rows (probes SCAB000001–3; M and p for about 10 mutants) of `GSE42527_final_GeneExpressionMatrix.txt.gz` and `GSE42526_final_GeneExpressionMatrix.txt.gz`; 35 rows of one wild-type sample table (GSM630359); GEO series metadata. That was to verify formats. No truth was seen. |
@@ -206,7 +209,8 @@ A primary truth that fails gives verdict 1. A secondary truth that fails is "not
 - **Each operator gets its own t\*:** t\*_K10 and t\*_R.
 - **Primary comparison:** R at t\*_R vs K10 at t\*_K10.
 - **H1:** K10 at t\*_K10 vs CLR. **This is the headline replication** (review N6). K10 at the transferred t = 9 vs CLR is descriptive.
-- **Secondary (descriptive):** both operators at t\*_K10; both at t = 9.
+- **Same-depth contrast (fixed, pre-specified, descriptive; PI decision 1 Nov 2026).** R and K10 both at t\*_K10. It is reported for P1, S1 and P2 with the deciding SE's intervals (√(SE_J² + SE_B²), same jackknife halves and cluster replicates), and has **no inferential role**: no p-value, no verdict, and it cannot rescue or overturn a primary result.
+- **Other secondary depths (descriptive):** both operators at t = 9.
 - **House practice, stated (N2, N3).**
   - t\* is selected on halves of about 350 profiles and applied at the full N.
   - t\* is fixed inside the experiment jackknife, so its selection uncertainty is not propagated.
@@ -250,6 +254,7 @@ All endpoints are pooled co-membership AUPR, R minus K10 unless stated, at the p
 - per-complex AP (complexes with ≥ 3 positive pairs);
 - relative changes (ratio of AUPRs) for every endpoint (N8);
 - the ribosome alone; small complexes of 3–10 genes;
+- the same-depth contrast (both at t\*_K10) for P1, S1 and P2, with intervals;
 - R vs CLR on P1 and S1; K10 vs CLR on P1;
 - the secondary depths;
 - all 1,484 mutants; the growth-corrected matrix;
@@ -317,7 +322,7 @@ All endpoints are pooled co-membership AUPR, R minus K10 unless stated, at the p
 2. **Criterion A selects deep depths in these synthetic data:** K10 t\* 10–24, R t\* 16–32, so R's t\* is typically 4–8 steps deeper. At its own t\*, K10 loses heavily to CLR on small complexes (×0.39–0.96).
    - Much of R's own-t\* advantage over K10 (×1.09–2.41) is therefore a **depth effect**: R's unreturned mass stays home, so its walk degrades small complexes more slowly with t.
    - The common-depth contrast (both at t = 9) is the smaller ×1.03–1.64.
-   - This is a known property of the primary contrast as written in rev 1. **The contrast was not changed after the rescore.** Both operators at t\*_K10 and at t = 9 remain descriptive.
+   - This is a known property of the primary contrast as written in rev 1. **The contrast was not changed after the rescore;** the PI reviewed it and kept it on 1 Nov 2026. The same-depth contrast (both at t\*_K10) is a fixed descriptive secondary, and both at t = 9 is descriptive.
 3. **Regulon risk.** Under strong batch effects (×2) R's deeper t\* costs regulons ×0.86–0.96 (0/4 seeds in all four cells). On a real regulon AUPR of about 0.1, a 14% relative loss would exceed the 0.005 margin. This is the main synthetic risk for P2.
 4. **R vs CLR on small complexes** is ×0.88–1.21. R is not reliably better than CLR on P1. This file does not test or claim it.
 
@@ -367,7 +372,7 @@ The verdict is computed by the script and written to `verdict.csv` before anyone
   - In mode "binding_only", every regulon claim says "DNA-binding regulons".
 - **Human lines (only under verdict 2):** S2/S3 give "replicated in HepG2 / Jurkat" or "not replicated"; S4/S5 give regulon no-harm in human. Under any other verdict, human results are descriptive intervals only.
 - **What does not count:**
-  - a win at any depth other than the primary ones;
+  - a win at any depth other than the primary ones, including the same-depth contrast;
   - a win on all 1,484 mutants, on the growth-corrected matrix, on the 3–10 size class, on per-complex AP, on all-evidence or "possibly circular" regulons, or on any sensitivity truth when the primary fails;
   - a win after swapping the complex source (except the fixed fallback), the regulon mode or evidence filter, the exclusion list, the size class or the merge rule;
   - a win by a gate variant;
@@ -438,3 +443,4 @@ The verdict is computed by the script and written to `verdict.csv` before anyone
 
 - 2026-11-01: DRAFT rev 1 (18babdb).
 - 2026-11-01: DRAFT rev 2: review fd9c827 addressed (see "Changes from rev 1"). Not fixed.
+- 2026-11-01: DRAFT rev 3: PI decisions recorded. Primary depth rule kept after review of the synthetic rescore (option A); same-depth contrast (both at t\*_K10) added as a fixed descriptive secondary; S3 stop branch, ρ ≈ 0.44 disclosure and gate F thresholds kept as written; E. coli/EcoMAC counted as one compendium, so H1 on yeast is the first organism-independent replication. No endpoint, threshold or verdict rule changed. Not fixed.
