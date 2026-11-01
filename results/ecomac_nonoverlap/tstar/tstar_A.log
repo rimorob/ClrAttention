@@ -1,0 +1,25 @@
+[09:17:22] subset A: 4189 genes x 2198 arrays; platforms Antisense (GPL199)=844; Genome 2.0 (GPL3154)=735; no GEO record=619 
+[09:20:40] subset A: 4189 genes x 2198 arrays; platforms Antisense (GPL199)=844; Genome 2.0 (GPL3154)=735; no GEO record=619 
+[09:24:04] split 01 (halves 1095/1103 arrays) 3.4 min 
+[09:27:31] split 02 (halves 1097/1101 arrays) 3.4 min 
+[09:30:51] split 03 (halves 1169/1029 arrays) 3.3 min 
+[09:34:07] split 04 (halves 1080/1118 arrays) 3.3 min 
+[09:37:24] split 05 (halves 1092/1106 arrays) 3.3 min 
+[09:40:47] split 06 (halves 1113/1085 arrays) 3.4 min 
+[09:44:15] split 07 (halves 1104/1094 arrays) 3.5 min 
+[09:47:46] split 08 (halves 1060/1138 arrays) 3.5 min 
+[09:51:04] split 09 (halves 1121/1077 arrays) 3.3 min 
+[09:54:22] split 10 (halves 998/1200 arrays) 3.3 min 
+[09:57:39] split 11 (halves 1076/1122 arrays) 3.3 min 
+[10:00:55] split 12 (halves 1094/1104 arrays) 3.3 min 
+[10:04:12] split 13 (halves 1089/1109 arrays) 3.3 min 
+[10:07:28] split 14 (halves 1101/1097 arrays) 3.3 min 
+[10:10:44] split 15 (halves 1079/1119 arrays) 3.3 min 
+[10:13:59] split 16 (halves 1168/1030 arrays) 3.3 min 
+[10:17:21] split 17 (halves 1092/1106 arrays) 3.4 min 
+[10:20:44] split 18 (halves 1108/1090 arrays) 3.4 min 
+[10:24:02] split 19 (halves 1138/1060 arrays) 3.3 min 
+[10:27:21] split 20 (halves 993/1205 arrays) 3.3 min 
+[10:27:21] selection: subset=A n_arrays=2198 n_genes=4189 nsplit=20 t_star=8 t_q25=7 t_q75=8 t_min=6 t_max=9 t_mean_curve_argmax=8 flat_lo_median=5 flat_hi_median=10 
+[10:27:21] validation vs frozen K10 curves: 520 rows, max |diff| = 5e-16 
+[10:27:21] done 

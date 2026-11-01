@@ -1,0 +1,23 @@
+[09:25:45] subset C: 4189 genes x 828 arrays; platforms Antisense (GPL199)=612; no GEO record=216 
+[09:28:54] split 01 (halves 420/408 arrays) 3.1 min 
+[09:31:47] split 02 (halves 411/417 arrays) 2.9 min 
+[09:34:38] split 03 (halves 413/415 arrays) 2.9 min 
+[09:37:33] split 04 (halves 334/494 arrays) 2.9 min 
+[09:40:28] split 05 (halves 410/418 arrays) 2.9 min 
+[09:43:27] split 06 (halves 391/437 arrays) 3.0 min 
+[09:46:23] split 07 (halves 407/421 arrays) 2.9 min 
+[09:49:16] split 08 (halves 421/407 arrays) 2.9 min 
+[09:52:06] split 09 (halves 442/386 arrays) 2.8 min 
+[09:54:55] split 10 (halves 324/504 arrays) 2.8 min 
+[09:57:48] split 11 (halves 412/416 arrays) 2.9 min 
+[10:00:37] split 12 (halves 435/393 arrays) 2.8 min 
+[10:03:24] split 13 (halves 418/410 arrays) 2.8 min 
+[10:06:12] split 14 (halves 419/409 arrays) 2.8 min 
+[10:08:58] split 15 (halves 396/432 arrays) 2.8 min 
+[10:11:45] split 16 (halves 312/516 arrays) 2.8 min 
+[10:14:35] split 17 (halves 404/424 arrays) 2.8 min 
+[10:17:25] split 18 (halves 408/420 arrays) 2.8 min 
+[10:20:16] split 19 (halves 404/424 arrays) 2.9 min 
+[10:23:07] split 20 (halves 400/428 arrays) 2.8 min 
+[10:23:07] selection: subset=C n_arrays=828 n_genes=4189 nsplit=20 t_star=9 t_q25=8 t_q75=10 t_min=8 t_max=11 t_mean_curve_argmax=10 flat_lo_median=8 flat_hi_median=10 
+[10:23:07] done 

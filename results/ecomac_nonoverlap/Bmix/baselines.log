@@ -1,0 +1,21 @@
+[09:24:12] options: dataset=ecomac methods= t=9 workers=8 out=results/ecomac_nonoverlap/Bmix jack=100 seed=20261016 alpha=0.5 ntrees=1000 quick=0 python=~/venvs/clr-baselines/bin/python julia=~/.juliaup/bin/julia gene_subset=none export_only=0 jack_reg=200 macro=0 array_subset=results/ecomac_nonoverlap/subsets/Bmix.txt 
+[09:24:17] array subset results/ecomac_nonoverlap/subsets/Bmix.txt: 635 arrays; platforms Antisense (GPL199)=232; no GEO record=403 
+[09:24:34] ecomac: 4189 genes x 635 samples 
+[09:29:52] references scored 
+[09:29:52] == ecomac SC (base rate 0.0939) 
+[09:29:52]    attention    AUPR 0.1334  coherence 0.567  vs attention +0.0000 [+0.0000, +0.0000]  | TF-node AUPR x3.36, per-TF AUROC 0.562 
+[09:29:52]    attention_hubstrat AUPR 0.1246  coherence 0.559  vs attention +0.0000 [+0.0000, +0.0000]  | TF-node AUPR x3.30, per-TF AUROC 0.553 
+[09:29:52]    clr_hubstrat AUPR 0.1138  coherence 0.534  vs attention -0.0108 [-0.0152, -0.0064]  | TF-node AUPR x2.98, per-TF AUROC 0.573 
+[09:29:52]    clr          AUPR 0.1137  coherence 0.527  vs attention -0.0197 [-0.0251, -0.0143]  | TF-node AUPR x3.10, per-TF AUROC 0.567 
+[09:29:52]    hub          AUPR 0.0999  coherence 0.534  vs attention -0.0336 [-0.0411, -0.0260]  | TF-node AUPR x1.15, per-TF AUROC 0.539 
+[09:29:52]    abs_pearson_hubstrat AUPR 0.0992  coherence 0.515  vs attention -0.0254 [-0.0312, -0.0196]  | TF-node AUPR x1.06, per-TF AUROC 0.543 
+[09:29:52]    abs_pearson  AUPR 0.0948  coherence 0.504  vs attention -0.0386 [-0.0463, -0.0308]  | TF-node AUPR x1.01, per-TF AUROC 0.536 
+[09:29:52] == ecomac all (base rate 0.1210) 
+[09:29:52]    attention    AUPR 0.1605  coherence 0.552  vs attention +0.0000 [+0.0000, +0.0000]  | TF-node AUPR x2.23, per-TF AUROC 0.562 
+[09:29:52]    attention_hubstrat AUPR 0.1469  coherence 0.555  vs attention +0.0000 [+0.0000, +0.0000]  | TF-node AUPR x2.24, per-TF AUROC 0.556 
+[09:29:52]    clr          AUPR 0.1465  coherence 0.537  vs attention -0.0140 [-0.0190, -0.0090]  | TF-node AUPR x2.11, per-TF AUROC 0.553 
+[09:29:52]    clr_hubstrat AUPR 0.1435  coherence 0.546  vs attention -0.0035 [-0.0074, +0.0004]  | TF-node AUPR x2.07, per-TF AUROC 0.566 
+[09:29:52]    hub          AUPR 0.1412  coherence 0.534  vs attention -0.0193 [-0.0275, -0.0111]  | TF-node AUPR x1.14, per-TF AUROC 0.544 
+[09:29:52]    abs_pearson_hubstrat AUPR 0.1306  coherence 0.519  vs attention -0.0164 [-0.0214, -0.0113]  | TF-node AUPR x0.92, per-TF AUROC 0.531 
+[09:29:52]    abs_pearson  AUPR 0.1235  coherence 0.509  vs attention -0.0370 [-0.0443, -0.0296]  | TF-node AUPR x0.87, per-TF AUROC 0.518 
+[09:29:52] done 

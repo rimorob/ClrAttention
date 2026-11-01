@@ -1,0 +1,23 @@
+[09:25:27] subset Bg3154: 4189 genes x 735 arrays; platforms Genome 2.0 (GPL3154)=735 
+[09:28:29] split 01 (halves 364/371 arrays) 3.0 min 
+[09:31:20] split 02 (halves 365/370 arrays) 2.8 min 
+[09:34:12] split 03 (halves 383/352 arrays) 2.9 min 
+[09:37:04] split 04 (halves 365/370 arrays) 2.9 min 
+[09:39:58] split 05 (halves 367/368 arrays) 2.9 min 
+[09:42:54] split 06 (halves 368/367 arrays) 2.9 min 
+[09:45:51] split 07 (halves 370/365 arrays) 3.0 min 
+[09:48:46] split 08 (halves 368/367 arrays) 2.9 min 
+[09:51:40] split 09 (halves 378/357 arrays) 2.9 min 
+[09:54:35] split 10 (halves 363/372 arrays) 2.9 min 
+[09:57:30] split 11 (halves 371/364 arrays) 2.9 min 
+[10:00:21] split 12 (halves 369/366 arrays) 2.9 min 
+[10:03:12] split 13 (halves 360/375 arrays) 2.8 min 
+[10:06:04] split 14 (halves 380/355 arrays) 2.9 min 
+[10:08:54] split 15 (halves 369/366 arrays) 2.8 min 
+[10:11:46] split 16 (halves 373/362 arrays) 2.9 min 
+[10:14:38] split 17 (halves 375/360 arrays) 2.9 min 
+[10:17:29] split 18 (halves 367/368 arrays) 2.8 min 
+[10:20:18] split 19 (halves 378/357 arrays) 2.8 min 
+[10:23:09] split 20 (halves 369/366 arrays) 2.9 min 
+[10:23:09] selection: subset=Bg3154 n_arrays=735 n_genes=4189 nsplit=20 t_star=11 t_q25=10 t_q75=11 t_min=9 t_max=12 t_mean_curve_argmax=10 flat_lo_median=10 flat_hi_median=12 
+[10:23:09] done 
