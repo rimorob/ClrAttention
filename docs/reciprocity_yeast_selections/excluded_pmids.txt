@@ -1,0 +1,31 @@
+# Exclusion list E (docs/preregistration_reciprocity_yeast.md, "Truths"; fixed with the preregistration).
+# Only lines that are bare PubMed IDs are read by analysis/yeast_prep.R.
+# (a) PubMed IDs linked by GEO to series on platform GPL11232 (Holstege lab array), query of 2026-11-01
+#     (esearch db=gds term=GPL11232[GPL] AND gse[ETYP]; 34 series, 20 PMIDs)
+21145464
+21596317
+21976730
+21998594
+22697265
+23599000
+23785440
+23932120
+24009531
+24037263
+24324601
+24766815
+24952590
+25157590
+26700642
+27979920
+29979971
+31506296
+34520050
+36066422
+# (b) PubMed IDs of S. cerevisiae GEO series with Holstege F or Kemmeren P as author on other platforms
+19713935
+21971086
+28049706
+28637236
+30203048
+# (c) reanalysis screen additions are written by truth_structure to excluded_pmids_screen_additions.txt
