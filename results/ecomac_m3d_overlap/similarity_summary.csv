@@ -1,0 +1,49 @@
+"measure","group","n","median","q05","q95","max","n_gt_0.98","n_gt_0.99","n_gt_0.995","frac_gt_0.99"
+"EcoMAC->M3D907 max Pearson","all",2198,0.9009,0.3789,0.9918,0.9934,815,406,0,0.1847
+"EcoMAC->M3D907 max Pearson","GPL199",844,0.989,0.8518,0.9923,0.9934,611,298,0,0.3531
+"EcoMAC->M3D907 max Pearson","GPL3154",735,0.749,0.4359,0.8667,0.8875,0,0,0,0
+"EcoMAC->M3D907 max Pearson","post_build (GSE>=20000)",518,0.8279,0.3896,0.9418,0.9634,0,0,0,0
+"EcoMAC->M3D907 max Pearson","post_build GPL199",137,0.9156,0.7936,0.9561,0.9634,0,0,0,0
+"EcoMAC->M3D907 max Pearson","post_build GPL3154",381,0.7595,0.2854,0.8688,0.8809,0,0,0,0
+"EcoMAC->M3D907 max Pearson","pre_build-eligible (GSE<20000)",1061,0.9876,0.6153,0.9922,0.9934,611,298,0,0.2809
+"EcoMAC->M3D907 max Pearson","non-GEO / unknown series",619,0.9131,0.3316,0.9916,0.9934,204,108,0,0.1745
+"EcoMAC->M3D907 max Spearman","all",2198,0.8969,0.3278,0.9958,0.9966,885,808,337,0.3676
+"EcoMAC->M3D907 max Spearman","GPL199",844,0.9945,0.8336,0.996,0.9966,667,616,266,0.7299
+"EcoMAC->M3D907 max Spearman","GPL3154",735,0.7425,0.3796,0.8673,0.8974,0,0,0,0
+"EcoMAC->M3D907 max Spearman","post_build (GSE>=20000)",518,0.8348,0.333,0.9377,0.9639,0,0,0,0
+"EcoMAC->M3D907 max Spearman","post_build GPL199",137,0.9083,0.7791,0.9525,0.9639,0,0,0,0
+"EcoMAC->M3D907 max Spearman","post_build GPL3154",381,0.7515,0.2397,0.8687,0.8861,0,0,0,0
+"EcoMAC->M3D907 max Spearman","pre_build-eligible (GSE<20000)",1061,0.9934,0.593,0.9959,0.9966,667,616,266,0.5806
+"EcoMAC->M3D907 max Spearman","non-GEO / unknown series",619,0.9124,0.2883,0.9957,0.9963,218,192,71,0.3102
+"EcoMAC->M3D466avg max Pearson","all",2198,0.8997,0.3762,0.9907,0.9934,703,157,0,0.0714
+"EcoMAC->M3D466avg max Pearson","GPL199",844,0.9842,0.8516,0.9912,0.9925,523,90,0,0.1066
+"EcoMAC->M3D466avg max Pearson","GPL3154",735,0.7419,0.4325,0.8664,0.8813,0,0,0,0
+"EcoMAC->M3D466avg max Pearson","post_build (GSE>=20000)",518,0.8246,0.3834,0.9411,0.9638,0,0,0,0
+"EcoMAC->M3D466avg max Pearson","post_build GPL199",137,0.9158,0.7951,0.9564,0.9638,0,0,0,0
+"EcoMAC->M3D466avg max Pearson","post_build GPL3154",381,0.7497,0.2516,0.8688,0.8813,0,0,0,0
+"EcoMAC->M3D466avg max Pearson","pre_build-eligible (GSE<20000)",1061,0.9795,0.6147,0.991,0.9925,523,90,0,0.0848
+"EcoMAC->M3D466avg max Pearson","non-GEO / unknown series",619,0.9135,0.3289,0.9914,0.9934,180,67,0,0.1082
+"EcoMAC->M3D907 max centred Pearson","all",2198,0.5853,0.2623,0.8623,0.9306,0,0,0,0
+"EcoMAC->M3D907 max centred Pearson","GPL199",844,0.8125,0.387,0.8755,0.9168,0,0,0,0
+"EcoMAC->M3D907 max centred Pearson","GPL3154",735,0.4488,0.2308,0.6391,0.7298,0,0,0,0
+"EcoMAC->M3D907 max centred Pearson","post_build (GSE>=20000)",518,0.4829,0.2557,0.6427,0.7036,0,0,0,0
+"EcoMAC->M3D907 max centred Pearson","post_build GPL199",137,0.5075,0.3019,0.6139,0.6577,0,0,0,0
+"EcoMAC->M3D907 max centred Pearson","post_build GPL3154",381,0.4795,0.2509,0.6471,0.7036,0,0,0,0
+"EcoMAC->M3D907 max centred Pearson","pre_build-eligible (GSE<20000)",1061,0.7984,0.2556,0.8704,0.9168,0,0,0,0
+"EcoMAC->M3D907 max centred Pearson","non-GEO / unknown series",619,0.545,0.334,0.8644,0.9306,0,0,0,0
+"EcoMAC->EcoMAC other series max Pearson","all",2198,0.9256,0.6616,0.9916,1,220,128,88,0.0582
+"EcoMAC->EcoMAC other series max Pearson","GPL199",844,0.9422,0.8543,1,1,59,48,48,0.0569
+"EcoMAC->EcoMAC other series max Pearson","GPL3154",735,0.8919,0.7085,0.9546,0.9916,7,3,0,0.0041
+"EcoMAC->EcoMAC other series max Pearson","post_build (GSE>=20000)",518,0.9091,0.7163,0.957,1,6,6,6,0.0116
+"EcoMAC->EcoMAC other series max Pearson","post_build GPL199",137,0.929,0.8148,0.9716,1,6,6,6,0.0438
+"EcoMAC->EcoMAC other series max Pearson","post_build GPL3154",381,0.8965,0.6931,0.9507,0.9671,0,0,0,0
+"EcoMAC->EcoMAC other series max Pearson","pre_build-eligible (GSE<20000)",1061,0.9305,0.7948,0.9824,1,60,45,42,0.0424
+"EcoMAC->EcoMAC other series max Pearson","non-GEO / unknown series",619,0.9423,0.6437,1,1,154,77,40,0.1244
+"EcoMAC->EcoMAC any (incl. same series)","all",2198,0.9838,0.9186,1,1,1236,794,274,0.3612
+"EcoMAC->EcoMAC any (incl. same series)","GPL199",844,0.9918,0.9411,1,1,596,475,179,0.5628
+"EcoMAC->EcoMAC any (incl. same series)","GPL3154",735,0.9804,0.8635,0.9953,0.9967,373,196,47,0.2667
+"EcoMAC->EcoMAC any (incl. same series)","post_build (GSE>=20000)",518,0.9838,0.8878,0.996,1,295,182,55,0.3514
+"EcoMAC->EcoMAC any (incl. same series)","post_build GPL199",137,0.9823,0.938,0.9966,1,74,44,12,0.3212
+"EcoMAC->EcoMAC any (incl. same series)","post_build GPL3154",381,0.9843,0.864,0.9959,0.9967,221,138,43,0.3622
+"EcoMAC->EcoMAC any (incl. same series)","pre_build-eligible (GSE<20000)",1061,0.9889,0.9101,1,1,674,489,171,0.4609
+"EcoMAC->EcoMAC any (incl. same series)","non-GEO / unknown series",619,0.9761,0.9387,1,1,267,123,48,0.1987

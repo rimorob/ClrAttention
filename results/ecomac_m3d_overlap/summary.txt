@@ -1,0 +1,117 @@
+shared genes 4056 / EcoMAC 4189 / M3D 4297
+                            measure                          group    n median
+         EcoMAC->M3D907 max Pearson                            all 2198 0.9009
+         EcoMAC->M3D907 max Pearson                         GPL199  844 0.9890
+         EcoMAC->M3D907 max Pearson                        GPL3154  735 0.7490
+         EcoMAC->M3D907 max Pearson        post_build (GSE>=20000)  518 0.8279
+         EcoMAC->M3D907 max Pearson              post_build GPL199  137 0.9156
+         EcoMAC->M3D907 max Pearson             post_build GPL3154  381 0.7595
+         EcoMAC->M3D907 max Pearson pre_build-eligible (GSE<20000) 1061 0.9876
+         EcoMAC->M3D907 max Pearson       non-GEO / unknown series  619 0.9131
+ EcoMAC->M3D907 max centred Pearson                            all 2198 0.5853
+ EcoMAC->M3D907 max centred Pearson                         GPL199  844 0.8125
+ EcoMAC->M3D907 max centred Pearson                        GPL3154  735 0.4488
+ EcoMAC->M3D907 max centred Pearson        post_build (GSE>=20000)  518 0.4829
+ EcoMAC->M3D907 max centred Pearson              post_build GPL199  137 0.5075
+ EcoMAC->M3D907 max centred Pearson             post_build GPL3154  381 0.4795
+ EcoMAC->M3D907 max centred Pearson pre_build-eligible (GSE<20000) 1061 0.7984
+ EcoMAC->M3D907 max centred Pearson       non-GEO / unknown series  619 0.5450
+    q05    q95    max n_gt_0.98 n_gt_0.99 n_gt_0.995 frac_gt_0.99
+ 0.3789 0.9918 0.9934       815       406          0       0.1847
+ 0.8518 0.9923 0.9934       611       298          0       0.3531
+ 0.4359 0.8667 0.8875         0         0          0       0.0000
+ 0.3896 0.9418 0.9634         0         0          0       0.0000
+ 0.7936 0.9561 0.9634         0         0          0       0.0000
+ 0.2854 0.8688 0.8809         0         0          0       0.0000
+ 0.6153 0.9922 0.9934       611       298          0       0.2809
+ 0.3316 0.9916 0.9934       204       108          0       0.1745
+ 0.2623 0.8623 0.9306         0         0          0       0.0000
+ 0.3870 0.8755 0.9168         0         0          0       0.0000
+ 0.2308 0.6391 0.7298         0         0          0       0.0000
+ 0.2557 0.6427 0.7036         0         0          0       0.0000
+ 0.3019 0.6139 0.6577         0         0          0       0.0000
+ 0.2509 0.6471 0.7036         0         0          0       0.0000
+ 0.2556 0.8704 0.9168         0         0          0       0.0000
+ 0.3340 0.8644 0.9306         0         0          0       0.0000
+                               measure   n    median       q05       q95
+ M3D->M3D other experiment max Pearson 907 0.9762077 0.8813727 0.9954202
+       max n_gt_0.98 n_gt_0.99 n_gt_0.995
+ 0.9972579       422       263         70
+                          series   n                         platform n_gt_0.98
+                         GSE6836 284                           GPL199       270
+                         GSE1121  43                           GPL199        43
+                        MSB 3:97  62 unknown (no GEO record / Isalan)        62
+                       Not found 214 unknown (no GEO record / Isalan)        57
+                         GSE6425  22                           GPL199        22
+                         GSE7398  24                           GPL199        24
+                         GSE4778  20                           GPL199        20
+                         GSE7326  24                           GPL199        24
+                         GSE4556  15                           GPL199        15
+                  ASAP-AffyData1  41 unknown (no GEO record / Isalan)        40
+                         GSE4511  15                           GPL199        15
+   J Bacteriol 186(10):3254-3258  14 unknown (no GEO record / Isalan)        14
+         J Bacteriol 187(3):1135  10 unknown (no GEO record / Isalan)        10
+                         GSE7885  18                           GPL199        17
+                        GSE11183  26                           GPL199        26
+                         GSE9582   7                           GPL199         7
+                        GSE13418  15                           GPL199        15
+                        GSE17505  30                           GPL199        20
+                         GSE9814   6                           GPL199         6
+                        GSE10158  43                           GPL199        43
+ ASAP-Suppressor tRNA expression   6 unknown (no GEO record / Isalan)         6
+             Cell 130(5):797-810  17 unknown (no GEO record / Isalan)        15
+                         GSE9755   4                           GPL199         3
+                         GSE3905  12                           GPL199        10
+                         GSE2037   2                           GPL199         2
+ n_gt_0.99 n_gt_0.995 median_best n_centred_rule median_best_centred
+       113          0      0.9895            284              0.8167
+        43          0      0.9925             43              0.8510
+        43          0      0.9907             62              0.8296
+        30          0      0.9469             82              0.6174
+        18          0      0.9910             22              0.8678
+        18          0      0.9906             24              0.8559
+        16          0      0.9910             20              0.8123
+        16          0      0.9907             24              0.8286
+        15          0      0.9920             15              0.8578
+        14          0      0.9891             41              0.8173
+        11          0      0.9905             15              0.8309
+         9          0      0.9909             14              0.8568
+         8          0      0.9905             10              0.7968
+         8          0      0.9894             18              0.8402
+         8          0      0.9891             26              0.8217
+         7          0      0.9909              7              0.8542
+         6          0      0.9897             15              0.8870
+         6          0      0.9812             30              0.8102
+         5          0      0.9907              6              0.8553
+         4          0      0.9884             43              0.7967
+         2          0      0.9893              6              0.8370
+         2          0      0.9878             17              0.8182
+         2          0      0.9873              4              0.8446
+         2          0      0.9865             12              0.8228
+         0          0      0.9882              2              0.7976
+       top_m3d_experiment
+            b2618_U_N0075
+          M9_WT_anaerobic
+           ccdB_MG1655_t0
+             HU_wt_LB_exp
+     MG1655_t1080_aerobic
+                 K12_t150
+         acid_shift_10min
+            RM_pHSG415_0h
+          ph5.7_anaerobic
+          WT_MOPS_glucose
+                      ph5
+               cybr_KNO_N
+       fnr_K_fnrAnaerobic
+      rb_del_rpoS_biofilm
+          HU_hupAB_LB_exp
+             W3110_K_luxS
+ bform_biofilm_attachment
+            har_S0_noIPTG
+               K_rpoS_exp
+      cefmec_cefmec_40min
+               ast_pBAD18
+    MG1063_uninduced_t180
+           ctrl_no_tannin
+             biofilm_15hr
+     carbonSourceForaging

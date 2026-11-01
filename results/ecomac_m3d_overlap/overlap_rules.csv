@@ -1,0 +1,8 @@
+"rule","n_ecomac","frac_of_2198","false_positives_in_post_build_null"
+"Pearson > 0.98 (pre-stated sensitivity)",815,0.3708,0
+"Pearson > 0.99 (pre-stated primary)",406,0.1847,0
+"Pearson > 0.995 (pre-stated sensitivity)",0,0,0
+"Spearman > 0.99",808,0.3676,0
+"centred Pearson > post-build null max (pre-stated secondary)",904,0.4113,0
+"mutual nearest neighbour (post hoc)",828,0.3767,0
+"centred rule AND mutual NN (post hoc overlap call)",828,0.3767,0
