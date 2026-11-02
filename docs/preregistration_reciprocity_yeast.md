@@ -563,6 +563,27 @@ The verdict is computed by the script and written to `verdict.csv` before anyone
 - 2026-11-01: DRAFT rev 1 (18babdb).
 - 2026-11-01: DRAFT rev 2: review fd9c827 addressed (see "Changes from rev 1"). Not fixed.
 - 2026-11-01: DRAFT rev 3: PI decisions recorded. Primary depth rule kept after review of the synthetic rescore (option A); same-depth contrast (both at t\*_K10) added as a fixed descriptive secondary; S3 stop branch, ρ ≈ 0.44 disclosure and gate F thresholds kept as written; E. coli/EcoMAC counted as one compendium, so H1 on yeast is the first organism-independent replication. No endpoint, threshold or verdict rule changed. Not fixed.
+- 2026-11-01: **DEVIATION 2 (PI decision, option (c) of `step3_stop_report_2.md`; written and committed before any orientation rule was fitted, and before any truth was downloaded or opened; yeast unconsumed).** This is the second deviation, and both happened before any truth was touched.
+  - *Where:* gate F item 1, the orientation rule.
+  - *What was found (step 3, job 0984, commit dc16ac1):* no single global rule reproduced the published M. The best median r was 0.793, below the 0.8 floor. "As deposited" fits mutants of the older sub-series and "flip_ref_ch1" fits most `[hs1991]` mutants, although the deposited VALUE definitions and dye labels say "as deposited" everywhere.
+  - *Change, all rules fixed here:*
+    1. **Sub-series of a hybridization.** It is the bracketed prefix of its GEO `!Sample_title` in the GSE42527 series matrix (for example `[hs1991]`). A title without a bracketed prefix belongs to sub-series `none`. This uses only deposited hybridization metadata.
+    2. **Pool and split, fixed before fitting.**
+       - The pool is the balanced mutant groups of GSE42527 (`dye_balance_GSE42527.csv`: exactly two hybridizations, one of each orientation) whose deleted gene is a column of the published GSE42527 final matrix.
+       - Sort the pool by group key in C-locale order. With `set.seed(20261106)`, `sample.int(n, floor(n/2))` selects the **fitting set (50%)**; the rest is the **held-out set**. Both lists are committed (`orientation_split.csv`) before any rule is fitted.
+       - **The held-out set is never used to choose a rule.**
+    3. **Rule per sub-series** (candidates: the three preregistered rules "asis", "flip_test_ch1", "flip_ref_ch1"; applied to each hybridization by its own sub-series):
+       - For each sub-series, the rule is chosen on the fitting-set mutants whose two hybridizations both belong to that sub-series. The chosen rule is the one with the highest median Pearson r between the rebuilt profile (the mean of the two oriented hybridizations, then per ORF, as rev 4) and the published M of that mutant.
+       - **Sub-series with fewer than 5 such fitting mutants get the default rule "as deposited".** Their held-out r is reported separately (descriptive) and enters the overall held-out median like every other held-out mutant.
+       - The published deleteome M is used **only as an orientation reference** for label-free expression values. No regulon, complex or other truth is involved.
+    4. **Floor.** The orientation step passes only if the **median r over all held-out mutants is ≥ 0.8**. Otherwise gate F is not computable (verdict 1).
+       - "published_M_reproduced" (gate F on the published M) requires every held-out mutant to reach r ≥ 0.99 and median |difference| ≤ 0.02, as before.
+       - Otherwise, if the floor passes, gate F uses mutants rebuilt with the fitted rules (stage `rebuild`, 376 mutants, seed 20261105, drawn from balanced mutants).
+    5. **Wild types (GSE45115).**
+       - All wild-type hybridizations belong to one sub-series and use **"as deposited"**: their deposited definitions are mutually consistent with log2(wt/ref), and there is no published wild-type reference to fit against.
+       - **Label-free orientation check:** after orientation and per-ORF averaging, the two hybridizations of each balanced wild-type dye-swap pair must have **Pearson r > 0** over ORFs. A pair from a wrongly oriented hybridization would correlate negatively.
+       - Groups failing it are excluded from gate F's wild-type matrix and counted. The share passing is reported. This check adds no new stopping gate.
+  - The deleteome sample tables needed for fitting and held-out evaluation (about 1,370 more hybridizations, about 0.9 GB) are downloaded in this step. They are expression data only.
 - 2026-11-01: **DEVIATION 1 (PI decision, before any truth was downloaded or opened; yeast unconsumed).**
   - *Where:* gate F item 1, structural dye check (review2 SF4 iii).
   - *What was found:* at protocol step 3 (jobs 0982–0983; `docs/reciprocity_yeast_selections/step3_stop_report.md`, commit 7a5d791) the label-free GEO metadata turned out to be irregular:
