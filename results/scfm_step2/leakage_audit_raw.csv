@@ -1,0 +1,7 @@
+study,accession,bioproject,doi,organism,technology,n_cxg_collections_strong,n_cxg_collections_weak,in_census_2023_05_15,in_census_2023_07_25,in_census_2023_12_15,n_srx_bioproject,scbasecount_2025-02-25_srx_hits,scbasecount_2026-01-12_srx_hits
+hESC,GSE75748,PRJNA305280,10.1186/s13059-016-1033-x,human,SMARTer/C1 full-length plate,0,0,0,0,0,1810.0,0,0
+hHep,GSE81252,PRJNA322308,10.1038/nature22796,human,SMART-seq2 / C1 plate,0,0,0,0,0,770.0,0,0
+mDC,GSE48968,PRJNA212439,10.1038/nature13437,mouse,SMART-seq plate,0,0,0,0,0,2425.0,0,0
+mESC,GSE98664,PRJNA385832,10.1038/s41467-018-02866-0,mouse,RamDA-seq plate,0,0,0,0,0,1507.0,0,0
+mHSC,GSE81682,PRJNA322317,10.1182/blood-2016-05-716480,mouse,SMART-seq2 plate,0,0,0,0,0,3840.0,0,0
+K562,(SRA only),PRJNA831566,10.1016/j.cell.2022.05.013,human (K562 cancer line),10x 3' Perturb-seq,0,0,0,0,0,7883.0,0,6237

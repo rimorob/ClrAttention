@@ -1,0 +1,20 @@
+{
+ "control_fraction_pre2023_datasets_in_release": {
+  "2023-05-15": 0.889,
+  "2023-07-25": 0.911,
+  "2023-12-15": 0.945
+ },
+ "control_n": 776,
+ "census_datasets": {
+  "2023-05-15": 804,
+  "2023-07-25": 850,
+  "2023-12-15": 1113
+ },
+ "census_datasets_not_in_current_public_collections": {
+  "2023-05-15": 9,
+  "2023-07-25": 4,
+  "2023-12-15": 6
+ },
+ "n_public_collections": 404,
+ "n_public_datasets": 2269
+}

@@ -1,0 +1,145 @@
+{
+ "1b699e04-1127-42ea-998b-011ace4a5b81": {
+  "releases": [
+   "2023-05-15"
+  ],
+  "title": "T cells -- CV19 infection, vaccination and HC",
+  "citation": "",
+  "organism": [
+   "Homo sapiens"
+  ],
+  "tissue": null
+ },
+ "2ef8f3ce-bbff-447b-9e51-567e5d6c47bd": {
+  "releases": [
+   "2023-05-15",
+   "2023-07-25"
+  ],
+  "title": "Dissection: Body of hippocampus (HiB) - Rostral DG-CA4",
+  "citation": "",
+  "organism": [
+   "Homo sapiens"
+  ],
+  "tissue": null
+ },
+ "30498543-4fdd-4f86-9e1b-05c1a1454a6a": {
+  "releases": [
+   "2023-05-15"
+  ],
+  "title": "B cells -- CV19 infection, vaccination and HC",
+  "citation": "",
+  "organism": [
+   "Homo sapiens"
+  ],
+  "tissue": null
+ },
+ "31dd355c-3140-4558-a648-7e1e5f00480b": {
+  "releases": [
+   "2023-05-15",
+   "2023-07-25",
+   "2023-12-15"
+  ],
+  "title": "An integrated transcriptomic and epigenomic atlas of mouse primary motor cortex cell types: chromatin accessibility",
+  "citation": "",
+  "organism": [
+   "Mus musculus"
+  ],
+  "tissue": null
+ },
+ "78f10833-3e61-4fad-96c9-4bbd4f14bdfa": {
+  "releases": [
+   "2023-05-15",
+   "2023-07-25",
+   "2023-12-15"
+  ],
+  "title": "Cross species map of pancreatic alpha cells",
+  "citation": "",
+  "organism": [
+   "Homo sapiens",
+   "Sus scrofa domesticus",
+   "Mus musculus"
+  ],
+  "tissue": null
+ },
+ "87ce26ed-e5d1-44b4-81cc-cc5b709a169f": {
+  "releases": [
+   "2023-05-15"
+  ],
+  "title": "Circulating Immune cells -- CV19 infection, vaccination and HC",
+  "citation": "",
+  "organism": [
+   "Homo sapiens"
+  ],
+  "tissue": null
+ },
+ "9c4c8515-8f82-4c72-b0c6-f87647b00bbe": {
+  "releases": [
+   "2023-05-15",
+   "2023-07-25",
+   "2023-12-15"
+  ],
+  "title": "Cross species map of pancreatic beta cells",
+  "citation": "",
+  "organism": [
+   "Homo sapiens",
+   "Sus scrofa domesticus",
+   "Mus musculus"
+  ],
+  "tissue": null
+ },
+ "b5191f01-f67d-44b8-bc8d-511a4ecd07bb": {
+  "releases": [
+   "2023-05-15"
+  ],
+  "title": "innate T cells -- CV19 infection, vaccination and HC",
+  "citation": "",
+  "organism": [
+   "Homo sapiens"
+  ],
+  "tissue": null
+ },
+ "e463dae9-3fc1-476d-870e-d98a04c56cd6": {
+  "releases": [
+   "2023-05-15"
+  ],
+  "title": "M cells -- CV19 infection, vaccination and HC",
+  "citation": "",
+  "organism": [
+   "Homo sapiens"
+  ],
+  "tissue": null
+ },
+ "1d4128f6-c27b-40c4-af77-b1c7e2b694e7": {
+  "releases": [
+   "2023-12-15"
+  ],
+  "title": "10x scATAC-seq from human cortex",
+  "citation": "",
+  "organism": [
+   "Homo sapiens"
+  ],
+  "tissue": null
+ },
+ "47812017-4b19-4488-8adb-99ddce38aa7a": {
+  "releases": [
+   "2023-12-15"
+  ],
+  "title": "Chimpanzee: Great apes study",
+  "citation": "",
+  "organism": [
+   "Pan troglodytes"
+  ],
+  "tissue": null
+ },
+ "f6d176d3-6409-4f5a-80ec-77934b31c3a0": {
+  "releases": [
+   "2023-12-15"
+  ],
+  "title": "Gorilla: Great apes study",
+  "citation": "",
+  "organism": [
+   "Gorilla gorilla"
+  ],
+  "tissue": null
+ }
+}
