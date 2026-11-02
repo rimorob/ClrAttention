@@ -200,17 +200,17 @@ series_meta <- function(gse) {
   data.frame(title = get("!Sample_title"), gsm = get("!Sample_geo_accession"),
              src1 = get("!Sample_source_name_ch1"), src2 = get("!Sample_source_name_ch2"), stringsAsFactors = FALSE)
 }
-dye_check <- function(meta) {      # SF4 (iii): one reference channel per hybridization; each pair has both orientations
+dye_check <- function(meta, tag) {   # DEVIATION 1: part 1 stops the stage; part 2 returns the balanced groups only
   r1 <- grepl(REF_RE, meta$src1, ignore.case = TRUE); r2 <- grepl(REF_RE, meta$src2, ignore.case = TRUE)
   bad_hyb <- meta$gsm[xor(r1, r2) == FALSE]
-  pair <- group_key(meta$title)   # the dye-swap pair = the hybridizations of one mutant (or one WT culture stem)
-  bad_pair <- names(which(tapply(r1, pair, function(v) !(length(v) == 2 && sum(v) == 1))))
-  if (length(bad_hyb) || length(bad_pair)) {
-    writeLines(c("hybridizations without exactly one reference channel:", bad_hyb, "pairs without one hybridization of each orientation:", bad_pair),
-               file.path(SEL, "dye_check_failures.txt"))
-    stop("structural dye check failed (", length(bad_hyb), " hybridizations, ", length(bad_pair), " pairs); see dye_check_failures.txt")
-  }
-  invisible(TRUE)
+  if (length(bad_hyb)) { writeLines(bad_hyb, file.path(SEL, paste0("dye_check_part1_failures_", tag, ".txt")))
+    stop("structural dye check part 1 failed: ", length(bad_hyb), " hybridizations without exactly one reference channel") }
+  key <- group_key(meta$title)
+  bal <- tapply(r1, key, function(v) length(v) == 2 && sum(v) == 1)
+  utils::write.csv(data.frame(group = names(bal), n_hyb = as.integer(table(key)[names(bal)]), balanced = as.logical(bal)),
+                   file.path(SEL, paste0("dye_balance_", tag, ".csv")), row.names = FALSE)
+  say(sprintf("dye check %s: part 1 ok (%d hybridizations); balanced groups %d of %d", tag, nrow(meta), sum(bal), length(bal)))
+  names(bal)[bal]
 }
 gsm_table <- function(gsm) {
   f <- file.path(D, "gsm", paste0(gsm, ".txt"))
@@ -319,8 +319,8 @@ if (stage == "matrix") {
 
 ## ---- stage: check (SF4) -------------------------------------------------------------------------
 if (stage == "check") {
-  pf <- platform(); mu <- series_meta("GSE42527"); dye_check(mu); key <- group_key(mu$title)
-  first10 <- sort(unique(key))[1:10]; meta <- mu[key %in% first10, ]
+  pf <- platform(); mu <- series_meta("GSE42527"); bal <- dye_check(mu, "GSE42527"); key <- group_key(mu$title)
+  first10 <- sort(unique(key[key %in% bal]))[1:10]; meta <- mu[key %in% first10, ]
   pub <- read_final("GSE42527"); Mo <- by_orf(pub$M, pf$orf[match(rownames(pub$M), pf$scab)])
   res <- do.call(rbind, lapply(RULES, function(rule) { R <- rebuild(meta, rule, pf)
     do.call(rbind, lapply(colnames(R), function(s) { j <- which(tolower(colnames(Mo)) == tolower(s))[1]
@@ -332,7 +332,7 @@ if (stage == "check") {
   status <- if (any(pass)) "published_M_reproduced" else if (medr[[rule]] >= 0.8) "NOT_reproduced_run_stage_rebuild" else "F_NOT_COMPUTABLE_verdict_1"
   res$chosen <- res$rule == rule; res$status <- status
   utils::write.csv(res, file.path(SEL, "implementation_check.csv"), row.names = FALSE)
-  writeLines(c(rule, status, env_info()), file.path(SEL, "orientation_rule.txt"))
+  writeLines(c(rule, status, env_info()), file.path(SEL, "orientation_rule.txt")); record_hashes()
   say("orientation rule: ", rule, " (median r ", round(medr[[rule]], 3), "); status ", status)
 }
 
@@ -340,11 +340,11 @@ if (stage == "check") {
 if (stage == "rebuild") {
   rr <- readLines(file.path(SEL, "orientation_rule.txt"))
   if (rr[2] != "NOT_reproduced_run_stage_rebuild") stop("rebuild is used only after a failed but floor-passing check (status: ", rr[2], ")")
-  pf <- platform(); mu <- series_meta("GSE42527"); key <- group_key(mu$title)
+  pf <- platform(); mu <- series_meta("GSE42527"); bal <- dye_check(mu, "GSE42527"); key <- group_key(mu$title)
   X <- rd_mat(file.path(D, "deleteome_responsive_700.tsv"))
-  cand <- sort(intersect(unique(key), tolower(colnames(X)))); Nw <- length(unique(group_key(series_meta("GSE45115")$title)))
+  cand <- sort(intersect(unique(key[key %in% bal]), tolower(colnames(X)))); Nw <- length(unique(group_key(series_meta("GSE45115")$title)))
   set.seed(20261105); pick <- sort(cand[sample.int(length(cand), min(Nw, length(cand)))])
-  meta <- mu[key %in% pick, ]; dye_check(meta)
+  meta <- mu[key %in% pick, ]
   R <- rebuild(meta, rr[1], pf)
   m <- utils::read.csv(file.path(SEL, "masking_log.csv")); s <- sgd()
   R <- R[intersect(rownames(X), rownames(R)), , drop = FALSE]
@@ -360,7 +360,8 @@ if (stage == "rebuild") {
 if (stage == "wt") {
   rf <- file.path(SEL, "orientation_rule.txt"); if (!file.exists(rf)) stop("run stage check first")
   rr <- readLines(rf); if (rr[2] == "F_NOT_COMPUTABLE_verdict_1") stop("orientation floor failed: gate F not computable (verdict 1)")
-  pf <- platform(); meta <- series_meta("GSE45115"); dye_check(meta); W <- rebuild(meta, rr[1], pf)
+  pf <- platform(); meta <- series_meta("GSE45115"); bal <- dye_check(meta, "GSE45115")
+  meta <- meta[group_key(meta$title) %in% bal, ]; W <- rebuild(meta, rr[1], pf)
   W <- W[intersect(universe_rows(), rownames(W)), , drop = FALSE]
   f <- finish_matrix(W, matrix(FALSE, nrow(W), ncol(W)))
   wr_mat(f$X, file.path(D, "wt_controls_GSE45115.tsv")); record_hashes()
