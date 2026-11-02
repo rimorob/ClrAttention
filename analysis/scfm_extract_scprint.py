@@ -70,16 +70,21 @@ def load_model(ckpt, control, seed, device):
         del m
         m = r
         del ck
+    assert m.attn_bias == "none" and m.cell_transformer is None and not m.use_metacell_token, "architecture option not handled by the Q,K attention readout"
+    info.update(depth_atinput=bool(m.depth_atinput), attn_bias=m.attn_bias)
     return m.eval().to(device), info
 
 
 @torch.no_grad()
 def run(model, gene_pos, x, device, bs, half_mask=None, want_hidden=True):
+    # depth token: models with depth_atinput (large-v1, small-v1) get req_depth = per-cell sum of the model input over the case genes
+    # (what scdataloader's Collator passes: the row sum of the adata it is given); medium-v1.5 has none (depth_atinput False)
     """x: cells x G (log2(1+x) applied inside the model). Same arithmetic as analysis/scfm_smoke_scprint.py::run, plus the
     half-sample sums. Returns Asum (float64, L,H,G,G on device, SUM over cells), A1sum (cells with half_mask True), mass sums,
     hidden prefix states."""
     nL, nH = model.nlayers, model.transformer.blocks[0].mixer.num_heads
-    npre = model.cell_embs_count - (1 if model.depth_atinput else 0)   # tokens before the genes (9: base + 8 class tokens)
+    npre = model.cell_embs_count     # tokens before the genes (medium: 9 = base + 8 class tokens; depth models: depth + base + 6 classes)
+    use_depth = bool(model.depth_atinput)
     G = gene_pos.shape[1]
     A = torch.zeros(nL, nH, G, G, dtype=torch.float64, device=device)
     A1 = torch.zeros_like(A) if half_mask is not None else None
@@ -90,7 +95,7 @@ def run(model, gene_pos, x, device, bs, half_mask=None, want_hidden=True):
     for s in range(0, n, bs):
         xb = x[s:s + bs].to(device)
         gb = gene_pos.expand(xb.shape[0], -1).to(device)
-        enc = model._encoder(gb, xb, None, None, None)
+        enc = model._encoder(gb, xb, None, xb.sum(1) if use_depth else None, None)
         assert enc.shape[1] == npre + G, enc.shape
         out, qkvs = model.transformer(enc, return_qkv=list(range(nL)))
         if want_hidden:
@@ -188,7 +193,7 @@ def main():
     ck_hp = torch.load(ckpt, map_location="cpu", weights_only=False)["hyper_parameters"]
     ldec, classes = ck_hp["label_decoders"], list(model.classes)
     R["nlayers"], R["nheads"] = model.nlayers, model.transformer.blocks[0].mixer.num_heads
-    R["n_prefix_tokens"] = model.cell_embs_count - (1 if model.depth_atinput else 0)
+    R["n_prefix_tokens"] = int(model.cell_embs_count)
     R["depth_atinput"] = bool(model.depth_atinput)
 
     if a.reproduce_step1:
@@ -267,11 +272,12 @@ def main():
         M["split_half"] = sh
         # class-head predictions (functional check of the input scale; token index 1+i, as in the step-1 smoke test)
         org = exp_org(case)
+        off = 1 if model.depth_atinput else 0       # position of the base-cell token (class i sits at off + 1 + i)
         preds = {}
         with torch.no_grad():
             for i, c in enumerate(classes):
                 dec = model.cls_decoders[c].to("cpu").eval()
-                p = dec(hid[:, 1 + i]).argmax(-1).numpy()
+                p = dec(hid[:, off + 1 + i]).argmax(-1).numpy()
                 lab = pd.Series([ldec[c].get(int(k), str(int(k))) for k in p]).value_counts()
                 preds[c] = lab.head(3).to_dict()
                 if c == "organism_ontology_term_id":
