@@ -1,0 +1,52 @@
+{
+ "scprint_version": "2.2.0",
+ "torch": "2.3.1+cu121",
+ "hparams_not_in_init_signature (go to **flash_attention_kwargs)": [
+  "checkpointing",
+  "drop_path_rate",
+  "fused_bias_fc",
+  "fused_dropout_add_ln",
+  "fused_mlp",
+  "mlp_ratio",
+  "num_heads_kv",
+  "residual_in_fp32",
+  "return_residual",
+  "sequence_parallel",
+  "weight_init"
+ ],
+ "depth_atinput_in_ckpt": false,
+ "strict_load": "ok via scPrint.load_from_checkpoint(strict=True) with only precpt_gene_emb=None, transformer='normal' overridden",
+ "cell_embs_count": 9,
+ "has_depth_encoder": false,
+ "expr_decoder_fc0_weight_shape_ckpt": [
+  256,
+  257
+ ],
+ "expr_decoder_fc0_weight_shape_model": [
+  256,
+  257
+ ],
+ "encoder_input_tokens": 1170,
+ "expected_prefix_tokens": 9,
+ "A_shape": [
+  8,
+  4,
+  1161,
+  1161
+ ],
+ "parity_vs_step1_shim": {
+  "max_abs_diff": 0.0,
+  "rel_L1": 0.0,
+  "mean_abs_diff_over_mean_entry": 0.0
+ },
+ "parity_per_layer_relL1": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ]
+}

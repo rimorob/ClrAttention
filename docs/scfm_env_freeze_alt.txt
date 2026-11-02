@@ -1,0 +1,5 @@
+# ~/venvs/scfm_alt (created 2026-11-01): python 3.10 from ~/venvs/scfm; torch, lightning, numpy etc. are borrowed read-only from ~/venvs/scfm via a .pth file (see docs/scfm_step2.md); only these two packages are installed in the alt venv itself
+scprint==2.2.0
+simpler-flash==1.0.7
+sparse==0.17.0
+# .pth: /home/boris/venvs/scfm/lib/python3.10/site-packages
