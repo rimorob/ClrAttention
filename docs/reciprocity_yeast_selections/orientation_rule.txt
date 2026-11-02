@@ -1,5 +1,6 @@
-flip_ref_ch1
-F_NOT_COMPUTABLE_verdict_1
+per_subseries:orientation_rules.csv
+NOT_reproduced_run_stage_rebuild
+heldout_median_r=0.8204 n=342
 R version 4.6.1 (2026-06-24)
 Mersenne-Twister/Inversion/Rejection
 C
