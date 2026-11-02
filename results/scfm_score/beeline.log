@@ -1,0 +1,45 @@
+[11:23:01] scfm_score: truth=real out=results/scfm_score threads=8 att=1 
+[11:23:23] hESC_500: 758 cells, gene sets full=873 A=842 S=841 
+[11:23:50]     held-out depth hESC_500 ns_soft10 on G-A directions 8,8 -> t* = 8 
+[11:25:01] hESC_500: done, 305 score rows, 2.0 min 
+[11:25:17] hESC_1000: 758 cells, gene sets full=1323 A=1288 S=1285 
+[11:26:05]     held-out depth hESC_1000 ns_soft10 on G-A directions 8,7 -> t* = 7 
+[11:27:36] hESC_1000: done, 305 score rows, 2.6 min 
+[11:27:41] hHep_500: 425 cells, gene sets full=911 A=906 S=907 AS=905 
+[11:28:08]     held-out depth hHep_500 ns_soft10 on G-A directions 10,10 -> t* = 10 
+[11:29:24] hHep_500: done, 295 score rows, 1.8 min 
+[11:29:28] hHep_1000: 425 cells, gene sets full=1367 A=1362 S=1362 AS=1360 
+[11:30:18]     held-out depth hHep_1000 ns_soft10 on G-A directions 10,10 -> t* = 10 
+[11:31:57] hHep_1000: done, 295 score rows, 2.6 min 
+[11:31:59] mDC_500: 383 cells, gene sets full=807 A=798 
+[11:32:17]     held-out depth mDC_500 ns_soft10 on G-A directions 8,10 -> t* = 9 
+[11:32:37] mDC_500: done, 190 score rows, 0.7 min 
+[11:32:39] mDC_1000: 383 cells, gene sets full=1270 A=1247 
+[11:33:16]     held-out depth mDC_1000 ns_soft10 on G-A directions 10,10 -> t* = 10 
+[11:33:46] mDC_1000: done, 190 score rows, 1.1 min 
+[11:34:04] mESC_500: 421 cells, gene sets full=1071 A=941 
+[11:34:41]     held-out depth mESC_500 ns_soft10 on G-A directions 7,7 -> t* = 7 
+[11:35:42] mESC_500: done, 228 score rows, 1.9 min 
+[11:36:01] mESC_1000: 421 cells, gene sets full=1528 A=1306 
+[11:36:57]     held-out depth mESC_1000 ns_soft10 on G-A directions 6,6 -> t* = 6 
+[11:38:12] mESC_1000: done, 228 score rows, 2.5 min 
+[11:38:16] mHSC-E_500: 1071 cells, gene sets full=666 A=660 
+[11:38:37]     held-out depth mHSC-E_500 ns_soft10 on G-A directions 8,10 -> t* = 9 
+[11:39:22] mHSC-E_500: done, 250 score rows, 1.2 min 
+[11:39:27] mHSC-E_1000: 1071 cells, gene sets full=1135 A=1122 B=1121 
+[11:40:07]     held-out depth mHSC-E_1000 ns_soft10 on G-A directions 8,8 -> t* = 8 
+[11:41:12] mHSC-E_1000: done, 280 score rows, 1.8 min 
+[11:41:16] mHSC-GM_500: 889 cells, gene sets full=593 A=584 B=583 
+[11:41:34]     held-out depth mHSC-GM_500 ns_soft10 on G-A directions 8,8 -> t* = 8 
+[11:42:23] mHSC-GM_500: done, 280 score rows, 1.2 min 
+[11:42:26] mHSC-GM_1000: 889 cells, gene sets full=1055 A=1030 B=1029 
+[11:43:00]     held-out depth mHSC-GM_1000 ns_soft10 on G-A directions 10,10 -> t* = 10 
+[11:43:58] mHSC-GM_1000: done, 280 score rows, 1.6 min 
+[11:44:02] mHSC-L_500: 847 cells, gene sets full=514 A=489 
+[11:44:18]     held-out depth mHSC-L_500 ns_soft10 on G-A directions 10,10 -> t* = 10 
+[11:44:57] mHSC-L_500: done, 250 score rows, 1.0 min 
+[11:45:01] mHSC-L_1000: 847 cells, gene sets full=692 A=647 
+[11:45:21]     held-out depth mHSC-L_1000 ns_soft10 on G-A directions 12,10 -> t* = 11 
+[11:46:02] mHSC-L_1000: done, 250 score rows, 1.1 min 
+[11:46:03] wrote 3626 rows to results/scfm_score/metrics_long.csv in 23.0 min 
+[11:46:03] done 
