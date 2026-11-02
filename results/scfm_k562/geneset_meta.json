@@ -1,0 +1,29 @@
+{
+ "collectri_sha256": "98ef1163146d2e28ee413e7c909174998cd9d742ea93d97ccfe93f3a14c160c1",
+ "collectri_rows": 64516,
+ "collectri_sources": 1201,
+ "collectri_sources_ge10": 587,
+ "n_cells_total": 310385,
+ "n_genes_matrix": 8563,
+ "n_control_cells": 10691,
+ "n_detected_ge5pct": 8561,
+ "n_duplicate_symbols_in_matrix": 4,
+ "tf_part": 278,
+ "variable_part": 1000,
+ "overlap": 34,
+ "gene_set_size": 1244,
+ "median_control_umi": 13714.0,
+ "h5ad_bytes": 10661879995,
+ "scprint_covered": 1218,
+ "scgpt_covered": 1240,
+ "intersection": 1217,
+ "tf_part_covered": 278,
+ "mapped_equal_to_deposit_gene_id": 1217,
+ "drop_reasons": {
+  "not_in_scprint_vocab": 21,
+  "no_match": 5
+ },
+ "geneset_sha256": "22caabb6e23868cf495f55f4c8e33c95a029c1632be74decf4d1e3ba1cc0a550",
+ "subsamples_sha256": "b4d6047b62e95c7fbde8cdc50b20d7a7a5011605b543fa72edc51fe57fd4dd1a",
+ "gene_map_sha256": "0d30d852f440e5f566d95b2de861195ef7147bea11c89c1387e7bf2695717079"
+}
