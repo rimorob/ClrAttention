@@ -1,0 +1,113 @@
+== PRIMARY: CLR-NS vs scPRINT medium-v1.5 R0, arm A, S = t(A); d_i = mean over gene sets and primary truths of log2(AUPRC ratio CLR-NS / AUPRC ratio scPRINT) 
+  cells used: 44 (14 gene-set x dataset combinations, primary truths) 
+  d_i: hESC +0.7336, hHep +0.7163, mDC +0.6729, mESC +0.5182, mHSC-E +0.7381, mHSC-GM +0.8022, mHSC-L +0.6829 
+  HL estimate +0.7069; interval [+0.6173, +0.7592] (coverage 0.9219, C = 4 of M = 28); margin delta = 0.15 
+  primary one-sided exact p (H0: median <= -delta) = 0.00781   (reject at 0.05 iff W+ >= 25; smallest attainable 0.00781) 
+  decision-rule rows that apply: NI + superior 
+  NI (L > -delta): TRUE; superiority (L > 0), tested next in the fixed sequence: TRUE 
+== KEY SECONDARIES (confirmatory only if primary NI holds; Holm at 0.05 over S1, S2) 
+  S1 (CLR vs R0, AUPRC ratio): d_i hESC +0.650, hHep +0.607, mDC +0.507, mESC +0.424, mHSC-E +0.728, mHSC-GM +0.703, mHSC-L +0.500 
+     HL +0.5901, interval [+0.4998, +0.6891], p_NI = 0.00781, Holm-rejected: TRUE, rows: NI + superior 
+  S2 (CLR-NS vs R0, EPR): d_i hESC +1.036, hHep +1.053, mDC +0.627, mESC +0.577, mHSC-E +1.090, mHSC-GM +1.180, mHSC-L +0.669 
+     HL +0.8699, interval [+0.6268, +1.1084], p_NI = 0.00781, Holm-rejected: TRUE, rows: NI + superior 
+  confirmatory status: primary NI holds -> the secondaries are interpreted confirmatorily 
+== ROBUST NI: scPRINT takes, per dataset, the best of {R0,R0',R1,R2} x {T,A,max} x {arm A, arm B where available} 
+  best-for-scPRINT configuration per dataset (smallest d_i): 
+    hESC     scprint_medium_A|R0|max                  d = +0.7028 
+    hHep     scprint_medium_A|R0|max                  d = +0.6910 
+    mDC      scprint_medium_A|R0|T                    d = +0.6729 
+    mESC     scprint_medium_A|R0|T                    d = +0.5182 
+    mHSC-E   scprint_medium_A|R0|T                    d = +0.7381 
+    mHSC-GM  scprint_medium_A|R0|max                  d = +0.7722 
+    mHSC-L   scprint_medium_B|R0|max                  d = +0.6648 
+  robust: HL +0.6894; interval [+0.6046, +0.7375]; p_NI = 0.00781; rows: NI + superior 
+  ROBUST NI (L > -delta): TRUE 
+== DESCRIPTIVE (no claims): CLR-NS vs each scPRINT readout / orientation / arm (AUPRC), n = 7 unless stated 
+  Arm B (n = 4: hESC and mHSC-E/GM/L): paired delta_i = log2 AUPRC ratio of scPRINT R0 under B minus under A 
+    delta_i: hESC +0.0006, mHSC-E -0.0095, mHSC-GM -0.0067, mHSC-L +0.0121 
+    HL -0.0012, range [-0.0095, +0.0121], median -0.0030; reading rule: median delta_i <= delta = 0.15 -> no input-scale dependence beyond the margin on the count datasets 
+  Controls (scPRINT, R0, S = t(A)): d_i vs CLR-NS, and scPRINT R0 minus control in log2 AUPRC ratio 
+== scGPT (descriptive; n = 2 BEELINE datasets plus K562 handled separately; no p-value) 
+  [primary] PRIMARY CLR-NS vs R0 (arm A, S=t(A), AUPRC)                                      n=7 HL +0.707 [+0.617, +0.759]  -> NI + superior 
+  [key secondary] S1 CLR vs R0 (AUPRC)                                                             n=7 HL +0.590 [+0.500, +0.689]  -> NI + superior 
+  [key secondary] S2 CLR-NS vs R0 (EPR)                                                            n=7 HL +0.870 [+0.627, +1.108]  -> NI + superior 
+  [robust] ROBUST NI: best of {R0,R0',R1,R2}x3 orient x arms                                n=7 HL +0.689 [+0.605, +0.738]  -> NI + superior 
+  [robust (reference)] robust max, arm A only, {R0,R0',R1,R2}x3                                         n=7 HL +0.690 [+0.605, +0.738] 
+  [robust (reference)] robust max, original prereg set {R0,R1,R2}x3, arm A                              n=7 HL +0.690 [+0.605, +0.738] 
+  [descriptive] CLR-NS vs scprint_medium_A R0 S=T                                                n=7 HL +0.706 [+0.616, +0.758] 
+  [descriptive] CLR-NS vs scprint_medium_A R0p S=T                                               n=7 HL +0.740 [+0.635, +0.779] 
+  [descriptive] CLR-NS vs scprint_medium_A R2 S=T                                                n=7 HL +0.848 [+0.774, +0.938] 
+  [descriptive] CLR-NS vs scprint_medium_A R0 S=A                                                n=7 HL +0.783 [+0.736, +0.904] 
+  [descriptive] CLR-NS vs scprint_medium_A R0p S=A                                               n=7 HL +0.971 [+0.873, +1.067] 
+  [descriptive] CLR-NS vs scprint_medium_A R2 S=A                                                n=7 HL +1.003 [+0.889, +1.095] 
+  [descriptive] CLR-NS vs scprint_medium_A R0 S=max                                              n=7 HL +0.725 [+0.633, +0.797] 
+  [descriptive] CLR-NS vs scprint_medium_A R0p S=max                                             n=7 HL +0.836 [+0.722, +0.913] 
+  [descriptive] CLR-NS vs scprint_medium_A R2 S=max                                              n=7 HL +0.939 [+0.841, +1.009] 
+  [descriptive] CLR-NS vs r1_A R1 S=T                                                            n=7 HL +0.825 [+0.657, +0.906] 
+  [descriptive] CLR-NS vs r1_A R1 S=A                                                            n=7 HL +0.918 [+0.836, +1.014] 
+  [descriptive] CLR-NS vs r1_A R1 S=max                                                          n=7 HL +0.855 [+0.746, +0.923] 
+  [descriptive arm B] CLR-NS vs scprint_medium_B R0 S=T                                                n=4 HL +0.740 range [+0.671, +0.808] 
+  [descriptive arm B] CLR-NS vs scprint_medium_B R0p S=T                                               n=4 HL +0.774 range [+0.720, +0.827] 
+  [descriptive arm B] CLR-NS vs scprint_medium_B R2 S=T                                                n=4 HL +0.909 range [+0.855, +1.014] 
+  [descriptive arm B] CLR-NS vs scprint_medium_B R0 S=A                                                n=4 HL +0.803 range [+0.733, +0.833] 
+  [descriptive arm B] CLR-NS vs scprint_medium_B R0p S=A                                               n=4 HL +0.965 range [+0.876, +1.055] 
+  [descriptive arm B] CLR-NS vs scprint_medium_B R2 S=A                                                n=4 HL +1.032 range [+0.934, +1.098] 
+  [descriptive arm B] CLR-NS vs scprint_medium_B R0 S=max                                              n=4 HL +0.728 range [+0.665, +0.780] 
+  [descriptive arm B] CLR-NS vs scprint_medium_B R0p S=max                                             n=4 HL +0.834 range [+0.770, +0.923] 
+  [descriptive arm B] CLR-NS vs scprint_medium_B R2 S=max                                              n=4 HL +0.986 range [+0.935, +1.078] 
+  [descriptive arm B] CLR-NS vs r1_B R1 S=T                                                            n=4 HL +0.841 range [+0.762, +0.945] 
+  [descriptive arm B] CLR-NS vs r1_B R1 S=A                                                            n=4 HL +0.865 range [+0.834, +1.065] 
+  [descriptive arm B] CLR-NS vs r1_B R1 S=max                                                          n=4 HL +0.856 range [+0.792, +0.963] 
+  [descriptive arm B] ARM B: delta_i = R0(B) - R0(A) log2 AUPRC ratio (n=4)                            n=4 HL -0.001 range [-0.010, +0.012] 
+  [descriptive checkpoint] CLR-NS vs scprint_large_A R0 S=t(A)                                              n=7 HL +1.028 [+0.952, +1.118] 
+  [descriptive checkpoint] CLR-NS vs scprint_small_A R0 S=t(A)                                              n=7 HL +1.061 [+0.956, +1.110] 
+  [descriptive control] CLR-NS vs control ctrl_perm (mean over 3 seeds)                                  n=7 HL +0.738 [+0.645, +0.778] 
+  [descriptive control seed] CLR-NS vs control ctrl_perm_s1001                                                n=7 HL +0.740 [+0.646, +0.778] 
+  [descriptive control seed] CLR-NS vs control ctrl_perm_s1002                                                n=7 HL +0.737 [+0.643, +0.778] 
+  [descriptive control seed] CLR-NS vs control ctrl_perm_s1003                                                n=7 HL +0.737 [+0.646, +0.778] 
+  [descriptive control] scPRINT R0 minus control ctrl_perm (mean over 3 seeds; log2 AUPRC ratio)         n=7 HL +0.020 [+0.010, +0.040] 
+  [descriptive control] CLR-NS vs control ctrl_rand_esm (mean over 3 seeds)                              n=7 HL +1.012 [+0.935, +1.088] 
+  [descriptive control seed] CLR-NS vs control ctrl_rand_esm_s1                                               n=7 HL +1.003 [+0.923, +1.056] 
+  [descriptive control seed] CLR-NS vs control ctrl_rand_esm_s2                                               n=7 HL +1.015 [+0.917, +1.088] 
+  [descriptive control seed] CLR-NS vs control ctrl_rand_esm_s3                                               n=7 HL +1.024 [+0.945, +1.099] 
+  [descriptive control] scPRINT R0 minus control ctrl_rand_esm (mean over 3 seeds; log2 AUPRC ratio)     n=7 HL +0.298 [+0.257, +0.387] 
+  [descriptive control] CLR-NS vs control ctrl_rand_emb (mean over 3 seeds)                              n=7 HL +1.038 [+0.955, +1.091] 
+  [descriptive control seed] CLR-NS vs control ctrl_rand_emb_s1                                               n=7 HL +1.033 [+0.951, +1.098] 
+  [descriptive control seed] CLR-NS vs control ctrl_rand_emb_s2                                               n=7 HL +1.036 [+0.946, +1.094] 
+  [descriptive control seed] CLR-NS vs control ctrl_rand_emb_s3                                               n=7 HL +1.045 [+0.954, +1.089] 
+  [descriptive control] scPRINT R0 minus control ctrl_rand_emb (mean over 3 seeds; log2 AUPRC ratio)     n=7 HL +0.324 [+0.280, +0.379] 
+  [descriptive control] scPRINT R0 minus ESM2 cosine (data-free prior; log2 AUPRC ratio)                 n=7 HL +0.220 [+0.045, +0.387] 
+  [descriptive control] CLR-NS vs ESM2 cosine                                                            n=7 HL +0.881 [+0.765, +1.034] 
+  [descriptive control] CLR-NS vs CLR applied to A (hybrid; symmetrised R0)                              n=7 HL +0.720 [+0.646, +0.825] 
+  [descriptive] CLR-NS vs |r| (G-intersection)                                                   n=7 HL +0.133 [+0.088, +0.212] 
+  [descriptive] CLR vs |r| (G-intersection)                                                      n=7 HL +0.046 [-0.047, +0.123] 
+  [descriptive] CLR-NS vs CLR (G-intersection)                                                   n=7 HL +0.101 [+0.055, +0.146] 
+  [descriptive] CLR-NS soft10 attention (held-out depth) vs scPRINT R0 [item 5]                  n=7 HL +0.403 [+0.371, +0.448] 
+  [descriptive] CLR-NS soft10 attention vs CLR-NS                                                n=7 HL -0.297 [-0.342, -0.218] 
+  [descriptive baseline] genie3 (full-set fit, scored on G-A) vs scPRINT R0                               n=7 HL -0.066 [-0.228, +0.073] 
+  [descriptive baseline] grnboost2 (full-set fit, scored on G-A) vs scPRINT R0                            n=7 HL +0.006 [-0.094, +0.105] 
+  [descriptive baseline] pidc (full-set fit, scored on G-A) vs scPRINT R0                                 n=7 HL +0.318 [+0.209, +0.437] 
+  [descriptive baseline] CLR-NS vs genie3 (full-set fit, scored on G-A)                                   n=7 HL +0.764 [+0.647, +0.883] 
+  [descriptive baseline] CLR-NS vs grnboost2 (full-set fit, scored on G-A)                                n=7 HL +0.693 [+0.601, +0.786] 
+  [descriptive baseline] CLR-NS vs pidc (full-set fit, scored on G-A)                                     n=7 HL +0.364 [+0.309, +0.442] 
+  [secondary truths] CLR-NS vs R0, primary + derived STRING truths                                    n=7 HL +0.693 [+0.620, +0.731] 
+  [secondary truths] CLR-NS vs R0, derived STRING truths only                                         n=7 HL +0.658 [+0.615, +0.713] 
+  [per-truth] CLR-NS vs R0, truth celltype_ChIP only                                           n=7 HL +1.850 [+1.750, +1.928] 
+  [per-truth] CLR-NS vs R0, truth nonspecific_ChIP only                                        n=7 HL -0.543 [-0.654, -0.382] 
+  [per-truth] CLR-NS vs R0, truth STRING only                                                  n=7 HL +0.830 [+0.742, +0.898] 
+  [per-truth] CLR-NS vs R0, truth LOFGOF only                                                  n=1 HL +0.042 range [+0.042, +0.042] 
+  [per-gene-set] CLR-NS vs R0, TFs+500 only                                                       n=7 HL +0.700 [+0.624, +0.770] 
+  [per-gene-set] CLR-NS vs R0, TFs+1000 only                                                      n=7 HL +0.709 [+0.621, +0.766] 
+  [descriptive scGPT] CLR-NS vs scGPT attn_last_mean (G-scGPT)                                         n=2 HL +1.093 range [+1.086, +1.101] 
+  [descriptive scPRINT vs scGPT] scPRINT R0 vs scGPT attn_last_mean (three-way intersection)                      n=2 HL +0.375 range [+0.371, +0.379] 
+  [descriptive scGPT] CLR-NS vs scGPT tok_cos (G-scGPT)                                                n=2 HL +0.846 range [+0.834, +0.858] 
+  [descriptive scPRINT vs scGPT] scPRINT R0 vs scGPT tok_cos (three-way intersection)                             n=2 HL +0.126 range [+0.124, +0.128] 
+  [descriptive scGPT] CLR-NS vs scGPT hid_cos (G-scGPT)                                                n=2 HL +1.054 range [+1.029, +1.078] 
+  [descriptive scPRINT vs scGPT] scPRINT R0 vs scGPT hid_cos (three-way intersection)                             n=2 HL +0.335 range [+0.322, +0.348] 
+  [descriptive scGPT] CLR-NS vs scGPT tok_cos_ln (G-scGPT) [exploratory readout]                       n=2 HL +0.882 range [+0.877, +0.888] 
+== dropped truth edges (full case gene set -> scPRINT-covered set), primary truths: 
+   truth edges in the full gene sets: 55904; retained on G-A: 55904; dropped: 0 (0.0%) 
+== SENSITIVITY (descriptive): mixed model, log2 AUPRC ratio ~ method + N + (1 | dataset) + (1 | dataset:truth); method = CLR-NS vs scPRINT R0 
+   method effect (CLR-NS minus scPRINT) = +0.6868, 95% CI [+0.4447, +0.9290] (log2 units; nlme::lme with random intercepts dataset and truth within dataset) 
+== leaked-dataset sensitivity: empty (E9: no scPRINT v1 or scGPT pair is classified 'in') 
+done 
