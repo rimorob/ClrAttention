@@ -107,7 +107,9 @@ gate_prereg <- function() {
 need_clean <- function(fs) for (f in fs) if (!clean(f)) stop("gate: ", f, " not committed or differs from HEAD")
 ORF_RE <- "^(Y[A-P][LR][0-9]{3}[WC](-[A-Z])?|Q[0-9]{4}|R[0-9]{4}[WC]?)$"
 REF_RE <- "ref"
-group_key <- function(title) ifelse(grepl("-del-", title), sub("-del-.*$", "", title), sub("-[ab]$", "", title))
+group_key <- function(title) {   # strips GEO prefixes such as "[hs1991] "; mutants by deleted gene, WT by title stem
+  t <- sub("^\\[[^]]*\\] *", "", title)
+  ifelse(grepl("-del", t), sub("-del.*$", "", t), sub("-[a-z0-9]+$", "", t)) }
 rd_mat <- function(f) { x <- utils::read.delim(f, check.names = FALSE); m <- as.matrix(x[, -1]); rownames(m) <- x$orf; m }
 wr_mat <- function(m, f) utils::write.table(data.frame(orf = rownames(m), m, check.names = FALSE), f, sep = "\t", quote = FALSE, row.names = FALSE)
 universe_rows <- function() { L <- readLines(file.path(D, "deleteome_responsive_700.tsv")); sub("\t.*$", "", L[-1]) }  # row names only
@@ -201,7 +203,7 @@ series_meta <- function(gse) {
 dye_check <- function(meta) {      # SF4 (iii): one reference channel per hybridization; each pair has both orientations
   r1 <- grepl(REF_RE, meta$src1, ignore.case = TRUE); r2 <- grepl(REF_RE, meta$src2, ignore.case = TRUE)
   bad_hyb <- meta$gsm[xor(r1, r2) == FALSE]
-  pair <- sub("-[ab]$", "", meta$title)
+  pair <- group_key(meta$title)   # the dye-swap pair = the hybridizations of one mutant (or one WT culture stem)
   bad_pair <- names(which(tapply(r1, pair, function(v) !(length(v) == 2 && sum(v) == 1))))
   if (length(bad_hyb) || length(bad_pair)) {
     writeLines(c("hybridizations without exactly one reference channel:", bad_hyb, "pairs without one hybridization of each orientation:", bad_pair),
