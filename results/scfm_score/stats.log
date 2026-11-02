@@ -24,8 +24,8 @@
   ROBUST NI (L > -delta): TRUE 
 == DESCRIPTIVE (no claims): CLR-NS vs each scPRINT readout / orientation / arm (AUPRC), n = 7 unless stated 
   Arm B (n = 4: hESC and mHSC-E/GM/L): paired delta_i = log2 AUPRC ratio of scPRINT R0 under B minus under A 
-    delta_i: hESC -0.0004, mHSC-E -0.0079, mHSC-GM +0.0011, mHSC-L +0.0065 
-    HL -0.0000, range [-0.0079, +0.0065], median +0.0003; reading rule: median delta_i <= delta = 0.15 -> no input-scale dependence beyond the margin on the count datasets 
+    delta_i: hESC -0.0003, mHSC-E -0.0079, mHSC-GM +0.0011, mHSC-L +0.0065 
+    HL +0.0001, range [-0.0079, +0.0065], median +0.0004; reading rule: median delta_i <= delta = 0.15 -> no input-scale dependence beyond the margin on the count datasets 
   Controls (scPRINT, R0, S = t(A)): d_i vs CLR-NS, and scPRINT R0 minus control in log2 AUPRC ratio 
 == scGPT (descriptive; n = 2 BEELINE datasets plus K562 handled separately; no p-value) 
   [primary] PRIMARY CLR-NS vs R0 (arm A, S=t(A), AUPRC)                                      n=7 HL +1.032 [+0.343, +1.897]  -> NI + superior 
@@ -58,7 +58,7 @@
   [descriptive arm B] CLR-NS vs r1_B R1 S=T                                                            n=4 HL +1.540 range [+0.321, +2.225] 
   [descriptive arm B] CLR-NS vs r1_B R1 S=A                                                            n=4 HL +1.353 range [+0.122, +2.100] 
   [descriptive arm B] CLR-NS vs r1_B R1 S=max                                                          n=4 HL +1.514 range [+0.289, +2.260] 
-  [descriptive arm B] ARM B: delta_i = R0(B) - R0(A) log2 AUPRC ratio (n=4)                            n=4 HL -0.000 range [-0.008, +0.007] 
+  [descriptive arm B] ARM B: delta_i = R0(B) - R0(A) log2 AUPRC ratio (n=4)                            n=4 HL +0.000 range [-0.008, +0.007] 
   [descriptive checkpoint] CLR-NS vs scprint_large_A R0 S=t(A)                                              n=7 HL +0.953 [+0.316, +1.740] 
   [descriptive checkpoint] CLR-NS vs scprint_small_A R0 S=t(A)                                              n=7 HL +1.130 [+0.440, +1.745] 
   [descriptive control] CLR-NS vs control ctrl_perm (mean over 3 seeds)                                  n=7 HL +1.039 [+0.360, +1.882] 

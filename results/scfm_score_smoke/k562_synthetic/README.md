@@ -1,0 +1,1 @@
+K562 scoring smoke test on SYNTHETIC truth only (planted from the networks of subsample 1), B = 40 (job 1022). The bootstrap statistic on the full sample equals the score_truth value (check column in beeline.log) for all 21 contrast x truth cells. No K562 truth file was read.

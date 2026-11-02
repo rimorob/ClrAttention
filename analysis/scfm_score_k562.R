@@ -34,6 +34,7 @@ say(sprintf("scfm_score_k562: truth=%s out=%s boot=%d workers=%d", sopt$truth, s
 
 H5 <- "data/perturbseq/K562_essential_raw_singlecell_01.h5ad"
 gs <- utils::read.delim("results/scfm_k562/geneset.tsv", stringsAsFactors = FALSE)
+gs$is_tf_part <- gs$is_tf_part %in% c("True", "TRUE", TRUE); gs$in_variable_part <- gs$in_variable_part %in% c("True", "TRUE", TRUE)
 sub <- utils::read.delim("results/scfm_k562/subsamples.tsv", stringsAsFactors = FALSE)
 metatxt <- readLines("results/scfm_k562/geneset_meta.json")
 MED <- as.numeric(sub("[^0-9.]*([0-9.]+).*", "\\1", grep("median_control_umi", metatxt, value = TRUE)))

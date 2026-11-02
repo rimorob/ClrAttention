@@ -126,7 +126,7 @@ cfg <- rbind(
   expand.grid(src = "r1_B", rd = "R1", ori = c("T", "A", "max"), stringsAsFactors = FALSE))
 dm <- NULL
 for (k in seq_len(nrow(cfg))) {
-  cd <- pick(cfg$src[k], cfg$rd[k], cfg$ori[k]); if (!nrow(cd)) next
+  cd <- pick(cfg$src[k], cfg$rd[k], cfg$ori[k], gset = if (cfg$src[k] %in% c("scprint_medium_A", "r1_A")) "A" else NULL); if (!nrow(cd)) next
   d <- dvec(cells(ref_cmp("clr_ns"), cd))
   dm <- rbind(dm, data.frame(config = sprintf("%s|%s|%s", cfg$src[k], cfg$rd[k], cfg$ori[k]), dataset = names(d), d = as.numeric(d)))
 }
@@ -148,13 +148,13 @@ add_row("robust max, original prereg set {R0,R1,R2}x3, arm A", setNames(bestP$d,
 ## ---- 4. DESCRIPTIVE: other readouts / orientations / arms of scPRINT vs CLR-NS (AUPRC) ----------------------------------------
 say("== DESCRIPTIVE (no claims): CLR-NS vs each scPRINT readout / orientation / arm (AUPRC), n = 7 unless stated")
 for (k in seq_len(nrow(cfg))) {
-  cd <- pick(cfg$src[k], cfg$rd[k], cfg$ori[k]); if (!nrow(cd)) next
+  cd <- pick(cfg$src[k], cfg$rd[k], cfg$ori[k], gset = if (cfg$src[k] %in% c("scprint_medium_A", "r1_A")) "A" else NULL); if (!nrow(cd)) next
   d <- dvec(cells(ref_cmp("clr_ns"), cd))
   add_row(sprintf("CLR-NS vs %s %s S=%s", cfg$src[k], cfg$rd[k], cfg$ori[k]), d, if (grepl("_B$", cfg$src[k])) "descriptive arm B" else "descriptive")
 }
 # arm B: per-dataset d_i under B, paired difference of scPRINT R0 (B minus A) in log2 AUPRC ratio; no p-value
 say("  Arm B (n = 4: hESC and mHSC-E/GM/L): paired delta_i = log2 AUPRC ratio of scPRINT R0 under B minus under A")
-cB <- pick("scprint_medium_B", "R0", "T"); cA <- pick("scprint_medium_A", "R0", "T")
+cB <- pick("scprint_medium_B", "R0", "T"); cA <- pick("scprint_medium_A", "R0", "T", gset = "A")
 mm <- merge(cA[cA$truth %in% PRIMARY, c("dataset", "N", "truth", "auprc_ratio")], cB[cB$truth %in% PRIMARY, c("dataset", "N", "truth", "auprc_ratio")],
             by = c("dataset", "N", "truth"), suffixes = c("_A", "_B"))
 mm$delta <- log2(mm$auprc_ratio_B) - log2(mm$auprc_ratio_A)

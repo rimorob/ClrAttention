@@ -1,0 +1,16 @@
+EXPLORATORY CHECKS (not preregistered)
+primary (reference): HL +1.032, [+0.343, +1.897]
+(a) mHSC-E from TFs+1000 only (mHSC-E_500 organism-head flag): d_mHSC-E +1.533 (was +1.524); HL +1.036, [+0.343, +1.897]
+(b) leave-one-dataset-out (n = 6; coverage 0.906):
+    without hESC     HL +1.197, [+0.498, +1.906], L > -delta: TRUE
+    without hHep     HL +1.195, [+0.343, +1.906], L > -delta: TRUE
+    without mDC      HL +1.191, [+0.300, +1.906], L > -delta: TRUE
+    without mESC     HL +1.191, [+0.343, +1.906], L > -delta: TRUE
+    without mHSC-E   HL +1.000, [+0.300, +1.897], L > -delta: TRUE
+    without mHSC-GM  HL +0.813, [+0.300, +1.524], L > -delta: TRUE
+    without mHSC-L   HL +0.813, [+0.300, +1.524], L > -delta: TRUE
+(c) per-truth d_i (n = 7 except LOFGOF, mESC only):
+    celltype_ChIP     n=7  hESC -0.60, hHep -0.01, mDC +0.61, mESC -0.08, mHSC-E -0.13, mHSC-GM -0.24, mHSC-L -0.11  HL -0.108 [-0.357, +0.248]
+    nonspecific_ChIP  n=7  hESC +0.25, hHep +0.49, mDC +0.65, mESC +0.49, mHSC-E +1.49, mHSC-GM +1.97, mHSC-L +1.87  HL +1.066 [+0.449, +1.732]
+    STRING            n=7  hESC +0.66, hHep +0.98, mDC +0.49, mESC +1.10, mHSC-E +3.22, mHSC-GM +3.96, mHSC-L +5.10  HL +2.192 [+0.735, +3.963]
+    LOFGOF            n=1  mESC +0.48  HL +0.484
