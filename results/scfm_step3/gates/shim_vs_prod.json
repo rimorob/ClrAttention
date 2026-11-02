@@ -1,0 +1,57 @@
+{
+ "case": "mHSC-E_500",
+ "scprint_shim": "1.0.13 (step-1 shim)",
+ "n_cells": 1071,
+ "shape": [
+  8,
+  4,
+  660,
+  660
+ ],
+ "max_abs_diff": 0.0,
+ "rel_L1": 0.0,
+ "bitwise_identical": true,
+ "per_layer_max_abs_diff": [
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0,
+  0.0
+ ],
+ "tol": 1e-06,
+ "passed": true,
+ "mass_max_abs_diff": 4.99692396260798e-06,
+ "shim_info": {
+  "dropped_hparams": [
+   "cell_specific_blocks",
+   "compress_class_dim",
+   "depth_atinput",
+   "label_counts"
+  ],
+  "missing_keys": [
+   "depth_encoder.encoder.0.weight",
+   "depth_encoder.encoder.0.bias",
+   "depth_encoder.encoder.1.weight",
+   "depth_encoder.encoder.1.bias",
+   "depth_encoder.encoder.4.weight",
+   "depth_encoder.encoder.4.bias",
+   "expr_decoder.fc.0.weight"
+  ],
+  "unexpected_keys": [
+   "grad_reverse_discriminator_loss.decoder.0.weight",
+   "grad_reverse_discriminator_loss.decoder.0.bias",
+   "grad_reverse_discriminator_loss.decoder.1.weight",
+   "grad_reverse_discriminator_loss.decoder.1.bias",
+   "grad_reverse_discriminator_loss.decoder.3.weight",
+   "grad_reverse_discriminator_loss.decoder.3.bias",
+   "grad_reverse_discriminator_loss.decoder.4.weight",
+   "grad_reverse_discriminator_loss.decoder.4.bias",
+   "grad_reverse_discriminator_loss.out_layer.weight",
+   "grad_reverse_discriminator_loss.out_layer.bias"
+  ]
+ },
+ "total_s": 35.46862840652466
+}

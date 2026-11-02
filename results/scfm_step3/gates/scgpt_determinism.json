@@ -1,0 +1,9 @@
+{
+ "attn_last": true,
+ "attn_last_mean": true,
+ "attn_all_mean": true,
+ "tok_cos": true,
+ "tok_cos_ln": true,
+ "hid_cos": true,
+ "passed": true
+}

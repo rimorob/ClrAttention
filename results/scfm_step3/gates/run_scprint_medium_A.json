@@ -1,0 +1,170 @@
+{
+ "scprint": "2.2.0",
+ "torch": "2.3.1+cu121",
+ "device": "NVIDIA GeForce GTX 1060 6GB",
+ "args": {
+  "cases": "all",
+  "arm": "A",
+  "ckpt_name": "medium-v1.5",
+  "control": "none",
+  "seed": 0,
+  "device": 1,
+  "bs": 8,
+  "out": "/home/boris/scfm_models/step3/scprint_medium_A",
+  "store_attn": "auto",
+  "ncells_limit": 0,
+  "reproduce_step1": ""
+ },
+ "ckpt": "/home/boris/scfm_models/scprint/medium-v1.5.ckpt",
+ "ckpt_sha256": "96ff7c5d9e1ad5076e818bde3c38f498c95cd354cc42029d90691b5ba2964ff8",
+ "route": "scprint.scPrint.load_from_checkpoint(strict=True)",
+ "depth_atinput": false,
+ "attn_bias": "none",
+ "load_s": 57.8024320602417,
+ "nlayers": 8,
+ "nheads": 4,
+ "n_prefix_tokens": 9,
+ "total_s": 415.6690077781677,
+ "manifest": [
+  {
+   "case": "hESC_500",
+   "n": 758,
+   "G": 842,
+   "infer_s": 20.4,
+   "nan": 0,
+   "org_acc": 1.0,
+   "r0p_n": 13,
+   "sh_R0": 0.1082
+  },
+  {
+   "case": "hESC_1000",
+   "n": 758,
+   "G": 1288,
+   "infer_s": 46.0,
+   "nan": 0,
+   "org_acc": 1.0,
+   "r0p_n": 13,
+   "sh_R0": 0.1112
+  },
+  {
+   "case": "hHep_500",
+   "n": 425,
+   "G": 906,
+   "infer_s": 13.2,
+   "nan": 0,
+   "org_acc": 1.0,
+   "r0p_n": 12,
+   "sh_R0": 0.1543
+  },
+  {
+   "case": "hHep_1000",
+   "n": 425,
+   "G": 1362,
+   "infer_s": 27.6,
+   "nan": 0,
+   "org_acc": 1.0,
+   "r0p_n": 13,
+   "sh_R0": 0.1703
+  },
+  {
+   "case": "mDC_500",
+   "n": 383,
+   "G": 798,
+   "infer_s": 9.3,
+   "nan": 0,
+   "org_acc": 0.9947780678851175,
+   "r0p_n": 14,
+   "sh_R0": 0.143
+  },
+  {
+   "case": "mDC_1000",
+   "n": 383,
+   "G": 1247,
+   "infer_s": 22.2,
+   "nan": 0,
+   "org_acc": 0.9947780678851175,
+   "r0p_n": 13,
+   "sh_R0": 0.1593
+  },
+  {
+   "case": "mESC_500",
+   "n": 421,
+   "G": 941,
+   "infer_s": 13.9,
+   "nan": 0,
+   "org_acc": 1.0,
+   "r0p_n": 14,
+   "sh_R0": 0.1005
+  },
+  {
+   "case": "mESC_1000",
+   "n": 421,
+   "G": 1306,
+   "infer_s": 25.8,
+   "nan": 0,
+   "org_acc": 1.0,
+   "r0p_n": 15,
+   "sh_R0": 0.109
+  },
+  {
+   "case": "mHSC-E_500",
+   "n": 1071,
+   "G": 660,
+   "infer_s": 18.8,
+   "nan": 0,
+   "org_acc": 0.6676003734827264,
+   "r0p_n": 14,
+   "sh_R0": 0.0818
+  },
+  {
+   "case": "mHSC-E_1000",
+   "n": 1071,
+   "G": 1122,
+   "infer_s": 52.4,
+   "nan": 0,
+   "org_acc": 0.9878618113912232,
+   "r0p_n": 14,
+   "sh_R0": 0.0927
+  },
+  {
+   "case": "mHSC-GM_500",
+   "n": 889,
+   "G": 584,
+   "infer_s": 12.5,
+   "nan": 0,
+   "org_acc": 0.984251968503937,
+   "r0p_n": 13,
+   "sh_R0": 0.0836
+  },
+  {
+   "case": "mHSC-GM_1000",
+   "n": 889,
+   "G": 1030,
+   "infer_s": 35.9,
+   "nan": 0,
+   "org_acc": 1.0,
+   "r0p_n": 13,
+   "sh_R0": 0.0962
+  },
+  {
+   "case": "mHSC-L_500",
+   "n": 847,
+   "G": 489,
+   "infer_s": 8.9,
+   "nan": 0,
+   "org_acc": 0.9952774498229043,
+   "r0p_n": 14,
+   "sh_R0": 0.0879
+  },
+  {
+   "case": "mHSC-L_1000",
+   "n": 847,
+   "G": 647,
+   "infer_s": 14.7,
+   "nan": 0,
+   "org_acc": 1.0,
+   "r0p_n": 14,
+   "sh_R0": 0.0889
+  }
+ ]
+}

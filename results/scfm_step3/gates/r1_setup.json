@@ -1,0 +1,14 @@
+{
+ "vocab": 44756,
+ "genes_already_in_registry": 0,
+ "human_vocab": 23149,
+ "human_in_public_table": 23149,
+ "human_missing_from_public_examples": [],
+ "human_n_missing_from_public": 0,
+ "mouse_vocab": 21607,
+ "mouse_in_public_table": 21607,
+ "mouse_missing_from_public_examples": [],
+ "mouse_n_missing_from_public": 0,
+ "genes_in_registry_after": 44756,
+ "s": 387.4388518333435
+}

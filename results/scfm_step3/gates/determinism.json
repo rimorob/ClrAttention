@@ -1,0 +1,8 @@
+{
+ "case": "hESC_500",
+ "attn_bitwise_identical": true,
+ "attn_max_abs_diff": 0.0,
+ "nets_bitwise_identical": true,
+ "heads_identical": true,
+ "passed": true
+}

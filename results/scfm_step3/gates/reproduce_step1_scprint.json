@@ -1,0 +1,41 @@
+{
+ "scprint": "2.2.0",
+ "torch": "2.3.1+cu121",
+ "device": "NVIDIA GeForce GTX 1060 6GB",
+ "args": {
+  "cases": "all",
+  "arm": "A",
+  "ckpt_name": "medium-v1.5",
+  "control": "none",
+  "seed": 0,
+  "device": 1,
+  "bs": 8,
+  "out": "/home/boris/scfm_models/step3/_gates/repro2",
+  "store_attn": "auto",
+  "ncells_limit": 0,
+  "reproduce_step1": "/home/boris/scfm_models/smoke_out"
+ },
+ "ckpt": "/home/boris/scfm_models/scprint/medium-v1.5.ckpt",
+ "ckpt_sha256": "96ff7c5d9e1ad5076e818bde3c38f498c95cd354cc42029d90691b5ba2964ff8",
+ "route": "scprint.scPrint.load_from_checkpoint(strict=True)",
+ "depth_atinput": false,
+ "attn_bias": "none",
+ "load_s": 57.111165285110474,
+ "nlayers": 8,
+ "nheads": 4,
+ "n_prefix_tokens": 9,
+ "reproduce_step1": {
+  "shape": [
+   8,
+   4,
+   1161,
+   1161
+  ],
+  "max_abs_diff": 0.0,
+  "bitwise_identical": true,
+  "rel_L1": 0.0,
+  "mass_diff_vs_step1": 2.4890899674723244e-08,
+  "step2_npz_input_max_abs_diff_vs_step1_input": 0.0,
+  "step2_npz_input_identical": true
+ }
+}

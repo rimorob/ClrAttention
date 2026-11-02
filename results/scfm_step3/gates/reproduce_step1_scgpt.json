@@ -1,0 +1,52 @@
+{
+ "torch": "2.3.1+cu121",
+ "device": "NVIDIA GeForce GTX 1060 6GB",
+ "args": {
+  "cases": "hESC_500,hESC_1000,hHep_500,hHep_1000",
+  "device": 1,
+  "bs": 4,
+  "binning_seed": 20261021,
+  "tag": "",
+  "out": "/home/boris/scfm_models/step3/_checks/repro",
+  "ncells_limit": 0,
+  "reproduce_step1": "/home/boris/scfm_models/smoke_out"
+ },
+ "sha256_ok": {
+  "best_model.pt": true,
+  "vocab.json": true,
+  "args.json": true
+ },
+ "scgpt": "0.2.4",
+ "load_info": {
+  "ckpt_keys_not_in_model": [
+   "flag_encoder.weight"
+  ],
+  "model_keys_not_in_ckpt": [
+   "cls_decoder._decoder.0.bias",
+   "cls_decoder._decoder.0.weight",
+   "cls_decoder._decoder.2.bias",
+   "cls_decoder._decoder.2.weight",
+   "cls_decoder._decoder.3.bias",
+   "cls_decoder._decoder.3.weight",
+   "cls_decoder._decoder.5.bias",
+   "cls_decoder._decoder.5.weight",
+   "cls_decoder.out_layer.bias",
+   "cls_decoder.out_layer.weight"
+  ],
+  "n_params_unchanged_by_load": 0
+ },
+ "reproduce_step1": {
+  "shape": [
+   12,
+   8,
+   1221,
+   1221
+  ],
+  "max_abs_diff": 0.0,
+  "bitwise_identical": true,
+  "rel_L1": 0.0,
+  "check": {
+   "max_abs_diff_vs_torch_MHA_layer0": 0.0
+  }
+ }
+}
