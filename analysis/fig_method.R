@@ -12,6 +12,9 @@
 # expression matrix with planted structure (a chain module, a one-factor module, noise genes):
 #   D     bspline_mi() via ClrAttention$estimate_mi()        (diagonal zeroed as clr_calibrate does)
 #   CLR   clr_calibrate(method = "normal", combine = "stouffer") via $calibrate()
+#         (the 2007 code, CLR 1.1 of 2006-12-08, combines the clipped row z-scores as sqrt(zij^2 + zji^2);
+#          Stouffer, per-gene-temperature softmax and the walk are this work's; the MI estimator is
+#          B-spline smoothing of bin weights in both, Daub et al. 2004)
 #   A     .softmax_rows(S, keff, cap) via $build_operator(softmax_keff, softmax_cap)
 #   P^t   P = (1-alpha) I + alpha A, repeated product, K_t = (P^t + P^t')/2: the lines of
 #         analysis/baselines.R (the walk as evaluated in the paper); ASSERTED below by evaluating those
@@ -279,12 +282,14 @@ draw_fig <- function() {
     if (q < 4) head_arrow(xq + cw + 0.005, Y(cy_), xq + cw + cg - 0.005, Y(cy_), ink[["secondary"]], 1)
   }
   by_ <- Y(0.67)
-  for (b in list(list(1, 2, ink[["secondary"]], 1, "published CLR (2007), modified", "plain"),
+  for (b in list(list(1, 2, ink[["secondary"]], 1, c("published CLR (2007);", "combination step modified"), "plain"),
                  list(3, 4, ink[["primary"]], 2.4, "added here", "bold"))) {
     x0b <- cxs[b[[1]]]; x1b <- cxs[b[[2]]] + cws[b[[2]]]
     seg(x0b, by_, x1b, by_, b[[3]], b[[4]]); seg(x0b, by_, x0b, by_ - 0.04, b[[3]], b[[4]])
     seg(x1b, by_, x1b, by_ - 0.04, b[[3]], b[[4]])
-    txt(b[[5]], (x0b + x1b) / 2, by_ + 0.09, 7, if (b[[6]] == "bold") ink[["primary"]] else ink[["secondary"]], b[[6]])
+    for (q in seq_along(b[[5]]))
+      txt(b[[5]][q], (x0b + x1b) / 2, by_ + 0.09 + (length(b[[5]]) - q) * 0.11, 7,
+          if (b[[6]] == "bold") ink[["primary"]] else ink[["secondary"]], b[[6]])
   }
   pill("no learned parameters  |  unsupervised  |  expression data only", (cx0 + cxs[4] + cws[4]) / 2, Y(1.28),
        h = 0.2, size = 7, fill = "white", col = ink[["primary"]], face = "bold", border = ink[["muted"]])
@@ -313,7 +318,7 @@ draw_fig <- function() {
   # ---- panel 1: D -----------------------------------------------------------------------
   c1 <- 0.1; m1 <- G * c1; ytop1 <- Y(r1 + 0.8); x1 <- 0.72
   panel_head("1", "Dependence", 0.1, yh, "pairwise compatibility (parameter-free, symmetric)", pal[["blue"]],
-             "MI (B-spline estimator here)")
+             "MI (B-spline, as in CLR 2007)")
   heat(x1, ytop1, c1, D, ramps$D, vmax = max(D))
   bands(x1, ytop1, c1, G, I, J, ext = 0.1)
   mark(x1, ytop1, c1, I, J)
@@ -329,14 +334,14 @@ draw_fig <- function() {
   }
   ptext(substitute(D[ij] == MI * "(" * i * ", " * j * ")" ~ "=" ~ v, list(v = sprintf("%.2f", D[I, J]))),
         x1 + m1 / 2, ytop1 - m1 - 0.42, 8)
-  sw <- c("dependence measure:", "MI (B-spline) here;", "|r| and normal-", "scores correlation", "also tested")
+  sw <- c("dependence measure:", "MI (B-spline, as in 2007);", "|r| and normal-", "scores correlation", "also tested")
   rect(2.3, ytop1 - 0.5, 0.03, 0.5, fill = pal[["blue"]])
   for (q in seq_along(sw)) txt(sw[q], 2.38, ytop1 - 0.06 - (q - 1) * 0.105, 7, ink[["secondary"]], just = "left")
   big_arrow(3.02, 3.52, ytop1 - m1 / 2 - 0.1, pal[["orange"]], h = 0.22, hl = 0.15)
 
   # ---- panel 2: CLR ------------------------------------------------------------------------
   panel_head("2", "Per-gene calibration (CLR)", XD + 0.1, yh, "per-query normalization of the logits", pal[["orange"]],
-             c("CLR z-scores (Faith 2007);", "Stouffer combination here"))
+             c("z-scores as in CLR 2007;", "Stouffer (not Euclidean) here"))
   dx0 <- XD + 0.2; dx1 <- XD + 1.95; dh <- 0.3
   y_a <- Y(r1 + 1.22); y_b <- Y(r1 + 2.37)
   for (b in list(list(y_a, "i"), list(y_b, "j"))) {

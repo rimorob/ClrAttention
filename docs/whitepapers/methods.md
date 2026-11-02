@@ -29,7 +29,7 @@ On M3D, the common coarse-bin rules (6–10 bins) are indistinguishable from one
 
 ## 3. CLR calibration
 
-Each row of the MI matrix is z-scored against its own background (sample standard deviation, negative z clipped to 0).  The two directions are combined with Stouffer's rule, (z_ij + z_ji)/√2, which has a standard-normal null.  The 2007 Euclidean rule, √(z_ij² + z_ji²), gives almost identical rankings:  Spearman correlation 0.993, and the top-5,000 lists share 4,864 pairs.
+Each row of the MI matrix is z-scored against its own background (sample standard deviation, negative z clipped to 0).  The two directions are combined with Stouffer's rule, (z_ij + z_ji)/√2, which has a standard-normal null.  The original CLR code (CLR 1.1, released 8 December 2006: README and `clr.m`) combined the clipped row z-scores with the Euclidean formula, √(z_ij² + z_ji²) (its 'rayleigh' method combines CDF values); it has no Stouffer combination, and its MI estimator is the same B-spline family as ours (Daub et al. 2004; default 10 bins, spline degree 3).  Stouffer's rule, the per-gene-temperature softmax and the multi-step walk are this work's.  The Euclidean rule gives almost identical rankings:  Spearman correlation 0.993, and the top-5,000 lists share 4,864 pairs.
 
 **Permutation null for edge selection.**  Each gene's samples are shuffled independently, B = 100 times, and MI and CLR are recomputed with the observed bin counts.  The null scores are pooled in a streaming histogram, and edges are selected by Benjamini–Hochberg at q = 0.05.
 

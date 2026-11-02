@@ -21,7 +21,7 @@
 | Sentence | Evidence | Status |
 |---|---|---|
 | 1. Attention is older than the transformer | Nadaraya 1964; Watson 1964; Schmidhuber 1991; Schlag et al. 2021; Vaswani et al. 2017 (cited in the Introduction) | framing, plan §10 |
-| 2. CLR, first widely adopted attention-like form; still standard for de novo, unsupervised inference | Faith, Hayete et al. 2007; DREAM5 (Marbach et al. 2012); strongest method tested on BEELINE | worked, §10 and §6 |
+| 2. CLR, first widely adopted attention-like form (fact check 2 Nov 2026: the 2007 code already uses a B-spline MI estimator and a Euclidean combination of row z-scores; do not present B-spline MI or any combination rule as new, only the Stouffer combination, softmax and walk are ours); still standard for de novo, unsupervised inference | Faith, Hayete et al. 2007; DREAM5 (Marbach et al. 2012); strongest method tested on BEELINE | worked, §10 and §6 |
 | 3. Softmax, iterated attention, label-free held-out depth | median t* = 9 over 50 lab splits; flat for t = 7–11 | worked, QC, §1 |
 | 4a. Pooled recovery +16% over CLR, in all 1,000 resamplings | nested bootstrap +0.022 [+0.019, +0.026]; ahead in 1,000/1,000 | worked, QC, §1 |
 | 4b. Leads GENIE3 and PIDC under hub control | within-hub-stratum AUPR leads on SC truths: M3D over GENIE3 and PIDC, EcoMAC over GENIE3 (reviewed); the EcoMAC PIDC cell is so far only in `sota_table.md` (1.57 against 1.40, not yet reviewed) | mixed, QC, §5 |
