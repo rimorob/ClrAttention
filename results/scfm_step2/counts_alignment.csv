@@ -1,0 +1,15 @@
+case,genes,cells,cells_matched_to_geo,cells_verified,genes_in_geo_linear_verified,genes_with_counts,counts_available,geo_accession,geo_kind
+hESC_500,873,758,758,758,873,873,True,GSE75748,"RSEM expected counts (non-integer, 2 decimals); not UMI"
+hESC_1000,1323,758,758,758,1323,1323,True,GSE75748,"RSEM expected counts (non-integer, 2 decimals); not UMI"
+hHep_500,911,425,425,425,908,0,False,GSE81252,log2 values only (no counts in the deposit); BEELINE values are these values
+hHep_1000,1367,425,425,425,1364,0,False,GSE81252,log2 values only (no counts in the deposit); BEELINE values are these values
+mDC_500,807,383,383,383,807,0,False,GSE48968,RSEM TPM only (no counts in the deposit)
+mDC_1000,1270,383,383,383,1270,0,False,GSE48968,RSEM TPM only (no counts in the deposit)
+mESC_500,1071,421,421,421,1043,0,False,GSE98664,"sailfish transcript TPM (mergedGTF), summed to gene_name; no counts for the RamDA time course in the deposit (its count files cover 10pg and C1 cells only)"
+mESC_1000,1528,421,421,421,1470,0,False,GSE98664,"sailfish transcript TPM (mergedGTF), summed to gene_name; no counts for the RamDA time course in the deposit (its count files cover 10pg and C1 cells only)"
+mHSC-E_500,666,1071,1071,1071,666,666,True,GSE81682,"HTSeq integer counts, Ensembl IDs"
+mHSC-E_1000,1135,1071,1071,1071,1133,1133,True,GSE81682,"HTSeq integer counts, Ensembl IDs"
+mHSC-GM_500,593,889,889,889,591,591,True,GSE81682,"HTSeq integer counts, Ensembl IDs"
+mHSC-GM_1000,1055,889,889,889,1053,1053,True,GSE81682,"HTSeq integer counts, Ensembl IDs"
+mHSC-L_500,514,847,847,847,512,512,True,GSE81682,"HTSeq integer counts, Ensembl IDs"
+mHSC-L_1000,692,847,847,847,689,689,True,GSE81682,"HTSeq integer counts, Ensembl IDs"
