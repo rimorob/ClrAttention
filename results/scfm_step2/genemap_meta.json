@@ -1,0 +1,14 @@
+{
+ "ensembl_human_gtf_sha256": "5d3c363835bda4cf8ba025f728b190f69d454e894514bb3c81123efdb15ef1b9",
+ "ensembl_mouse_gtf_sha256": "fd89f56d03871fac5b05a699fa2ea0ce46245d35b64248cf74d9f70b59b61618",
+ "hgnc_sha256": "d93ce6b22d01dc1e1ded28857246951d605ead47ed17ef973ad1142b1d13bed0",
+ "mgi_list2_sha256": "00c4dd2abd9e2fe70b7810ee2914a6af65015dfd620fd493de2ce7f811cc915f",
+ "mgi_ensembl_sha256": "1c8ee6e696bc30dbe3eea7d73e58a1fe9c6ec38674db8ddf2f762babcae096eb",
+ "scprint_vocab_human": 23149,
+ "scprint_vocab_mouse": 21607,
+ "scprint_vocab_other": 0,
+ "scprint_ckpt_sha256": "96ff7c5d9e1ad5076e818bde3c38f498c95cd354cc42029d90691b5ba2964ff8",
+ "scgpt_vocab_size": 60697,
+ "vocab_nonprimary_human": 3141,
+ "vocab_nonprimary_mouse": 51
+}
