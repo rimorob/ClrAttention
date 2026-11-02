@@ -1,0 +1,39 @@
+[12:56:26] scfm_score_k562: truth=real out=results/scfm_score_k562 boot=1000 workers=6 
+[12:56:31] expression: 5 subsamples, 1244 genes x 1024 cells, median UMI scale 13714 
+[12:56:31] gene sets: full 1244, A (scPRINT) 1218, S (scGPT) 1240, AS 1217 
+[12:56:51] subsample 1: networks built 
+[12:57:11] subsample 2: networks built 
+[12:57:31] subsample 3: networks built 
+[12:57:50] subsample 4: networks built 
+[12:58:09] subsample 5: networks built 
+[12:58:17] truths (real): DoRothEA_AB 15267 edges; CollecTRI 64516 edges; KD_response 17019 edges 
+[12:59:47] scored 570 rows 
+[13:00:17]   CLR-NS vs scPRINT R0                                 DoRothEA_AB  regs 113  d = +0.310 [-0.163, +0.799]  (score_truth check +0.310) 
+[13:00:48]   CLR-NS vs scGPT attention                            DoRothEA_AB  regs 113  d = +1.002 [+0.553, +1.627]  (score_truth check +1.002) 
+[13:01:18]   CLR-NS vs scGPT token cosine                         DoRothEA_AB  regs 113  d = -0.714 [-1.257, -0.128]  (score_truth check -0.714) 
+[13:01:49]   CLR-NS vs scGPT hidden cosine                        DoRothEA_AB  regs 113  d = +0.233 [-0.286, +0.861]  (score_truth check +0.233) 
+[13:02:19]   scPRINT R0 vs scGPT attention (three-way set)        DoRothEA_AB  regs 113  d = +0.722 [+0.154, +1.355]  (score_truth check +0.722) 
+[13:02:49]   scPRINT R0 vs scGPT token cosine (three-way set)     DoRothEA_AB  regs 113  d = -1.003 [-1.639, -0.397]  (score_truth check -1.003) 
+[13:03:20]   scPRINT R0 vs scGPT hidden cosine (three-way set)    DoRothEA_AB  regs 113  d = -0.045 [-0.643, +0.625]  (score_truth check -0.045) 
+[13:04:34]   CLR-NS vs scPRINT R0                                 CollecTRI    regs 283  d = +0.360 [+0.123, +0.654]  (score_truth check +0.360) 
+[13:05:47]   CLR-NS vs scGPT attention                            CollecTRI    regs 283  d = +0.712 [+0.403, +1.130]  (score_truth check +0.712) 
+[13:06:58]   CLR-NS vs scGPT token cosine                         CollecTRI    regs 283  d = -0.325 [-0.661, -0.016]  (score_truth check -0.325) 
+[13:08:09]   CLR-NS vs scGPT hidden cosine                        CollecTRI    regs 283  d = +0.214 [-0.080, +0.595]  (score_truth check +0.214) 
+[13:09:22]   scPRINT R0 vs scGPT attention (three-way set)        CollecTRI    regs 283  d = +0.371 [+0.096, +0.672]  (score_truth check +0.371) 
+[13:10:38]   scPRINT R0 vs scGPT token cosine (three-way set)     CollecTRI    regs 283  d = -0.664 [-1.015, -0.398]  (score_truth check -0.664) 
+[13:11:51]   scPRINT R0 vs scGPT hidden cosine (three-way set)    CollecTRI    regs 283  d = -0.120 [-0.383, +0.134]  (score_truth check -0.120) 
+[13:12:33]   CLR-NS vs scPRINT R0                                 KD_response  regs 166  d = +0.134 [-0.013, +0.297]  (score_truth check +0.134) 
+[13:13:17]   CLR-NS vs scGPT attention                            KD_response  regs 166  d = +0.160 [+0.033, +0.332]  (score_truth check +0.160) 
+[13:14:02]   CLR-NS vs scGPT token cosine                         KD_response  regs 166  d = +0.096 [-0.039, +0.201]  (score_truth check +0.096) 
+[13:14:46]   CLR-NS vs scGPT hidden cosine                        KD_response  regs 166  d = +0.298 [+0.172, +0.440]  (score_truth check +0.298) 
+[13:15:31]   scPRINT R0 vs scGPT attention (three-way set)        KD_response  regs 166  d = +0.012 [-0.092, +0.121]  (score_truth check +0.012) 
+[13:16:16]   scPRINT R0 vs scGPT token cosine (three-way set)     KD_response  regs 166  d = -0.052 [-0.309, +0.111]  (score_truth check -0.052) 
+[13:17:02]   scPRINT R0 vs scGPT hidden cosine (three-way set)    KD_response  regs 166  d = +0.201 [+0.069, +0.327]  (score_truth check +0.201) 
+[13:17:02]   POOLED CLR-NS vs scPRINT R0                                 d = +0.268 [+0.090, +0.457] 
+[13:17:02]   POOLED CLR-NS vs scGPT attention                            d = +0.625 [+0.425, +0.888] 
+[13:17:02]   POOLED CLR-NS vs scGPT token cosine                         d = -0.314 [-0.547, -0.092] 
+[13:17:02]   POOLED CLR-NS vs scGPT hidden cosine                        d = +0.248 [+0.044, +0.486] 
+[13:17:02]   POOLED scPRINT R0 vs scGPT attention (three-way set)        d = +0.369 [+0.149, +0.616] 
+[13:17:02]   POOLED scPRINT R0 vs scGPT token cosine (three-way set)     d = -0.573 [-0.815, -0.353] 
+[13:17:02]   POOLED scPRINT R0 vs scGPT hidden cosine (three-way set)    d = +0.012 [-0.212, +0.252] 
+[13:17:02] done 
