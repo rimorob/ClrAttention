@@ -107,7 +107,7 @@
   - Not "attention helps", and not "wider contexts help".
   - Do not call CLR-NS "the best single-cell method" beyond the methods tested.
   - No p-values computed over 72 combinations as if they were independent.
-- **EcoMAC as an independent replication.** Its overlap with M3D arrays is unchecked. The held-out-depth and bootstrap analysis has not been run on EcoMAC, and its +0.032 is a point estimate.
+- **EcoMAC as an independent replication or an independent second dataset.** The overlap audit (1 Nov 2026, `docs/plans/ecomac_m3d_overlap.md`) found that 828 of 2,198 EcoMAC arrays (37.7%) have a one-to-one M3D counterpart, covering 91% of M3D's chips. Say instead: a larger, partly overlapping compendium that adds Genome 2.0 and post-2009 arrays and agrees on direction. Non-overlap sensitivity (post hoc, not preregistered, same truth; `docs/plans/ecomac_nonoverlap_rescore.md`): on the 1,370 arrays without an M3D counterpart attention minus CLR is +0.0285 SC, the same as on all arrays. The held-out-depth and bootstrap analysis has not been run on EcoMAC, and its +0.032 is a point estimate.
 - **Depth as a resolution parameter**, discrete scales or plateaus (multiscale pilot: did not work), or the size–depth relation as biology. That relation is a generic diffusion property, and large regulons' extra preference for depth is convergence to hubs.
 - **"Calibrated" or "FDR-controlled" attention weights.**
   - The permutation null calibrates CLR scores; iterated attention mass has no null.
@@ -146,7 +146,7 @@
    - If QC confirms this, "on par" in the abstract still holds, but the plan's "Holm p ≥ 0.21" needs updating.
    - The hub-controlled EcoMAC PIDC cell (`sota_table.md`: 1.57 against 1.40) is also not yet in the reviewed plan text.
 7. **Hub-control follow-ups.** These are: the macro view under hub control, a method-neutral hub stratifier, a cluster bootstrap for the knockdown-response modules and a no-ribosome sensitivity check. They could soften or sharpen the clique-loss sentence.
-8. **EcoMAC core analysis plus the M3D/EcoMAC array-overlap audit.** Together these would license "two compendia".
+8. **EcoMAC core analysis plus the M3D/EcoMAC array-overlap audit.** The audit is done (see the 'EcoMAC as an independent replication' item above): it does not license "two independent compendia"; write "two partly overlapping compendia". The held-out-depth and experiment-level bootstrap on EcoMAC are still outstanding.
 9. **Genome-wide K562 and RPE1 compendia (jobs 0871, 0872).** These turn "K562" into "human cell lines", or show that the effect is specific to K562.
 10. **Remaining human baselines.** Done: GENIE3, PIDC and GRNBoost2 are in the human competitor table (Table 2, 5,671 genes); GRNBoost2 was regenerated with legacy early stopping (jobs 0925 on 5,671 genes, 0929 on 8,559 genes; PIDC was not run on 8,559 genes).
 11. **Remaining analyses.** None of these changes the abstract unless it reverses a result:

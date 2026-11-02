@@ -64,7 +64,7 @@ The informative feature is the excess band, which is absent in single-platform d
    - The arrays without a GEO record are the weakest group.  Pooling heterogeneous sources dilutes the signal unless the heterogeneity is modelled.
 4. **Attention helps in every configuration.**  The gain is largest on the uncorrected pool:  +0.032 AUPR and +0.048 coherence over CLR(MI), against +0.021 / +0.031 on M3D.
 
-These are single fits without intervals.  ComBat correction by platform, a stronger batch model than centring, is used in Supplementary Note 7 and in the method comparison (main text, Table 2); like centring, it helps both dependence measures more than switching between them, and mutual information keeps a coherence edge after correction.  [PENDING:  held-out depth and experiment-level bootstrap intervals on EcoMAC, and an audit of arrays shared with M3D; until then EcoMAC is not an independent replication and its +0.032 is a point estimate.]
+These are single fits without intervals.  ComBat correction by platform, a stronger batch model than centring, is used in Supplementary Note 7 and in the method comparison (main text, Table 2); like centring, it helps both dependence measures more than switching between them, and mutual information keeps a coherence edge after correction.  [PENDING:  experiment-level bootstrap intervals on EcoMAC.  The audit of arrays shared with M3D is done (Supplementary Note 17): 828 of the 2,198 EcoMAC arrays (37.7%) have a one-to-one M3D counterpart, so EcoMAC is not an independent replication, and its +0.032 is a point estimate.]
 
 ---
 
@@ -217,7 +217,7 @@ Removing the top k principal components before co-expression network inference i
 
 **Reading.**
 
-1. **The attention gain survives component removal.**  At every k, on both compendia, attention on CLR(MI) beats CLR(MI), with intervals excluding zero (M3D +0.017 to +0.022; EcoMAC +0.020 to +0.029).  Attention does not merely duplicate the removal of global programs.
+1. **The attention gain survives component removal.**  At every k, on both (partly overlapping; Note 17) compendia, attention on CLR(MI) beats CLR(MI), with intervals excluding zero (M3D +0.017 to +0.022; EcoMAC +0.020 to +0.029).  Attention does not merely duplicate the removal of global programs.
 2. **Removing a few components helps both methods.**  With k = 2–3, CLR improves (M3D 0.136 → 0.146; EcoMAC 0.130 → 0.150) and attention on top of it gives the highest AUPR of any configuration.  Beyond about five components AUPR declines, as regulatory programs themselves start to be removed.
 3. **The permutation rule over-removes for this purpose.**  It selects k = 31 (M3D) and 68 (EcoMAC), where CLR falls below the uncorrected AUPR, although coherence with attention keeps rising.  We therefore keep k = 0 in the main analyses.  Choosing k = 2–3 because it scores best against RegulonDB would tune the preprocessing on the gold standard.
 4. **Mutual information is at least as good as |r| at every k,** and its advantage on EcoMAC widens as components are removed.

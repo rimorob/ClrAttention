@@ -35,6 +35,8 @@ Pooled AUPR over the base rate; bold is best in the full row (|r| is best on COR
 
 Full table, with all truths and footnotes: `docs/whitepapers/sota_table.md`.
 
+EcoMAC is not an independent replication of M3D. It is a larger, partly overlapping compendium: 828 of its 2,198 arrays (37.7%) have a one-to-one M3D counterpart, covering 91% of M3D's chips (overlap audit, 1 Nov 2026). On the 1,370 EcoMAC arrays without an M3D counterpart, attention minus CLR is +0.0285 on strong-evidence regulons, the same as on all arrays (+0.0278); this is a post hoc sensitivity analysis that is not preregistered and reuses the same truth, so it is a robustness check and not a held-out test.
+
 - **Per regulon** (each regulon weighted equally): attention ties CLR and GENIE3. Its mean AP is higher than |r|'s in 3 of 4 comparisons after correction and than PIDC's and GRNBoost2's in 1 of 4 each; medians are about equal. Its win rate is highest in regulons of 25 or more genes.
 - **Direct TF→target edges:** attention trails CLR. The walk trades edge precision for module recovery.
 
