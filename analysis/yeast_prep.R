@@ -12,8 +12,9 @@
 #   matrix             700 responsive mutants (published M) -> ORF x mutant matrix; deleted gene resolved via SGD
 #                      (unique aliases), verified by its own M (<= -1 and in the column's lowest 1%), else dropped;
 #                      masking of the deleted ORF and ORFs overlapping / within 500 bp; divergent-pair list
-#   check              three dye-orientation rules vs published M (first 10 mutants, C-locale order); floor r 0.8;
-#                      structural dye-balance check
+#   orient_split       DEVIATION 2: fixed 50/50 split of balanced mutants into fitting / held-out sets (seed 20261106)
+#   check              DEVIATION 2: per-sub-series orientation rule fitted on the fitting set (>= 5 mutants, else
+#                      "asis"); floor: held-out median r >= 0.8; structural dye check part 1 stops, part 2 = balanced only
 #   rebuild            only after a failed (but floor-passing) check: 376 random mutants (seed 20261105) rebuilt
 #   wt                 wild-type controls (GSE45115 sample tables) with the same rule and the structural check
 #   splits             10 random halves (seed 20261101); label-free mutant clusters (complete linkage, 1 - r,
@@ -37,7 +38,7 @@
 invisible(Sys.setlocale("LC_COLLATE", "C"))
 RNGkind("Mersenne-Twister", "Inversion", "Rejection")
 args <- commandArgs(trailingOnly = TRUE)
-STAGES <- c("selftest_gate", "selftest_git", "download", "matrix", "check", "rebuild", "wt", "splits", "feasibility",
+STAGES <- c("selftest_gate", "selftest_git", "download", "matrix", "orient_split", "check", "rebuild", "wt", "splits", "feasibility",
             "complex_structure", "regulon_structure")
 if (!length(args) || !args[1] %in% STAGES) stop("usage: Rscript analysis/yeast_prep.R <", paste(STAGES, collapse = "|"), "> [options]")
 stage <- args[1]
@@ -212,14 +213,16 @@ dye_check <- function(meta, tag) {   # DEVIATION 1: part 1 stops the stage; part
   say(sprintf("dye check %s: part 1 ok (%d hybridizations); balanced groups %d of %d", tag, nrow(meta), sum(bal), length(bal)))
   names(bal)[bal]
 }
+GSM_CACHE <- new.env()
 gsm_table <- function(gsm) {
+  if (!is.null(GSM_CACHE[[gsm]])) return(GSM_CACHE[[gsm]])
   f <- file.path(D, "gsm", paste0(gsm, ".txt"))
   if (!file.exists(f)) { dir.create(dirname(f), showWarnings = FALSE)
     fetch(sprintf("%s?acc=%s&targ=self&form=text&view=data", ACC, gsm), f); Sys.sleep(0.4) }
   L <- readLines(f); a <- which(L == "!sample_table_begin"); b <- which(L == "!sample_table_end")
   if (!length(a)) stop("no sample table in ", f)
   tb <- utils::read.delim(text = L[(a + 1L):(if (length(b)) b - 1L else length(L))], stringsAsFactors = FALSE)
-  stats::setNames(as.numeric(tb$VALUE), as.character(tb$ID_REF))
+  v <- stats::setNames(as.numeric(tb$VALUE), as.character(tb$ID_REF)); GSM_CACHE[[gsm]] <- v; v
 }
 platform <- function() {
   f <- file.path(D, "GPL11232_full.txt"); L <- readLines(f)
@@ -246,10 +249,14 @@ read_final <- function(g) {
   list(M = M, P = P, label = names(x)[mcol])
 }
 RULES <- c("asis", "flip_test_ch1", "flip_ref_ch1")
+subseries <- function(title) ifelse(grepl("^\\[", title), sub("^(\\[[^]]*\\]).*$", "\\1", title), "none")   # DEVIATION 2
+rule_of <- function(meta, rule) {     # `rule`: one rule, or a named vector sub-series -> rule (missing -> "asis")
+  if (length(rule) == 1L && is.null(names(rule))) return(rep(rule, nrow(meta)))
+  r <- unname(rule[subseries(meta$title)]); r[is.na(r)] <- "asis"; r }
+orient <- function(v, rule, ref_ch1) if ((rule == "flip_test_ch1" && !ref_ch1) || (rule == "flip_ref_ch1" && ref_ch1)) -v else v
 rebuild <- function(meta, rule, pf) {   # mean of the oriented hybridizations per group, then per ORF
-  key <- group_key(meta$title); r1 <- grepl(REF_RE, meta$src1, ignore.case = TRUE)
-  vals <- lapply(seq_len(nrow(meta)), function(k) { v <- gsm_table(meta$gsm[k])
-    if ((rule == "flip_test_ch1" && !r1[k]) || (rule == "flip_ref_ch1" && r1[k])) v <- -v; v })
+  key <- group_key(meta$title); r1 <- grepl(REF_RE, meta$src1, ignore.case = TRUE); rr <- rule_of(meta, rule)
+  vals <- lapply(seq_len(nrow(meta)), function(k) orient(gsm_table(meta$gsm[k]), rr[k], r1[k]))
   ids <- sort(Reduce(union, lapply(vals, names)))
   V <- vapply(vals, function(v) v[ids], numeric(length(ids))); rownames(V) <- ids
   V <- vapply(split(seq_len(ncol(V)), key), function(ix) rowMeans(V[, ix, drop = FALSE], na.rm = TRUE), numeric(nrow(V)))
@@ -317,35 +324,60 @@ if (stage == "matrix") {
   say("commit ", SEL, "/{deleteome_matrix.sha256, dropped_columns.csv, masking_log.csv, divergent_pairs.csv, ambiguous_aliases.txt}")
 }
 
-## ---- stage: check (SF4) -------------------------------------------------------------------------
+## ---- stage: orient_split (DEVIATION 2) -----------------------------------------------------------
+if (stage == "orient_split") {
+  mu <- series_meta("GSE42527"); bal <- dye_check(mu, "GSE42527")
+  pub <- read_final("GSE42527"); pool <- sort(intersect(unique(bal), tolower(colnames(pub$M))))
+  set.seed(20261106); fit <- pool[sort(sample.int(length(pool), floor(length(pool) / 2)))]
+  out <- data.frame(group = pool, set = ifelse(pool %in% fit, "fitting", "held_out"))
+  utils::write.csv(out, file.path(SEL, "orientation_split.csv"), row.names = FALSE)
+  say(sprintf("orientation split: %d balanced mutants -> %d fitting, %d held-out; commit and push before stage check",
+              length(pool), sum(out$set == "fitting"), sum(out$set == "held_out")))
+}
+
+## ---- stage: check (DEVIATION 2: per-sub-series rule, held-out floor) -------------------------
 if (stage == "check") {
-  pf <- platform(); mu <- series_meta("GSE42527"); bal <- dye_check(mu, "GSE42527"); key <- group_key(mu$title)
-  first10 <- sort(unique(key[key %in% bal]))[1:10]; meta <- mu[key %in% first10, ]
+  sp_f <- file.path(SEL, "orientation_split.csv")
+  if (!clean(sp_f) || !on_upstream(last_commit(sp_f))) stop("gate: orientation_split.csv must be committed and pushed before fitting")
+  sp <- utils::read.csv(sp_f); pf <- platform(); mu <- series_meta("GSE42527"); bal <- dye_check(mu, "GSE42527")
+  key <- group_key(mu$title); mu$key <- key; mu$ss <- subseries(mu$title)
   pub <- read_final("GSE42527"); Mo <- by_orf(pub$M, pf$orf[match(rownames(pub$M), pf$scab)])
-  res <- do.call(rbind, lapply(RULES, function(rule) { R <- rebuild(meta, rule, pf)
-    do.call(rbind, lapply(colnames(R), function(s) { j <- which(tolower(colnames(Mo)) == tolower(s))[1]
-      g <- intersect(rownames(R), rownames(Mo)); a <- R[g, s]; b <- Mo[g, j]
-      data.frame(rule = rule, mutant = s, r = stats::cor(a, b, use = "complete.obs"), med_abs = stats::median(abs(a - b), na.rm = TRUE)) })) }))
-  pass <- tapply(res$r >= 0.99 & res$med_abs <= 0.02, res$rule, all)
-  medr <- tapply(res$r, res$rule, stats::median)
-  rule <- if (any(pass)) names(pass)[pass][1] else names(which.max(medr))
-  status <- if (any(pass)) "published_M_reproduced" else if (medr[[rule]] >= 0.8) "NOT_reproduced_run_stage_rebuild" else "F_NOT_COMPUTABLE_verdict_1"
-  res$chosen <- res$rule == rule; res$status <- status
-  utils::write.csv(res, file.path(SEL, "implementation_check.csv"), row.names = FALSE)
-  writeLines(c(rule, status, env_info()), file.path(SEL, "orientation_rule.txt")); record_hashes()
-  say("orientation rule: ", rule, " (median r ", round(medr[[rule]], 3), "); status ", status)
+  r_of <- function(groups, rule) { meta <- mu[mu$key %in% groups, ]; if (!nrow(meta)) return(NULL); R <- rebuild(meta, rule, pf)
+    do.call(rbind, lapply(colnames(R), function(g) { j <- which(tolower(colnames(Mo)) == tolower(g))[1]
+      o <- intersect(rownames(R), rownames(Mo)); a <- R[o, g]; b <- Mo[o, j]
+      data.frame(group = g, r = stats::cor(a, b, use = "complete.obs"), med_abs = stats::median(abs(a - b), na.rm = TRUE)) })) }
+  fit <- sp$group[sp$set == "fitting"]; held <- sp$group[sp$set == "held_out"]
+  ss_of_group <- tapply(mu$ss, mu$key, function(v) if (length(unique(v)) == 1L) v[1] else "mixed")
+  rules <- list(); fitrows <- list()
+  for (ss in sort(unique(mu$ss[mu$key %in% c(fit, held)]))) {
+    g <- fit[ss_of_group[fit] == ss]
+    if (length(g) >= 5) {
+      med <- vapply(RULES, function(rl) stats::median(r_of(g, rl)$r), 0); rules[[ss]] <- names(which.max(med))
+    } else { med <- stats::setNames(rep(NA_real_, 3), RULES); rules[[ss]] <- "asis" }
+    fitrows[[ss]] <- data.frame(subseries = ss, n_fit = length(g), rule = rules[[ss]], t(med), default_used = length(g) < 5) }
+  rule_map <- unlist(rules)
+  utils::write.csv(do.call(rbind, fitrows), file.path(SEL, "orientation_rules.csv"), row.names = FALSE)
+  ho <- r_of(held, rule_map); ho$subseries <- ss_of_group[ho$group]; ho$set <- "held_out"
+  utils::write.csv(ho, file.path(SEL, "implementation_check.csv"), row.names = FALSE)
+  medr <- stats::median(ho$r, na.rm = TRUE)
+  status <- if (all(ho$r >= 0.99 & ho$med_abs <= 0.02)) "published_M_reproduced" else if (medr >= 0.8) "NOT_reproduced_run_stage_rebuild" else "F_NOT_COMPUTABLE_verdict_1"
+  writeLines(c("per_subseries:orientation_rules.csv", status, sprintf("heldout_median_r=%.4f n=%d", medr, nrow(ho)), env_info()),
+             file.path(SEL, "orientation_rule.txt")); record_hashes()
+  print(do.call(rbind, fitrows)); print(tapply(ho$r, ho$subseries, stats::median))
+  say(sprintf("held-out median r %.3f over %d mutants; status %s", medr, nrow(ho), status))
 }
 
 ## ---- stage: rebuild (only after a failed, floor-passing check) ----------------------------------
 if (stage == "rebuild") {
   rr <- readLines(file.path(SEL, "orientation_rule.txt"))
   if (rr[2] != "NOT_reproduced_run_stage_rebuild") stop("rebuild is used only after a failed but floor-passing check (status: ", rr[2], ")")
+  rmap <- utils::read.csv(file.path(SEL, "orientation_rules.csv")); rmap <- stats::setNames(rmap$rule, rmap$subseries)
   pf <- platform(); mu <- series_meta("GSE42527"); bal <- dye_check(mu, "GSE42527"); key <- group_key(mu$title)
   X <- rd_mat(file.path(D, "deleteome_responsive_700.tsv"))
   cand <- sort(intersect(unique(key[key %in% bal]), tolower(colnames(X)))); Nw <- length(unique(group_key(series_meta("GSE45115")$title)))
   set.seed(20261105); pick <- sort(cand[sample.int(length(cand), min(Nw, length(cand)))])
   meta <- mu[key %in% pick, ]
-  R <- rebuild(meta, rr[1], pf)
+  R <- rebuild(meta, rmap, pf)
   m <- utils::read.csv(file.path(SEL, "masking_log.csv")); s <- sgd()
   R <- R[intersect(rownames(X), rownames(R)), , drop = FALSE]
   mask <- matrix(FALSE, nrow(R), ncol(R), dimnames = dimnames(R))
@@ -353,19 +385,28 @@ if (stage == "rebuild") {
     if (!is.na(d)) mask[intersect(neighbours(s, d, 500), rownames(R)), j] <- TRUE }
   f <- finish_matrix(R, mask); wr_mat(f$X, file.path(D, "mutants_rebuilt_376.tsv"))
   writeLines(pick, file.path(SEL, "rebuilt_mutants.txt")); record_hashes()
-  say(sprintf("rebuilt %d mutants (rule %s) for gate F", ncol(f$X), rr[1]))
+  say(sprintf("rebuilt %d mutants (per-sub-series rules) for gate F", ncol(f$X)))
 }
 
-## ---- stage: wt ----------------------------------------------------------------------------------
+## ---- stage: wt (DEVIATION 2: "asis" + label-free pair check r > 0) ----------------------------
 if (stage == "wt") {
   rf <- file.path(SEL, "orientation_rule.txt"); if (!file.exists(rf)) stop("run stage check first")
   rr <- readLines(rf); if (rr[2] == "F_NOT_COMPUTABLE_verdict_1") stop("orientation floor failed: gate F not computable (verdict 1)")
   pf <- platform(); meta <- series_meta("GSE45115"); bal <- dye_check(meta, "GSE45115")
-  meta <- meta[group_key(meta$title) %in% bal, ]; W <- rebuild(meta, rr[1], pf)
+  meta <- meta[group_key(meta$title) %in% bal, ]; key <- group_key(meta$title)
+  one <- function(k) by_orf(matrix(gsm_table(meta$gsm[k]), ncol = 1, dimnames = list(names(gsm_table(meta$gsm[k])), "v")),
+                            pf$orf[match(names(gsm_table(meta$gsm[k])), pf$id)])
+  pc <- do.call(rbind, lapply(split(seq_len(nrow(meta)), key), function(ix) { a <- one(ix[1]); b <- one(ix[2])
+    o <- intersect(rownames(a), rownames(b)); data.frame(group = key[ix[1]], r_pair = stats::cor(a[o, 1], b[o, 1], use = "complete.obs")) }))
+  pc$pass <- is.finite(pc$r_pair) & pc$r_pair > 0
+  utils::write.csv(pc, file.path(SEL, "wt_pair_check.csv"), row.names = FALSE)
+  say(sprintf("WT pair check (r > 0): %d of %d balanced groups pass (%.1f%%)", sum(pc$pass), nrow(pc), 100 * mean(pc$pass)))
+  meta <- meta[key %in% pc$group[pc$pass], ]
+  W <- rebuild(meta, "asis", pf)
   W <- W[intersect(universe_rows(), rownames(W)), , drop = FALSE]
   f <- finish_matrix(W, matrix(FALSE, nrow(W), ncol(W)))
   wr_mat(f$X, file.path(D, "wt_controls_GSE45115.tsv")); record_hashes()
-  say(sprintf("wild-type matrix: %d ORFs x %d cultures (rule %s)", nrow(f$X), ncol(f$X), rr[1]))
+  say(sprintf("wild-type matrix: %d ORFs x %d cultures", nrow(f$X), ncol(f$X)))
 }
 
 ## ---- stage: splits (halves, clusters, experiment-jackknife replicates; SF5) ---------------------
