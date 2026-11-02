@@ -1,0 +1,2 @@
+"mutant_source","N_matched","genes","median_Rprime_mut","median_Rprime_wt","iqr_Rprime_mut","iqr_Rprime_wt","Q_overlap_share","genes_beyond_wt_median","genes_beyond_wt_q10","genes_beyond_wt_q90","R","RNG","collate","pass"
+"rebuilt_376",169,6169,0.122150483239986,0.295798427476412,0.0204818723152302,0.0198155577599683,0.204744233963375,386,51,2052.6,"R version 4.6.1 (2026-06-24)","Mersenne-Twister/Inversion/Rejection","C",FALSE
