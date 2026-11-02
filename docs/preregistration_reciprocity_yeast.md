@@ -1,6 +1,6 @@
 # Preregistration: reciprocal attention and headline replication on a held-out yeast deletion compendium
 
-> **STATUS: DRAFT rev 5, under review (1 Nov 2026). Not fixed.** This file becomes a preregistration only when this block is replaced, in a commit, by a single line of the form `> *Fixed 2026-MM-DD*` (a real date). Every truth-touching gate in `analysis/yeast_prep.R` and in the test script requires a line matching the regular expression `^> \*Fixed [0-9]{4}-[0-9]{2}-[0-9]{2}\*$`. That is a positive marker. The gate also requires that the date is a real calendar date and that no DRAFT status line remains. `Rscript analysis/yeast_prep.R selftest_gate [--prereg <file>]` prints "fixed" or "draft" for the file and tests the marker logic on derived copies (fixed and draft copies, the invalid dates 2026-99-99 and 2026-02-30, the placeholder, and a marker with a stray DRAFT line).
+> *Fixed 2026-11-01*
 
 *Drafted by Claude (Opus, high effort, statistics lead).*
 
@@ -25,7 +25,8 @@
 | Primary depth rule kept after the synthetic rescore (option A); same-depth contrast descriptive | PI, 1 Nov 2026 |
 | S3 stop branch; ρ ≈ 0.44 disclosed; gate F thresholds as judgment calls | PI, 1 Nov 2026 |
 | Collins timing condition relaxed | PI, 1 Nov 2026 |
-| **SF3: the complex power gate is computed from complex sizes before any regulon membership is built. If it fails, the reciprocity arms are "not run" (verdict 1): no R score is computed anywhere, and the human and descriptive arms do not run. H1 alone is still tested, which consumes the yeast regulon truth. Consumption is counted per truth, so the unscored complex truth is not consumed** | **PROVISIONAL: drafted on the coordinator's instruction, awaiting PI confirmation before this file is fixed** |
+| "Consumed" counted per truth (not per compendium), with the disclosure condition for the unscored complex truth | PI-confirmed, 1 Nov 2026 |
+| **SF3: the complex power gate is computed from complex sizes before any regulon membership is built. If it fails, the reciprocity arms are "not run" (verdict 1): no R score is computed anywhere, and the human and descriptive arms do not run. H1 alone is still tested, which consumes the yeast regulon truth. Consumption is counted per truth, so the unscored complex truth is not consumed** | **PI-confirmed, 1 Nov 2026** (drafted provisionally in rev 4–5) |
 
 ## Disclosure: what has been touched, and what was decided after seeing data
 
@@ -47,7 +48,7 @@
 | **Yeast is single-use** | The deleteome expression and every yeast truth below are untouched in this project. The a3r follow-up (interpretation memo section 7.3) and the C3 asymmetry edge test (`docs/plans/asymmetry_expert.md`) are **not** included and therefore can never use these yeast truths (PI decision). **"Consumed" is counted per truth:** a yeast truth is consumed once any operator has been scored against it.
 - A full truth phase consumes the regulon truth, the complex truth and the TF-edge truth.
 - A failure of gate F consumes nothing, because no truth is downloaded before it.
-- A failure of the complex power gate (or of P1 evaluability) builds complex membership and its size structure but scores nothing against it. Under the provisional SF3 rule, H1 is then still tested, which consumes the yeast regulon truth (and the TF-edge truth is not scored).
+- A failure of the complex power gate (or of P1 evaluability) builds complex membership and its size structure but scores nothing against it. Under the SF3 rule, H1 is then still tested, which consumes the yeast regulon truth (and the TF-edge truth is not scored).
 - The unscored complex truth stays **unconsumed**. It may be used later only under a new preregistration that discloses three things: its size structure (n_eff) was seen here; the deleteome expression was already used for H1; and this file's reciprocity arms were "not run". |
 | **Truth–data independence (review B1)** | YEASTRACT's expression evidence is mostly wild-type vs TF-mutant microarrays and may include the deleteome itself or its constituent Holstege-lab datasets. The primary regulon truth therefore requires expression evidence from a reference outside a fixed exclusion list, or falls back to DNA-binding evidence alone (see "Truths"). A contamination audit is committed before scoring. |
 | **What the drafter has seen of the yeast data** | The column headers and the first 1–3 rows (probes SCAB000001–3; M and p for about 10 mutants) of `GSE42527_final_GeneExpressionMatrix.txt.gz` and `GSE42526_final_GeneExpressionMatrix.txt.gz`; 35 rows of one wild-type sample table (GSM630359); GEO series metadata. That was to verify formats. No truth was seen. |
@@ -200,7 +201,7 @@ The list is committed as `docs/reciprocity_yeast_selections/excluded_pmids.txt` 
 - **S1 truth:** all merged complexes; positives = co-members of any merged complex.
 - **Fallback, fixed now.** If n_eff(P1) < 100 with Complex Portal, use the union of Complex Portal and CYC2008 (Pu et al. 2009; ORF lists), merged by the same rule, decided from counts alone before scoring.
   - **CYC2008 procedure (two runs of 8a).** The first 8a run is committed with the fallback status "CYC2008 required but not available". Then the CYC2008 file is downloaded, and its log `cyc2008_download_log.md` (source URL, date, SHA-256) is committed **after** that first run under the same strict ancestry rule. Then 8a is re-run with `--cyc2008`. The gate checks the file's SHA-256 against the log. Both runs' counts stay in the git history.
-  - If CYC2008 cannot be obtained, or the union still has n_eff < 100, the reciprocity arms get verdict 1 (H1 per the provisional SF3 rule).
+  - If CYC2008 cannot be obtained, or the union still has n_eff < 100, the reciprocity arms get verdict 1 (H1 per the SF3 rule).
   - The unused source is never scored.
 - **Ribosome (descriptive).** Merged complexes with ≥ 30% cytoplasmic r-protein ORFs: the ORFs of `SGD_features.tab` standard names matching `^RP[LS][0-9]+[AB]?$`.
 
@@ -215,7 +216,7 @@ The list is committed as `docs/reciprocity_yeast_selections/excluded_pmids.txt` 
 | S6 | ≥ 200 positive edges |
 | Human truths | ≥ 200 positive pairs |
 
-- A failing P1 truth gives verdict 1 for the reciprocity arms (H1 per the provisional SF3 rule).
+- A failing P1 truth gives verdict 1 for the reciprocity arms (H1 per the SF3 rule).
 - A failing regulon truth gives verdict 1 for the reciprocity arms and makes H1 "not evaluable".
 - A secondary truth that fails is "not evaluable", counts in its family, and is reported.
 - Verdict 3b (S1 not evaluable) is practically reachable only after a crash, because S1 contains P1's complexes (review2 N6).
@@ -284,7 +285,7 @@ All endpoints are pooled co-membership AUPR, R minus K10 unless stated, at the p
 | P2 | yeast regulons (primary truth, mode as computed) | non-inferiority, margin 0.005 |
 
 **Headline replication, a separate family H at one-sided α = 0.025.**
-- H1 is tested whatever P1 and P2 show. Under the provisional SF3 rule it is also tested when the reciprocity arms are not run because the complex power gate or P1 evaluability failed, provided gate F passed and the regulon truth is evaluable. In that case H1 is the only yeast score computed.
+- H1 is tested whatever P1 and P2 show. Under the SF3 rule it is also tested when the reciprocity arms are not run because the complex power gate or P1 evaluability failed, provided gate F passed and the regulon truth is evaluable. In that case H1 is the only yeast score computed.
 - The paper never combines family H with the P/S families (N7).
 - H1 superiority and the "significant CLR advantage" statement have nulls that are both true at d = 0, so family H is in effect a two-sided 0.05 test with directional conclusions (review2 N7).
 
@@ -414,9 +415,9 @@ All endpoints are pooled co-membership AUPR, R minus K10 unless stated, at the p
 
   - The 0.72 figure assumes the M3D ratio. In a perturbation compendium a small complex's co-expression can hinge on a few deletion columns, so ρ may be 1 or more, and the cluster jackknife is conservative by construction. **The test is therefore adequately powered only under favourable assumptions. This is disclosed, and the realised SE_J and SE_B are reported against these projections.** The MDE is reported, never observed power.
   - **Label-free SE_B proxy** (selection stage, reported, not gating): the SD of the criterion-A AP difference R vs K10 over the first 50 cluster-jackknife replicates. In replicate b the networks are fitted on the kept clusters at the committed t\* values, and the target is the top-1% CLR pairs of the deleted clusters' mutants (review2 N9).
-  - **Order (provisional SF3).** n_eff(P1) is computed in step 8a from Complex Portal membership and complex sizes only (and CYC2008 under the fallback), before any regulon membership is built. No expression value or network is used.
+  - **Order (SF3).** n_eff(P1) is computed in step 8a from Complex Portal membership and complex sizes only (and CYC2008 under the fallback), before any regulon membership is built. No expression value or network is used.
 - **Regulon arm (B2).** n_eff(P2) is computed the same way (Σ over regulons of within-regulon positive pairs) and reported by `regulon_structure`, not gating. *E. coli* mild K10 tweaks had paired regulon SEs of 0.0005–0.0022; at 0.0015 and ρ = 0.44, NI power at d = 0 is 0.86. **A failure to show non-inferiority under low power is not evidence of a regulon cost** (verdict 5a vs 5b).
-- **If the power gate fails** (after the CYC2008 fallback): verdict 1 for the reciprocity arms. Under the provisional SF3 rule (review3):
+- **If the power gate fails** (after the CYC2008 fallback): verdict 1 for the reciprocity arms. Under the SF3 rule (review3; PI-confirmed 1 Nov 2026):
   - **no R score is computed against any truth**, not even descriptively;
   - the HepG2, Jurkat, K562 and *E. coli* arms and every descriptive set do not run;
   - H1 (family H, K10 vs CLR on yeast regulons) is the only score computed, if gate F passed and the regulon truth is evaluable. It consumes the yeast regulon truth.
@@ -428,7 +429,7 @@ The verdict is computed by the script and written to `verdict.csv` before anyone
 | # | Condition | Verdict (one line) | Reporting |
 |---|---|---|---|
 | — | Synthetic implementation check of R fails (protocol step 5) | **No verdict.** Fix the implementation and log the cause before any real data are fitted | — |
-| 1 | Gate F fails or is not computable; or the power gate fails after the fallback; or a primary truth fails evaluability | **Not run:** no adequately powered held-out test of reciprocity was possible | Reciprocity stays a synthetic-only, explained candidate; the gate numbers are reported. No R score is computed; no human or descriptive arm runs. If F failed, nothing else runs and no truth is consumed. Otherwise H1 alone is tested under the provisional SF3 rule if the regulon truth is evaluable, consuming the regulon truth only |
+| 1 | Gate F fails or is not computable; or the power gate fails after the fallback; or a primary truth fails evaluability | **Not run:** no adequately powered held-out test of reciprocity was possible | Reciprocity stays a synthetic-only, explained candidate; the gate numbers are reported. No R score is computed; no human or descriptive arm runs. If F failed, nothing else runs and no truth is consumed. Otherwise H1 alone is tested under the SF3 rule if the regulon truth is evaluable, consuming the regulon truth only |
 | 2 | P1 and P2 pass, and S1 is rejected | **Confirmed, no large-complex cost:** reciprocal attention becomes the method's operator from here on | The *E. coli* headline keeps K10, and the order of events is stated; S2–S6 per Holm |
 | 3a | P1 and P2 pass, and S1 is evaluable but S1-NI is not rejected | **Confirmed as a complex-mode variant:** it improves small complexes; non-inferiority on all complexes was not shown | K10 stays the default; if S1-harm is rejected at 0.025 with d ≤ −0.005 (disjoint nulls), "large-complex cost" is said; S2–S6 descriptive |
 | 3b | P1 and P2 pass, and S1 is not evaluable | **Confirmed as a complex-mode variant; the large-complex question could not be evaluated** | as 3a, without any large-complex statement |
@@ -480,7 +481,7 @@ The verdict is computed by the script and written to `verdict.csv` before anyone
      - computes P1/S1 evaluability counts and n_eff(P1);
      - records SHA-256 of raw and built files and the test-script and converter hashes.
 
-     Commit and push. If the power gate or P1 evaluability fails, the reciprocity arms get verdict 1 (provisional SF3: only H1 continues, through 8b, 8c and step 10).
+     Commit and push. If the power gate or P1 evaluability fails, the reciprocity arms get verdict 1 (SF3: only H1 continues, through 8b, 8c and step 10).
    - **8b. YEASTRACT export:** performed only after 8a is committed and pushed, with the form fields above. Write the export log, including the `raw_export:` hash lines, then commit and push it in a commit of its own. The code enforces strict ancestry.
    - **8c. Regulons** (`yeast_prep.R regulon_structure`): checks the raw export files against the log's SHA-256, runs the committed converter on them, computes the mode, applies E and the reanalysis screen, and builds regulons and TF edges. It also computes the contamination audit, the P2/S6 evaluability counts and n_eff(P2), and records SHA-256. It verifies the expression matrix against `deleteome_matrix.sha256` and gates `masking_log.csv` and `dropped_columns.csv`. Commit.
 9. **Code review** of the committed test script against this file, by a reviewer who has seen no yeast or HepG2 score. A required change is a logged deviation and is committed before step 10.
@@ -536,7 +537,7 @@ The verdict is computed by the script and written to `verdict.csv` before anyone
 |---|---|
 | BL2 residual | Holm step-down on p-values only; d-thresholds qualify wording only; loss definition with a "decrease smaller than the margin" wording; 5a reads "no significant regulon loss (as defined)"; verdict 4 regulon line always evaluated; precedence order stated; worked example (p₁ 0.020, p_harm 0.005, d₂ −0.004) → 5a; 1.5α worst case disclosed |
 | Self-test | `selftest_gate` reports "fixed"/"draft" for any file (`--prereg`), validates a real date and the absence of a DRAFT line, and tests derived copies; passes on this draft and on a fixed copy |
-| SF3 consistency | Under verdict 1 from 8a: no R score anywhere, no human or descriptive arm, H1 only; consumption counted per truth; the unscored complex truth stays unconsumed (with a disclosure condition); per-truth jackknife seeds; still PROVISIONAL |
+| SF3 consistency | Under verdict 1 from 8a: no R score anywhere, no human or descriptive arm, H1 only; consumption counted per truth; the unscored complex truth stays unconsumed (with a disclosure condition); per-truth jackknife seeds; still provisional in rev 5 (PI-confirmed when fixed, 1 Nov 2026) |
 | SF2 code | Adding commit of each log, strictly later than the earlier commits; log must not change after it was added; shallow clones refused; every gate commit must be on the upstream branch; `yeast_prep.R` gated and its blob recorded; 8c runs the committed converter on the hashed raw export; converter deviation route; CYC2008 two-run procedure; ancestry check for `excluded_pmids.txt`; `selftest_git` tests these rules in a throw-away repository |
 | Converter | Anchored whole-token label table ("Indirect" → expression; "Expression; ChIP-chip" → both, unattributed); stop on any unrecognised label; value column never an "evidence" column |
 | Notes | Stage name in `excluded_pmids.txt` corrected; what code cannot prove about export timing stated |
@@ -549,7 +550,7 @@ The verdict is computed by the script and written to `verdict.csv` before anyone
 | BL2 | NI and harm declared disjoint-null tests at full level; claims outside the IUT use Holm over {H_P1, H_P2}; 5a/5b conditions wired to it; new 5c; S1-harm defined at 0.025 when S1-NI is not rejected |
 | SF1 | YEASTRACT mode computed by code (≥ 95% of expression-evidence associations with attributed PMIDs); combined-only PMIDs give binding_only; converter committed before the export with a fixed label table; form fields fixed |
 | SF2 | Step 8 split into 8a (complexes, power gate), 8b (export), 8c (regulons); ancestry enforced with `git merge-base --is-ancestor`; CYC2008 under the same rule |
-| SF3 | **PROVISIONAL:** complex power gate before any regulon membership; on failure the reciprocity arms are verdict 1 but H1 is still tested and consumes the regulon truth; "consumed" defined |
+| SF3 | Provisional in rev 4 (PI-confirmed when fixed, 1 Nov 2026): complex power gate before any regulon membership; on failure the reciprocity arms are verdict 1 but H1 is still tested and consumes the regulon truth; "consumed" defined |
 | SF4 | Third dye rule; median r floor 0.8 (else F not computable, verdict 1); structural dye-balance check for mutants and WT |
 | SF5 | Fallback for K < 20 or a cluster > 25% (cluster-stratified delete-half); RNG and R version pinned; complete-linkage caveat disclosed |
 | SF6 | Resolved deleted ORF must have M ≤ −1 and lie in its column's lowest 1%, else the column is dropped |
@@ -562,5 +563,6 @@ The verdict is computed by the script and written to `verdict.csv` before anyone
 - 2026-11-01: DRAFT rev 1 (18babdb).
 - 2026-11-01: DRAFT rev 2: review fd9c827 addressed (see "Changes from rev 1"). Not fixed.
 - 2026-11-01: DRAFT rev 3: PI decisions recorded. Primary depth rule kept after review of the synthetic rescore (option A); same-depth contrast (both at t\*_K10) added as a fixed descriptive secondary; S3 stop branch, ρ ≈ 0.44 disclosure and gate F thresholds kept as written; E. coli/EcoMAC counted as one compendium, so H1 on yeast is the first organism-independent replication. No endpoint, threshold or verdict rule changed. Not fixed.
+- 2026-11-01: **FIXED.** The PI confirmed SF3 (complex power gate from Complex Portal sizes before any regulon truth is built; on failure the reciprocity arms get verdict 1 but H1 is still scored, consuming the yeast regulon truth) and the per-truth definition of "consumed" with its disclosure condition. Provisional flags removed; status block replaced by the fixed-date marker. No other change from DRAFT rev 5 (ba73a50). `excluded_pmids.txt` was committed earlier (18babdb onward).
 - 2026-11-01: DRAFT rev 5: review3 858c08d addressed (see "Changes from rev 4"); no endpoint, margin or threshold changed; verdict 4's regulon line and the Holm rule made explicit; SF3 still provisional. Not fixed.
 - 2026-11-01: DRAFT rev 4: review2 226e53e addressed (see "Changes from rev 3"). Verdict 5c added and the claim rule wired into verdicts 4–5; the order of the truth-structure steps changed (8a–8c); SF3 provisional pending PI confirmation. Not fixed.
