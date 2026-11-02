@@ -288,8 +288,10 @@ def main():
         if store:
             np.save(base + ".attn.npy", A)
             M["attn_file_sha256"] = sha256(base + ".attn.npy")
-        np.savez(base + ".nets.npz", R0=R0.astype(np.float32), R0p=R0p.astype(np.float32), R2=R2.astype(np.float32),
-                 genes=np.array(use.symbol), ensembl=np.array(use.ensembl), r0p_heads=np.array(hs))
+        nets = dict(R0=R0.astype(np.float32), genes=np.array(use.symbol), ensembl=np.array(use.ensembl), r0p_heads=np.array(hs))
+        if a.control == "none" and a.ckpt_name == "medium-v1.5":      # controls and secondary checkpoints: R0 only (mean readout)
+            nets.update(R0p=R0p.astype(np.float32), R2=R2.astype(np.float32))
+        np.savez(base + ".nets.npz", **nets)
         M["nets_file_sha256"] = sha256(base + ".nets.npz")
         M["total_s"] = time.time() - tc
         json.dump(M, open(base + ".json", "w"), indent=1, default=str)
