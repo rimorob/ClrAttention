@@ -563,6 +563,18 @@ The verdict is computed by the script and written to `verdict.csv` before anyone
 - 2026-11-01: DRAFT rev 1 (18babdb).
 - 2026-11-01: DRAFT rev 2: review fd9c827 addressed (see "Changes from rev 1"). Not fixed.
 - 2026-11-01: DRAFT rev 3: PI decisions recorded. Primary depth rule kept after review of the synthetic rescore (option A); same-depth contrast (both at t\*_K10) added as a fixed descriptive secondary; S3 stop branch, ρ ≈ 0.44 disclosure and gate F thresholds kept as written; E. coli/EcoMAC counted as one compendium, so H1 on yeast is the first organism-independent replication. No endpoint, threshold or verdict rule changed. Not fixed.
+- 2026-11-01: **DEVIATION 1 (PI decision, before any truth was downloaded or opened; yeast unconsumed).**
+  - *Where:* gate F item 1, structural dye check (review2 SF4 iii).
+  - *What was found:* at protocol step 3 (jobs 0982–0983; `docs/reciprocity_yeast_selections/step3_stop_report.md`, commit 7a5d791) the label-free GEO metadata turned out to be irregular:
+    - part 1, exactly one reference channel per hybridization, holds for 1,387/1,387 mutant and 755/755 wild-type hybridizations;
+    - part 2, one hybridization of each orientation per pair, fails for 15 of 701 mutants (13 single hybridizations; cho2 and dbp3 with two in one orientation), and for some wild-type title stems (about 61 of 407 unbalanced).
+  - *Change:*
+    - part 1 remains the orientation check and still stops the stage if violated;
+    - part 2 no longer stops the stage. It is applied as "balanced groups only" (exactly two hybridizations, one of each orientation) for the orientation-rule reproduction (the first 10 balanced mutants in C-locale order), for the rebuild fallback's candidate pool, and for gate F's wild-type matrix;
+    - unbalanced mutants leave the check pool and unbalanced wild-type groups leave gate F;
+    - the confirmatory published-M matrix (652 mutants after the preregistered resolution and own-M rules) is unaffected.
+  - *Also logged:* a code bug fixed at step 3 (the grouping key did not strip GEO title prefixes such as `[hs1991] `, and it paired mutant cultures by title stem instead of by deleted gene). That is an implementation fix, not a design change.
+  - The PI chose option (a) of the stop report on 1 Nov 2026.
 - 2026-11-01: **FIXED.** The PI confirmed SF3 (complex power gate from Complex Portal sizes before any regulon truth is built; on failure the reciprocity arms get verdict 1 but H1 is still scored, consuming the yeast regulon truth) and the per-truth definition of "consumed" with its disclosure condition. Provisional flags removed; status block replaced by the fixed-date marker. No other change from DRAFT rev 5 (ba73a50). `excluded_pmids.txt` was committed earlier (18babdb onward).
 - 2026-11-01: DRAFT rev 5: review3 858c08d addressed (see "Changes from rev 4"); no endpoint, margin or threshold changed; verdict 4's regulon line and the Holm rule made explicit; SF3 still provisional. Not fixed.
 - 2026-11-01: DRAFT rev 4: review2 226e53e addressed (see "Changes from rev 3"). Verdict 5c added and the claim rule wired into verdicts 4–5; the order of the truth-structure steps changed (8a–8c); SF3 provisional pending PI confirmation. Not fixed.
