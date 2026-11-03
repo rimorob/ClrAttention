@@ -10,7 +10,7 @@
 #' @param mi symmetric numeric MI matrix (e.g. from [bspline_mi()]).
 #' @param method "normal" (z-scores, default), "rayleigh", or "kde".
 #' @param combine bilateral combination for method = "normal": "stouffer"
-#'   (default since 2026-09-23: (z_ij+z_ji)/sqrt(2), standard-normal null) or
+#'   (default since 2026-09-23: (z_ij+z_ji)/sqrt(2); a ranking score, NOT standard-normal under permutation: corr(z_ij, z_ji) ~ 0.998 and both are clipped) or
 #'   "euclidean" (historical 2007: sqrt(z_ij^2 + z_ji^2), Rayleigh-type null).
 #'   Ignored (with an error if non-default) for other methods.
 #' @return symmetric G x G CLR score matrix with zero diagonal.

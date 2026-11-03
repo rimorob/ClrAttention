@@ -2,6 +2,8 @@
 
 *3 November 2026. Expert memo for the PI (network inference, dependence statistics, diffusion on graphs, attention; Claude Opus). Everything computed here is **EXPLORATORY**. K562 CORUM, DoRothEA and CollecTRI are in-sample: they were already used in `docs/plans/corum_analysis.md`, the keff test, the CLR(log Pᵗ) test and `analysis/rclr_k562/`. BEELINE truths are in-sample for CLR-NS, which was chosen on them. No held-out or sealed truth was opened: no DREAM5 gold standard, no yeast truth, no E. coli complex truth, no RPE1 file, no scFM K562 truth. Labels: **[V]** I re-derived or re-read it; **[R]** recalled from a cited doc and not re-derived; **[S]** speculation.*
 
+> **QC (3 Nov, `docs/plans/corum_expert2_qc.md`): PASS WITH CORRECTIONS.** All numbers reproduce. Read the QC discrepancy table before quoting: (1) the 'real rows are near-symmetric' statement holds for |r| only (B-spline MI row skewness is 1.19 in BEELINE vs 0.70 in the null); (2) 'ranking is not affected' is true only for the ties artefact, row calibration does change the pooled top-1% (Jaccard 0.75 for median/MAD); (3) 'MI is more skewed under the null' holds for K562 only; (4) the false 'standard-normal null' sentence also stood in `methods.md` and `R/calibrate.R` (all three fixed 3 Nov).
+
 ## Verdicts
 
 **Task A: no untested reason for the CORUM loss remains that attention can address and that would survive a held-out test.**
