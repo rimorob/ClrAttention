@@ -1,0 +1,35 @@
+# Disk budget and cleanup list
+
+Set by the PI on 2 Nov 2026: **50 GB total for the project's added storage** (raised from 20 GB for `~/scfm_models`), "to ensure we are not shortchanging ourselves". Track what can be deleted; **clean up when the paper is ready, not before.** Nothing below is to be deleted until then.
+
+Counted against the budget: `~/scfm_models`, the scFM virtual environments, `data/yeast`, and anything new (DREAM5, fine-tuning, later jobs). Pre-existing project data (`data/perturbseq`, `data/beeline`, M3D, etc.) and `results/` are listed for information and are not counted. Machine: one 954 GB NVMe, 311 GB free on 2 Nov (66% used).
+
+## Counted (2 Nov 2026, 21:50)
+
+| Location | Size | Contents | Deletable when the paper is ready? |
+|---|---|---|---|
+| `~/scfm_models/step3` | 5.7 GB | frozen step-3 extraction (scPRINT arms A/B, R1, scGPT, controls, K562 step 3); SHA-256 manifest in `results/scfm_step3/` | No: the scored inputs; keep until the repository tag, then recomputable (about 1.5 GPU-hours) |
+| `~/scfm_models/smoke_out` | 2.7 GB | step-2 smoke-test outputs | **Yes** (superseded by step 3) |
+| `~/scfm_models/scprint` | 1.5 GB | scPRINT checkpoints (medium-v1.5 222 MB; large-v1, small-v1) | Re-downloadable; keep while fine-tuning runs |
+| `~/scfm_models/step4_scoring`, `step4_k562` | 1.0 GB + 0.5 GB | derived scoring exports (BEELINE, K562) | **Yes** after the final numbers are archived (re-exportable by `analysis/scfm_score_export.py`) |
+| `~/scfm_models/raw` | 0.9 GB | downloaded raw count matrices (GEO) | Re-downloadable; keep until K562/BEELINE inputs are archived |
+| `~/scfm_models/scgpt_human` | 0.2 GB | scGPT whole-human checkpoint | Re-downloadable |
+| `~/scfm_models/step2`, `lamin_*` | 0.2 GB | gene maps, leakage audit, lamin instances | Keep (small; the audit is cited) |
+| `~/venvs/scfm` | 7.1 GB | scGPT environment (torch 2.6, CUDA) | **Yes**, rebuildable from the install notes in `docs/STATUS.md` |
+| `~/venvs/scfm_alt` | < 0.01 GB | scprint 2.2.0 environment (links) | Keep |
+| `data/yeast` | 2.1 GB | Kemmeren deleteome and series matrices (never scored; verdict 1) | **Yes** if the yeast test is dropped; keep if DREAM5/yeast follow-up goes ahead |
+
+Total counted: about 22 GB of 50 GB.
+
+## Not counted, for information
+
+| Location | Size | Note |
+|---|---|---|
+| `results/` | 27 GB (gitignored) | largest: `clr_logpt_test` 7.5 GB; `baselines_k562ess_truthgenes_genie3` 2.5 GB; `grnboost2_superseded` 1.9 GB (**superseded GRNBoost2 runs, deletable**); `grnboost2_check` 1.8 GB; `beeline_baselines` and `baselines_k562ess_genie3` 1.6 GB each |
+| `data/perturbseq` | 11 GB | K562 Perturb-seq inputs: needed |
+| `data/beeline` | 0.75 GB | BEELINE inputs: needed |
+| `~/venvs/clr-baselines`, `gb2-legacy-check*` | 0.6 + 0.5 + 0.5 GB | `gb2-legacy-check-py311-failed` is a failed environment: **deletable** |
+| `docs/whitepapers/figures/pb_runs/` | 0.16 GB (untracked) | old PaperBanana runs; keep only the round-4 layout reference |
+
+## New items (append below; one row each: path, size, source, deletable yes/no)
+
