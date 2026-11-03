@@ -21,7 +21,7 @@ d_i = for dataset i, the mean over gene sets and primary truths of log2(AUPRC ra
 
 | Dataset | cells | AUPRC ratio CLR-NS (mean) | AUPRC ratio scPRINT R0 (mean) | d_i |
 |---|---|---|---|---|
-| hESC | 6 | 1.26 | 1.18 | +0.103 |
+| hESC | 6 | 1.26 | 1.18 | +0.102 |
 | hHep | 6 | 1.44 | 0.98 | +0.484 |
 | mDC | 6 | 1.57 | 1.05 | +0.583 |
 | mESC | 8 | 1.49 | 1.01 | +0.498 |
