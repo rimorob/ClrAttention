@@ -173,6 +173,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--store-attn", choices=["auto", "yes", "no"], default="auto")
     ap.add_argument("--ncells-limit", type=int, default=0, help="TEST ONLY: first N cells")
+    ap.add_argument("--load-state-dir", default="", help="E17 fine-tuning arm: per case, replace the model weights by <dir>/<case>.pt (fp32 state dict "
+                    "written by analysis/scfm_finetune_scprint.py) before the unchanged readout; empty = zero-shot (default, no effect)")
     ap.add_argument("--reproduce-step1", default="", help="step-1 smoke dir: reproduce attn_run1.npz exactly (hESC_1000, 64 cells) and exit")
     a = ap.parse_args()
     assert a.device != 0, "device 0 is the desktop GPU: never used"
@@ -231,6 +233,11 @@ def main():
     for case in cases:
         tc = time.time()
         use, x, cells, note = case_inputs(case, a.arm)
+        if a.load_state_dir:
+            sp = os.path.join(os.path.expanduser(a.load_state_dir), case + ".pt")
+            note["ft_state_file"], note["ft_state_sha256"] = sp, sha256(sp)
+            model.load_state_dict(torch.load(sp, map_location="cpu"), strict=True)
+            model.eval().to(dev)
         if a.ncells_limit:
             x, cells = x[:a.ncells_limit], cells[:a.ncells_limit]
         n, G = x.shape
