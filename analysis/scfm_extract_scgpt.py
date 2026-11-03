@@ -82,6 +82,8 @@ def main():
     ap.add_argument("--tag", default="")
     ap.add_argument("--out", required=True)
     ap.add_argument("--ncells-limit", type=int, default=0, help="TEST ONLY")
+    ap.add_argument("--load-state-dir", default="", help="E17 fine-tuning arm: per case, replace the model weights by <dir>/<case>.pt (fp32 state dict "
+                    "written by analysis/scfm_finetune_scgpt.py) before the unchanged readout; empty = zero-shot (default, no effect)")
     ap.add_argument("--reproduce-step1", default="")
     a = ap.parse_args()
     assert a.device != 0
@@ -125,6 +127,13 @@ def main():
     manifest = []
     for case in a.cases.split(","):
         tc = time.time()
+        ft = {}
+        if a.load_state_dir:
+            sp = os.path.join(os.path.expanduser(a.load_state_dir), case + ".pt")
+            ft = dict(ft_state_file=sp, ft_state_sha256=sha256(sp))
+            model.load_state_dict(torch.load(sp, map_location="cpu"), strict=True)
+            model.eval().to(dev)
+            tok = model.encoder.embedding.weight.detach()
         z = np.load(f"{STEP2}/{case}.npz", allow_pickle=True)
         gm = pd.read_csv(f"{ROOT}/results/scfm_step2/gene_map/{case}.tsv", sep="\t")
         assert list(gm.symbol) == list(z["genes"]) and case.startswith("h")
@@ -149,7 +158,7 @@ def main():
             e_raw = torch.nn.functional.normalize(tok[ids.to(dev)].float(), dim=-1)
             e_ln = torch.nn.functional.normalize(model.encoder(ids.unsqueeze(0).to(dev))[0].float(), dim=-1)
             tok_cos, tok_cos_ln = (e_raw @ e_raw.T).cpu().numpy(), (e_ln @ e_ln.T).cpu().numpy()
-        M = dict(case=case, n_cells=int(n), n_genes=int(G), binning_seed=a.binning_seed, tag=a.tag, infer_s=infer_s,
+        M = dict(case=case, n_cells=int(n), n_genes=int(G), binning_seed=a.binning_seed, tag=a.tag, infer_s=infer_s, **ft,
                  gpu_peak_alloc_MiB=torch.cuda.max_memory_allocated(dev) / 2**20, check=chk,
                  attn_nan=int(np.isnan(A).sum()), attn_inf=int(np.isinf(A).sum()), row_sum_min=float(A.sum(-1).min()), row_sum_max=float(A.sum(-1).max()),
                  cls_token_mass=np.round(cm, 5).tolist(), rel_entropy=np.round(ent, 4).tolist(),
