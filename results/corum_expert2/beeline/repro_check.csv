@@ -1,0 +1,4 @@
+"check","n","max_abs_diff"
+"CLR-NS AUPRC ratio max |diff| vs results/beeline_baselines",72,4.2632564145606e-14
+"CLR (MI) AUPRC ratio max |diff|",72,4.9737991503207e-14
+"|r| Blom vs |r| raw (expected to differ)",72,6.12956270864006

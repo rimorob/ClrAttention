@@ -1,0 +1,2 @@
+"label","method","reference","spearman","jaccard_top1pct","row_top10_overlap","ties_at_top_frac"
+"k562","clr_absr","clr_mi",0.611336451350713,0.448575058340166,0.452847822253571,6.21994986720407e-06

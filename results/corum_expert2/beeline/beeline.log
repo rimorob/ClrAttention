@@ -1,0 +1,16 @@
+[12:49:44] hESC_500: 873 genes x 758 cells, diagnostics done (32.4 s) 
+[12:50:25] hESC_1000: 1323 genes x 758 cells, diagnostics done (40.9 s) 
+[12:50:41] hHep_500: 911 genes x 425 cells, diagnostics done (15.9 s) 
+[12:51:09] hHep_1000: 1367 genes x 425 cells, diagnostics done (28.5 s) 
+[12:51:21] mDC_500: 807 genes x 383 cells, diagnostics done (11.8 s) 
+[12:51:44] mDC_1000: 1270 genes x 383 cells, diagnostics done (23.2 s) 
+[12:52:12] mESC_500: 1071 genes x 421 cells, diagnostics done (27.6 s) 
+[12:52:57] mESC_1000: 1528 genes x 421 cells, diagnostics done (44.8 s) 
+[12:53:08] mHSC-E_500: 666 genes x 1071 cells, diagnostics done (11.4 s) 
+[12:53:33] mHSC-E_1000: 1135 genes x 1071 cells, diagnostics done (25.0 s) 
+[12:53:42] mHSC-GM_500: 593 genes x 889 cells, diagnostics done (8.5 s) 
+[12:54:01] mHSC-GM_1000: 1055 genes x 889 cells, diagnostics done (19.8 s) 
+[12:54:08] mHSC-L_500: 514 genes x 847 cells, diagnostics done (7.0 s) 
+[12:54:18] mHSC-L_1000: 692 genes x 847 cells, diagnostics done (9.9 s) 
+[12:54:18] stage 1 (label-free) written 
+[12:57:54] done 
