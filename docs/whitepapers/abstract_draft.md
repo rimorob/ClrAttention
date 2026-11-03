@@ -29,7 +29,7 @@
 | 5. Per-regulon parity | Holm p ≥ 0.21 against CLR, GENIE3 and PIDC | mixed, QC, §5 |
 | 6. Resolution traded for aggregation | gain sits in regulons of ≥ 100 genes; 86% of the CORUM loss is ribosome and pre-rRNA complexes | QC, §5 |
 | 7. Human gains small; single cell nothing | DoRothEA +0.006 [0.002, 0.010] under hub control; attention adds nothing over CLR-NS | mixed, QC, §5; did not work, QC, §6 |
-| 8. [PENDING] learned attention | scPRINT (primary) and scGPT (secondary), zero-shot | not started, §5 |
+| 8. Learned attention (result in; sentence still to write) | CLR-NS non-inferior and superior to zero-shot scPRINT (+1.03 log2 [+0.34, +1.90], 7 of 7); scPRINT at permutation level; zero on cell-type ChIP; scGPT n = 2 mixed | preregistered, run once, `docs/scfm_scoring.md` |
 
 **Notes for the rewrite**
 - **"First widely adopted" is unhedged here** to save words. The Nature Communications version keeps "to our knowledge". Either way, the Introduction should separate CLR from topological overlap (see `abstract_points.md`, d).

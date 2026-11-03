@@ -113,7 +113,7 @@
   - The permutation null calibrates CLR scores; iterated attention mass has no null.
   - Hard FDR operators fail as operators, and the FDR bootstrap is still running (job 100).
   - The current `paper.md` Discussion ("attention can be thresholded at a controlled false-discovery rate") overstates this.
-- **Estimated attention beats learned attention.** This is pending; see (e1).
+- **Estimated attention beats learned attention / foundation models.** Not supported. The result (2 Nov, `docs/scfm_scoring.md`) is non-inferiority and superiority to zero-shot scPRINT attention on BEELINE (+1.03 log2, 7 of 7, [+0.34, +1.90]), but scPRINT's R0 scores at its own permutation control and below a data-free embedding cosine, the advantage is zero on cell-type ChIP, scGPT is mixed (n = 2) and fine-tuning was not run. Say 'non-inferior to zero-shot attention from a single-cell foundation model, which performs at permutation level on these data'.
 - **Perturbation diversity drives performance.** Single-condition K562 control cells scored about as well as the compendium (mixed).
 - **Perturbation-target results.** These belong to Paper 2 and are mixed. The current `paper.md` abstract still includes them; remove them there.
 - **Mutual information as essential.** The dependence measure matters little on single-platform data.
@@ -126,14 +126,7 @@
 
 ## (e) Pending results that would change the abstract
 
-1. **Learned-attention comparator (plan §5, not started; `docs/plans/scfm_comparator.md`).** scPRINT is primary and scGPT secondary; about 2 weeks and under 2 GPU-days; to be preregistered before scoring. Its result fills the [PENDING] sentence:
-   - **Foundation-model attention is below CLR-NS and CLR attention:** "Zero-shot attention from single-cell foundation models falls short of both." The calibrated, label-free baseline then becomes a headline point.
-   - **The CLR-on-learned-attention hybrid improves the foundation model** (the thesis test): add "and CLR's normalization improves it". This is the strongest Nature Machine Intelligence story: the old operator's key step transfers to learned attention.
-   - **Foundation-model attention matches or exceeds CLR-NS:** "matches" or "exceeds both". The closing framing moves from yardstick to complement.
-   - **Statistics problem to fix before preregistration.**
-     - With n = 7 BEELINE blocks, an exact two-sided Wilcoxon or sign test cannot go below p = 0.0156. That is above the first Holm threshold for the planned four tests (0.05/4 = 0.0125), so as specified no comparison can reach Holm significance.
-     - Options: add the K562 single-cell block (n = 8 gives a minimum p of 0.0078), use one-sided tests in a preregistered direction, shrink the family, or make non-inferiority plus consistency across datasets the primary endpoint.
-     - Write the [PENDING] sentence to match ("in 7 of 7 datasets"; "within the non-inferiority margin").
+1. **Learned-attention comparator: DONE (2 Nov; `docs/scfm_scoring.md`, preregistration E16).** Outcome: CLR-NS is non-inferior and superior to scPRINT R0 (HL +1.03 log2, [+0.34, +1.90], p = 0.0078 one-sided, 7 of 7 datasets; robust best-of readouts [+0.23, +1.66]). This is the 'matches or exceeds' branch of the old plan, but qualified: scPRINT is at permutation level, so the right sentence is 'is at least as good as zero-shot attention from scPRINT, which here performs no better than permuted expression'. CLR on the learned attention (hybrid) does not close the gap (+1.05), so the 'CLR improves the foundation model' branch is not supported. Fill the [PENDING] sentence with the first of these, with the cell-type-ChIP and scGPT caveats in the text.
 2. **Multi-head attention (keff 3/10/30, preregistered).**
    - If it beats keff = 10 on CORUM without losing on regulons (the decision rule), the trade-off sentence becomes: "multi-head attention, another language-model component, recovers tight complexes without losing regulons". This would be the largest possible upgrade to the abstract.
    - If not, the trade-off sentence stands as written.
@@ -158,5 +151,5 @@
 
 **Venue reality check.**
 - **The plan's condition for Nature Machine Intelligence:** the multiscale result and competitive baselines. Multiscale did not work (no plateaus), and the baselines are at parity per regulon.
-- **`paper_draft_notes.md` condition:** a single-cell gain and a head-to-head with learned attention. There is no single-cell gain, and the head-to-head is pending.
+- **`paper_draft_notes.md` condition:** a single-cell gain and a head-to-head with learned attention. There is no single-cell gain; the head-to-head is done (non-inferior and superior to zero-shot scPRINT, against a comparator at permutation level; see (e1)).
 - **So the Nature Machine Intelligence case now rests on items 1 and 2.** Without them, the 200-word Nature Communications version in `abstract_draft.md` is the realistic submission.
