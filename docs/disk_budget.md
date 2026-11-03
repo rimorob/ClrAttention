@@ -33,3 +33,8 @@ Total counted: about 22 GB of 50 GB.
 
 ## New items (append below; one row each: path, size, source, deletable yes/no)
 
+| `data/dream5` | 0.24 GB now (login-free expression archive, zip + extracted); expected about 0.5 GB with the Synapse training files and scoring code | DREAM5 network-inference data (login-free GeneNetWeaver-site archive; Synapse `syn2787209` for TF lists, gene IDs, gold standards). Counted. Added 3 Nov 2026 (`docs/plans/dream5_design.md`) | **Yes**, re-downloadable (hashes in `docs/dream5_selections/download_log.tsv`); keep until the DREAM5 scoring is archived |
+| `results/dream5` (planned) | expected 2-4 GB, ceiling 5 GB for all of DREAM5 | method score caches (PIDC edge lists about 1.5 GB are the largest), refit-replicate tables. Counted for DREAM5 even though under `results/` | **Yes** for PIDC edge lists and score caches after the final numbers are archived; keep the committed tables |
+| `~/venvs/dream5` | 0.07 GB | `synapseclient` 4.14 only (downloads; holds no credentials) | **Yes**, rebuildable |
+
+DREAM5 projected total: well under 5 GB, so the counted total stays at about 22 to 27 GB of 50 GB.
