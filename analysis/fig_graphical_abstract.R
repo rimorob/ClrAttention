@@ -2,7 +2,7 @@
 # Brief: docs/whitepapers/graphical_abstract_prompt.md, revised after PI review:
 # published CLR (Faith et al. 2007) is ONLY the per-gene context normalization;
 # the softmax and the multi-step walk are this paper's additions. The 2007 code (CLR 1.1, 2006-12-08)
-# combines the clipped row z-scores as sqrt(zi^2 + zj^2); the Stouffer combination is this work's
+# combines the clipped row z-scores as sqrt(zi^2 + zj^2); the Stouffer combination: no statement about who introduced it (PI, 3 Nov)
 # (the B-spline MI estimator is the same family in both, Daub et al. 2004).
 # Palette: analysis/plot_theme.R (blue = MI, orange = CLR normalization, violet = softmax,
 # magenta = depth/walk, aqua = the full method of this work, grey = competitors,
@@ -185,7 +185,7 @@ draw_abstract <- function() {
 
   # ---------------- panel 2: CLR criss-cross (after Faith et al. 2007, Fig. 2A) ----
   # MI matrix with gene i's row and gene j's column; each is z-scored against its own
-  # background; the pair score combines the two (2007: Euclidean sqrt(zi^2 + zj^2); this work: Stouffer; negatives clipped to 0).
+  # background; the pair score combines the two (Stouffer (zi + zj)/sqrt(2); Euclidean sqrt(zi^2 + zj^2) ranks nearly identically; negatives clipped to 0).
   x0 <- X[2]; W2 <- Wv[2]
   pill("existing method", x0 + 1.0, 6.0, 1.5, 0.3, fill = "#ecebe7", col = NA, size = 10.5,
        face = "plain", tcol = ink[["secondary"]])
@@ -240,10 +240,10 @@ draw_abstract <- function() {
   fx <- x0 + W2 / 2
   seg(lc, cb - 0.42, fx - 0.3, 2.6, ink[["secondary"]], 1.2, arrow = ar)
   seg(rc, cb - 0.42, fx + 0.3, 2.6, ink[["secondary"]], 1.2, arrow = ar)
-  grid.text(expression(sqrt(z[i]^2 + z[j]^2)), fx, 2.38, default.units = "native",
+  grid.text(expression((z[i] + z[j]) / sqrt(2)), fx, 2.38, default.units = "native",
             gp = gpar(fontfamily = FONT, fontsize = 14, col = ink[["primary"]]))
-  txt("2007 rule (Euclidean); z-scores clipped at 0", fx, 2.17, 9, ink[["secondary"]])
-  grid.text(expression("this work: Stouffer, " * (z[i] + z[j]) / sqrt(2)), fx, 2.01, default.units = "native",
+  txt("Stouffer combination; z-scores clipped at 0", fx, 2.17, 9, ink[["secondary"]])
+  grid.text(expression("Euclidean " * sqrt(z[i]^2 + z[j]^2) * " ranks the same"), fx, 2.01, default.units = "native",
             gp = gpar(fontfamily = FONT, fontsize = 9, col = ink[["secondary"]]))
   grid.roundrect(fx, 1.75, 2.35, 0.32, default.units = "native", r = unit(0.06, "inches"),
                  gp = gpar(fill = "#fbe3d9", col = pal[["orange"]], lwd = 1.4))

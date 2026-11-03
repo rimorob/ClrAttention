@@ -13,7 +13,7 @@
 #   D     bspline_mi() via ClrAttention$estimate_mi()        (diagonal zeroed as clr_calibrate does)
 #   CLR   clr_calibrate(method = "normal", combine = "stouffer") via $calibrate()
 #         (the 2007 code, CLR 1.1 of 2006-12-08, combines the clipped row z-scores as sqrt(zij^2 + zji^2);
-#          Stouffer, per-gene-temperature softmax and the walk are this work's; the MI estimator is
+#          the per-gene-temperature softmax and the walk are this work's, and no statement is made about who introduced the Stouffer rule (PI, 3 Nov); the MI estimator is
 #          B-spline smoothing of bin weights in both, Daub et al. 2004)
 #   A     .softmax_rows(S, keff, cap) via $build_operator(softmax_keff, softmax_cap)
 #   P^t   P = (1-alpha) I + alpha A, repeated product, K_t = (P^t + P^t')/2: the lines of
@@ -341,7 +341,7 @@ draw_fig <- function() {
 
   # ---- panel 2: CLR ------------------------------------------------------------------------
   panel_head("2", "Per-gene calibration (CLR)", XD + 0.1, yh, "per-query normalization of the logits", pal[["orange"]],
-             c("z-scores as in CLR 2007;", "Stouffer (not Euclidean) here"))
+             c("z-scores clipped at 0;", "pair combined by Stouffer"))
   dx0 <- XD + 0.2; dx1 <- XD + 1.95; dh <- 0.3
   y_a <- Y(r1 + 1.22); y_b <- Y(r1 + 2.37)
   for (b in list(list(y_a, "i"), list(y_b, "j"))) {

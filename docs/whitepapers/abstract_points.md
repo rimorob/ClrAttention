@@ -84,7 +84,7 @@
 - On EcoMAC, platform mixtures leave 8.4% of pairs with far more mutual information than their correlation implies.
 - One clean platform (735 arrays) beats all 2,198 arrays pooled.
 - Mutual information and correlation are interchangeable on single-platform M3D.
-- Stouffer and Euclidean combination are equivalent; B = 100 permutations suffice. Fact correction (verified 2 Nov 2026 against the CLR 1.1 code release of 8 Dec 2006, README and `clr.m`): the 2007 package already uses a B-spline MI estimator (Daub et al. 2004; default 10 bins, degree 3) and combines the clipped row z-scores with the Euclidean formula; it has no Stouffer combination. So the MI estimator family is not new here (only the bin-count rule of Hacine-Gharbi et al. 2012 and the spline order are details), while the Stouffer combination, the per-gene-temperature softmax and the multi-step walk are this work's.
+- Stouffer and Euclidean combination are equivalent; B = 100 permutations suffice. Fact correction (verified 2 Nov 2026 against the CLR 1.1 code release of 8 Dec 2006, README and `clr.m`): the 2007 package already uses a B-spline MI estimator (Daub et al. 2004; default 10 bins, degree 3) and combines the clipped row z-scores with the Euclidean formula. So the MI estimator family is not new here (only the bin-count rule of Hacine-Gharbi et al. 2012 and the spline order are details), while the per-gene-temperature softmax and the multi-step walk are this work's. PI, 3 Nov: a Stouffer version of the code was never publicly announced, so make no statement about who introduced the Stouffer combination.
 - The packed MI→CLR path uses 5× less peak memory at 8,563 genes.
 - Status: **worked**.
 
