@@ -1,0 +1,59 @@
+=== net1
+matrix chips x genes (805, 1643); NaN 0 (fraction 0); inf 0; range 0..2.197; mean 0.5431; zero-variance genes 0; duplicate gene columns 0
+gene_ids rows 1643; ids equal expression header: True
+TFs 195; all in gene list: True; TF ids are G1..G195: True; TF fraction of genes 0.119
+decoy genes (random expression, name 'decoy*') 78; decoy TFs 17; real genes 1565; real TFs 178
+candidate TF x gene pairs 320385; without self-pairs 320190
+chip features columns ['#Experiment', 'Perturbations', 'PerturbationLevels', 'Treatment', 'DeletedGenes', 'OverexpressedGenes', 'Time', 'Repeat']; rows 805
+'#Experiment' = coarse series index: 107 values (non-decreasing True); replicate group = run starting at Repeat==1: 487 groups; Repeat is 1..k within every group: True
+chips per replicate group {1: 305, 2: 74, 3: 92, 4: 4, 5: 12}; mean 1.653; chips in multi-chip groups 500 (0.621)
+replicate groups per series: median 2, max 30; series with >1 group 80
+  Perturbations: non-NA chips 345, distinct 43
+  PerturbationLevels: non-NA chips 150, distinct 11
+  Treatment: non-NA chips 6, distinct 1
+  DeletedGenes: non-NA chips 186, distinct 39
+  OverexpressedGenes: non-NA chips 17, distinct 7
+  Time: non-NA chips 463, distinct 37
+  DeletedGenes: chips naming a TF-list gene 186, distinct TFs 37
+  OverexpressedGenes: chips naming a TF-list gene 17, distinct TFs 7
+averaged file (487, 1643); Repeat sum 805; max |avg - mean of replicate chips| 8e-08; transposed archive == Synapse matrix: True
+=== net3
+matrix chips x genes (805, 4511); NaN 0 (fraction 0); inf 0; range 3.46..15.28; mean 8.544; zero-variance genes 0; duplicate gene columns 0
+gene_ids rows 4511; ids equal expression header: True
+TFs 334; all in gene list: True; TF ids are G1..G334: True; TF fraction of genes 0.074
+decoy genes (random expression, name 'decoy*') 214; decoy TFs 30; real genes 4297; real TFs 304
+candidate TF x gene pairs 1506674; without self-pairs 1506340
+original (pre-anonymisation) genes 4297, all in challenge: True, challenge real genes not in original 0; original TFs 304, in challenge TF list 304; TF-list entries not in original TF list (non-decoy) 0
+chip features columns ['#Experiment', 'Perturbations', 'PerturbationLevels', 'Treatment', 'DeletedGenes', 'OverexpressedGenes', 'Time', 'Repeat']; rows 805
+'#Experiment' = coarse series index: 107 values (non-decreasing True); replicate group = run starting at Repeat==1: 487 groups; Repeat is 1..k within every group: True
+chips per replicate group {1: 305, 2: 74, 3: 92, 4: 4, 5: 12}; mean 1.653; chips in multi-chip groups 500 (0.621)
+replicate groups per series: median 2, max 30; series with >1 group 80
+  Perturbations: non-NA chips 345, distinct 43
+  PerturbationLevels: non-NA chips 150, distinct 11
+  Treatment: non-NA chips 6, distinct 1
+  DeletedGenes: non-NA chips 186, distinct 43
+  OverexpressedGenes: non-NA chips 17, distinct 8
+  Time: non-NA chips 463, distinct 34
+  DeletedGenes: chips naming a TF-list gene 117, distinct TFs 20
+  OverexpressedGenes: chips naming a TF-list gene 2, distinct TFs 2
+averaged file (487, 4511); Repeat sum 805; max |avg - mean of replicate chips| 3.3e-08; transposed archive == Synapse matrix: True
+=== net4
+matrix chips x genes (536, 5950); NaN 0 (fraction 0); inf 0; range 2.382..14.92; mean 9.661; zero-variance genes 0; duplicate gene columns 0
+gene_ids rows 5950; ids equal expression header: True
+TFs 333; all in gene list: True; TF ids are G1..G333: True; TF fraction of genes 0.056
+decoy genes (random expression, name 'decoy*') 283; decoy TFs 0; real genes 5667; real TFs 333
+candidate TF x gene pairs 1981350; without self-pairs 1981017
+original (pre-anonymisation) genes 5667, all in challenge: True, challenge real genes not in original 0; original TFs 183, in challenge TF list 183; TF-list entries not in original TF list (non-decoy) 150
+chip features columns ['#Experiment', 'Perturbations', 'PerturbationLevels', 'Treatment', 'DeletedGenes', 'OverexpressedGenes', 'Time', 'Repeat']; rows 536
+'#Experiment' = coarse series index: 59 values (non-decreasing True); replicate group = run starting at Repeat==1: 321 groups; Repeat is 1..k within every group: True
+chips per replicate group {1: 186, 2: 65, 3: 62, 4: 7, 6: 1}; mean 1.670; chips in multi-chip groups 350 (0.653)
+replicate groups per series: median 2, max 60; series with >1 group 33
+  Perturbations: non-NA chips 234, distinct 30
+  PerturbationLevels: non-NA chips 88, distinct 20
+  Treatment: non-NA chips 0, distinct 0
+  DeletedGenes: non-NA chips 106, distinct 16
+  OverexpressedGenes: non-NA chips 0, distinct 0
+  Time: non-NA chips 298, distinct 93
+  DeletedGenes: chips naming a TF-list gene 42, distinct TFs 5
+  OverexpressedGenes: chips naming a TF-list gene 0, distinct TFs 0
+averaged file (321, 5950); Repeat sum 536; max |avg - mean of replicate chips| 3.3e-08; transposed archive == Synapse matrix: True
