@@ -1,0 +1,17 @@
+[15:55:04] scfm_score_ft: truth=real out=results/scfm_score_ft exports=/home/boris/scfm_models/step5_ft/scoring 
+[15:55:39] hESC_500: done, 0.6 min 
+[15:56:11] hESC_1000: done, 0.5 min 
+[15:56:30] hHep_500: done, 0.3 min 
+[15:56:56] hHep_1000: done, 0.4 min 
+[15:57:02] mDC_500: done, 0.1 min 
+[15:57:11] mDC_1000: done, 0.1 min 
+[15:57:46] mESC_500: done, 0.6 min 
+[15:58:17] mESC_1000: done, 0.5 min 
+[15:58:27] mHSC-E_500: done, 0.2 min 
+[15:58:39] mHSC-E_1000: done, 0.2 min 
+[15:58:50] mHSC-GM_500: done, 0.2 min 
+[15:59:00] mHSC-GM_1000: done, 0.2 min 
+[15:59:09] mHSC-L_500: done, 0.1 min 
+[15:59:18] mHSC-L_1000: done, 0.2 min 
+[15:59:18] wrote 440 rows to results/scfm_score_ft/metrics_ft.csv 
+[15:59:18] done 
