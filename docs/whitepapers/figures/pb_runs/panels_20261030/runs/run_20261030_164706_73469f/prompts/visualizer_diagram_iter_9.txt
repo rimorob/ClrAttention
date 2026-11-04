@@ -1,0 +1,54 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+A clean, publication-quality methodological diagram set against a crisp white background, following an analytical left-to-right flow. The header is placed at the top-left. The diagram consists of three visual zones: two vertically stacked univariate marginal distribution plots on the left, an orange convergence transition arrow in the center, and a 14x14 CLR score matrix S accompanied by mathematical equations on the right.
+
+---
+
+### 1. Header
+- **Indicator**: A solid matte black circle containing a bold white numeral "2".
+- **Title**: Bold sans-serif text reading "Context normalization (CLR)" immediately following the circle.
+- **Subtitle Tag**: A compact, rounded rectangular chip in light neutral gray with an orange vertical accent stripe along its left border, containing dark slate-gray text: "scaling the logits".
+
+---
+
+### 2. Left Section: Marginal Distributions
+Two vertically stacked Gaussian density plots aligned on a common horizontal scale.
+
+- **Top Curve (Row i)**:
+  - **Label**: "row i of D" in bold black/dark slate text.
+  - **Distribution**: A smooth bell curve filled with translucent soft blue and outlined with a thin slate-blue stroke. Below the baseline is a rug plot of 14 delicate tick marks indicating empirical row mutual information values.
+  - **Observed Value Highlight**: The upper tail region to the right of observed value D_ij is shaded in darker denim blue. A solid dark-blue dot on the curve marks coordinate D_ij.
+  - **Axis & Formula**: Baseline axis labeled "MI" in muted gray with an axis tick under D_ij. Below the axis: z_ij = (D_ij - mu_i) / sigma_i = 2.2 in muted denim blue.
+
+- **Bottom Curve (Row j)**:
+  - **Label**: "row j of D" in bold black/dark slate text.
+  - **Distribution**: A smooth bell curve filled with translucent blush pink and outlined in dusty rose, with a 14-tick rug plot along the baseline.
+  - **Observed Value Highlight**: The upper tail region to the right of observed value D_ij is shaded in darker dusty rose. A solid dusty-rose dot on the curve marks coordinate D_ij.
+  - **Axis & Formula**: Baseline axis labeled "MI" in muted gray with an axis tick under D_ij. Below the axis: z_ji = (D_ij - mu_j) / sigma_j = 1.8 in dusty rose.
+
+---
+
+### 3. Center Transition
+- **Convergence Lines**: Two clean, smooth leader lines—one emerging from the shaded tail coordinate of row i (blue) slanting smoothly downward-right, and one from row j (pink) slanting smoothly upward-right—converging cleanly into the base of the orange block arrow.
+- **Transition Arrow**: A solid, warm-orange horizontal block arrow pointing directly toward matrix S, symbolizing the joint integration of z_ij and z_ji into the context-normalized matrix score.
+
+---
+
+### 4. Right Section: CLR Matrix and Scores
+- **Top Equations**: Centered neatly above the matrix in standard mathematical typography:
+  S_ij = (z^+_ij + z^+_ji) / sqrt(2),  z^+ = max(z, 0)
+
+- **Score Matrix S**:
+  - Label "Score Matrix S" centered directly above the grid.
+  - A precise square 14x14 grid with thin white cell divider borders.
+  - **No In-Cell Text**: All numbers, digits, and "x" characters are completely removed from every cell; cells are filled purely with solid color.
+  - **Diagonal**: Every cell along the main diagonal strictly from (1,1) down to (14,14) is filled with a uniform light neutral grey representing self-interactions, with no text.
+  - **Heatmap Colors**: Pure color-fill following an orange sequential scale (light/pale orange = low score, deep dark burnt orange = high score), matching the exact spatial color pattern of the matrix without any text inside the cells.
+  - **Row Band i**: A flat translucent denim-blue horizontal band highlighting row i across all 14 columns, labeled with an italic "i" at its left border.
+  - **Column Band j**: A flat translucent dusty-rose vertical band highlighting column j across all 14 rows, labeled with an italic "j" at its bottom border.
+  - **Intersection Cell (i, j)**: The intersection cell where row band i and column band j cross is emphasized with a bold black square outline.
+
+- **Bottom Annotation**: Positioned directly beneath Column band j in bold text: S_ij = 2.8.

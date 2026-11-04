@@ -1,0 +1,48 @@
+I am working on a task: given the 'Methodology' section of a paper, and the caption of the desired figure, automatically generate a corresponding illustrative diagram. I will input the text of the 'Methodology' section, the figure caption, and your output should be a detailed description of an illustrative figure that effectively represents the methods described in the text.
+
+To help you understand the task better, and grasp the principles for generating such figures, I will also provide you with several examples. You should learn from these examples to provide your figure description.
+
+** IMPORTANT: **
+Your description should be as detailed as possible. Semantically, clearly describe each element and their connections. Formally, include various details such as background style (typically pure white or very light pastel), colors, line thickness, icon styles, etc. Remember: vague or unclear specifications will only make the generated figure worse, not better.
+
+Your description should cover:
+1. **Overall layout**: General flow direction (left-to-right or top-to-bottom), major sections/phases
+2. **Components**: Each box, module, or element with its exact label
+3. **Connections**: Arrows, data flows, and their directions
+4. **Groupings**: How components are grouped or sectioned (colored regions, dashed borders)
+5. **Labels and annotations**: Text labels, mathematical notations
+6. **Input/Output**: What enters and exits the system
+7. **Styling**: Background fills, color palettes (in natural language, e.g., "soft sky blue", "warm peach" — never hex codes), line weights, icon styles
+
+## Methodology Section
+Panel 3 of a 4-panel method figure: 'Softmax attention'. Two 14x14 matrices side by side: S (orange scale) and A (violet scale, light = low, dark = high; grey diagonal), each with gene i row band and gene j column band crossing at a traced cell, joined by a violet block arrow labelled 'softmax'. Under each matrix, row i drawn as a bar strip aligned with the columns: row i of S (orange bars, five dark top-5 bars, S_ij = 2.8 labelled) and row i of A (violet bars, A_ij = 0.64 labelled, sums to 1). Notes: 'dark: top 5 kept (real: 50)', 'sums to 1'. Formula A_i = softmax(S_i / tau_i), 'tau_i set per gene so that k_eff = 3 (real: 10)'. Header chip: numbered black circle 3, bold title 'Softmax attention', grey tag 'softmax over the keys' with a violet left edge.
+
+
+## Figure Caption
+Panel 3 (Softmax): S and A matrices side by side with the row-i bar strips (S_ij = 2.8, A_ij = 0.64) and formula. REPRODUCE the first reference image (the content reference) exactly: every heatmap cell, bar, number, label and formula must stay where it is, with the same values and the same colour. Do not invent, add, remove, permute, smooth or re-block any matrix cell or bar. Improve only styling and clarity: crisper type, cleaner alignment, consistent line weights. The second reference image (Faith et al. 2007, CLR paper, Fig. 1A) is a STYLE reference only: flat translucent row band (gene i, blue) and column band (gene j, pink) crossing at the traced cell, plain bold gene labels, minimal ink, white background; do not copy its content. Colour key (keep): blue = dependence, orange = CLR, violet = softmax, magenta = walk; in every heatmap light = low and dark = high; grey diagonal = self. Single panel, white background, no extra panels, no title other than those in the reference.
+
+## Reference Examples
+(No reference examples available. Generate based on source context alone.)
+
+Based on the methodology section, figure caption, and learning from the style and structure of the reference examples above, generate a comprehensive and detailed textual description of the methodology diagram.
+
+Note: Do not include figure titles (e.g., "Figure 1: ...") in the diagram description. The caption should remain separate from the diagram content.
+
+## Aspect Ratio Recommendation
+
+After your detailed description, on a **new line**, output exactly one line in this format:
+```
+RECOMMENDED_RATIO: <ratio>
+```
+where `<ratio>` is one of: 1:1, 2:3, 3:2, 3:4, 4:3, 9:16, 16:9, 21:9.
+
+Choose the best aspect ratio based on:
+- The **content structure**: pipelines and sequential flows → wide (16:9, 21:9); deep hierarchies or vertical stacks → tall (2:3, 9:16); balanced architectures → square-ish (1:1, 4:3, 3:4)
+- The **reference examples' aspect ratios** listed above (if available)
+- The **number of components** and their spatial arrangement
+
+For example, a left-to-right encoder-decoder pipeline would be 16:9, while a top-to-bottom tree structure would be 2:3.
+
+
+## User-Provided Reference/Sketch
+The final 2 attached image(s), after the reference example images, are user-provided reference/sketch images (e.g. a hand-drawn sketch, whiteboard photo, or a prior version of the figure). Use them as guidance for the layout and content of the target diagram while staying faithful to the source text.

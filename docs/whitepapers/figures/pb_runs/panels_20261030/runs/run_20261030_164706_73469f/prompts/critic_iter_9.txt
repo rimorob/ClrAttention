@@ -1,0 +1,96 @@
+## ROLE
+
+You are a Lead Visual Designer for top-tier AI conferences (e.g., NeurIPS 2025).
+
+## TASK
+Your task is to conduct a sanity check and provide a critique of the target diagram based on its content and presentation. You must ensure its alignment with the provided 'Methodology Section', 'Figure Caption'.
+
+You are also provided with the 'Detailed Description' corresponding to the current diagram. If you identify areas for improvement in the diagram, you must list your specific critique and provide a revised version of the 'Detailed Description' that incorporates these corrections.
+
+## CRITIQUE & REVISION RULES
+
+1. Content
+    - **Fidelity & Alignment:** Ensure the diagram accurately reflects the method described in the "Methodology Section" and aligns with the "Figure Caption." Reasonable simplifications are allowed, but no critical components should be omitted or misrepresented. Also, the diagram should not contain any hallucinated content. Consistent with the provided methodology section & figure caption is always the most important thing.
+    - **Text QA:** Check for typographical errors, nonsensical text, or unclear labels within the diagram. Flag any garbled, misspelled, or non-English text. Flag any hex codes, pixel dimensions, or CSS values rendered as text. Suggest specific corrections.
+    - **Validation of Examples:** Verify the accuracy of illustrative examples. If the diagram includes specific examples to aid understanding (e.g., molecular formulas, attention maps, mathematical expressions), ensure they are factually correct and logically consistent. If an example is incorrect, provide the correct version.
+    - **Caption Exclusion:** Ensure the figure caption text (e.g., "Figure 1: Overview...") is **not** included within the image visual itself. The caption should remain separate.
+2. Presentation
+    - **Clarity & Readability:** Evaluate the overall visual clarity. If the flow is confusing or the layout is cluttered, suggest structural improvements.
+    - **Legend Management:** Be aware that the description & diagram may include a text-based legend explaining color coding. Since this is typically redundant, please excise such descriptions if found.
+
+** IMPORTANT: **
+Your Description should primarily be modifications based on the original description, rather than rewriting from scratch. If the original description has obvious problems in certain parts that require re-description, your description should be as detailed as possible. Semantically, clearly describe each element and their connections. Formally, include various details such as background, colors, line thickness, icon styles, etc. Remember: vague or unclear specifications will only make the generated figure worse, not better.
+
+## INPUT DATA
+
+- **Methodology Section**: Panel 2 of a 4-panel method figure: 'Context normalization (CLR)'. Left: two normal-density curves, row i of D (blue, top) and row j of D (pink, bottom), each with a rug of the row's 14 MI values below the axis and the observed value D_ij marked as a dot in the right tail (tail shaded darker). z_ij = (D_ij - mu_i)/sigma_i = 2.2 (blue); z_ji = (D_ij - mu_j)/sigma_j = 1.8 (pink). Two lines converge from the curves on an orange block arrow pointing at the 14x14 CLR score matrix S (orange sequential scale, light = low, dark = high, grey diagonal), gene i row band (blue) and gene j column band (pink) crossing at the traced cell, caption S_ij = 2.8. Above S the formula S_ij = (z+_ij + z+_ji)/sqrt(2) and the note z+ = max(z, 0). Header chip: numbered black circle 2, bold title 'Context normalization (CLR)', grey tag 'scaling the logits' with an orange left edge.
+
+- **Figure Caption**: Panel 2 (CLR): two row distributions with D_ij in the right tail (z_ij = 2.2, z_ji = 1.8), arrow, and the S matrix with S_ij = 2.8 and its formula. REPRODUCE the first reference image (the content reference) exactly: every heatmap cell, bar, number, label and formula must stay where it is, with the same values and the same colour. Do not invent, add, remove, permute, smooth or re-block any matrix cell or bar. Improve only styling and clarity: crisper type, cleaner alignment, consistent line weights. The second reference image (Faith et al. 2007, CLR paper, Fig. 1A) is a STYLE reference only: flat translucent row band (gene i, blue) and column band (gene j, pink) crossing at the traced cell, plain bold gene labels, minimal ink, white background; do not copy its content. Colour key (keep): blue = dependence, orange = CLR, violet = softmax, magenta = walk; in every heatmap light = low and dark = high; grey diagonal = self. Single panel, white background, no extra panels, no title other than those in the reference.
+- **Detailed Description**: ### Overall Layout
+A clean, publication-quality methodological diagram set against a crisp white background, following an analytical left-to-right flow. The header is placed at the top-left. The diagram consists of three visual zones: two vertically stacked univariate marginal distribution plots on the left, an orange convergence transition arrow in the center, and a 14x14 CLR score matrix S accompanied by mathematical equations on the right.
+
+---
+
+### 1. Header
+- **Indicator**: A solid matte black circle containing a bold white numeral "2".
+- **Title**: Bold sans-serif text reading "Context normalization (CLR)" immediately following the circle.
+- **Subtitle Tag**: A compact, rounded rectangular chip in light neutral gray with an orange vertical accent stripe along its left border, containing dark slate-gray text: "scaling the logits".
+
+---
+
+### 2. Left Section: Marginal Distributions
+Two vertically stacked Gaussian density plots aligned on a common horizontal scale.
+
+- **Top Curve (Row i)**:
+  - **Label**: "row i of D" in bold black/dark slate text.
+  - **Distribution**: A smooth bell curve filled with translucent soft blue and outlined with a thin slate-blue stroke. Below the baseline is a rug plot of 14 delicate tick marks indicating empirical row mutual information values.
+  - **Observed Value Highlight**: The upper tail region to the right of observed value D_ij is shaded in darker denim blue. A solid dark-blue dot on the curve marks coordinate D_ij.
+  - **Axis & Formula**: Baseline axis labeled "MI" in muted gray with an axis tick under D_ij. Below the axis: z_ij = (D_ij - mu_i) / sigma_i = 2.2 in muted denim blue.
+
+- **Bottom Curve (Row j)**:
+  - **Label**: "row j of D" in bold black/dark slate text.
+  - **Distribution**: A smooth bell curve filled with translucent blush pink and outlined in dusty rose, with a 14-tick rug plot along the baseline.
+  - **Observed Value Highlight**: The upper tail region to the right of observed value D_ij is shaded in darker dusty rose. A solid dusty-rose dot on the curve marks coordinate D_ij.
+  - **Axis & Formula**: Baseline axis labeled "MI" in muted gray with an axis tick under D_ij. Below the axis: z_ji = (D_ij - mu_j) / sigma_j = 1.8 in dusty rose.
+
+---
+
+### 3. Center Transition
+- **Convergence Lines**: Two clean, smooth leader lines—one emerging from the shaded tail coordinate of row i (blue) slanting smoothly downward-right, and one from row j (pink) slanting smoothly upward-right—converging cleanly into the base of the orange block arrow.
+- **Transition Arrow**: A solid, warm-orange horizontal block arrow pointing directly toward matrix S, symbolizing the joint integration of z_ij and z_ji into the context-normalized matrix score.
+
+---
+
+### 4. Right Section: CLR Matrix and Scores
+- **Top Equations**: Centered neatly above the matrix in standard mathematical typography:
+  S_ij = (z^+_ij + z^+_ji) / sqrt(2),  z^+ = max(z, 0)
+
+- **Score Matrix S**:
+  - Label "Score Matrix S" centered directly above the grid.
+  - A precise square 14x14 grid with thin white cell divider borders.
+  - **No In-Cell Text**: All numbers, digits, and "x" characters are completely removed from every cell; cells are filled purely with solid color.
+  - **Diagonal**: Every cell along the main diagonal strictly from (1,1) down to (14,14) is filled with a uniform light neutral grey representing self-interactions, with no text.
+  - **Heatmap Colors**: Pure color-fill following an orange sequential scale (light/pale orange = low score, deep dark burnt orange = high score), matching the exact spatial color pattern of the matrix without any text inside the cells.
+  - **Row Band i**: A flat translucent denim-blue horizontal band highlighting row i across all 14 columns, labeled with an italic "i" at its left border.
+  - **Column Band j**: A flat translucent dusty-rose vertical band highlighting column j across all 14 rows, labeled with an italic "j" at its bottom border.
+  - **Intersection Cell (i, j)**: The intersection cell where row band i and column band j cross is emphasized with a bold black square outline.
+
+- **Bottom Annotation**: Positioned directly beneath Column band j in bold text: S_ij = 2.8.
+- **Target Diagram**: [The generated figure is provided as an image]
+
+## OUTPUT
+Provide your response strictly in the following JSON format:
+{
+    "critic_suggestions": ["specific actionable suggestion 1", "specific actionable suggestion 2"],
+    "revised_description": "The complete revised description incorporating all suggested fixes. If no revision is needed, set to null."
+}
+
+If the image is publication-ready with no issues, return:
+{
+    "critic_suggestions": [],
+    "revised_description": null
+}
+
+
+Additional user feedback to consider in your evaluation:
+The matrix colour pattern is now correct, keep it exactly. But REMOVE every digit, letter x and number printed inside the matrix cells: the cells must contain colour only (grey diagonal cells plain grey). Keep the curves, formulas, the two converging connector lines into the orange arrow, S_ij = 2.8 and the gene i / gene j bands.

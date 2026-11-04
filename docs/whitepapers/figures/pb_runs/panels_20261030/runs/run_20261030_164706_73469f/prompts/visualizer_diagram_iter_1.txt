@@ -1,0 +1,66 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+A clean, horizontal methodological diagram rendered against a pure, crisp white background. The header is positioned at the top left. The main body follows an intuitive left-to-right analytical flow divided into three balanced visual zones: two vertically stacked univariate marginal distribution plots on the left, an orange convergence transition arrow in the center, and a $14 \times 14$ score matrix accompanied by mathematical equations on the right.
+
+---
+
+### 1. Header
+- **Indicator**: A solid matte black circular badge with a crisp white numeral "2" centered within.
+- **Title**: Prominent, bold sans-serif text reading "Context normalization (CLR)" placed directly to the right of the badge.
+- **Subtitle Tag**: A compact, rounded rectangular chip in very pale neutral gray with a vivid warm orange vertical accent stripe along its left edge, displaying dark slate-gray text: "scaling the logits".
+
+---
+
+### 2. Left Section: Marginal Distributions
+Two vertically stacked, cleanly aligned density plots sharing a common horizontal scale.
+
+- **Top Curve (Row $i$)**:
+  - **Header Label**: "row $i$ of D" set in medium sans-serif in muted denim blue.
+  - **Distribution**: A smooth Gaussian bell curve filled with translucent soft ice blue and contoured with a thin slate-blue stroke. Beneath the baseline lies a rug plot composed of 14 delicate vertical tick marks indicating empirical row mutual information values.
+  - **Observed Value Highlight**: The upper tail area to the right of observed value $D_{ij}$ is filled with a distinct, darker denim blue. A small, solid dark denim blue dot marks the coordinate $D_{ij}$ along the curve.
+  - **Axis & Formula**: Baseline axis labeled "MI" in muted gray. Directly below the axis, the standardized score equation is rendered in muted slate blue:  
+    $$z_{ij} = (D_{ij} - \mu_i)/\sigma_i = 2.2$$
+
+- **Bottom Curve (Row $j$)**:
+  - **Header Label**: "row $j$ of D" set in medium sans-serif in dusty rose pink.
+  - **Distribution**: An identical smooth Gaussian density curve filled with translucent pale blush pink and outlined in a thin dusty rose stroke. Along the horizontal baseline, a rug plot of 14 delicate vertical tick marks represents empirical row values.
+  - **Observed Value Highlight**: The right tail region beyond $D_{ij}$ is filled with a richer, darker dusty rose shade, with a solid rose-pink dot marking $D_{ij}$ on the curve.
+  - **Axis & Formula**: Baseline axis labeled "MI" in muted gray. Directly below the axis, the standardized score equation is rendered in dusty rose:  
+    $$z_{ji} = (D_{ij} - \mu_j)/\sigma_j = 1.8$$
+
+---
+
+### 3. Center Transition
+- **Leader Lines**: Two fine, elegant converging guide lines—one originating from the blue tail of row $i$ and the other from the pink tail of row $j$—angle inward toward the center.
+- **Transition Arrow**: The guide lines terminate at a bold, flat warm-orange horizontal block arrow pointing directly toward matrix $\mathrm{S}$, signifying the joint integration of both $z$-scores into the context-normalized matrix.
+
+---
+
+### 4. Right Section: CLR Matrix and Scores
+- **Top Equations**: Centered neatly above the matrix, displayed in formal academic mathematical typography:
+  $$\mathrm{S}_{ij} = \frac{z^+_{ij} + z^+_{ji}}{\sqrt{2}}$$
+  $$z^+ = \max(z, 0)$$
+
+- **Score Matrix $\mathrm{S}$**:
+  - A square $14 \times 14$ grid separated by thin, clean white gridlines.
+  - **Sequential Heatmap Scale**: Grid cells are shaded according to a smooth warm sequential palette, ranging from pale cream and light apricot for low values to deep burnt orange for high values.
+  - **Diagonal**: The main diagonal from top-left to bottom-right is shaded in a neutral, uniform light gray to indicate self-interactions.
+  - **Row Band $i$**: A flat, translucent soft-blue horizontal highlight overlay spanning the entire width of row $i$, tagged with an italicized sans-serif "$i$" adjacent to the left border.
+  - **Column Band $j$**: A flat, translucent dusty-rose vertical highlight overlay spanning the entire height of column $j$, tagged with an italicized sans-serif "$j$" directly above the top border.
+  - **Intersection Cell $(i, j)$**: The specific cell where the blue row band and pink column band intersect is prominently framed by a sharp, solid black border, emphasizing the localized pairwise interaction.
+
+- **Bottom Annotation**: Positioned directly beneath column $j$ in crisp bold sans-serif text:  
+  $$\mathrm{S}_{ij} = 2.8$$
+
+---
+
+### Styling & Visual Polish
+- **Color Harmony**: Controlled palette dominated by clean whitespace, muted denim blue (dependence of row $i$), dusty rose (dependence of row $j$), warm pastel-to-burnt orange (CLR score matrix and transition), and light neutral grays for structural tags and diagonal cells.
+- **Linework & Contrast**: Uniform fine strokes for axes, rug marks, and matrix divisions; high-contrast black framing reserved strictly for key visual anchors (the section badge and the intersection target cell).
+- **Typography**: Clean, contemporary sans-serif for annotations and labels; standard LaTeX math serif for algebraic expressions and statistical variables.
+
+
+Note: this plan was guided by a user-provided reference sketch; follow the description above faithfully.

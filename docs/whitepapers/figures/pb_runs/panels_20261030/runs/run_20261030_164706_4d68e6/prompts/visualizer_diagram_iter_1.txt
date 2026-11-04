@@ -1,0 +1,103 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+The figure represents "Panel 3: Softmax attention", organized in a balanced, top-to-bottom and left-to-right flow on a clean, solid white background:
+- **Top Left**: A header block identifying the step number and stage name, accompanied by a subtitle tag.
+- **Upper Center**: Two 14×14 heatmaps placed side-by-side—matrix $\mathbf{S}$ on the left and matrix $\mathbf{A}$ on the right—connected by a horizontal block arrow pointing from left to right.
+- **Middle Section**: Two discrete vertical bar charts positioned directly beneath each respective matrix, precisely aligned with the matrix columns to represent the 14 values of row $i$.
+- **Bottom Center**: Mathematical formulation defining the per-row softmax operation with row-specific temperature scaling.
+
+---
+
+### Component-by-Component Description
+
+#### 1. Header (Top Left)
+- **Step Badge**: A solid black circular badge containing a clean, white bold sans-serif numeral "**3**".
+- **Panel Title**: Immediately to the right of the badge, crisp bold black text reads: **Softmax attention**.
+- **Process Chip**: Directly below the title, a light warm-gray rounded pill tag containing dark charcoal sans-serif text: `softmax over the keys`. The pill features a distinct, vertical medium violet accent bar running down its entire left border edge.
+
+---
+
+#### 2. Matrix Heatmaps (Upper Section)
+
+##### Left Matrix: Matrix $\mathbf{S}$ (Raw CLR Scores)
+- **Title**: A single, clean black letter **S** centered directly above the matrix in medium-weight sans-serif type.
+- **Grid Structure**: A 14×14 square grid of uniformly sized, borderless tiles with hairline white cell dividers.
+- **Color Scale**: A monochromatic warm orange gradient ranging from very pale peach and cream (near-zero baseline values) to deep rust-orange and warm terracotta (high similarity scores).
+  - Prominent high-value clusters form off-diagonal block structures (notably concentrated along rows 4–8 and columns 4–8, as well as rows 10–13 and columns 10–13).
+  - The main diagonal cells are filled with a uniform, neutral light gray to clearly denote self-interactions.
+- **Interactive Highlight Bands (Row $i$ and Column $j$)**:
+  - **Row $i$ (Query Gene)**: A flat, translucent soft sky-blue horizontal highlight band spans across the 4th row. A crisp, bold blue italic label **$i$** sits cleanly outside the grid, centered to the left of this band.
+  - **Column $j$ (Key Gene)**: A flat, translucent dusty-rose vertical highlight band spans down the 4th column. A crisp, bold magenta italic label **$j$** sits directly above this column.
+  - **Intersection Cell $(i, j)$**: The cell where the blue row band and dusty-rose column band cross is highlighted by a sharp, high-contrast dark charcoal square outline.
+
+##### Central Flow Arrow
+- Positioned in the horizontal gap between matrix $\mathbf{S}$ and matrix $\mathbf{A}$.
+- A solid horizontal block arrow filled with medium periwinkle-violet pointing directly from left to right.
+- Directly centered above the arrow is crisp, medium-weight violet sans-serif text: **softmax**.
+
+##### Right Matrix: Matrix $\mathbf{A}$ (Attention Weights)
+- **Title**: A single, clean black letter **A** centered directly above the matrix in medium-weight sans-serif type.
+- **Grid Structure**: An identical 14×14 square grid matching the exact dimensions and spacing of matrix $\mathbf{S}$.
+- **Color Scale**: A monochromatic violet-indigo palette ranging from ultra-pale lavender and translucent off-white (near-zero attention) to intense, saturated dark royal violet (dominant attention probability).
+  - Main diagonal cells are filled with the same flat, neutral light gray indicating self-interactions.
+  - Due to softmax concentration, the matrix appears noticeably sparser than $\mathbf{S}$, displaying only a few prominent dark violet cells per row, reflecting sharpened attention distributions.
+- **Interactive Highlight Bands (Row $i$ and Column $j$)**:
+  - **Row $i$**: The identical translucent soft sky-blue horizontal band spans across the 4th row, marked with a bold blue italic **$i$** on its left.
+  - **Column $j$**: The identical translucent dusty-rose vertical band spans down the 4th column, marked with a bold magenta italic **$j$** on top.
+  - **Intersection Cell $(i, j)$**: The intersecting cell is prominently framed with a sharp, solid dark charcoal square outline.
+
+---
+
+#### 3. Row-wise Bar Charts (Middle Section)
+
+Directly beneath each matrix sits a 1D column-aligned bar profile representing the profile of row $i$:
+
+##### Left Bar Profile: Row $i$ of Matrix $\mathbf{S}$
+- **Base Axis**: A thin, clean medium-gray horizontal baseline spanning the exact column width of matrix $\mathbf{S}$.
+- **Column Guide**: The vertical dusty-rose column band from column $j$ extends downward seamlessly, encompassing the 4th bar position.
+- **Bars**: 
+  - 14 discrete vertical bars precisely aligned with the horizontal centers of the 14 matrix columns.
+  - Baseline entries are near-zero, with only the top entries elevated: 5 prominent orange bars (a moderate bar at column 3, the tallest bar at column 4, followed by diminishing bars at columns 5, 6, and 7, and a tiny faint stub at column 8).
+  - The bar at position $j$ (column 4) is the tallest, filled with deep saturated terracotta orange. Immediately to its right is a crisp magenta label: **$S_{ij} = 2.8$**.
+- **Labels Below Axis**:
+  - First line (centered): Semi-bold black text reading: **row $i$ of $\mathbf{S}$**.
+  - Second line (explanatory note): Muted dark gray sans-serif text reading: `dark: top 5 kept (real: 50)`.
+
+##### Right Bar Profile: Row $i$ of Matrix $\mathbf{A}$
+- **Base Axis**: A thin medium-gray horizontal baseline spanning the exact column width of matrix $\mathbf{A}$.
+- **Column Guide**: The translucent dusty-rose column band extends cleanly downward through column $j$.
+- **Bars**:
+  - 14 discrete vertical bars reflecting the normalized probability distribution.
+  - Saturated deep violet bars: column 4 dominates prominently as a tall, sharp bar, while positions 3, 5, 6, and 7 show reduced or minimal heights, and all remaining positions sit flat at baseline zero.
+  - Directly beside the peak of bar $j$, a crisp magenta label reads: **$A_{ij} = 0.64$**.
+- **Labels Below Axis**:
+  - First line (centered): Semi-bold black text reading: **row $i$ of $\mathbf{A}$**.
+  - Second line (explanatory note): Muted dark gray sans-serif text reading: `sums to 1`.
+
+---
+
+#### 4. Mathematical Formulation (Bottom Section)
+Centered horizontally below the two bar charts:
+- **Main Equation**: Displayed in standard mathematical notation:
+  $$\mathbf{A}_i = \text{softmax}(\mathbf{S}_i / \tau_i)$$
+- **Parameter Annotation**: Positioned directly underneath the equation in dark gray text:
+  $$\tau_i\text{ set per gene so that } k_{\text{eff}} = 3\text{ (real: 10)}$$
+
+---
+
+### Styling and Aesthetics
+- **Background**: Solid, flat pure white with no drop shadows or decorative gradients.
+- **Color Palette**:
+  - **Matrix $\mathbf{S}$**: Pale cream and soft peach to rich terracotta and burnt orange.
+  - **Matrix $\mathbf{A}$**: Pale lavender to deep royal violet.
+  - **Self-Interactions**: Muted neutral light gray diagonal tiles.
+  - **Row $i$ Highlight**: Light translucent sky-blue wash with a soft blue text label.
+  - **Column $j$ Highlight**: Light translucent dusty-rose wash with a magenta text label.
+  - **Values/Callouts**: Saturated deep magenta for specific numeric callouts ($S_{ij}$ and $A_{ij}$).
+- **Typography & Linework**: Clean, modern sans-serif typography for all section titles, process tags, and descriptive notes; standard serif italic mathematical type for variables ($i, j, S, A, \tau$). Hairline separators and precise vertical alignment between matrix columns and bar charts ensure a rigorous, publication-grade academic presentation.
+
+
+Note: this plan was guided by a user-provided reference sketch; follow the description above faithfully.

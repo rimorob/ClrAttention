@@ -1,0 +1,164 @@
+## ROLE
+
+You are a Lead Visual Designer for top-tier AI conferences (e.g., NeurIPS 2025).
+
+## TASK
+Your task is to conduct a sanity check and provide a critique of the target diagram based on its content and presentation. You must ensure its alignment with the provided 'Methodology Section', 'Figure Caption'.
+
+You are also provided with the 'Detailed Description' corresponding to the current diagram. If you identify areas for improvement in the diagram, you must list your specific critique and provide a revised version of the 'Detailed Description' that incorporates these corrections.
+
+## CRITIQUE & REVISION RULES
+
+1. Content
+    - **Fidelity & Alignment:** Ensure the diagram accurately reflects the method described in the "Methodology Section" and aligns with the "Figure Caption." Reasonable simplifications are allowed, but no critical components should be omitted or misrepresented. Also, the diagram should not contain any hallucinated content. Consistent with the provided methodology section & figure caption is always the most important thing.
+    - **Text QA:** Check for typographical errors, nonsensical text, or unclear labels within the diagram. Flag any garbled, misspelled, or non-English text. Flag any hex codes, pixel dimensions, or CSS values rendered as text. Suggest specific corrections.
+    - **Validation of Examples:** Verify the accuracy of illustrative examples. If the diagram includes specific examples to aid understanding (e.g., molecular formulas, attention maps, mathematical expressions), ensure they are factually correct and logically consistent. If an example is incorrect, provide the correct version.
+    - **Caption Exclusion:** Ensure the figure caption text (e.g., "Figure 1: Overview...") is **not** included within the image visual itself. The caption should remain separate.
+2. Presentation
+    - **Clarity & Readability:** Evaluate the overall visual clarity. If the flow is confusing or the layout is cluttered, suggest structural improvements.
+    - **Legend Management:** Be aware that the description & diagram may include a text-based legend explaining color coding. Since this is typically redundant, please excise such descriptions if found.
+
+** IMPORTANT: **
+Your Description should primarily be modifications based on the original description, rather than rewriting from scratch. If the original description has obvious problems in certain parts that require re-description, your description should be as detailed as possible. Semantically, clearly describe each element and their connections. Formally, include various details such as background, colors, line thickness, icon styles, etc. Remember: vague or unclear specifications will only make the generated figure worse, not better.
+
+## INPUT DATA
+
+- **Methodology Section**: Panel 3 of a 4-panel method figure: 'Softmax attention'. Two 14x14 matrices side by side: S (orange scale) and A (violet scale, light = low, dark = high; grey diagonal), each with gene i row band and gene j column band crossing at a traced cell, joined by a violet block arrow labelled 'softmax'. Under each matrix, row i drawn as a bar strip aligned with the columns: row i of S (orange bars, five dark top-5 bars, S_ij = 2.8 labelled) and row i of A (violet bars, A_ij = 0.64 labelled, sums to 1). Notes: 'dark: top 5 kept (real: 50)', 'sums to 1'. Formula A_i = softmax(S_i / tau_i), 'tau_i set per gene so that k_eff = 3 (real: 10)'. Header chip: numbered black circle 3, bold title 'Softmax attention', grey tag 'softmax over the keys' with a violet left edge.
+
+- **Figure Caption**: Panel 3 (Softmax): S and A matrices side by side with the row-i bar strips (S_ij = 2.8, A_ij = 0.64) and formula. REPRODUCE the first reference image (the content reference) exactly: every heatmap cell, bar, number, label and formula must stay where it is, with the same values and the same colour. Do not invent, add, remove, permute, smooth or re-block any matrix cell or bar. Improve only styling and clarity: crisper type, cleaner alignment, consistent line weights. The second reference image (Faith et al. 2007, CLR paper, Fig. 1A) is a STYLE reference only: flat translucent row band (gene i, blue) and column band (gene j, pink) crossing at the traced cell, plain bold gene labels, minimal ink, white background; do not copy its content. Colour key (keep): blue = dependence, orange = CLR, violet = softmax, magenta = walk; in every heatmap light = low and dark = high; grey diagonal = self. Single panel, white background, no extra panels, no title other than those in the reference.
+- **Detailed Description**: ### Overall Layout
+The figure represents 'Panel 3: Softmax attention', organized in a clean, balanced, top-to-bottom and left-to-right flow on a solid pure white background:
+- **Top Left**: A header block identifying step number '3' and stage name 'Softmax attention', accompanied by a subtitle tag 'softmax over the keys'.
+- **Upper Center**: Two 14×14 heatmaps placed side-by-side—matrix $\mathbf{S}$ on the left and matrix $\mathbf{A}$ on the right—joined by a central horizontal periwinkle-violet block arrow labelled 'softmax'.
+- **Middle Section**: Two discrete 1D bar charts positioned directly beneath their respective matrices, precisely aligned column-by-column to depict row $i$.
+- **Bottom Center**: Mathematical formulation defining row-wise softmax with per-gene temperature scaling.
+
+---
+
+### Component-by-Component Description
+
+#### 1. Header (Top Left)
+- **Step Badge**: A solid black circular badge containing a clean, white bold sans-serif numeral '**3**'.
+- **Panel Title**: Immediately to the right of the badge, crisp bold black text reads: **Softmax attention**.
+- **Process Chip**: Directly below the title, a light warm-gray rounded pill tag containing dark charcoal sans-serif text: `softmax over the keys`. The pill features a distinct, vertical medium violet accent bar along its left edge.
+
+---
+
+#### 2. Matrix Heatmaps (Upper Section)
+
+##### Left Matrix: Matrix $\mathbf{S}$ (Raw CLR Scores)
+- **Title**: A clean black sans-serif letter **S** centered directly above the matrix.
+- **Grid Structure**: A 14×14 square grid of uniformly sized tiles separated by hairline white grid lines.
+- **Color Scale & Sparsity**: Monochromatic warm orange palette (near-white pale cream to deep terracotta orange). The matrix is predominantly sparse (near-white baseline across most tiles), with dense high-value clusters concentrated along genes 4–9 and the lower-right block (genes 10–13).
+- **Diagonal**: Neutral light gray diagonal squares indicating self-interactions.
+- **Highlight Bands & Crosshair**:
+  - **Row $i$ (Query Gene)**: A flat, translucent soft sky-blue horizontal band covering row 4, with a bold blue italic label **$i$** to its left.
+  - **Column $j$ (Key Gene)**: A flat, translucent dusty-rose vertical band covering column 4, with a bold magenta italic label **$j$** above it.
+  - **Intersection $(i, j)$**: The crossing tile at $(i, j)$ is framed with a sharp, high-contrast dark charcoal square outline.
+
+##### Central Flow Arrow
+- Positioned horizontally between matrix $\mathbf{S}$ and matrix $\mathbf{A}$.
+- A flat periwinkle-violet horizontal block arrow pointing from left to right.
+- Centered directly above the arrow is crisp violet sans-serif text: **softmax**.
+
+##### Right Matrix: Matrix $\mathbf{A}$ (Attention Weights)
+- **Title**: A clean black sans-serif letter **A** centered directly above the matrix.
+- **Grid Structure**: An identical 14×14 square grid matching matrix $\mathbf{S}$.
+- **Color Scale & Sparsity**: Monochromatic violet palette ranging from near-white lavender to deep royal violet. Reflecting temperature-sharpened softmax, the matrix is very sparse: only ~5 non-white violet cells appear per row, while the rest are near-white.
+- **Diagonal**: Neutral light gray diagonal tiles denoting self-interactions.
+- **Highlight Bands & Crosshair**:
+  - Translucent blue row band across row $i$ (labeled **$i$** in blue).
+  - Translucent dusty-rose column band down column $j$ (labeled **$j$** in magenta).
+  - Crossing cell $(i, j)$ is framed with a solid dark charcoal square outline.
+
+---
+
+#### 3. Row-wise Bar Charts (Middle Section)
+
+Aligned directly beneath each matrix, sharing the exact horizontal column positions of the 14 genes:
+
+##### Left Bar Strip: Row $i$ of Matrix $\mathbf{S}$
+- **Base Axis**: A thin medium-gray horizontal line spanning the 14 columns.
+- **Column Guide**: The dusty-rose translucent vertical band continues downward seamlessly through column $j$.
+- **Bars & Coloring**: 
+  - Contains 14 discrete bars aligned with columns 1 to 14.
+  - Exactly 5 prominent bars centered around column $j$ (columns 3, 4, 5, 6, 7) are filled with saturated, dark terracotta orange (representing the top 5 candidates).
+  - The bar at column $j$ is the tallest, accompanied by a magenta text callout immediately to its right: **$S_{ij} = 2.8$**.
+  - Two additional flanking low bars (e.g., columns 1 and 2) are rendered in pale/light peach-orange to clearly distinguish them from the top 5.
+  - Remaining positions sit near baseline zero.
+- **Subtitles Below Axis**:
+  - Line 1: Bold black text: **row $i$ of $\mathbf{S}$**.
+  - Line 2: Dark gray explanatory note: `dark: top 5 kept (real: 50)`.
+
+##### Right Bar Strip: Row $i$ of Matrix $\mathbf{A}$
+- **Base Axis**: A thin medium-gray horizontal line spanning the 14 columns.
+- **Column Guide**: The dusty-rose translucent vertical band continues downward through column $j$.
+- **Bars & Coloring**:
+  - Dominant tall bar at column $j$ filled with deep saturated royal violet, accompanied by a magenta text callout: **$A_{ij} = 0.64$**.
+  - Four small but clearly visible low violet bars at columns 3, 5, 6, and 7, reflecting the remaining non-zero softmax probabilities among the top 5.
+  - All remaining bars are exactly at zero baseline.
+- **Subtitles Below Axis**:
+  - Line 1: Bold black text: **row $i$ of $\mathbf{A}$**.
+  - Line 2: Dark gray explanatory note: `sums to 1`.
+
+---
+
+#### 4. Mathematical Formulation (Bottom Section)
+Centered horizontally beneath the bar charts:
+- **Equation**: $\mathbf{A}_i = \text{softmax}(\mathbf{S}_i / \tau_i)$
+- **Parameter Note**: Located directly below the formula in clean dark gray text: $\tau_i\text{ set per gene so that } k_{\text{eff}} = 3\text{ (real: 10)}$
+
+---
+
+### Styling and Aesthetics
+- Solid pure white background with no drop shadows.
+- Crisp hairline boundaries between heatmap cells.
+- High-contrast typography: bold modern sans-serif for labels, italic serif for mathematical symbols ($i, j, \mathbf{S}, \mathbf{A}, \tau$).
+- **Target Diagram**: [The generated figure is provided as an image]
+
+## OUTPUT
+Provide your response strictly in the following JSON format:
+{
+    "critic_suggestions": ["specific actionable suggestion 1", "specific actionable suggestion 2"],
+    "revised_description": "The complete revised description incorporating all suggested fixes. If no revision is needed, set to null."
+}
+
+If the image is publication-ready with no issues, return:
+{
+    "critic_suggestions": [],
+    "revised_description": null
+}
+
+
+Additional user feedback to consider in your evaluation:
+EXACT CELL DATA for the matrix (row 1 at top, column 1 at left; 14 rows x 14 columns; digit = colour level, 0 = palest (near white), 9 = darkest of that matrix's colour scale; x = grey self-diagonal cell). Paint each cell with exactly this level, nothing else: Matrix S (orange ramp):
+row  1: x 3 0 0 3 0 0 0 0 2 2 5 2 0
+row  2: 3 x 2 0 1 0 0 1 0 2 0 2 0 2
+row  3: 0 2 x 2 2 1 2 1 1 0 0 0 0 9
+row  4: 2 2 4 x 7 5 5 3 3 2 2 2 2 2
+row  5: 2 0 1 8 x 7 4 2 2 0 0 0 0 0
+row  6: 0 0 1 5 7 x 8 3 1 0 0 0 0 0
+row  7: 0 0 2 4 4 8 x 7 4 0 0 0 0 0
+row  8: 0 1 1 2 3 3 7 x 9 0 0 0 0 1
+row  9: 0 0 1 1 2 1 4 9 x 0 0 0 0 0
+row 10: 2 2 0 0 1 0 0 0 0 x 4 6 7 0
+row 11: 2 0 0 0 1 0 0 0 0 4 x 6 9 1
+row 12: 5 2 0 0 1 0 0 0 0 6 6 x 7 2
+row 13: 2 0 0 0 1 0 0 0 0 7 9 7 x 0
+row 14: 0 2 9 0 1 0 0 1 0 0 1 2 0 x
+Matrix A (violet ramp):
+row  1: x 2 0 0 1 0 0 0 0 1 1 9 1 0
+row  2: 9 x 1 0 1 0 0 0 0 2 0 2 0 1
+row  3: 0 1 x 1 2 0 1 0 0 0 0 0 0 9
+row  4: 2 2 3 x 7 3 3 2 2 2 2 2 2 2
+row  5: 1 0 0 6 x 6 1 1 0 0 0 0 0 0
+row  6: 0 0 0 1 5 x 7 1 0 0 0 0 0 0
+row  7: 0 0 0 1 2 8 x 4 1 0 0 0 0 0
+row  8: 0 0 0 1 2 1 3 x 8 0 0 0 0 0
+row  9: 0 0 1 0 2 1 2 9 x 0 0 0 0 0
+row 10: 1 1 0 0 1 0 0 0 0 x 2 4 8 0
+row 11: 1 0 0 0 1 0 0 0 0 2 x 2 9 1
+row 12: 1 0 0 0 1 0 0 0 0 2 2 x 8 0
+row 13: 1 0 0 0 1 0 0 0 0 3 7 3 x 0
+row 14: 0 1 9 0 1 0 0 1 0 0 1 1 0 x
+Both: gene i band = row 4, gene j band = column 5, black box at row 4 column 5. Bar strips under each matrix are row 4 of that same matrix: one bar per column, height proportional to the level in row 4 (S: columns 4-9 non-zero; A: tall bar at column 5, A_ij = 0.64), aligned to the columns, no bars for level-0 cells.

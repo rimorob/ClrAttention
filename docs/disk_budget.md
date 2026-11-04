@@ -38,3 +38,15 @@ Total counted: about 22 GB of 50 GB.
 | `~/venvs/dream5` | 0.07 GB | `synapseclient` 4.14 only (downloads; holds no credentials) | **Yes**, rebuildable |
 
 DREAM5 projected total: well under 5 GB, so the counted total stays at about 22 to 27 GB of 50 GB.
+
+## scFM fine-tuning
+
+Step 3.10 (E17, E18), 3 Nov 2026. The fine-tuned state dicts (14 scPRINT at 74 MB, 4 scGPT at 207 MB, about 1.9 GB written) were deleted by the extraction jobs 1041 and 1052 after the truth-free QC gate; `~/scfm_models` is 13 GB after the deletion (15 GB while the state dicts existed). Counted total: the project stays well under 50 GB.
+
+| Path | Size | Source | Deletable |
+|---|---|---|---|
+| `~/scfm_models/step5_ft/scprint_attn` | 1.8 GB | fine-tuned scPRINT attention (`.attn.npy`, `.nets.npz`, json), 14 cases; frozen by `results/scfm_ft/sha256_manifest.csv` | No while the arm is cited (the scored input); recomputable by `analysis/scfm_finetune_scprint.py` plus `scfm_extract_scprint.py --load-state-dir` (about 2 GPU-hours) |
+| `~/scfm_models/step5_ft/scgpt_attn` | 0.25 GB | fine-tuned scGPT attention, 4 cases | As above (about 1 GPU-hour) |
+| `~/scfm_models/step5_ft/scoring` | 0.23 GB | float32 exports of the fine-tuned networks for the R scoring (`scfm_score_export_ft.py`) | **Yes**, re-exportable from the manifest-checked attention files |
+| `~/scfm_models/step5_ft/scprint_ckpt`, `scgpt_ckpt` | < 0.001 GB | per-case training json only (loss curves, SHA-256 of the deleted state dicts); the `.pt` files are gone | Keep (tiny, record of the training) |
+| `results/scfm_ft`, `results/scfm_score_ft` | < 0.001 GB | manifest, QC tables, metric table, contrasts (force-added to git) | No |

@@ -1,0 +1,68 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+A clean, publication-quality methodological diagram set against a crisp white background, following an analytical left-to-right flow. The header is placed at the top-left. The diagram consists of three visual zones: two vertically stacked univariate marginal distribution plots on the left, an orange convergence transition arrow in the center, and a 14x14 CLR score matrix S accompanied by mathematical equations on the right.
+
+---
+
+### 1. Header
+- **Indicator**: A solid matte black circle containing a bold white numeral "2".
+- **Title**: Bold sans-serif text reading "Context normalization (CLR)" immediately following the circle.
+- **Subtitle Tag**: A compact, rounded rectangular chip in light neutral gray with an orange vertical accent stripe along its left border, containing dark slate-gray text: "scaling the logits".
+
+---
+
+### 2. Left Section: Marginal Distributions
+Two vertically stacked Gaussian density plots aligned on a common horizontal scale.
+
+- **Top Curve (Row i)**:
+  - **Label**: "row i of D" in muted denim blue.
+  - **Distribution**: A smooth bell curve filled with translucent soft blue and outlined with a thin slate-blue stroke. Below the baseline is a rug plot of 14 delicate tick marks indicating empirical row mutual information values.
+  - **Observed Value Highlight**: The upper tail region to the right of observed value D_ij is shaded in darker denim blue. A solid dark-blue dot on the curve marks coordinate D_ij.
+  - **Axis & Formula**: Baseline axis labeled "MI" in muted gray with an axis tick under D_ij. Below the axis: z_ij = (D_ij - mu_i) / sigma_i = 2.2 in muted denim blue.
+
+- **Bottom Curve (Row j)**:
+  - **Label**: "row j of D" in dusty rose pink.
+  - **Distribution**: A smooth bell curve filled with translucent blush pink and outlined in dusty rose, with a 14-tick rug plot along the baseline.
+  - **Observed Value Highlight**: The upper tail region to the right of observed value D_ij is shaded in darker dusty rose. A solid dusty-rose dot on the curve marks coordinate D_ij.
+  - **Axis & Formula**: Baseline axis labeled "MI" in muted gray with an axis tick under D_ij. Below the axis: z_ji = (D_ij - mu_j) / sigma_j = 1.8 in dusty rose.
+
+---
+
+### 3. Center Transition
+- **Convergence Lines**: Two fine leader lines emerging from the shaded tail regions of row i (blue) and row j (pink) angle inward and converge directly onto the rear base of an orange block arrow.
+- **Transition Arrow**: A solid, warm-orange horizontal block arrow pointing directly toward matrix S, symbolizing the joint integration of z_ij and z_ji into the context-normalized matrix score.
+
+---
+
+### 4. Right Section: CLR Matrix and Scores
+- **Top Equations**: Centered neatly above the matrix in mathematical typography:
+  S_ij = (z^+_ij + z^+_ji) / sqrt(2)
+  z^+ = max(z, 0)
+
+- **Score Matrix S**:
+  - Label "Score Matrix S" centered directly above the grid.
+  - A precise square 14x14 grid with thin white cell dividers.
+  - **Diagonal**: Every cell along the main diagonal strictly from (1,1) down to (14,14)—including (4,4) and (5,5)—is colored in a uniform light neutral grey representing self-interactions ('x').
+  - **Heatmap Cell Data (14x14 orange sequential scale, 0 = palest/near-white, 9 = darkest burnt orange, x = grey diagonal)**:
+    - Row 1:  x, 3, 0, 0, 3, 0, 0, 0, 0, 2, 2, 5, 2, 0
+    - Row 2:  3, x, 2, 0, 1, 0, 0, 1, 0, 2, 0, 2, 0, 2
+    - Row 3:  0, 2, x, 2, 2, 1, 2, 1, 1, 0, 0, 0, 0, 9
+    - Row 4:  2, 2, 4, x, 7, 5, 5, 3, 3, 2, 2, 2, 2, 2
+    - Row 5:  2, 0, 1, 8, x, 7, 4, 2, 2, 0, 0, 0, 0, 0
+    - Row 6:  0, 0, 1, 5, 7, x, 8, 3, 1, 0, 0, 0, 0, 0
+    - Row 7:  0, 0, 2, 4, 4, 8, x, 7, 4, 0, 0, 0, 0, 0
+    - Row 8:  0, 1, 1, 2, 3, 3, 7, x, 9, 0, 0, 0, 0, 1
+    - Row 9:  0, 0, 1, 1, 2, 1, 4, 9, x, 0, 0, 0, 0, 0
+    - Row 10: 2, 2, 0, 0, 1, 0, 0, 0, 0, x, 4, 6, 7, 0
+    - Row 11: 2, 0, 0, 0, 1, 0, 0, 0, 0, 4, x, 6, 9, 1
+    - Row 12: 5, 2, 0, 0, 1, 0, 0, 0, 0, 6, 6, x, 7, 2
+    - Row 13: 2, 0, 0, 0, 1, 0, 0, 0, 0, 7, 9, 7, x, 0
+    - Row 14: 0, 2, 9, 0, 1, 0, 0, 1, 0, 0, 1, 2, 0, x
+  - **Row Band i**: A flat translucent denim-blue horizontal strip highlighting Row 4 across all 14 columns, labeled with an italic "i" at its left border.
+  - **Column Band j**: A flat translucent dusty-rose vertical strip highlighting Column 5 across all 14 rows, labeled with an italic "j" at its bottom border.
+  - **Intersection Cell (i, j)**: Located precisely at Row 4, Column 5 (value 7), framed with a crisp, bold black square outline.
+
+- **Bottom Annotation**: Positioned directly beneath Column 5 in bold text: S_ij = 2.8.

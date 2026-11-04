@@ -1,0 +1,136 @@
+## ROLE
+
+You are a Lead Visual Designer for top-tier AI conferences (e.g., NeurIPS 2025).
+
+## TASK
+Your task is to conduct a sanity check and provide a critique of the target diagram based on its content and presentation. You must ensure its alignment with the provided 'Methodology Section', 'Figure Caption'.
+
+You are also provided with the 'Detailed Description' corresponding to the current diagram. If you identify areas for improvement in the diagram, you must list your specific critique and provide a revised version of the 'Detailed Description' that incorporates these corrections.
+
+## CRITIQUE & REVISION RULES
+
+1. Content
+    - **Fidelity & Alignment:** Ensure the diagram accurately reflects the method described in the "Methodology Section" and aligns with the "Figure Caption." Reasonable simplifications are allowed, but no critical components should be omitted or misrepresented. Also, the diagram should not contain any hallucinated content. Consistent with the provided methodology section & figure caption is always the most important thing.
+    - **Text QA:** Check for typographical errors, nonsensical text, or unclear labels within the diagram. Flag any garbled, misspelled, or non-English text. Flag any hex codes, pixel dimensions, or CSS values rendered as text. Suggest specific corrections.
+    - **Validation of Examples:** Verify the accuracy of illustrative examples. If the diagram includes specific examples to aid understanding (e.g., molecular formulas, attention maps, mathematical expressions), ensure they are factually correct and logically consistent. If an example is incorrect, provide the correct version.
+    - **Caption Exclusion:** Ensure the figure caption text (e.g., "Figure 1: Overview...") is **not** included within the image visual itself. The caption should remain separate.
+2. Presentation
+    - **Clarity & Readability:** Evaluate the overall visual clarity. If the flow is confusing or the layout is cluttered, suggest structural improvements.
+    - **Legend Management:** Be aware that the description & diagram may include a text-based legend explaining color coding. Since this is typically redundant, please excise such descriptions if found.
+
+** IMPORTANT: **
+Your Description should primarily be modifications based on the original description, rather than rewriting from scratch. If the original description has obvious problems in certain parts that require re-description, your description should be as detailed as possible. Semantically, clearly describe each element and their connections. Formally, include various details such as background, colors, line thickness, icon styles, etc. Remember: vague or unclear specifications will only make the generated figure worse, not better.
+
+## INPUT DATA
+
+- **Methodology Section**: Panel 3 of a 4-panel method figure: 'Softmax attention'. Two 14x14 matrices side by side: S (orange scale) and A (violet scale, light = low, dark = high; grey diagonal), each with gene i row band and gene j column band crossing at a traced cell, joined by a violet block arrow labelled 'softmax'. Under each matrix, row i drawn as a bar strip aligned with the columns: row i of S (orange bars, five dark top-5 bars, S_ij = 2.8 labelled) and row i of A (violet bars, A_ij = 0.64 labelled, sums to 1). Notes: 'dark: top 5 kept (real: 50)', 'sums to 1'. Formula A_i = softmax(S_i / tau_i), 'tau_i set per gene so that k_eff = 3 (real: 10)'. Header chip: numbered black circle 3, bold title 'Softmax attention', grey tag 'softmax over the keys' with a violet left edge.
+
+- **Figure Caption**: Panel 3 (Softmax): S and A matrices side by side with the row-i bar strips (S_ij = 2.8, A_ij = 0.64) and formula. REPRODUCE the first reference image (the content reference) exactly: every heatmap cell, bar, number, label and formula must stay where it is, with the same values and the same colour. Do not invent, add, remove, permute, smooth or re-block any matrix cell or bar. Improve only styling and clarity: crisper type, cleaner alignment, consistent line weights. The second reference image (Faith et al. 2007, CLR paper, Fig. 1A) is a STYLE reference only: flat translucent row band (gene i, blue) and column band (gene j, pink) crossing at the traced cell, plain bold gene labels, minimal ink, white background; do not copy its content. Colour key (keep): blue = dependence, orange = CLR, violet = softmax, magenta = walk; in every heatmap light = low and dark = high; grey diagonal = self. Single panel, white background, no extra panels, no title other than those in the reference.
+- **Detailed Description**: ### Overall Layout
+The figure represents 'Panel 3: Softmax attention', organized in a clean, balanced, top-to-bottom and left-to-right flow on a solid pure white background:
+- **Top Left**: A header block identifying step number '3' and stage name 'Softmax attention', accompanied by a subtitle tag 'softmax over the keys'.
+- **Upper Center**: Two 14×14 heatmaps placed side-by-side—matrix S on the left and matrix A on the right—joined by a central horizontal periwinkle-violet block arrow labelled 'softmax'. Both matrices are strictly sparse with crisp tile boundaries, lacking any smooth artificial gradients.
+- **Middle Section**: Two discrete 1D bar charts positioned directly beneath their respective matrices, precisely aligned column-by-column across 14 discrete gene positions to depict row i.
+- **Bottom Center**: Mathematical formulation defining row-wise softmax with per-gene temperature scaling.
+
+---
+
+### Component-by-Component Description
+
+#### 1. Header (Top Left)
+- **Step Badge**: A solid black circular badge containing a clean, white bold sans-serif numeral '**3**'.
+- **Panel Title**: Immediately to the right of the badge, crisp bold black text reads: **Softmax attention**.
+- **Process Chip**: Directly below the title, a light warm-gray rounded pill tag containing dark charcoal sans-serif text: `softmax over the keys`. The pill features a distinct vertical violet accent bar along its left edge.
+
+---
+
+#### 2. Matrix Heatmaps (Upper Section)
+
+##### Left Matrix: Matrix S (Raw CLR Scores)
+- **Title**: A clean black sans-serif letter **S** centered directly above the matrix.
+- **Grid Structure**: A 14×14 square grid of uniformly sized tiles separated by hairline white grid lines. Exactly 14 diagonal self-cells (cells (k, k) from (1, 1) straight to (14, 14)) are uniform, solid neutral light-grey squares forming an uninterrupted, perfectly straight diagonal line.
+- **Heatmap Sparsity & Color Distribution (Orange scale: 0 = near-white/pale cream, 9 = darkest saturated terracotta)**:
+  - The matrix is strictly sparse; the vast majority of cells are pale cream (near-white). There are no horizontal, vertical, or regional gradients, and no printed numeric digits inside cells.
+  - Highly colored cells strictly form two modular clusters and three isolated off-diagonal pairs:
+    1. **Central cluster (genes 4–9)**: dense block of medium-to-dark terracotta tiles around the diagonal spanning rows 4–9 and columns 4–9.
+    2. **Lower-right cluster (genes 10–13)**: dense block of medium-to-dark terracotta tiles spanning rows 10–13 and columns 10–13.
+    3. **Isolated dark cells**: row 1 col 12, row 3 col 14, and row 14 col 3.
+- **Highlight Bands & Crosshair**:
+  - **Row i (Query Gene)**: A flat, translucent soft sky-blue horizontal band covering **row 4**, with a bold blue italic label **i** to its left.
+  - **Column j (Key Gene)**: A flat, translucent dusty-rose/pink vertical band covering **column 5**, with a bold magenta italic label **j** centered directly above column 5.
+  - **Intersection (i, j)**: The crossing cell is strictly at **row 4, column 5** (immediately to the right of diagonal cell (4, 4)), framed with a sharp, high-contrast dark charcoal square outline. The diagonal self-cell (4, 4) remains plain light grey to its left.
+
+##### Central Flow Arrow
+- Positioned horizontally between matrix S and matrix A.
+- A flat periwinkle-violet horizontal block arrow pointing from left to right.
+- Centered directly above the arrow is crisp violet sans-serif text: **softmax**.
+
+##### Right Matrix: Matrix A (Attention Weights)
+- **Title**: A clean black sans-serif letter **A** centered directly above the matrix.
+- **Grid Structure**: An identical 14×14 square grid matching matrix S. Exactly 14 diagonal self-cells (cells (k, k) from (1, 1) straight to (14, 14)) are solid neutral light-grey squares forming a straight, uninterrupted diagonal line.
+- **Heatmap Sparsity & Color Distribution (Violet scale: 0 = near-white/pale lavender, 9 = darkest royal violet)**:
+  - Strictly sparse: the vast majority of cells are near-white/pale lavender without any smooth gradient.
+  - Saturated violet cells strictly reflect the post-softmax weights of top CLR entries, mirroring the modular cluster locations (genes 4–9 and 10–13, plus isolated connections).
+- **Highlight Bands & Crosshair**:
+  - Translucent soft sky-blue horizontal band covering **row 4**, with a bold blue italic label **i** to its left.
+  - Translucent dusty-rose/pink vertical band covering **column 5**, with a bold magenta italic label **j** centered directly above column 5.
+  - Crossing cell at **row 4, column 5** is framed with a solid dark charcoal square outline, leaving diagonal cell (4, 4) in plain light grey immediately to its left.
+
+---
+
+#### 3. Row-wise Bar Charts (Middle Section)
+
+Aligned directly beneath each matrix, strictly matching the horizontal column positions of the 14 genes:
+
+##### Left Bar Strip: Row i of Matrix S
+- **Base Axis**: A thin medium-gray horizontal line spanning columns 1 through 14.
+- **Column Guide**: The dusty-rose translucent vertical band continues downward seamlessly through **column 5**.
+- **Bars & Coloring**:
+  - Depicts row 4 CLR scores. Columns 1, 2, 3, 10, 11, 12, 13, 14 and diagonal column 4 have no bars (flat at zero baseline).
+  - Terracotta orange bars are present only at active columns 5, 6, 7, 8, 9.
+  - The bar at **column 5** is the tallest (dark saturated terracotta), directly aligned within the pink guide band, accompanied by a magenta text callout immediately to its right: **S_{ij} = 2.8**.
+- **Subtitles Below Axis**:
+  - Line 1: Bold black text: **row i of S**.
+  - Line 2: Dark gray explanatory note: `dark: top 5 kept (real: 50)`.
+
+##### Right Bar Strip: Row i of Matrix A
+- **Base Axis**: A thin medium-gray horizontal line spanning columns 1 through 14.
+- **Column Guide**: The dusty-rose translucent vertical band continues downward seamlessly through **column 5**.
+- **Bars & Coloring**:
+  - Exactly one dominant, tall bar at **column 5** filled with deep saturated royal violet, directly aligned within the pink guide band, accompanied by a magenta text callout immediately to its right: **A_{ij} = 0.64**.
+  - Very low, tiny violet bars at remaining active top neighbors (columns 6, 7, 8, 9); all other columns are flat at zero.
+- **Subtitles Below Axis**:
+  - Line 1: Bold black text: **row i of A**.
+  - Line 2: Dark gray explanatory note: `sums to 1`.
+
+---
+
+#### 4. Mathematical Formulation (Bottom Section)
+Centered horizontally beneath the bar charts:
+- **Equation**: A_i = softmax(S_i / tau_i)
+- **Parameter Note**: Located directly below the formula in clean dark gray text: `tau_i set per gene so that k_eff = 3 (real: 10)`
+
+---
+
+### Styling and Aesthetics
+- Solid pure white background with no drop shadows or decorative borders.
+- Crisp hairline boundaries between heatmap cells, with clean flat color blocks.
+- High-contrast typography: bold modern sans-serif for labels, italic serif for mathematical symbols (i, j, S, A, tau).
+- **Target Diagram**: [The generated figure is provided as an image]
+
+## OUTPUT
+Provide your response strictly in the following JSON format:
+{
+    "critic_suggestions": ["specific actionable suggestion 1", "specific actionable suggestion 2"],
+    "revised_description": "The complete revised description incorporating all suggested fixes. If no revision is needed, set to null."
+}
+
+If the image is publication-ready with no issues, return:
+{
+    "critic_suggestions": [],
+    "revised_description": null
+}
+
+
+Additional user feedback to consider in your evaluation:
+The matrices are wrong: S and A must NOT be smooth gradients. Both are sparse: the vast majority of cells are near-white (S) or near-white lavender (A); only the cells listed with levels 3-9 in the digit grids I gave earlier are coloured, forming a dark chain block on genes 4-9 around the diagonal and a block on genes 10-13 at lower right, plus a few isolated dark cells at the top right and bottom left (row 3 column 14, row 1 column 12, row 14 column 3). No horizontal or vertical gradient. Do not print digits in cells. Bars: S row 4 has bars at columns 4-9 only (tallest at column 5, S_ij = 2.8); A row 4 has one dominant bar at column 5 (A_ij = 0.64) and tiny bars at columns 4, 6, 7, 8.

@@ -1,0 +1,80 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout and Structure
+
+The diagram illustrates the diffusion of attention across a biological gene network via a multi-step lazy random walk. It adopts an ultra-clean, minimalist Nature-style scientific vector schematic layout on a uniform, warm off-white background. The composition is organized into two primary horizontal tiers:
+
+1. **Top Section (Main Diffusion Progression)**: A horizontal sequence of four identical network graphs representing diffusion snapshots across discrete progression stages (`step 0`, `step 1`, `step 3`, and `step 9`), sequentially linked from left to right by thin, delicate horizontal arrows.
+2. **Bottom Section (Comparative Mechanism Inset)**: A split two-panel comparative inset placed side by side beneath the primary progression, contrasting diffusion behavior within a `regulon (loose)` against a `complex (tight clique)` at step 9.
+3. **Corner Identifier**: A subtle, understated label reading `schematic` anchored at the bottom-left corner of the canvas in a muted charcoal tone.
+
+---
+
+### Component Details and Visual Flow
+
+#### 1. Top Section: Diffusion Walk Across Steps (Horizontal Flow)
+
+The top section consists of four identical topological layouts of a gene network positioned side-by-side on an implicit horizontal baseline to track attention mass progression.
+
+* **Topology Structure (Identical across all 4 snapshots)**:
+  * A central loose cluster (the target regulon) consisting of roughly twelve circular nodes connected by thin, hairline light-slate grey edges in an open, semi-sparse web.
+  * Within this loose cluster, a prominent query node is marked with the single lowercase letter `i` in an upright sans-serif font.
+  * Surrounding this central regulon are two to three smaller satellite modules (clusters of three to five nodes each), linked to the central module by a few sparse bridge edges.
+
+* **Color and Mass Intensity Progression**:
+  * **Snapshot 1 (`step 0`)**: 
+    * Text label placed neatly above: `step 0` in medium-weight charcoal sans-serif.
+    * All attention mass is strictly concentrated on the query node `i`. Node `i` is filled with a solid, deep vibrant magenta-pink with a soft, translucent circular pink bloom glowing immediately behind it.
+    * All other network nodes are hollow circular outlines with pure white fill and crisp, thin dark-slate borders.
+  * **Snapshot 2 (`step 1`)**:
+    * Separated from the previous snapshot by a delicate, thin rightward arrow (`→`) in neutral grey.
+    * Text label placed neatly above: `step 1`.
+    * Half of the mass remains on node `i` (filled in rich medium-deep pink), while its immediate one-hop neighbor nodes within the regulon take on a soft medium-pink fill.
+    * Outlying nodes within the regulon and all nodes in adjacent satellite clusters remain pure white with thin grey borders.
+  * **Snapshot 3 (`step 3`)**:
+    * Connected via a thin rightward arrow (`→`).
+    * Text label placed neatly above: `step 3`.
+    * Attention mass has diffused across most of the regulon. The central node `i` and its closest partners exhibit a moderate rose-pink shade, while outer nodes within the regulon display a gentle, lighter blush-pink tint that gradually fades with topological distance.
+    * A subtle, faint rose-pink ambient glow softly cushions the central regulon area. Neighboring external clusters remain uncolored.
+  * **Snapshot 4 (`step 9`)**:
+    * Connected via a thin rightward arrow (`→`).
+    * Text label placed neatly above: `step 9`.
+    * Attention mass has fully diffused and reached an equilibrium across the entire regulon, giving all of its member nodes an even, soft dusty-pink tint.
+    * A very faint, translucent whisper of blush tint leaks across the connecting bridge edges into the closest gateway nodes of adjacent neighboring modules.
+
+---
+
+#### 2. Bottom Section: Topological Trade-off Insets
+
+Generous vertical whitespace cleanly separates the upper progression from the lower comparison panels, which illustrate why lazy diffusion concentrates within loose functional modules but disperses from tightly bound multi-protein complexes.
+
+* **Left Sub-Panel: `regulon (loose)`**:
+  * **Label**: Centered neatly above the sub-network: `regulon (loose)` in medium-weight charcoal sans-serif.
+  * **Graph Structure**: Displays a sparse, distributed module of ten to twelve nodes connected by open, branching edges (matching the regulon topology from the top section) evaluated at step 9.
+  * **Visual State**: Attention mass has accumulated and remained trapped inside the loose module. Every node is filled with a steady, uniform medium-pink tint, supported by a cohesive, soft pastel pink ambient glow behind the entire cluster, signifying complete, uniform module coverage.
+
+* **Right Sub-Panel: `complex (tight clique)`**:
+  * **Label**: Centered neatly above the sub-network: `complex (tight clique)` in medium-weight charcoal sans-serif.
+  * **Graph Structure**: Displays an ultra-dense, tightly connected clique (representing a dense protein complex such as a ribosome), structured as a regular pentagon of five to six nodes where every node is interconnected to all others by criss-crossing chord edges.
+  * **Context Cloud**: This compact pentagonal clique sits directly at the edge of an expansive, wide cloud of pale grey nodes linked by hairline grey edges (representing the surrounding cellular translation machinery).
+  * **Visual State**: Due to high internal connectivity and outward connections, the attention mass has over-diffused and dissipated outward into the larger background cloud.
+  * The nodes of the tight clique itself are only very faintly tinted in pale, washed-out blush pink.
+  * A delicate, thin curved magenta-pink arrow sweeps outward from the perimeter of the pentagonal clique into the surrounding grey background cloud, visually emphasizing the directional leakage and dispersion of mass.
+
+---
+
+### Styling, Color Palette, and Typographic Specifications
+
+* **Canvas Background**: Flat, uniform warm off-white with an academic, clean parchment feel.
+* **Color Palette**:
+  * **Primary Signal (Attention Mass)**: Monochromatic magenta-pink ramp (ranging from pure white for unvisited nodes, through soft blush and pastel rose-pink for diffused mass, up to a deep, saturated berry-pink for concentrated attention).
+  * **Diffuse Glow / Bloom**: Translucent, soft-edged circular gradients behind active nodes and clusters, evoking a delicate ink-in-water or thermal diffusion effect.
+  * **Nodes and Edges**: Edges rendered in hairline neutral slate grey. Inactive or unvisited nodes have crisp, hairline dark-grey perimeters with clean white interiors.
+  * **Query Node `i`**: Distinctly demarcated by an upright, bold dark charcoal letter centered inside the node circle.
+  * **Text Elements**: Crisp dark charcoal, set in a clean, legible sans-serif typeface (such as Helvetica or Arial).
+* **Graphic Restraint**: Completely free of axes, tick marks, numeric legends, matrix grids, or decorative gradient cards. Visual clarity relies strictly on geometric network topology, node fills, and subtle ink-like diffuse blooms.
+
+
+Note: this plan was guided by a user-provided reference sketch; follow the description above faithfully.

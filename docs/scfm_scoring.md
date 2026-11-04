@@ -226,6 +226,81 @@ Per case: `results/scfm_score/dropped_genes_and_truth_edges.csv` (genes in the f
 5. On the K562 replication (descriptive) the direction is the same but smaller (0.27 log2 units, interval 0.09 to 0.46); scGPT is mixed (CLR-NS is better than its attention, worse than its token-embedding cosine).
 6. These are comparisons against known networks that are incomplete, with seven datasets and no claim that either method recovers causal regulation.
 
+## 11. Fine-tuning arm (step 3.10; E17, E18; descriptive: no p-value, no NI claim, no decision label)
+
+Added 2026-11-03, after sections 1 to 10 (those were written before this arm was run; item 8 of section 9, "the fine-tuning arm was not run for any dataset", describes the state of 2 Nov and is superseded by this section for BEELINE). Settings: preregistration E17 (written before any fine-tuned attention existed). Freeze: E18 and `results/scfm_ft/sha256_manifest.csv` (32 files, manifest SHA-256 `7cbbd397...3a8c71`, commit edb6f83, committed before any truth was opened for this arm). Scoring: job 1070, run once on the real BEELINE truths; the manifest was re-verified first (32 files, 0 mismatches). Scripts: `analysis/scfm_score_export_ft.py`, `scfm_score_ft.R`, `scfm_score_ft_stats.R` (smoke-tested on synthetic truth first, job 1060, commit 5b21491). Outputs: `results/scfm_score_ft/` (`metrics_ft.csv`, `contrasts_ft_summary.csv`, `cells_*.csv`, `stats_ft.log`).
+
+**What was fine-tuned.** scPRINT medium-v1.5 on each of the 14 BEELINE cases (7 datasets x gene sets of 500 and 1,000), 10 epochs over all cells of the case, the package's default self-supervised losses (denoising and bottleneck-generation ZINB terms; no labels), seed 20261021, batch of 8 cells; scGPT whole-human on the four hESC and hHep cases (masked-value GEP and GEPC losses, mask ratio 0.4, 10 epochs). The attention was then extracted with the unchanged zero-shot readout (same cells, genes, gene order, arm A, R0 / R0' / R2 definitions and seeds) and scored with the same function, truths and gene sets as section 2. The CLR-NS and zero-shot rows are the E16 rows (reference line of the first table reproduces the primary exactly: HL +1.032, [+0.343, +1.897]).
+
+**How far the models moved (truth-free QC, `results/scfm_ft/qc_*.csv`).** Training loss fell in every run (scPRINT, epoch 1 to epoch 10, e.g. hESC_500 8.05 to 7.28, mESC_500 4.12 to 2.78); the relative weight change was 0.5 to 1.1% (scPRINT) and 1.2 to 1.6% (scGPT). The fine-tuned R0 differs clearly from the zero-shot R0 (relative L1 0.46 to 0.70, Spearman 0.62 to 0.77 off-diagonal; scGPT attention relative L1 0.46 to 0.47, Spearman 0.25 to 0.31), against a split-half relative L1 of 0.08 to 0.16 for the same readout (scPRINT). So the networks changed substantially in the sense of the readout; the question below is whether they changed in the sense of the truths.
+
+**d_i definitions.** Fine-tuning effect: per dataset, the mean over gene sets and primary truths of log2(AUPRC ratio fine-tuned R0 / AUPRC ratio zero-shot R0), S = Aᵀ, arm A, 44 cells; positive = fine-tuning raised the score. CLR-NS minus fine-tuned R0: the same d_i as the primary (higher favours CLR-NS). Hodges-Lehmann estimate and the exact 92.2% Wilcoxon interval (n = 7) as in section 2. Descriptive.
+
+| Dataset | cells | AUPRC ratio CLR-NS | zero-shot R0 | fine-tuned R0 | fine-tuned minus zero-shot (log2) | CLR-NS minus fine-tuned (log2) |
+|---|---|---|---|---|---|---|
+| hESC | 6 | 1.26 | 1.18 | 1.13 | -0.042 | +0.145 |
+| hHep | 6 | 1.44 | 0.98 | 0.98 | -0.009 | +0.493 |
+| mDC | 6 | 1.57 | 1.05 | 0.98 | -0.100 | +0.683 |
+| mESC | 8 | 1.49 | 1.01 | 1.00 | -0.009 | +0.507 |
+| mHSC-E | 6 | 4.57 | 1.11 | 1.06 | -0.056 | +1.580 |
+| mHSC-GM | 6 | 7.44 | 1.23 | 1.09 | -0.150 | +2.047 |
+| mHSC-L | 6 | 12.63 | 1.10 | 1.07 | -0.045 | +2.332 |
+
+(Mean AUPRC ratios are plain means over the dataset's cells.) Per cell, fine-tuning lowered the AUPRC ratio in 32 of the 44 cells and raised it in 12 (`cells_ft_vs_zs_R0.csv`); the fine-tuned ratio lies between 0.78 and 1.47 over all cells.
+
+| Contrast (positive = first-named is higher) | n | HL and exact 92.2% interval (scGPT: range) | datasets positive |
+|---|---|---|---|
+| fine-tuned R0 minus zero-shot R0, AUPRC ratio (log2) | 7 | -0.052 [-0.100, -0.026] | 0 of 7 |
+| CLR-NS minus fine-tuned R0, AUPRC ratio | 7 | **+1.114 [+0.414, +1.956]** | 7 of 7 |
+| (reference, E16) CLR-NS minus zero-shot R0 | 7 | +1.032 [+0.343, +1.897] | 7 of 7 |
+| CLR-NS minus fine-tuned R0, EPR (log2, floor 1e-9) | 7 | +2.526 [+1.274, +5.156] | 7 of 7 |
+| fine-tuned minus zero-shot R0, EPR | 7 | +0.117 [-0.317, +2.611] | 4 of 7 |
+| CLR minus fine-tuned R0, AUPRC ratio | 7 | +1.024 [+0.325, +1.900] | 7 of 7 |
+
+Per truth and gene set (n = 7; LOF/GOF is mESC only, n = 1):
+
+| Subset | fine-tuned minus zero-shot R0 | CLR-NS minus fine-tuned R0 |
+|---|---|---|
+| celltype_ChIP | -0.060 [-0.129, +0.014] | -0.080 [-0.276, +0.266] |
+| nonspecific_ChIP | -0.106 [-0.230, +0.026] | +1.141 [+0.372, +1.962] |
+| STRING | -0.048 [-0.081, -0.015] | +2.236 [+0.810, +3.944] |
+| LOF/GOF (mESC, n = 1) | +0.112 | +0.372 |
+| TFs+500 only | -0.084 [-0.148, -0.020] | +1.120 [+0.408, +1.939] |
+| TFs+1000 only | -0.037 [-0.094, +0.006] | +1.146 [+0.421, +1.922] |
+
+Other readouts and orientations (fine-tuned minus zero-shot, then CLR-NS minus fine-tuned):
+
+| Readout | fine-tuned minus zero-shot | CLR-NS minus fine-tuned |
+|---|---|---|
+| R0, S = A | +0.051 [+0.011, +0.091] | +1.054 [+0.348, +1.889] |
+| R0, S = max(A, Aᵀ) | -0.003 [-0.029, +0.022] | +1.086 [+0.323, +1.969] |
+| R0', S = Aᵀ | -0.037 [-0.085, +0.004] | +1.170 [+0.399, +2.044] |
+| R2, S = Aᵀ | +0.034 [-0.027, +0.095] | +1.157 [+0.401, +2.029] |
+
+**scGPT (hESC, hHep; n = 2, per-dataset values, no interval).** Values are log2 AUPRC ratio differences on the scGPT G-intersection.
+
+| Readout | fine-tuned minus zero-shot | CLR-NS minus fine-tuned (E16 value for the zero-shot model in brackets) |
+|---|---|---|
+| attention, last layer | +0.058 (hESC +0.070, hHep +0.046) | +0.313 (+0.107, +0.520) [+0.371] |
+| token-embedding cosine | -0.009 (-0.012, -0.007) | -0.766 (-0.895, -0.636) [-0.775] |
+| hidden-state cosine | -0.130 (-0.147, -0.114) | -0.163 (-0.284, -0.043) [-0.294] |
+| token-embedding cosine, LayerNorm'd (not preregistered) | -0.007 (-0.008, -0.006) | -0.747 (-0.902, -0.592) [-0.754] |
+
+**Plain reading (descriptive).**
+
+1. Self-supervised fine-tuning on the same cells that are then scored, with the settings fixed in E17, did not make the scPRINT attention better at recovering the BEELINE truths. The AUPRC ratio of R0 moved by a small amount, on average slightly down (-0.05 log2 units, about 3.5%; at most -0.15 in one dataset), in 32 of 44 cells down. The interval for this shift excludes 0 (it is descriptive; the shift is far smaller than the 0.15 margin of the primary and than the CLR-NS advantage).
+2. The gap between CLR-NS and scPRINT R0 is unchanged in size and direction when the fine-tuned R0 replaces the zero-shot R0: +1.114 [+0.414, +1.956] against +1.032 [+0.343, +1.897], with all seven datasets positive, and the same pattern by truth (non-specific ChIP-seq and STRING carry it; on cell-type ChIP-seq the interval includes 0 and favours R0 in 5 of 7 datasets). The other readouts (R0', R2, orientation A or max) behave the same way.
+3. For scGPT the fine-tuning effect is within +0.06 to -0.13 log2 units on the two datasets and does not change the earlier ordering (CLR-NS above the attention, below the token-embedding cosine); n = 2, so no more than an indication.
+4. No NI claim and no decision-table label is attached to any row of this section; the preregistered primary, key secondaries and robust NI of section 2 are unchanged.
+
+**Caveats.**
+
+- One fine-tuning recipe (E17): package-default self-supervised losses, no cell-type or other labels, no validation split or model selection, learning rate and 10 epochs as fixed beforehand, batch of 8 cells, 480 to 1,340 optimiser steps per case (the smallest case never leaves the 500-step warm-up). Other recipes (longer training, a lower or higher learning rate, label-based or supervised network objectives, pooling cells from several datasets, adapter methods) were not tried and are not excluded by this result. The weight change is 0.5 to 1.6%.
+- Each model was fine-tuned on the cells it is then scored on (transductive, no truth); this is the most favourable setting for the unsupervised objective and gives no estimate of transfer to other datasets.
+- scPRINT was fine-tuned with `do_cls` off (needs labels, which would be truths), without the package's learning-rate reduction and early-stopping callbacks (no validation split), in fp32 with the `normal` transformer (not flash), as listed in E17.
+- n = 7 datasets (scPRINT) and n = 2 (scGPT); the intervals are exact at 92.2% on dataset-level means, not 95%. The EPR-based fine-tuning contrast depends on mHSC-L, where zero-shot EPR is 0 for two cells and is floored at 1e-9 (section 9, item 12), which is why its upper end is large.
+- Scored once; no fine-tuned result was used to choose any setting. The fine-tuned state dicts were deleted after the extraction QC (their SHA-256 is in the per-case json under `~/scfm_models/step5_ft/*_attn`); the attention outputs and logs are kept.
+
 ## Files
 
-`results/scfm_score/` (metrics_long.csv, contrasts_summary.csv, stats.log, primary_cells.csv, robust_*.csv, armB_paired_cells.csv, key_metrics_per_case.csv, dropped_genes_and_truth_edges.csv, mixed_model_fixed.csv, exploratory.txt), `results/scfm_score_k562/`, `results/scfm_score_smoke/`, `results/scfm_k562/`. Scripts: `analysis/scfm_score_export.py`, `scfm_score.R`, `scfm_score_stats.R`, `scfm_score_k562.R`, `scfm_score_synth_truth.R`, `scfm_score_exploratory.R`, `scfm_k562_prep.py`, `scfm_k562_manifest.py`.
+`results/scfm_score/` (metrics_long.csv, contrasts_summary.csv, stats.log, primary_cells.csv, robust_*.csv, armB_paired_cells.csv, key_metrics_per_case.csv, dropped_genes_and_truth_edges.csv, mixed_model_fixed.csv, exploratory.txt), `results/scfm_score_k562/`, `results/scfm_score_smoke/`, `results/scfm_k562/`. Scripts: `analysis/scfm_score_export.py`, `scfm_score.R`, `scfm_score_stats.R`, `scfm_score_k562.R`, `scfm_score_synth_truth.R`, `scfm_score_exploratory.R`, `scfm_k562_prep.py`, `scfm_k562_manifest.py`. Fine-tuning arm (section 11): `results/scfm_ft/` (SHA-256 manifest, QC tables), `results/scfm_score_ft/`; scripts `analysis/scfm_finetune_scprint.py`, `scfm_finetune_scgpt.py`, `scfm_ft_manifest.py`, `scfm_ft_qc.py`, `scfm_score_export_ft.py`, `scfm_score_ft.R`, `scfm_score_ft_stats.R`.

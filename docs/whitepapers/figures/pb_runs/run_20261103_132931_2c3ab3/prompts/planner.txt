@@ -1,0 +1,58 @@
+I am working on a task: given the 'Methodology' section of a paper, and the caption of the desired figure, automatically generate a corresponding illustrative diagram. I will input the text of the 'Methodology' section, the figure caption, and your output should be a detailed description of an illustrative figure that effectively represents the methods described in the text.
+
+To help you understand the task better, and grasp the principles for generating such figures, I will also provide you with several examples. You should learn from these examples to provide your figure description.
+
+** IMPORTANT: **
+Your description should be as detailed as possible. Semantically, clearly describe each element and their connections. Formally, include various details such as background style (typically pure white or very light pastel), colors, line thickness, icon styles, etc. Remember: vague or unclear specifications will only make the generated figure worse, not better.
+
+Your description should cover:
+1. **Overall layout**: General flow direction (left-to-right or top-to-bottom), major sections/phases
+2. **Components**: Each box, module, or element with its exact label
+3. **Connections**: Arrows, data flows, and their directions
+4. **Groupings**: How components are grouped or sectioned (colored regions, dashed borders)
+5. **Labels and annotations**: Text labels, mathematical notations
+6. **Input/Output**: What enters and exits the system
+7. **Styling**: Background fills, color palettes (in natural language, e.g., "soft sky blue", "warm peach" — never hex codes), line weights, icon styles
+
+## Methodology Section
+Method: attention diffusing over a gene network (the multi-step walk).
+
+A gene-by-gene dependence network. A query gene i (a black node labelled i) sits inside a loose module (its regulon, about a dozen genes joined by thin grey edges), with neighbouring modules around it. Attention is a unit of mass that starts entirely on i and spreads over the network like ink or heat diffusing through a graph.
+
+Rule per step: every gene passes attention to its roughly 10 strongest partners with softmax weights (per-gene temperature, at most 50 candidate partners, no learned parameters), lazily: half of the mass stays put (P = 0.5 I + 0.5 A). The read-out is the symmetrised mass.
+
+Main panel: a row of four small network snapshots of the SAME network (same node positions in each), labelled exactly 'step 0', 'step 1', 'step 3', 'step 9', joined by thin right-pointing arrows between snapshots. Step 0: only node i is filled solid magenta-pink (all mass on i), everything else white. Step 1: mass on i and its direct partners only. Step 3: mass covers most of the regulon, fading with distance. Step 9: mass spread through the whole regulon and thinning, faintly, into the neighbouring modules. Node fill = amount of attention mass: a single-hue magenta/pink (#e87ba4) ramp from white (none) to deep pink (much), plus a soft diffuse glow (heat/ink bloom) behind the nodes. Edges thin grey. No other colours inside the networks.
+
+Second small panel (inset along the bottom or right), titled 'regulon (loose)' and 'complex (tight clique)' side by side, both at step 9. Left: a loose module (sparse web of nodes) completely and evenly tinted pink: mass covers it. Right: a tight clique (5 to 6 nodes all joined to each other, drawn as a pentagon with all chords, like a ribosome complex) sitting at the edge of a larger wider cloud of grey nodes (the wider translation program); pink mass leaks out of the clique into the surrounding nodes so the clique itself is only pale pink. A short curved arrow shows leaking mass. 
+
+Style: clean, flat, vector-like scientific schematic, white / off-white background (#fcfcfb), thin lines, sans-serif text (Helvetica/Arial), dark grey text, minimal ink, like a Nature figure. Use only these labels: 'step 0', 'step 1', 'step 3', 'step 9', 'regulon (loose)', 'complex (tight clique)', node label 'i', and a small caption 'schematic' bottom-left. No numbers, no axes, no neural network imagery, no learned weights, no matrices, no other text.
+
+
+## Figure Caption
+Attention diffusing over a gene network: multi-step lazy walk (steps 0, 1, 3, 9) and the loose-regulon versus tight-clique trade-off
+
+## Reference Examples
+(No reference examples available. Generate based on source context alone.)
+
+Based on the methodology section, figure caption, and learning from the style and structure of the reference examples above, generate a comprehensive and detailed textual description of the methodology diagram.
+
+Note: Do not include figure titles (e.g., "Figure 1: ...") in the diagram description. The caption should remain separate from the diagram content.
+
+## Aspect Ratio Recommendation
+
+After your detailed description, on a **new line**, output exactly one line in this format:
+```
+RECOMMENDED_RATIO: <ratio>
+```
+where `<ratio>` is one of: 1:1, 2:3, 3:2, 3:4, 4:3, 9:16, 16:9, 21:9.
+
+Choose the best aspect ratio based on:
+- The **content structure**: pipelines and sequential flows → wide (16:9, 21:9); deep hierarchies or vertical stacks → tall (2:3, 9:16); balanced architectures → square-ish (1:1, 4:3, 3:4)
+- The **reference examples' aspect ratios** listed above (if available)
+- The **number of components** and their spatial arrangement
+
+For example, a left-to-right encoder-decoder pipeline would be 16:9, while a top-to-bottom tree structure would be 2:3.
+
+
+## User-Provided Reference/Sketch
+The final 1 attached image(s), after the reference example images, are user-provided reference/sketch images (e.g. a hand-drawn sketch, whiteboard photo, or a prior version of the figure). Use them as guidance for the layout and content of the target diagram while staying faithful to the source text.

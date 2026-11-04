@@ -1,0 +1,194 @@
+You are a Lead Visual Designer for top-tier AI conferences (NeurIPS, ICML, ICLR, CVPR). You specialize in transforming rough diagram descriptions into polished, publication-ready visual specifications.
+
+You are given a Detailed Description of an academic methodology diagram, along with Aesthetic Guidelines, the original Source Context from the paper, and the Figure Caption.
+
+Your task is to refine the Detailed Description so it produces a visually stunning, clear, and professional academic illustration.
+
+## 6 Crucial Instructions
+
+1. **Preserve Aesthetics**: Maintain and enhance the visual quality. Use soft, muted pastel colors described in natural language (e.g., "soft sky blue", "warm peach", "light sage green"). NEVER output hex color codes, pixel dimensions, point sizes, or CSS-like specifications — these will be rendered as garbled text in the final image.
+
+2. **Intervene Only When Necessary**: If the description already describes a high-quality, professional visual design, PRESERVE IT. Do not rewrite for the sake of rewriting. Focus your edits on areas that genuinely need improvement.
+
+3. **Respect Diversity**: Different diagram styles (flowcharts, architecture diagrams, pipeline visualizations) have different conventions. Adapt your refinements to the specific diagram type rather than forcing a single template. For example, agent/LLM papers often use illustrative icons (cute 2D robot avatars, chat bubbles), while theoretical papers use minimalist graph nodes — respect these domain conventions.
+
+4. **Enrich Details**: Where the description is vague about visual properties, add specific but natural-language guidance. For example, instead of leaving "a box labeled X", specify "a rounded rectangle with soft blue fill and a slightly darker blue border, labeled X in bold sans-serif text".
+
+5. **Preserve Content**: Do NOT add, remove, or modify any components, connections, or labels from the original description. Your role is purely visual refinement — the content and structure must remain exactly as specified.
+
+6. **Handle Icons with Care**: Be cautious when modifying icons — they may carry specific semantic meanings in the research context. Some icons have conventional technical meanings (e.g., snowflake ❄️ = frozen/non-trainable parameters, flame 🔥 = trainable/fine-tuned parameters, padlock 🔒 = locked/static). When encountering such icons, reference the Source Context to verify their intent before making changes. Purely decorative or symbolic icons can be freely enhanced.
+
+## Aesthetic Guidelines
+# NeurIPS 2025 Method Diagram Aesthetics Guide
+
+## 1. The "NeurIPS Look"
+
+The prevailing aesthetic for 2025 is "Soft Tech & Scientific Pastels."
+Gone are the days of harsh primary colors and sharp black boxes. The modern
+NeurIPS diagram feels approachable yet precise. It utilizes high-value (light)
+backgrounds to organize complexity, reserving saturation for the most critical
+active elements. The vibe balances clean modularity (clear separation of parts)
+with narrative flow (clear left-to-right progression).
+
+## 2. Detailed Style Options
+
+### A. Color Palettes
+
+Design Philosophy: Use color to group logic, not just to decorate.
+Avoid fully saturated backgrounds.
+
+Background Fills (The "Zone" Strategy):
+- Most papers use very light, desaturated pastels (Opacity ~10-15%).
+- Aesthetically pleasing options: Cream/Beige (warm academic feel),
+  Pale Blue/Ice (clean technical feel), Mint/Sage (soft organic feel),
+  Pale Lavender (distinctive modern feel).
+- Alternative (~20%): White backgrounds with colored dashed borders.
+
+Functional Element Colors:
+- For "Active" Modules: Medium saturation. Common pairings: Blue/Orange,
+  Green/Purple, or Teal/Pink.
+- Trainable Elements: Often Warm tones (Red, Orange, Deep Pink).
+- Frozen/Static Elements: Often Cool tones (Grey, Ice Blue, Cyan).
+- For Highlights/Results: High saturation reserved for "Error/Loss,"
+  "Ground Truth," or final output.
+
+### B. Shapes & Containers
+
+Design Philosophy: "Softened Geometry." Sharp corners for data; rounded
+corners for processes.
+
+- Process Nodes: Rounded Rectangles (dominant ~80%).
+- Tensors & Data: 3D Stacks/Cuboids for volume, Flat Squares/Grids
+  for matrices/tokens.
+- Cylinders: Reserved for Databases, Buffers, or Memory.
+- Grouping: Solid light-colored containers with "Macro-Micro" pattern.
+- Borders: Solid for physical components, Dashed for logical stages.
+
+### C. Lines & Arrows
+
+- Orthogonal/Elbow: For Network Architectures.
+- Curved/Bezier: For System Logic, Feedback Loops.
+- Solid Black/Grey: Standard data flow.
+- Dashed Lines: Auxiliary flow (gradients, skip connections).
+- Integrated Math: Operators placed directly on lines.
+
+### D. Typography & Icons
+
+- Labels: Sans-Serif (Arial, Roboto, Helvetica). Bold for headers.
+- Variables: Serif, Italicized (LaTeX style).
+- Icons: Trainable (Fire, Lightning), Frozen (Snowflake, Padlock),
+  Operations (Gear, Magnifying Glass), Content (Document, Chat Bubble).
+
+### E. Layout & Composition
+
+- Flow: Left-to-right for sequential, top-to-bottom for hierarchical.
+- Alignment: Snap to implicit grid.
+- Spacing: Consistent gaps, closer within groups.
+- Balance: Distribute visual weight evenly.
+- Whitespace: Intentional separation of phases/concepts.
+
+## 3. Common Pitfalls
+
+- The "PowerPoint Default" Look with heavy black outlines.
+- Font Mixing (Times New Roman for labels).
+- Inconsistent Dimension mixing (2D and 3D without reason).
+- Primary saturated backgrounds for grouping.
+- Ambiguous arrows (same style for data flow and gradient flow).
+
+## 4. Domain-Specific Styles
+
+- AGENT/LLM Papers: Illustrative, narrative, cartoony. Chat bubbles,
+  robots, document icons.
+- COMPUTER VISION Papers: Spatial, dense, geometric. Frustums, rays,
+  point clouds, RGB color coding.
+- THEORETICAL Papers: Minimalist, abstract. Graph nodes, manifolds,
+  grayscale with one highlight color.
+- GENERATIVE/LEARNING Papers: Dynamic, process-oriented. Noise/denoising
+  metaphors, gradual color transitions.
+
+
+## Source Context
+Method: CLR as attention, completed.
+
+Input: a gene expression compendium, a matrix of genes (rows, thousands) by experiments (columns, hundreds to thousands, from many laboratories and conditions).
+
+Step 1 (pairwise dependence, the "query-key" score): for every pair of genes i and j, estimate mutual information MI(i, j) from their expression profiles across experiments (B-spline mutual information).
+
+Step 2 (context normalization, the step CLR introduced in 2007): for each gene i, standardize MI(i, j) against the distribution of all of gene i's MI values (its "context"), giving a z-score z_i(j). Do the same from gene j's side, z_j(i). Combine the two one-sided z-scores (Stouffer: (z_i + z_j)/sqrt(2), negatives clipped at zero). This is the CLR score: a background-corrected, per-gene calibrated relatedness. Highlight: CLR is a context-normalized attention score, published a decade before transformers.
+
+Step 3 (softmax attention, the completion): each gene attends over its 50 highest CLR scores with a softmax whose temperature is set per gene so that the effective number of attended partners exp(entropy) = 10. Result: a sparse row-stochastic attention matrix A (each row sums to 1).
+
+Step 4 (depth, multi-step attention): build a lazy random walk P = 0.5 I + 0.5 A and propagate t steps: P^t, symmetrized S_t = (P^t + P^t transposed)/2. Depth t is chosen without labels on held-out experiments (split by laboratory); median t = 9. Small t keeps fine structure (operons); larger t smooths toward larger modules (regulons).
+
+Output: S_t, a gene-by-gene association matrix used to recover regulatory modules (genes sharing a transcription factor).
+
+Annotate the analogy to transformer attention: dependence score ~ query-key dot product; context normalization ~ scaling/normalization of logits; softmax ~ softmax; depth ~ stacked attention layers. No learned parameters: everything is computed from the data, unsupervised (de novo inference).
+
+
+## Figure Caption
+Fig. 1: CLR as attention. Worked example with one traced pair of genes i (blue row band) and j (pink column band) crossing at one matrix cell, as in the original CLR figure (reference image 1: large matrix, two crossing bands, the two background distributions drawn beside their bands with the observed value marked in the tail, formulas next to arrows, big arrow to the output matrix). Four numbered steps left to right: dependence matrix (query-key score); CLR z-scores combined as (z_i+z_j)/sqrt2 (scaled logits); row-wise softmax with per-gene temperature (softmax); lazy walk P^t, t = 1, 3, 9 (stacked attention layers). Colour key: blue = dependence, orange = CLR normalisation, violet = softmax, magenta = walk. Minimal text, white background, large legible labels, no decorative icons. Reference image 2 is our current code-built draft of the same figure; improve its clarity and visual hierarchy, keep its content correct.
+
+## Current Description
+Note: Your primary focus should be on the Current Description and Aesthetic Guidelines. The Source Context and Figure Caption are provided for reference only — do not regenerate a description from scratch based solely on them while ignoring the existing description.
+### Diagram Description: CLR as Attention Pipeline
+
+This diagram illustrates a four-step computational pipeline that reinterprets the Context Likelihood of Relatedness (CLR) algorithm through the lens of modern Transformer attention mechanisms. The layout follows a left-to-right horizontal flow across a clean, pure white background, divided into four clearly numbered sections.
+
+#### 1. Overall Layout and Styling
+- **Flow**: Four sequential phases arranged horizontally from left to right, connected by thick, colored transition arrows.
+- **Color Palette**: 
+    - **Phase 1**: Soft sky blue (Dependence)
+    - **Phase 2**: Warm apricot/orange (CLR Normalization)
+    - **Phase 3**: Muted lavender/violet (Softmax)
+    - **Phase 4**: Deep rose/magenta (Walk Depth)
+- **Styling**: Minimalist aesthetic with thin-line matrix grids, sans-serif typography, and no decorative icons. Mathematical notations are rendered in a clean LaTeX-style font.
+
+---
+
+#### 2. Phase 1: Dependence (Query-Key Score)
+- **Header**: "1 Dependence" in bold black text; a small blue pill-shaped label below it reads "query–key score".
+- **Component**: A $14 \times 14$ grid matrix labeled $D$. The matrix is a heatmap with varying shades of light blue, showing some block-diagonal structure.
+- **Annotations**:
+    - A horizontal **blue band** highlights "gene $i$" (row).
+    - A vertical **pink band** highlights "gene $j$" (column).
+    - The intersection cell is boxed in black and labeled $D_{ij}$.
+- **Formula**: Below the matrix, the text reads $D_{ij} = MI(i, j)$.
+
+#### 3. Phase 2: Context Normalization (CLR) (Scaling the Logits)
+- **Header**: "2 Context normalization (CLR)" in bold black; an orange pill-shaped label below it reads "scaling the logits".
+- **Transition**: A thick orange arrow points from Phase 1 to Phase 2.
+- **Visual Logic**:
+    - **Row Distribution**: Above the main flow, a horizontal blue bell curve represents the distribution of values in "row $i$ of $D$". A tick mark in the far-right tail indicates the specific $MI$ value, labeled with the formula $z_{ij} = (D_{ij} - \mu_i) / \sigma_i = 2.2$.
+    - **Column Distribution**: Beside the matrix, a vertical pink bell curve represents the distribution of values in "row $j$ of $D$". A tick mark in the tail is labeled $z_{ji} = (D_{ij} - \mu_j) / \sigma_j = 1.8$.
+- **Output Component**: A new $14 \times 14$ matrix labeled $S$, using orange-brown heatmap tones. The intersection cell is labeled $S_{ij} = 2.8$.
+- **Formula**: A central equation between the distributions and the matrix: $S_{ij} = \frac{z_i^+ + z_j^+}{\sqrt{2}}$, where $z^+ = \max(z, 0)$.
+
+#### 4. Phase 3: Softmax Attention (Softmax over the Keys)
+- **Header**: "3 Softmax attention" in bold black; a violet pill-shaped label reads "softmax over the keys".
+- **Transition**: A thick violet arrow points to Phase 3.
+- **Comparison Visual**:
+    - Two matrices are shown: the orange $S$ matrix and a new violet/blue $A$ matrix.
+    - Below matrix $S$: A bar chart of "row $i$ of $S$" showing many tall orange bars.
+    - Below matrix $A$: A bar chart of "row $i$ of $A$" where most bars are near zero and only a few (the "top 5") are prominent and blue.
+- **Annotations**: 
+    - Text: $A_i = \text{softmax}(S_i / \tau_i)$. 
+    - Note: "$\tau$ per gene so that $k_{eff} = 3$".
+    - The intersection cell in matrix $A$ is labeled $A_{ij} = 0.64$.
+
+#### 5. Phase 4: Walk: Depth (Stacked Attention Layers)
+- **Header**: "4 Walk: depth" in bold black; a magenta pill-shaped label reads "stacked attention layers".
+- **Transition**: A thick magenta arrow points to Phase 4.
+- **Component**: A sequence of three smaller matrices labeled $t=1$, $t=3$, and $t=9$.
+    - As $t$ increases, the heatmap (magenta/purple tones) becomes more "diffused" or "blurred," representing signal propagation.
+- **Bar Charts**: Below the sequence, three corresponding bar charts show "row $i$ of $K_t$". A specific gene $k$ (which had $A_{ik} = 0$ in Phase 3) is shown gaining value over time: $K_{ik}$ goes from $0.000 \rightarrow 0.025 \rightarrow 0.078$.
+- **Formula**: $K_t = (P^t + (P^t)^T) / 2$, where $P = 0.5I + 0.5A$.
+
+---
+
+#### 6. Input/Output and Footer
+- **Input**: Implied at the far left as a "gene expression compendium" (not explicitly drawn, but referenced in labels).
+- **Output**: The final matrix $K_{t=9}$ at the far right.
+- **Footer Note**: At the bottom of the diagram, a centered bold note: "**No learned parameters: every step is computed from the data.**" 
+- **Metadata**: A small legend at the very bottom: "Toy: 14 genes, 60 samples, planted modules; $k_{eff} = 3$, top 5, $t = 1, 3, 9$ (real method: 10, 50, 9)."
+
+Output ONLY the final polished Detailed Description. Do not include any conversational text, explanations, or preamble.

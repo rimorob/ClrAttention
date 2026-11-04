@@ -1,0 +1,12 @@
+{
+  "source_context": "Panel 2 of a 4-panel method figure: 'Context normalization (CLR)'. Left: two normal-density curves, row i of D (blue, top) and row j of D (pink, bottom), each with a rug of the row's 14 MI values below the axis and the observed value D_ij marked as a dot in the right tail (tail shaded darker). z_ij = (D_ij - mu_i)/sigma_i = 2.2 (blue); z_ji = (D_ij - mu_j)/sigma_j = 1.8 (pink). Two lines converge from the curves on an orange block arrow pointing at the 14x14 CLR score matrix S (orange sequential scale, light = low, dark = high, grey diagonal), gene i row band (blue) and gene j column band (pink) crossing at the traced cell, caption S_ij = 2.8. Above S the formula S_ij = (z+_ij + z+_ji)/sqrt(2) and the note z+ = max(z, 0). Header chip: numbered black circle 2, bold title 'Context normalization (CLR)', grey tag 'scaling the logits' with an orange left edge.\n",
+  "communicative_intent": "Panel 2 (CLR): two row distributions with D_ij in the right tail (z_ij = 2.2, z_ji = 1.8), arrow, and the S matrix with S_ij = 2.8 and its formula. REPRODUCE the first reference image (the content reference) exactly: every heatmap cell, bar, number, label and formula must stay where it is, with the same values and the same colour. Do not invent, add, remove, permute, smooth or re-block any matrix cell or bar. Improve only styling and clarity: crisper type, cleaner alignment, consistent line weights. The second reference image (Faith et al. 2007, CLR paper, Fig. 1A) is a STYLE reference only: flat translucent row band (gene i, blue) and column band (gene j, pink) crossing at the traced cell, plain bold gene labels, minimal ink, white background; do not copy its content. Colour key (keep): blue = dependence, orange = CLR, violet = softmax, magenta = walk; in every heatmap light = low and dark = high; grey diagonal = self. Single panel, white background, no extra panels, no title other than those in the reference.",
+  "diagram_type": "methodology",
+  "raw_data": null,
+  "aspect_ratio": "1:1",
+  "vector_export": "none",
+  "input_images": [
+    "docs/whitepapers/figures/pb_runs/panels_20261030/ref/panel2.png",
+    "docs/whitepapers/figures/pb_runs/panels_20261030/in/style_2007_panelA.png"
+  ]
+}

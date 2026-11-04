@@ -1,0 +1,61 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+A clean, scientific single-panel method diagram set on a pure white background, organized into three evenly spaced horizontal columns corresponding to walk depths ($t = 1, 3, 9$). A distinct academic header anchors the upper left and upper right, followed by three horizontally aligned pairs of square heatmaps and corresponding bar plots connected sequentially by slender magenta transition arrows. Explanatory mathematical formulas and baseline legend annotations are cleanly centered along the bottom margin.
+
+---
+
+### Header
+- **Top Left Section**:
+  - A small, solid black circle containing a centered white numeral **4**.
+  - Immediately to its right, the bold section title **"Walk: depth"** rendered in a clean sans-serif typeface.
+  - Positioned directly below the title, a light cool-grey rounded rectangular pill tag reading **"stacked attention layers"** in a compact sans-serif font, accented with a vibrant solid magenta vertical stripe along its left border.
+- **Top Right Section**:
+  - Formatted mathematical relation in crisp typographic LaTeX style: **$P = 0.5I + 0.5A$**.
+
+---
+
+### Three-Stage Walk Columns ($t = 1, 3, 9$)
+Three sequential algorithmic stages arranged from left to right, linked between adjacent heatmaps by small, horizontal rightward-pointing magenta arrows positioned at the vertical midpoint:
+
+1. **Column Stage Identifiers**:
+   - Prominently positioned centered above each matrix is a bold label: **$t = 1$**, **$t = 3$**, and **$t = 9$**.
+   - Directly aligned above the target column of each heatmap sits an italicized serif label **$k$**.
+
+2. **$14 \times 14$ Symmetrized Walk Heatmaps ($K_t$)**:
+   - **Grid Structure**: Uniform $14 \times 14$ square grids separated by faint, ultra-thin white gridlines.
+   - **Sequential Color Gradient**: Continuous magenta scale ranging from very pale, nearly white blush pink (representing minimum / zero values) to deep saturated magenta and dark wine (representing high walk weights). Diagonal self-attention cells along the main diagonal are consistently filled with a neutral light grey.
+   - **Precise Block Sparsity & Diffusion Evolution**:
+     - At **$t = 1$**: Highly sparse with near-white cells throughout, except for dense diagonal chain blocks along genes 4–9 and lower-right genes 10–13, along with a few sparse isolated connections.
+     - At **$t = 3$**: Localized smoothing and gentle spreading around the primary blocks, while inter-module and background cells remain predominantly pale/white.
+     - At **$t = 9$**: Gradual multi-hop diffusion further softening and connecting the modules, but maintaining overall block contrast without flooding the entire background into uniform mid-pink.
+   - **Row Highlight Overlay**: A continuous, flat translucent soft cerulean blue horizontal band spans the full width of row $i$, with an italicized serif label **$i$** placed to the left of row $i$.
+   - **Target Coordinate Box**: A distinct, sharp solid black square stroke encloses the single intersection cell at coordinate $(i, k)$ along the blue-tinted row $i$.
+
+3. **Row $i$ Profiles (Bar Plots)**:
+   - Positioned directly below each corresponding heatmap, perfectly maintaining the horizontal gene column coordinates.
+   - A single, left-aligned descriptive subtitle sits above each bar series: **"row $i$ of $K_t$ (gene $i$ omitted)"**.
+   - **Bar Geometry & Correct Distribution Profiles**:
+     - Discrete, slender vertical bars filled with solid medium magenta, representing diffusion weights across all genes for row $i$ (with gene $i$ omitted as an empty gap).
+     - **$t = 1$ profile**: Prominent tall bar near column 3 and non-zero bars restricted solely to the left cluster; gene $k$ has exactly zero height ($K_{ik} = 0.000$, a flat hairline baseline) and no bars appear on the far right.
+     - **$t = 3$ profile**: Moderate diffusion spread across the left cluster, with a very slight non-zero bar appearing at gene $k$ ($K_{ik} = 0.025$).
+     - **$t = 9$ profile**: Further spreading across both clusters; the bar at gene $k$ ($K_{ik} = 0.078$) is small-to-moderate and clearly NOT the dominant or tallest bar of the series.
+   - **Gene $k$ Target Indicator**: The vertical slot corresponding to column $k$ is shaded with a pale grey vertical background column. Directly beneath the horizontal baseline at this coordinate sits a small, crisp upward-pointing solid black triangle.
+   - **Quantitative Labels**: Positioned directly beneath each upward-pointing black triangle:
+     - Under $t = 1$: **$K_{ik} = 0.000$**
+     - Under $t = 3$: **$K_{ik} = 0.025$**
+     - Under $t = 9$: **$K_{ik} = 0.078$**
+
+---
+
+### Bottom Annotations & Legend
+- **Symmetrization Formula**: Centered horizontally across the panel in standard serif mathematical notation: **$K_t = (P^t + (P^t)^T)/2$**.
+- **Explanatory Legend**: Centered directly below the formula in a quiet, dark charcoal sans-serif font: **"box / triangle: gene $k$, not attended directly ($A_{ik} = 0$)"**.
+
+---
+
+### Styling & Visual Polish
+- **Color Palette**: Pristine pure white background; sequential magenta gradient (pale blush to deep magenta) for walk weights; soft translucent cerulean blue for the row $i$ band; muted cool grey for diagonal self-loops, pill tag, and gene $k$ background stripe; solid black for indicator boxes, triangles, and primary text.
+- **Linework & Typography**: Minimalist, publication-grade ink philosophy with razor-thin grid borders, clear sans-serif labels for text headers, and italic serif styling for mathematical index variables ($i, k, t$).

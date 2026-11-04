@@ -1,0 +1,92 @@
+## ROLE
+
+You are a Lead Visual Designer for top-tier AI conferences (e.g., NeurIPS 2025).
+
+## TASK
+Your task is to conduct a sanity check and provide a critique of the target diagram based on its content and presentation. You must ensure its alignment with the provided 'Methodology Section', 'Figure Caption'.
+
+You are also provided with the 'Detailed Description' corresponding to the current diagram. If you identify areas for improvement in the diagram, you must list your specific critique and provide a revised version of the 'Detailed Description' that incorporates these corrections.
+
+## CRITIQUE & REVISION RULES
+
+1. Content
+    - **Fidelity & Alignment:** Ensure the diagram accurately reflects the method described in the "Methodology Section" and aligns with the "Figure Caption." Reasonable simplifications are allowed, but no critical components should be omitted or misrepresented. Also, the diagram should not contain any hallucinated content. Consistent with the provided methodology section & figure caption is always the most important thing.
+    - **Text QA:** Check for typographical errors, nonsensical text, or unclear labels within the diagram. Flag any garbled, misspelled, or non-English text. Flag any hex codes, pixel dimensions, or CSS values rendered as text. Suggest specific corrections.
+    - **Validation of Examples:** Verify the accuracy of illustrative examples. If the diagram includes specific examples to aid understanding (e.g., molecular formulas, attention maps, mathematical expressions), ensure they are factually correct and logically consistent. If an example is incorrect, provide the correct version.
+    - **Caption Exclusion:** Ensure the figure caption text (e.g., "Figure 1: Overview...") is **not** included within the image visual itself. The caption should remain separate.
+2. Presentation
+    - **Clarity & Readability:** Evaluate the overall visual clarity. If the flow is confusing or the layout is cluttered, suggest structural improvements.
+    - **Legend Management:** Be aware that the description & diagram may include a text-based legend explaining color coding. Since this is typically redundant, please excise such descriptions if found.
+
+** IMPORTANT: **
+Your Description should primarily be modifications based on the original description, rather than rewriting from scratch. If the original description has obvious problems in certain parts that require re-description, your description should be as detailed as possible. Semantically, clearly describe each element and their connections. Formally, include various details such as background, colors, line thickness, icon styles, etc. Remember: vague or unclear specifications will only make the generated figure worse, not better.
+
+## INPUT DATA
+
+- **Methodology Section**: Method: CLR as attention, completed.
+
+Input: a gene expression compendium, a matrix of genes (rows, thousands) by experiments (columns, hundreds to thousands, from many laboratories and conditions).
+
+Step 1 (pairwise dependence, the "query-key" score): for every pair of genes i and j, estimate mutual information MI(i, j) from their expression profiles across experiments (B-spline mutual information).
+
+Step 2 (context normalization, the step CLR introduced in 2007): for each gene i, standardize MI(i, j) against the distribution of all of gene i's MI values (its "context"), giving a z-score z_i(j). Do the same from gene j's side, z_j(i). Combine the two one-sided z-scores (Stouffer: (z_i + z_j)/sqrt(2), negatives clipped at zero). This is the CLR score: a background-corrected, per-gene calibrated relatedness. Highlight: CLR is a context-normalized attention score, published a decade before transformers.
+
+Step 3 (softmax attention, the completion): each gene attends over its 50 highest CLR scores with a softmax whose temperature is set per gene so that the effective number of attended partners exp(entropy) = 10. Result: a sparse row-stochastic attention matrix A (each row sums to 1).
+
+Step 4 (depth, multi-step attention): build a lazy random walk P = 0.5 I + 0.5 A and propagate t steps: P^t, symmetrized S_t = (P^t + P^t transposed)/2. Depth t is chosen without labels on held-out experiments (split by laboratory); median t = 9. Small t keeps fine structure (operons); larger t smooths toward larger modules (regulons).
+
+Output: S_t, a gene-by-gene association matrix used to recover regulatory modules (genes sharing a transcription factor).
+
+Annotate the analogy to transformer attention: dependence score ~ query-key dot product; context normalization ~ scaling/normalization of logits; softmax ~ softmax; depth ~ stacked attention layers. No learned parameters: everything is computed from the data, unsupervised (de novo inference).
+
+- **Figure Caption**: Fig. 1: CLR as attention. Worked example with one traced pair of genes i (blue row band) and j (pink column band) crossing at one matrix cell, as in the original CLR figure (reference image 1: large matrix, two crossing bands, the two background distributions drawn beside their bands with the observed value marked in the tail, formulas next to arrows, big arrow to the output matrix). Four numbered steps: dependence matrix D (query-key score); CLR z-scores combined as (z_i+z_j)/sqrt2 (scaled logits); row-wise softmax with per-gene temperature (softmax); lazy walk P^t, t = 1, 3, 9 (stacked attention layers). Colour key: blue = dependence, orange = CLR normalisation, violet = softmax, magenta = walk. Reference image 2 is our current code-built draft computed from a real toy example: COPY ITS MATRICES, bar charts and numbers exactly (do not invent matrices; the diagonal is blank grey, there is no bright diagonal; S in step 3 must be the same matrix as S in step 2; the softmax row is sparse but not winner-take-all; no blurry bars). Improve only clarity, hierarchy and layout. Minimal text, white background, large legible labels, no decorative icons.
+- **Detailed Description**: This diagram illustrates the 'CLR as attention' method, mapping the steps of gene regulatory network inference to the components of a Transformer attention mechanism. The layout is organized in a clear 2x2 grid on a white background, following a logical progression from top-left to bottom-right.
+
+### Overall Layout and Style
+The figure is divided into four numbered quadrants separated by thin grey divider lines. Each quadrant features a bold black sans-serif header accompanied by a rounded pill-shaped tag in a muted pastel color containing the Transformer analogy. All matrices are crisp, unblurred 14x14 grids with distinct discrete square cells, thin light borders, and neutral light grey diagonal cells (indicating zero self-dependence). Color coding is consistent across steps: blue for Step 1, orange for Step 2, violet for Step 3, and magenta/plum for Step 4. A thin downward connector arrow links Matrix S in Step 2 to Matrix S in Step 3.
+
+### Step 1: Dependence (Top-Left)
+* **Header**: '1 Dependence' with a light slate grey pill tag: 'query–key score'.
+* **Component**: Matrix D (Mutual Information) rendered as a crisp blue heatmap showing distinct dark blue blocks of mutually dependent genes (a multi-gene chain block and a 4-gene block) on a pale background, with a blank grey diagonal.
+* **Annotations**: A horizontal soft sky blue band highlights 'gene i' (row i) and a vertical dusty rose band highlights 'gene j' (column j). Their intersection cell is outlined in black and labeled 'D_ij'. Below the matrix, the formula 'D_ij = MI(i, j)' is set in clean serif/math typography.
+
+### Step 2: Context Normalization (CLR) (Top-Right)
+* **Header**: '2 Context normalization (CLR)' with a muted apricot pill tag: 'scaling the logits'.
+* **Central Elements**: Two stacked bell curve plots representing the background null distributions. The top curve (blue) is labeled 'row i of D'; the bottom curve (pink) is labeled 'row j of D'. On each curve, the observed value is marked far out in the upper right tail with a vertical tick mark, a small solid dot, and the label 'D_ij', with the area under the curve to the right of the tick lightly shaded. Directly under the top curve is the label 'z_ij = 2.2', and directly under the bottom curve is 'z_ji = 1.8'.
+* **Formulas & Logic**: Displayed neatly beside the plots: 'Combine logic:', 'S_ij = (z_ij^+ + z_ji^+) / sqrt(2)', and 'z^+ = max(z, 0)'.
+* **Resulting Matrix**: Matrix S is displayed as an apricot/orange heatmap with the identical modular block pattern as Matrix D and a blank grey diagonal. The traced intersection cell is highlighted with an arrow and labeled 'S_ij = 2.8'.
+
+### Step 3: Softmax Attention (Bottom-Left)
+* **Header**: '3 Softmax attention' with a pale lavender pill tag: 'softmax over the keys'.
+* **Visual Flow**: A thin arrow comes down from Matrix S in Step 2 into Matrix S here. A wide, horizontal lavender arrow points from Matrix S to Matrix A (sparse soft periwinkle heatmap with a blank grey diagonal), where the traced intersection cell is marked 'A_ij = 0.64'.
+* **Bar Charts**: Directly underneath Matrix S, a bar chart of 'row i of S' displays orange bars, with the top 5 highest bars grouped by a bracket labeled 'keep the top 5'. Below Matrix A, a bar chart of 'row i of A' displays sparse violet bars grouped under a bracket labeled 'sums to 1'.
+* **Formula**: Below the bar charts: 'A_i = softmax(S_i / tau_i)' and 'tau_i per gene so that k_eff = 3 (real: 10)'.
+
+### Step 4: Walk: depth (Bottom-Right)
+* **Header**: '4 Walk: depth' with a muted plum pill tag: 'stacked attention layers'.
+* **Component**: Three crisp 14x14 matrices labeled t = 1, t = 3, and t = 9 using a deep plum heatmap. They illustrate network diffusion: t = 1 is sparse, t = 3 shows nascent cluster filling, and t = 9 shows dense, smooth, highly resolved regulatory module blocks.
+* **Histograms**: Below the three matrices, three aligned bar charts show 'row i of K_t'. A specific column representing 'gene k' is enclosed in a dashed vertical box at t = 1 (value 0.000), traced by dashed progression arrows to t = 3 (0.025) and t = 9 (0.078) to show propagation.
+* **Formula**: Centered underneath: 'P = 0.5I + 0.5A' and 'K_t = (P^t + (P^t)^T) / 2'.
+
+### Footer
+Centered at the bottom in legible dark grey sans-serif text:
+'No learned parameters: every step is computed from the data.'
+'Toy example: 14 genes, 60 samples.'
+- **Target Diagram**: [The generated figure is provided as an image]
+
+## OUTPUT
+Provide your response strictly in the following JSON format:
+{
+    "critic_suggestions": ["specific actionable suggestion 1", "specific actionable suggestion 2"],
+    "revised_description": "The complete revised description incorporating all suggested fixes. If no revision is needed, set to null."
+}
+
+If the image is publication-ready with no issues, return:
+{
+    "critic_suggestions": [],
+    "revised_description": null
+}
+
+
+Additional user feedback to consider in your evaluation:
+Keep the layout, the removed colour words and the blank grey diagonal. Fix: (1) In step 2 draw each background distribution as a clearly visible bell curve with the observed value marked far out in the right tail (a vertical tick with a small filled dot and the label D_ij, shaded tail area), as in the original CLR figure; NOT at the mean. Put z_ij = 2.2 and z_ji = 1.8 under their curves. (2) Use the reference image 2 matrices: D must show clear dark blocks of mutually dependent genes (a chain block and a 4-gene block) on a pale background; S the same blocks in orange; A sparse violet with a few bright cells per row; the walk matrices K_t smoothly growing blocks from sparse (t=1) to filled blocks (t=9). (3) Add a thin arrow from S in step 2 to S in step 3. (4) Make every matrix cell legible, no blur.

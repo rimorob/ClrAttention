@@ -1,0 +1,95 @@
+## ROLE
+
+You are a Lead Visual Designer for top-tier AI conferences (e.g., NeurIPS 2025).
+
+## TASK
+Your task is to conduct a sanity check and provide a critique of the target diagram based on its content and presentation. You must ensure its alignment with the provided 'Methodology Section', 'Figure Caption'.
+
+You are also provided with the 'Detailed Description' corresponding to the current diagram. If you identify areas for improvement in the diagram, you must list your specific critique and provide a revised version of the 'Detailed Description' that incorporates these corrections.
+
+## CRITIQUE & REVISION RULES
+
+1. Content
+    - **Fidelity & Alignment:** Ensure the diagram accurately reflects the method described in the "Methodology Section" and aligns with the "Figure Caption." Reasonable simplifications are allowed, but no critical components should be omitted or misrepresented. Also, the diagram should not contain any hallucinated content. Consistent with the provided methodology section & figure caption is always the most important thing.
+    - **Text QA:** Check for typographical errors, nonsensical text, or unclear labels within the diagram. Flag any garbled, misspelled, or non-English text. Flag any hex codes, pixel dimensions, or CSS values rendered as text. Suggest specific corrections.
+    - **Validation of Examples:** Verify the accuracy of illustrative examples. If the diagram includes specific examples to aid understanding (e.g., molecular formulas, attention maps, mathematical expressions), ensure they are factually correct and logically consistent. If an example is incorrect, provide the correct version.
+    - **Caption Exclusion:** Ensure the figure caption text (e.g., "Figure 1: Overview...") is **not** included within the image visual itself. The caption should remain separate.
+2. Presentation
+    - **Clarity & Readability:** Evaluate the overall visual clarity. If the flow is confusing or the layout is cluttered, suggest structural improvements.
+    - **Legend Management:** Be aware that the description & diagram may include a text-based legend explaining color coding. Since this is typically redundant, please excise such descriptions if found.
+
+** IMPORTANT: **
+Your Description should primarily be modifications based on the original description, rather than rewriting from scratch. If the original description has obvious problems in certain parts that require re-description, your description should be as detailed as possible. Semantically, clearly describe each element and their connections. Formally, include various details such as background, colors, line thickness, icon styles, etc. Remember: vague or unclear specifications will only make the generated figure worse, not better.
+
+## INPUT DATA
+
+- **Methodology Section**: Panel 4 of a 4-panel method figure: 'Walk: depth'. P = 0.5 I + 0.5 A. Three 14x14 symmetrised walk matrices K_t = (P^t + (P^t)^T)/2 for t = 1, 3, 9 in a row (magenta sequential scale, light = low, dark = high; grey diagonal), small magenta arrows between them, each with the gene i row band and a black box on the cell (i, k) for gene k, marked 'k' above. Under each, row i of K_t as magenta bars on the same gene axis (gene i omitted), gene k's slot shaded grey with a triangle below, labelled K_ik = 0.000 (t = 1), 0.025 (t = 3), 0.078 (t = 9). Note: 'row i of K_t (gene i omitted)', formula K_t = (P^t + (P^t)^T)/2, 'box / triangle: gene k, not attended directly (A_ik = 0)'. The block structure becomes smoother and spreads with t. Header chip: numbered black circle 4, bold title 'Walk: depth', grey tag 'stacked attention layers' with a magenta left edge.
+
+- **Figure Caption**: Panel 4 (Walk): K_t matrices for t = 1, 3, 9 with row-i bars and K_ik = 0.000 / 0.025 / 0.078. REPRODUCE the first reference image (the content reference) exactly: every heatmap cell, bar, number, label and formula must stay where it is, with the same values and the same colour. Do not invent, add, remove, permute, smooth or re-block any matrix cell or bar. Improve only styling and clarity: crisper type, cleaner alignment, consistent line weights. The second reference image (Faith et al. 2007, CLR paper, Fig. 1A) is a STYLE reference only: flat translucent row band (gene i, blue) and column band (gene j, pink) crossing at the traced cell, plain bold gene labels, minimal ink, white background; do not copy its content. Colour key (keep): blue = dependence, orange = CLR, violet = softmax, magenta = walk; in every heatmap light = low and dark = high; grey diagonal = self. Single panel, white background, no extra panels, no title other than those in the reference.
+- **Detailed Description**: ### Overall Layout
+A clean, scientific single-panel method diagram set on a pure white background, organized into three evenly spaced horizontal columns corresponding to walk depths ($t = 1, 3, 9$). A distinct academic header anchors the upper left and upper right, followed by three horizontally aligned pairs of square heatmaps and corresponding bar plots connected sequentially by slender magenta transition arrows. Explanatory mathematical formulas and baseline legend annotations are cleanly centered along the bottom margin.
+
+---
+
+### Header
+- **Top Left Section**:
+  - A small, solid black circle containing a centered white numeral **4**.
+  - Immediately to its right, the bold section title **"Walk: depth"** rendered in a clean sans-serif typeface.
+  - Positioned directly below the title, a light cool-grey rounded rectangular pill tag reading **"stacked attention layers"** in a compact sans-serif font, accented with a vibrant solid magenta vertical stripe along its left border.
+- **Top Right Section**:
+  - Formatted mathematical relation in crisp typographic LaTeX style: **$P = 0.5I + 0.5A$**.
+
+---
+
+### Three-Stage Walk Columns ($t = 1, 3, 9$)
+Three sequential algorithmic stages arranged from left to right, linked between adjacent heatmaps by small, horizontal rightward-pointing magenta arrows positioned at the vertical midpoint:
+
+1. **Column Stage Identifiers**:
+   - Prominently positioned centered above each matrix is a bold label: **$t = 1$**, **$t = 3$**, and **$t = 9$**.
+   - Directly aligned above the target column of each heatmap sits an italicized serif label **$k$**.
+
+2. **$14 \times 14$ Symmetrized Walk Heatmaps ($K_t$)**:
+   - **Grid Structure**: Uniform $14 \times 14$ square grids separated by faint, ultra-thin white gridlines.
+   - **Sequential Color Gradient**: Continuous magenta scale ranging from very pale, nearly white blush pink (representing minimum values / non-attended cells) to deep saturated magenta and dark wine (representing maximum walk weights). Diagonal self-attention cells along the main diagonal are consistently filled with a neutral light grey.
+   - **Diffusion Evolution Across Time**:
+     - At **$t = 1$**: Sparsely populated, highly localized block patterns with crisp contrast.
+     - At **$t = 3$**: Intermediate diffusion showing spreading color into neighboring modules with softened edges.
+     - At **$t = 9$**: Broadly diffused, smooth multi-hop connectivity spreading across wide modular neighborhoods.
+   - **Row Highlight Overlay**: A continuous, flat translucent soft cerulean blue horizontal band spans the full width of row $i$, with an italicized serif label **$i$** placed just outside the left edge of each matrix aligned with this row.
+   - **Target Coordinate Box**: A distinct, sharp solid black square stroke encloses the single intersection cell at coordinate $(i, k)$ along the blue-tinted row $i$.
+
+3. **Row $i$ Profiles (Bar Plots)**:
+   - Positioned directly below each corresponding heatmap, perfectly maintaining the horizontal gene column coordinates.
+   - A single, left-aligned descriptive subtitle sits above the bar series: **"row $i$ of $K_t$ (gene $i$ omitted)"**.
+   - **Bars**: Discrete, slender vertical bars filled with solid medium magenta, representing the diffusion weights across all genes for row $i$ (with the slot for gene $i$ omitted as a gap).
+   - **Gene $k$ Target Indicator**: The vertical slot corresponding to column $k$ is highlighted from baseline to top with a soft pale grey vertical background column. Directly beneath the horizontal baseline at this coordinate sits a small, crisp upward-pointing solid black triangle.
+   - **Quantitative Labels**: Positioned directly beneath each upward-pointing black triangle:
+     - Under $t = 1$: **$K_{ik} = 0.000$**
+     - Under $t = 3$: **$K_{ik} = 0.025$**
+     - Under $t = 9$: **$K_{ik} = 0.078$**
+
+---
+
+### Bottom Annotations & Legend
+- **Symmetrization Formula**: Centered horizontally across the panel in standard serif mathematical notation: **$K_t = (P^t + (P^t)^T)/2$**.
+- **Explanatory Legend**: Centered directly below the formula in a quiet, dark charcoal sans-serif font: **"box / triangle: gene $k$, not attended directly ($A_{ik} = 0$)"**.
+
+---
+
+### Styling & Visual Polish
+- **Color Palette**: Pristine pure white background; sequential magenta gradient (pale blush to deep magenta) for walk weights; soft translucent cerulean blue for the row $i$ band; muted cool grey for diagonal self-loops, pill tag, and gene $k$ background stripe; solid black for indicator boxes, triangles, and primary text.
+- **Linework & Typography**: Minimalist, publication-grade ink philosophy with razor-thin grid borders, clear sans-serif labels for text headers, and italic serif styling for mathematical index variables ($i, k, t$). Visual hierarchy prioritizes the gradual diffusion of magenta signal and the steady emergence of weight at cell $(i, k)$.
+- **Target Diagram**: [The generated figure is provided as an image]
+
+## OUTPUT
+Provide your response strictly in the following JSON format:
+{
+    "critic_suggestions": ["specific actionable suggestion 1", "specific actionable suggestion 2"],
+    "revised_description": "The complete revised description incorporating all suggested fixes. If no revision is needed, set to null."
+}
+
+If the image is publication-ready with no issues, return:
+{
+    "critic_suggestions": [],
+    "revised_description": null
+}

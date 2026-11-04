@@ -1,0 +1,56 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+This diagram illustrates the "CLR as attention" method, mapping the steps of gene regulatory network inference to the components of a Transformer attention mechanism. The layout is organized in a **2x2 grid** on a clean white background, following a logical progression from top-left to bottom-right.
+
+### Overall Layout and Style
+The figure is divided into four numbered quadrants. Each quadrant features a header in bold sans-serif text, accompanied by a pill-shaped tag in a muted pastel color containing the Transformer analogy. Large, softly shaded directional arrows in desaturated tones (ice blue, apricot, lavender, and rose) indicate the flow between steps. All matrices are 14x14 grids with thin, light grey lines and neutral light grey diagonal cells.
+
+---
+
+### Step 1: Dependence (Top-Left)
+*   **Header**: "**1 Dependence**" in bold black sans-serif. Below it, a small rounded tag in a "light slate grey" with white text: "query–key score".
+*   **Component**: A matrix **D** representing Mutual Information.
+*   **Styling**: The matrix uses a "soft ice blue" heatmap where darker shades represent higher MI values. 
+*   **Annotations**: 
+    *   A horizontal, semi-transparent "soft sky blue" band highlights "gene $i$".
+    *   A vertical, semi-transparent "dusty rose" band highlights "gene $j$".
+    *   The intersection cell is outlined with a crisp black border and labeled **$D_{ij}$**.
+    *   Mathematical notation below the matrix: "$D_{ij} = MI(i, j)$" in a clean LaTeX-style serif font.
+
+### Step 2: Context Normalization (CLR) (Top-Right)
+*   **Header**: "**2 Context normalization (CLR)**" in bold black sans-serif. Below it, a "muted apricot" tag with white text: "scaling the logits".
+*   **Central Elements**: Two minimalist line plots showing Gaussian-like background distributions.
+    *   **Top curve (Soft Blue)**: Labeled "row $i$ of D". A vertical tick on the far right tail is labeled "$MI$". A fine grey arrow points to this tick with the formula: "$z_{ij} = (D_{ij} - \mu_i) / \sigma_i = 2.2$".
+    *   **Bottom curve (Soft Pink)**: Labeled "row $j$ of D". A similar tick in the tail is labeled "$MI$". Formula: "$z_{ji} = (D_{ji} - \mu_j) / \sigma_j = 1.8$".
+*   **Formula**: To the right of the curves, the combination logic: "$S_{ij} = \frac{z_{ij}^+ + z_{ji}^+}{\sqrt{2}}$" and "$z^+ = \max(z, 0)$".
+*   **Resulting Matrix**: A matrix **S** using a "warm muted apricot" heatmap. The same gene $i$ (blue row) and gene $j$ (pink column) bands intersect at a cell labeled "**$S_{ij} = 2.8$**" in bold.
+
+### Step 3: Softmax Attention (Bottom-Left)
+*   **Header**: "**3 Softmax attention**" in bold black sans-serif. Below it, a "pale lavender" tag with white text: "softmax over the keys".
+*   **Visual Flow**: The apricot matrix **S** from Step 2 is shown on the left, with a wide, semi-transparent lavender arrow pointing to a new matrix **A**.
+*   **Matrix A**: A "soft periwinkle" heatmap. The matrix is sparse; most cells are white, with a few cells in a saturated "deep lavender." The intersection is labeled "**$A_{ij} = 0.64$**".
+*   **Bar Charts**: 
+    *   **Below matrix S**: A bar chart of "row $i$ of S" with muted orange bars. The 5 highest bars are highlighted in a "deep terracotta" and labeled "keep the top 5".
+    *   **Below matrix A**: A bar chart of "row $i$ of A" with soft violet bars. One bar is significantly taller than the others; the chart is labeled "sums to 1".
+*   **Formula**: "$A_i = \text{softmax}(S_i / \tau_i)$" with the annotation: "$\tau$ per gene so that $k_{\text{eff}} = 3$ (real: 10)".
+
+### Step 4: Walk: depth (Bottom-Right)
+*   **Header**: "**4 Walk: depth**" in bold black sans-serif. Below it, a "muted rose" tag with white text: "stacked attention layers".
+*   **Component**: A horizontal sequence of three smaller matrices labeled **$t=1$**, **$t=3$**, and **$t=9$**.
+*   **Styling**: A "muted plum" heatmap. As $t$ increases from left to right, the visual density of the matrices increases, showing more interconnected, "spread out" patterns.
+*   **Bar Charts**: Three histograms placed directly below their respective matrices showing "row $i$ of $K_t$". 
+    *   A specific bar for "gene $k$" (which is empty at $t=1$) is enclosed in a small dashed box and traced across the three charts to show its growth.
+    *   Values: $K_{ik} = 0.000$ (at $t=1$), $K_{ik} = 0.025$ (at $t=3$), $K_{ik} = 0.078$ (at $t=9$).
+*   **Formula**: "$P = 0.5I + 0.5A$"; "$K_t = (P^t + (P^t)^T)/2$".
+
+---
+
+### Styling Details
+*   **Lines & Borders**: Use medium-thin grey lines for all matrix grids. Use dashed lines for auxiliary connections (like the trace across histograms).
+*   **Typography**: All labels in a clean sans-serif (e.g., Helvetica). Mathematical variables ($i, j, t, P$) are in italicized serif.
+*   **Footer**: A small, centered note at the bottom in a light grey sans-serif: "No learned parameters: every step is computed from the data." and "Toy example: 14 genes, 60 samples."
+
+
+Note: this plan was guided by a user-provided reference sketch; follow the description above faithfully.

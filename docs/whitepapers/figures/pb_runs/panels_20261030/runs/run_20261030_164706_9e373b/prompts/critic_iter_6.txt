@@ -1,0 +1,137 @@
+## ROLE
+
+You are a Lead Visual Designer for top-tier AI conferences (e.g., NeurIPS 2025).
+
+## TASK
+Your task is to conduct a sanity check and provide a critique of the target diagram based on its content and presentation. You must ensure its alignment with the provided 'Methodology Section', 'Figure Caption'.
+
+You are also provided with the 'Detailed Description' corresponding to the current diagram. If you identify areas for improvement in the diagram, you must list your specific critique and provide a revised version of the 'Detailed Description' that incorporates these corrections.
+
+## CRITIQUE & REVISION RULES
+
+1. Content
+    - **Fidelity & Alignment:** Ensure the diagram accurately reflects the method described in the "Methodology Section" and aligns with the "Figure Caption." Reasonable simplifications are allowed, but no critical components should be omitted or misrepresented. Also, the diagram should not contain any hallucinated content. Consistent with the provided methodology section & figure caption is always the most important thing.
+    - **Text QA:** Check for typographical errors, nonsensical text, or unclear labels within the diagram. Flag any garbled, misspelled, or non-English text. Flag any hex codes, pixel dimensions, or CSS values rendered as text. Suggest specific corrections.
+    - **Validation of Examples:** Verify the accuracy of illustrative examples. If the diagram includes specific examples to aid understanding (e.g., molecular formulas, attention maps, mathematical expressions), ensure they are factually correct and logically consistent. If an example is incorrect, provide the correct version.
+    - **Caption Exclusion:** Ensure the figure caption text (e.g., "Figure 1: Overview...") is **not** included within the image visual itself. The caption should remain separate.
+2. Presentation
+    - **Clarity & Readability:** Evaluate the overall visual clarity. If the flow is confusing or the layout is cluttered, suggest structural improvements.
+    - **Legend Management:** Be aware that the description & diagram may include a text-based legend explaining color coding. Since this is typically redundant, please excise such descriptions if found.
+
+** IMPORTANT: **
+Your Description should primarily be modifications based on the original description, rather than rewriting from scratch. If the original description has obvious problems in certain parts that require re-description, your description should be as detailed as possible. Semantically, clearly describe each element and their connections. Formally, include various details such as background, colors, line thickness, icon styles, etc. Remember: vague or unclear specifications will only make the generated figure worse, not better.
+
+## INPUT DATA
+
+- **Methodology Section**: Panel 4 of a 4-panel method figure: 'Walk: depth'. P = 0.5 I + 0.5 A. Three 14x14 symmetrised walk matrices K_t = (P^t + (P^t)^T)/2 for t = 1, 3, 9 in a row (magenta sequential scale, light = low, dark = high; grey diagonal), small magenta arrows between them, each with the gene i row band and a black box on the cell (i, k) for gene k, marked 'k' above. Under each, row i of K_t as magenta bars on the same gene axis (gene i omitted), gene k's slot shaded grey with a triangle below, labelled K_ik = 0.000 (t = 1), 0.025 (t = 3), 0.078 (t = 9). Note: 'row i of K_t (gene i omitted)', formula K_t = (P^t + (P^t)^T)/2, 'box / triangle: gene k, not attended directly (A_ik = 0)'. The block structure becomes smoother and spreads with t. Header chip: numbered black circle 4, bold title 'Walk: depth', grey tag 'stacked attention layers' with a magenta left edge.
+
+- **Figure Caption**: Panel 4 (Walk): K_t matrices for t = 1, 3, 9 with row-i bars and K_ik = 0.000 / 0.025 / 0.078. REPRODUCE the first reference image (the content reference) exactly: every heatmap cell, bar, number, label and formula must stay where it is, with the same values and the same colour. Do not invent, add, remove, permute, smooth or re-block any matrix cell or bar. Improve only styling and clarity: crisper type, cleaner alignment, consistent line weights. The second reference image (Faith et al. 2007, CLR paper, Fig. 1A) is a STYLE reference only: flat translucent row band (gene i, blue) and column band (gene j, pink) crossing at the traced cell, plain bold gene labels, minimal ink, white background; do not copy its content. Colour key (keep): blue = dependence, orange = CLR, violet = softmax, magenta = walk; in every heatmap light = low and dark = high; grey diagonal = self. Single panel, white background, no extra panels, no title other than those in the reference.
+- **Detailed Description**: ### Overall Layout
+A clean, publication-grade single-panel scientific method diagram on a pure white background, illustrating multi-hop random walk diffusion across depth (stacked attention layers) for three sequential stages: t = 1, t = 3, and t = 9. The panel contains a standardized header chip at the top left, a transition probability equation at top right, followed by three horizontally aligned sub-blocks connected by slender magenta arrows. Each sub-block contains a column index 'k', a stage label, a 14x14 symmetrized walk matrix heatmap $K_t$ with row i and target cell (i, k) highlighted, and a corresponding 1D bar chart of row i directly below.
+
+---
+
+### Header
+- **Top Left**:
+  - Numbered black circular badge containing white numeral **4**.
+  - Bold title: **"Walk: depth"** in clean sans-serif.
+  - Rounded tag below title: **"stacked attention layers"** in light grey with a crisp vertical magenta accent stripe on the left edge.
+- **Top Right**:
+  - Formulation in LaTeX: **$P = 0.5I + 0.5A$**.
+
+---
+
+### Three Diffusion Stages (t = 1, 3, 9)
+Three stages displayed side-by-side, connected between the heatmaps by small horizontal magenta arrows ($→$):
+
+1. **Stage Headers & Column Labels**:
+   - Headings centered above each heatmap: **$t = 1$**, **$t = 3$**, and **$t = 9$**.
+   - Above column 9 of each matrix, a centered italic serif label **$k$**.
+
+2. **14 × 14 Symmetrized Walk Heatmaps ($K_t$)**:
+   - **Grid & Color Ramp**: Exactly 14 rows by 14 columns with thin white gridlines. Sequential magenta palette where 0 = palest blush/white and 9 = deep saturated magenta. All diagonal self-loop cells $(m, m)$ are rendered in neutral medium-light grey.
+   - **Cell-by-Cell Data Accuracy**:
+     - **t = 1**: Sparse network structure with two distinct modules: diagonal chain module along rows/cols 4–9 and dense 4×4 module at lower right (rows/cols 10–13). Row 4 values: [2, 2, 3, grey, 8, 3, 3, 3, 2, 2, 2, 2, 2, 2]. Off-diagonal cell $(4, 9)$ has baseline intensity (level 2 / $K_{ik} = 0.000$).
+     - **t = 3**: Matrix values diffuse locally; chain and lower module spread into adjacent cells. Row 4 values: [2, 2, 3, grey, 8, 5, 4, 3, 3, 2, 2, 2, 2, 3], with cell $(4, 9)$ gently increasing ($K_{ik} = 0.025$).
+     - **t = 9**: Broader global diffusion across rows/cols 4–14; row 4 values: [2, 2, 3, grey, 6, 6, 5, 4, 4, 2, 2, 2, 2, 3], showing increased diffusion to gene k ($K_{ik} = 0.078$).
+   - **Gene i Row Band & Target Cell (i, k)**:
+     - A flat translucent soft blue horizontal band highlights **row 4 (gene i)** across the entire matrix width, labeled with an italic serif **$i$** to the left of row 4.
+     - A sharp solid black square outline precisely encloses the cell at **row 4, column 9** (target gene $k$).
+
+3. **Row $i$ Profiles (Bar Plots)**:
+   - Positioned directly underneath each respective heatmap, horizontally spanning the identical column width.
+   - Header centered above each bar chart: **"row $i$ of $K_t$ (gene $i$ omitted)"**.
+   - Bars represent the 13 off-diagonal values of row 4 in solid magenta, leaving an omitted/empty gap at gene index $i = 4$.
+   - **Gene $k$ Slot Highlight**:
+     - A single-column-width light grey rectangular shaded bar highlights exactly column slot $k$ (column 9).
+     - An upward-pointing solid black triangle rests on the baseline directly under column slot $k$.
+     - Directly below the triangle, exact numeric values: **$K_{ik} = 0.000$** (at t = 1, flat baseline with no bar), **$K_{ik} = 0.025$** (at t = 3, small magenta bar), and **$K_{ik} = 0.078$** (at t = 9, medium magenta bar).
+
+---
+
+### Bottom Annotations
+- **Formula**: Centered horizontally below the bar plots: **$K_t = (P^t + (P^t)^T)/2$**.
+- **Caption Note**: Centered beneath the formula: **"box / triangle: gene $k$, not attended directly ($A_{ik} = 0$)"**.
+- **Target Diagram**: [The generated figure is provided as an image]
+
+## OUTPUT
+Provide your response strictly in the following JSON format:
+{
+    "critic_suggestions": ["specific actionable suggestion 1", "specific actionable suggestion 2"],
+    "revised_description": "The complete revised description incorporating all suggested fixes. If no revision is needed, set to null."
+}
+
+If the image is publication-ready with no issues, return:
+{
+    "critic_suggestions": [],
+    "revised_description": null
+}
+
+
+Additional user feedback to consider in your evaluation:
+EXACT CELL DATA for the matrix (row 1 at top, column 1 at left; 14 rows x 14 columns; digit = colour level, 0 = palest (near white), 9 = darkest of that matrix's colour scale; x = grey self-diagonal cell). Paint each cell with exactly this level, nothing else: Walk matrix K_t at t = 1 (magenta ramp):
+row  1: x 5 0 0 0 0 0 0 0 1 1 5 1 0
+row  2: 5 x 1 0 0 0 0 0 0 1 0 1 0 1
+row  3: 0 1 x 1 1 0 1 0 1 0 0 0 0 9
+row  4: 2 2 3 x 8 3 3 3 2 2 2 2 2 2
+row  5: 0 0 1 7 x 5 1 1 1 0 0 0 0 0
+row  6: 0 0 0 1 5 x 7 1 1 0 0 0 0 0
+row  7: 0 0 1 1 1 7 x 3 1 0 0 0 0 0
+row  8: 0 0 0 1 1 1 3 x 8 0 0 0 0 1
+row  9: 0 0 1 0 1 1 1 8 x 0 0 0 0 0
+row 10: 1 1 0 0 0 0 0 0 0 x 1 2 5 0
+row 11: 1 0 0 0 0 0 0 0 0 1 x 2 8 1
+row 12: 5 1 0 0 0 0 0 0 0 2 2 x 6 1
+row 13: 1 0 0 0 0 0 0 0 0 5 8 6 x 0
+row 14: 0 1 9 0 0 0 0 1 0 0 1 1 0 x
+K_t at t = 3:
+row  1: x 4 1 0 0 0 0 0 0 2 2 5 3 1
+row  2: 4 x 1 0 0 0 0 0 0 1 1 3 2 1
+row  3: 1 1 x 1 1 1 1 1 1 0 1 1 0 8
+row  4: 2 2 3 x 8 5 4 3 3 2 2 2 2 3
+row  5: 0 0 1 8 x 7 3 2 1 0 0 0 0 1
+row  6: 0 0 1 4 7 x 7 2 2 0 0 0 0 0
+row  7: 0 0 1 2 3 7 x 4 3 0 0 0 0 1
+row  8: 0 0 1 1 2 2 4 x 8 0 0 0 0 1
+row  9: 0 0 1 1 1 2 3 8 x 0 0 0 0 1
+row 10: 2 1 0 0 0 0 0 0 0 x 4 5 7 0
+row 11: 2 1 1 0 0 0 0 0 0 4 x 5 9 1
+row 12: 5 3 1 0 0 0 0 0 0 5 5 x 8 1
+row 13: 3 2 0 0 0 0 0 0 0 7 9 8 x 1
+row 14: 1 1 8 1 1 0 1 1 1 0 1 1 1 x
+K_t at t = 9:
+row  1: x 1 1 0 0 0 0 0 0 2 3 3 6 1
+row  2: 1 x 1 0 0 0 0 0 0 2 2 2 4 1
+row  3: 1 1 x 1 1 1 1 1 1 1 1 1 1 2
+row  4: 2 2 3 x 6 6 5 4 4 2 2 2 2 3
+row  5: 0 0 1 5 x 7 5 3 2 0 0 0 0 1
+row  6: 0 0 1 5 7 x 6 5 4 0 0 0 0 1
+row  7: 0 0 1 4 5 6 x 5 4 0 0 0 0 1
+row  8: 0 0 1 2 3 5 5 x 4 0 0 0 0 1
+row  9: 0 0 1 2 2 4 4 4 x 0 0 0 0 1
+row 10: 2 2 1 0 0 0 0 0 0 x 6 5 8 1
+row 11: 3 2 1 0 0 0 0 0 0 6 x 7 9 1
+row 12: 3 2 1 0 0 0 0 0 0 5 7 x 9 1
+row 13: 6 4 1 0 0 0 0 0 0 8 9 9 x 2
+row 14: 1 1 2 1 1 1 1 1 1 1 1 1 2 x
+Gene i band = row 4; black box at row 4 column 9 (gene k). Bars under each matrix = off-diagonal entries of row 4 (gene i itself omitted), one bar per column aligned to the columns, height proportional to the level; at t = 1 column 9 has no bar (K_ik = 0.000).

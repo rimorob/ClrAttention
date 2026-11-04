@@ -1,0 +1,34 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+A clean, minimalist single-panel scientific diagram set against a seamless, solid white background with generous surrounding whitespace. The composition is strictly aligned along a central vertical axis, comprising a left-aligned top header, a centered, perfectly square 14×14 mutual-information heatmap matrix with translucent crosshair highlights, and a crisp mathematical equation centered directly underneath the matrix.
+
+### Header
+- **Index Badge**: A small, perfectly circular solid black badge containing a crisp, centered white numeral '1' in a bold sans-serif typeface, anchored at the top-left corner.
+- **Section Title**: A prominent, bold black sans-serif label reading 'Dependence', positioned horizontally adjacent to the circular badge with comfortable spacing.
+- **Sub-label Chip**: Positioned just beneath the title, an elongated capsule-shaped tag with a very soft, light neutral grey fill and a thin, solid cobalt blue accent bar along its left vertical edge. Inside, the phrase 'query–key score' is printed in a clean, medium-weight charcoal grey sans-serif font.
+
+### Central Heatmap Matrix (14×14 Grid)
+- **Matrix Architecture**: Exactly 14 rows and 14 columns of square cells representing pairwise mutual information ($D$) between 14 genes, separated by ultra-thin, hairline white cell dividers for clean individual definition.
+- **Coordinate Labels**: Subtle, clean grey sans-serif index numbers '1' and '14' clearly mark the start and end of the rows and columns at the top, bottom, left, and right margins without redundant duplicate numerals.
+- **Main Diagonal Baseline**: Every self-interaction cell strictly along the main diagonal $(k, k)$ from $(1, 1)$ to $(14, 14)$ has a uniform, desaturated soft warm grey fill. There are zero off-diagonal grey cells.
+- **Sequential Blue Scale & Block Structure**:
+  - **Chain Block 1 (Genes 4–9)**: Rows 4 through 9 and columns 4 through 9 form a distinct dark blue cluster block with graded mid-to-dark blue off-diagonal cells and grey diagonal cells.
+  - **Chain Block 2 (Genes 10–13)**: Rows 10 through 13 and columns 10 through 13 form a secondary moderate denim-blue cluster block.
+  - **Background / Weak Coupling**: All remaining off-diagonal cells (including rows/columns 1–3 and gene 14) are rendered in a delicate, very pale powder blue with subtle realistic variation.
+
+### Selection Overlays & Intersection
+- **Gene $i$ Row Highlight**: Spanning horizontally across exactly row 4, a flat, translucent soft pastel blue band covers all 14 cells. It is bounded along its top and bottom edges by fine, crisp navy blue borderlines. Directly outside the left margin of the grid, aligned with row 4, sits the text label 'gene i' in bold deep blue sans-serif typography.
+- **Gene $j$ Column Highlight**: Spanning vertically down exactly column 5, a flat, translucent soft rose-pink band extends through all 14 rows. It is bounded along its left and right edges by fine, crisp magenta borderlines. Directly above the top margin of the grid, aligned with column 5, sits the text label 'gene j' in bold deep crimson sans-serif typography.
+- **Intersection Cell $(i, j)$**: Located precisely at row 4, column 5 where the horizontal blue and vertical pink bands cross, the individual cell is highlighted by a sharp, prominent solid black rectangular outline that rests on top of the translucent color blend, isolating the evaluated mutual information score.
+
+### Annotations & Math
+- **Bottom Equation**: Centered neatly beneath the heatmap grid with clear breathing room, formatted in publication-grade mathematical typography:
+  $$D_{ij} = \text{MI}(i, j) = 0.31$$
+  where $D$ and indices $i, j$ are rendered in elegant italic serif math type, 'MI' is set in upright sans-serif text, and the numerical value '0.31' is crisp and legible.
+
+### Visual Styling & Aesthetic Balance
+- **Linework**: Razor-sharp, consistent hairline weights for grid structure and overlay bounds; bold black line weight reserved exclusively for the black intersection focus cell at $(4, 5)$.
+- **Typography**: Modern, publication-quality sans-serif for headers and gene labels paired with LaTeX-style mathematical typesetting for variables.

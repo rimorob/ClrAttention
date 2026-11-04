@@ -1,0 +1,12 @@
+{
+  "source_context": "Panel 4 of a 4-panel method figure: 'Walk: depth'. P = 0.5 I + 0.5 A. Three 14x14 symmetrised walk matrices K_t = (P^t + (P^t)^T)/2 for t = 1, 3, 9 in a row (magenta sequential scale, light = low, dark = high; grey diagonal), small magenta arrows between them, each with the gene i row band and a black box on the cell (i, k) for gene k, marked 'k' above. Under each, row i of K_t as magenta bars on the same gene axis (gene i omitted), gene k's slot shaded grey with a triangle below, labelled K_ik = 0.000 (t = 1), 0.025 (t = 3), 0.078 (t = 9). Note: 'row i of K_t (gene i omitted)', formula K_t = (P^t + (P^t)^T)/2, 'box / triangle: gene k, not attended directly (A_ik = 0)'. The block structure becomes smoother and spreads with t. Header chip: numbered black circle 4, bold title 'Walk: depth', grey tag 'stacked attention layers' with a magenta left edge.\n",
+  "communicative_intent": "Panel 4 (Walk): K_t matrices for t = 1, 3, 9 with row-i bars and K_ik = 0.000 / 0.025 / 0.078. REPRODUCE the first reference image (the content reference) exactly: every heatmap cell, bar, number, label and formula must stay where it is, with the same values and the same colour. Do not invent, add, remove, permute, smooth or re-block any matrix cell or bar. Improve only styling and clarity: crisper type, cleaner alignment, consistent line weights. The second reference image (Faith et al. 2007, CLR paper, Fig. 1A) is a STYLE reference only: flat translucent row band (gene i, blue) and column band (gene j, pink) crossing at the traced cell, plain bold gene labels, minimal ink, white background; do not copy its content. Colour key (keep): blue = dependence, orange = CLR, violet = softmax, magenta = walk; in every heatmap light = low and dark = high; grey diagonal = self. Single panel, white background, no extra panels, no title other than those in the reference.",
+  "diagram_type": "methodology",
+  "raw_data": null,
+  "aspect_ratio": "1:1",
+  "vector_export": "none",
+  "input_images": [
+    "docs/whitepapers/figures/pb_runs/panels_20261030/ref/panel4.png",
+    "docs/whitepapers/figures/pb_runs/panels_20261030/in/style_2007_panelA.png"
+  ]
+}

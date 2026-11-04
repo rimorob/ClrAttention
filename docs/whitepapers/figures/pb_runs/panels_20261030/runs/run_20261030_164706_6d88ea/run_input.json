@@ -1,0 +1,12 @@
+{
+  "source_context": "Panel 1 of a 4-panel method figure: 'Dependence'. A 14x14 symmetric mutual-information matrix D of a toy 14-gene dataset (blue sequential scale, light = low MI, dark = high MI; grey diagonal = self). Gene i (row 4) is a horizontal blue band, gene j (column 5) is a vertical pink band, crossing at the traced cell outlined in black, D_ij = MI(i, j) = 0.31. The matrix has a dark chain block around genes 4-9 and a second moderate block around genes 10-13. Caption below the matrix: D_ij = MI(i, j) = 0.31. Header chip: numbered black circle 1, bold title 'Dependence', grey tag 'query-key score' with a blue left edge.\n",
+  "communicative_intent": "Panel 1 (Dependence): the 14x14 mutual-information matrix D with gene i row band and gene j column band, traced cell D_ij = 0.31. REPRODUCE the first reference image (the content reference) exactly: every heatmap cell, bar, number, label and formula must stay where it is, with the same values and the same colour. Do not invent, add, remove, permute, smooth or re-block any matrix cell or bar. Improve only styling and clarity: crisper type, cleaner alignment, consistent line weights. The second reference image (Faith et al. 2007, CLR paper, Fig. 1A) is a STYLE reference only: flat translucent row band (gene i, blue) and column band (gene j, pink) crossing at the traced cell, plain bold gene labels, minimal ink, white background; do not copy its content. Colour key (keep): blue = dependence, orange = CLR, violet = softmax, magenta = walk; in every heatmap light = low and dark = high; grey diagonal = self. Single panel, white background, no extra panels, no title other than those in the reference.",
+  "diagram_type": "methodology",
+  "raw_data": null,
+  "aspect_ratio": "1:1",
+  "vector_export": "none",
+  "input_images": [
+    "docs/whitepapers/figures/pb_runs/panels_20261030/ref/panel1.png",
+    "docs/whitepapers/figures/pb_runs/panels_20261030/in/style_2007_panelA.png"
+  ]
+}

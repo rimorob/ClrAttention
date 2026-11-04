@@ -1,0 +1,33 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+A clean, minimalist single-panel scientific diagram set against a solid, seamless white background with generous margins. The panel is vertically aligned, featuring a top-left panel header, a perfectly square 14×14 mutual-information heatmap matrix centered in the frame, and a publication-quality mathematical equation centered directly underneath.
+
+### Header
+- **Index Badge**: A small, solid black circular badge containing a clean, centered white numeral '1' in bold sans-serif type, positioned at the top-left.
+- **Title**: A bold black sans-serif label reading 'Dependence', positioned adjacent to the circular badge.
+- **Sub-label Chip**: Positioned directly beneath the title, a rounded horizontal tag with a soft neutral light-grey fill and a crisp cobalt blue accent bar along its left vertical edge. Inside, the text 'query–key score' is set in a medium-weight charcoal sans-serif font.
+
+### Central Heatmap Matrix (Strictly 14×14 Grid)
+- **Grid Architecture**: Exactly 14 rows and 14 columns of equal-sized square cells representing pairwise mutual information ($D$) among 14 genes, separated by ultra-thin, hairline white gridlines.
+- **Coordinate Labels**: Unobtrusive, clean grey sans-serif numerals '1' and '14' mark the first and fourteenth rows and columns along the outer perimeter (top, bottom, left, and right margins).
+- **Main Diagonal (Self-Interaction)**: All 14 diagonal cells $(k, k)$ from $(1, 1)$ down to $(14, 14)$ are uniformly filled with a flat, desaturated warm-grey. No off-diagonal cell contains grey.
+- **Block Structure & Sequential Blue Ramp**:
+  - **Block 1 (Genes 4–9)**: A 6×6 block spanning rows 4 to 9 and columns 4 to 9 rendered in graded mid-to-dark blue tones representing strong mutual information, pierced along the diagonal by grey cells $(4,4)$ through $(9,9)$.
+  - **Block 2 (Genes 10–13)**: A 4×4 block spanning rows 10 to 13 and columns 10 to 13 rendered in moderate slate/denim blue tones, with grey diagonal cells $(10,10)$ through $(13,13)$.
+  - **Background & Uncoupled Genes**: All remaining off-diagonal cells (genes 1–3, gene 14, and cross-block pairs) are colored in a delicate, very pale powder blue with subtle realistic gradations.
+
+### Selection Overlays & Intersection
+- **Gene $i$ Row Highlight**: Spans horizontally across precisely row 4 across all 14 columns as a flat, translucent soft blue band, bounded top and bottom by fine navy borders. Aligned directly to the left of row 4 outside the grid is the bold blue sans-serif label 'gene i'.
+- **Gene $j$ Column Highlight**: Spans vertically down precisely column 5 across all 14 rows as a flat, translucent soft rose-pink band, bounded left and right by fine crimson borders. Aligned directly above column 5 outside the grid is the bold crimson sans-serif label 'gene j'.
+- **Target Intersection Cell $(4, 5)$**: The intersection of row 4 and column 5 forms an off-diagonal cell. It is highlighted with a crisp, solid black border around its perimeter, overlaying the translucent blended color to distinctly isolate the evaluated mutual information score $D_{ij}$.
+
+### Mathematical Annotation
+- **Bottom Equation**: Centered neatly beneath the heatmap grid with ample breathing space:
+  $$D_{ij} = \text{MI}(i, j) = 0.31$$
+  Typeset with italic serif variables $D, i, j$, standard upright text for 'MI', and crisp numerals for '0.31'.
+
+### Linework & Styling
+- Minimal ink aesthetic with hairline cell separators and boundary strokes; distinct medium-weight black stroke strictly reserved for the focus box around cell $(4, 5)$.

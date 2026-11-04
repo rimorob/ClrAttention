@@ -1,0 +1,12 @@
+{
+  "source_context": "Panel 3 of a 4-panel method figure: 'Softmax attention'. Two 14x14 matrices side by side: S (orange scale) and A (violet scale, light = low, dark = high; grey diagonal), each with gene i row band and gene j column band crossing at a traced cell, joined by a violet block arrow labelled 'softmax'. Under each matrix, row i drawn as a bar strip aligned with the columns: row i of S (orange bars, five dark top-5 bars, S_ij = 2.8 labelled) and row i of A (violet bars, A_ij = 0.64 labelled, sums to 1). Notes: 'dark: top 5 kept (real: 50)', 'sums to 1'. Formula A_i = softmax(S_i / tau_i), 'tau_i set per gene so that k_eff = 3 (real: 10)'. Header chip: numbered black circle 3, bold title 'Softmax attention', grey tag 'softmax over the keys' with a violet left edge.\n",
+  "communicative_intent": "Panel 3 (Softmax): S and A matrices side by side with the row-i bar strips (S_ij = 2.8, A_ij = 0.64) and formula. REPRODUCE the first reference image (the content reference) exactly: every heatmap cell, bar, number, label and formula must stay where it is, with the same values and the same colour. Do not invent, add, remove, permute, smooth or re-block any matrix cell or bar. Improve only styling and clarity: crisper type, cleaner alignment, consistent line weights. The second reference image (Faith et al. 2007, CLR paper, Fig. 1A) is a STYLE reference only: flat translucent row band (gene i, blue) and column band (gene j, pink) crossing at the traced cell, plain bold gene labels, minimal ink, white background; do not copy its content. Colour key (keep): blue = dependence, orange = CLR, violet = softmax, magenta = walk; in every heatmap light = low and dark = high; grey diagonal = self. Single panel, white background, no extra panels, no title other than those in the reference.",
+  "diagram_type": "methodology",
+  "raw_data": null,
+  "aspect_ratio": "1:1",
+  "vector_export": "none",
+  "input_images": [
+    "docs/whitepapers/figures/pb_runs/panels_20261030/ref/panel3.png",
+    "docs/whitepapers/figures/pb_runs/panels_20261030/in/style_2007_panelA.png"
+  ]
+}

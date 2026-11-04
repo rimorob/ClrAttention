@@ -1,0 +1,37 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+A clean, minimalist single-panel scientific diagram set against a seamless, solid white background with generous surrounding whitespace. The composition is strictly aligned along a central vertical axis, comprising a left-aligned top header, a centered 14×14 mutual-information heatmap matrix with translucent crosshair highlights, and a crisp mathematical equation centered directly underneath the matrix.
+
+### Header
+- **Index Badge**: A small, perfectly circular solid black badge containing a crisp, centered white numeral "1" in a bold sans-serif typeface, anchored at the top-left corner.
+- **Section Title**: A prominent, bold black sans-serif label reading "Dependence", positioned horizontally adjacent to the circular badge with comfortable spacing.
+- **Sub-label Chip**: Positioned just beneath the title, an elongated capsule-shaped tag with a very soft, light neutral grey fill and a thin, solid cobalt blue accent bar along its left vertical edge. Inside, the phrase "query–key score" is printed in a clean, medium-weight charcoal grey sans-serif font.
+
+### Central Heatmap Matrix
+- **Matrix Architecture**: A perfectly square 14×14 grid of cells representing pairwise mutual information ($D$) between 14 genes, separated by ultra-thin, hairline white cell dividers for clean individual definition.
+- **Diagonal Baseline**: Every self-interaction cell along the main diagonal $(k, k)$ has a uniform, desaturated soft warm grey fill, clearly differentiating baseline self-correlation from off-diagonal interactions.
+- **Sequential Gradient Palette**: Off-diagonal cells follow a smooth, sequential single-hue blue scale where higher mutual information corresponds to darker, richer saturation:
+  - A prominent, dark navy blue block spans indices 4 through 9, indicating a tightly coupled gene cluster.
+  - A secondary, medium denim blue block spans indices 10 through 13, indicating moderate mutual information.
+  - The remaining background cells have a delicate, very pale powder blue fill representing weak background mutual information.
+
+### Selection Overlays & Intersection
+- **Gene $i$ Row Highlight**: Spanning horizontally across row 4, a flat, translucent soft pastel blue band covers all 14 cells. It is bounded along its top and bottom edges by fine, crisp navy blue borderlines. Directly outside the left margin of the grid, aligned with this row, sits the text label "gene i" in bold deep blue sans-serif typography.
+- **Gene $j$ Column Highlight**: Spanning vertically down column 5, a flat, translucent soft rose-pink band extends through the entire height of the column. It is bounded along its left and right edges by fine, crisp magenta borderlines. Directly above the top margin of the grid, aligned with this column, sits the text label "gene j" in bold deep crimson sans-serif typography.
+- **Intersection Cell $(i, j)$**: Located at row 4, column 5 where the horizontal blue and vertical pink bands cross, the individual cell is highlighted by a sharp, prominent solid black rectangular outline that rests on top of the translucent color blend, precisely isolating the evaluated score.
+
+### Annotations & Math
+- **Bottom Equation**: Centered neatly beneath the heatmap grid with clear breathing room, formatted in publication-grade mathematical typography:
+  $$D_{ij} = \text{MI}(i, j) = 0.31$$
+  where $D$ and the indices $i, j$ are rendered in elegant italic serif math type, "MI" is set in upright sans-serif text, and the numerical value is crisp and legible.
+
+### Visual Styling & Aesthetic Balance
+- **Color Philosophy**: Soft tech pastels with functional contrast; neutral light grey for non-informative self-loops, an intuitive pale-to-deep blue progression for dependence density, and soft complementary blue-versus-pink translucent overlays for coordinate tracing.
+- **Linework**: Razor-sharp, consistent hairline weights for grid structure and overlay bounds; bold line weight reserved exclusively for the black intersection focus cell.
+- **Typography**: Modern, publication-quality sans-serif for headers and labels paired with LaTeX-style mathematical typesetting for variables.
+
+
+Note: this plan was guided by a user-provided reference sketch; follow the description above faithfully.

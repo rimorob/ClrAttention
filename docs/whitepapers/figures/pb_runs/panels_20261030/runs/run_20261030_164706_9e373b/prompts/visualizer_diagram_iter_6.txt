@@ -1,0 +1,50 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+A clean, publication-grade single-panel scientific method diagram on a pure white background, illustrating multi-hop random walk diffusion across depth (stacked attention layers) for three sequential stages: t = 1, t = 3, and t = 9. The panel contains a standardized header chip at the top left, a transition probability equation at top right, followed by three horizontally aligned sub-blocks connected by slender magenta arrows. Each sub-block contains a column index 'k', a stage label, a 14x14 symmetrized walk matrix heatmap $K_t$ with row i and target cell (i, k) highlighted, and a corresponding 1D bar chart of row i directly below.
+
+---
+
+### Header
+- **Top Left**:
+  - Numbered black circular badge containing white numeral **4**.
+  - Bold title: **"Walk: depth"** in clean sans-serif.
+  - Rounded tag below title: **"stacked attention layers"** in light grey with a crisp vertical magenta accent stripe on the left edge.
+- **Top Right**:
+  - Formulation in LaTeX: **$P = 0.5I + 0.5A$**.
+
+---
+
+### Three Diffusion Stages (t = 1, 3, 9)
+Three stages displayed side-by-side, connected between the heatmaps by small horizontal magenta arrows ($→$):
+
+1. **Stage Headers & Column Labels**:
+   - Headings centered above each heatmap: **$t = 1$**, **$t = 3$**, and **$t = 9$**.
+   - Above column 9 of each matrix, a centered italic serif label **$k$**.
+
+2. **14 × 14 Symmetrized Walk Heatmaps ($K_t$)**:
+   - **Grid & Color Ramp**: Exactly 14 rows by 14 columns with thin white gridlines. Sequential magenta palette where 0 = palest blush/white and 9 = deep saturated magenta. All diagonal self-loop cells $(m, m)$ are rendered in neutral medium-light grey.
+   - **Cell-by-Cell Data Accuracy**:
+     - **t = 1**: Sparse network structure with two distinct modules: diagonal chain module along rows/cols 4–9 and dense 4×4 module at lower right (rows/cols 10–13). Row 4 values: [2, 2, 3, grey, 8, 3, 3, 3, 2, 2, 2, 2, 2, 2]. Off-diagonal cell $(4, 9)$ has baseline intensity (level 2 / $K_{ik} = 0.000$).
+     - **t = 3**: Matrix values diffuse locally; chain and lower module spread into adjacent cells. Row 4 values: [2, 2, 3, grey, 8, 5, 4, 3, 3, 2, 2, 2, 2, 3], with cell $(4, 9)$ gently increasing ($K_{ik} = 0.025$).
+     - **t = 9**: Broader global diffusion across rows/cols 4–14; row 4 values: [2, 2, 3, grey, 6, 6, 5, 4, 4, 2, 2, 2, 2, 3], showing increased diffusion to gene k ($K_{ik} = 0.078$).
+   - **Gene i Row Band & Target Cell (i, k)**:
+     - A flat translucent soft blue horizontal band highlights **row 4 (gene i)** across the entire matrix width, labeled with an italic serif **$i$** to the left of row 4.
+     - A sharp solid black square outline precisely encloses the cell at **row 4, column 9** (target gene $k$).
+
+3. **Row $i$ Profiles (Bar Plots)**:
+   - Positioned directly underneath each respective heatmap, horizontally spanning the identical column width.
+   - Header centered above each bar chart: **"row $i$ of $K_t$ (gene $i$ omitted)"**.
+   - Bars represent the 13 off-diagonal values of row 4 in solid magenta, leaving an omitted/empty gap at gene index $i = 4$.
+   - **Gene $k$ Slot Highlight**:
+     - A single-column-width light grey rectangular shaded bar highlights exactly column slot $k$ (column 9).
+     - An upward-pointing solid black triangle rests on the baseline directly under column slot $k$.
+     - Directly below the triangle, exact numeric values: **$K_{ik} = 0.000$** (at t = 1, flat baseline with no bar), **$K_{ik} = 0.025$** (at t = 3, small magenta bar), and **$K_{ik} = 0.078$** (at t = 9, medium magenta bar).
+
+---
+
+### Bottom Annotations
+- **Formula**: Centered horizontally below the bar plots: **$K_t = (P^t + (P^t)^T)/2$**.
+- **Caption Note**: Centered beneath the formula: **"box / triangle: gene $k$, not attended directly ($A_{ik} = 0$)"**.

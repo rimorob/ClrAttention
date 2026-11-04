@@ -1,0 +1,41 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+A clean, publication-grade single-panel scientific diagram set against a solid, seamless white background with balanced margins. The panel features a top-left panel header, a perfectly square, symmetric 14×14 mutual-information heatmap matrix centered in the frame, and a publication-quality mathematical equation centered directly underneath.
+
+### Header
+- **Index Badge**: A small, solid black circular badge containing a clean, centered white numeral '1' in bold sans-serif type, positioned at the top-left.
+- **Title**: A bold black sans-serif label reading 'Dependence', positioned adjacent to the circular badge.
+- **Sub-label Chip**: Positioned directly beneath the title, a rounded horizontal tag with a soft neutral light-grey fill and a crisp cobalt blue accent bar along its left vertical edge. Inside, the text 'query–key score' is set in a medium-weight charcoal sans-serif font.
+
+### Central Heatmap Matrix (Strictly 14×14 Grid)
+- **Grid Architecture**: Exactly 14 rows and 14 columns (total 196 cells) of equal-sized square cells representing pairwise mutual information ($D$) among 14 genes, separated by ultra-thin, hairline white gridlines.
+- **Coordinate Labels**: Unobtrusive, clean grey sans-serif numerals '1' and '14' mark the first and fourteenth rows and columns along the outer perimeter (top, bottom, left, and right margins).
+- **Continuous Main Diagonal (Self-Interaction)**: Exactly 14 diagonal cells $(k, k)$ extending unbroken strictly from top-left $(1, 1)$ to bottom-right $(14, 14)$ are uniformly filled with a flat, desaturated warm-grey with an 'x' symbol. No off-diagonal cell is filled with grey.
+- **Exact Cell-by-Cell Sequential Blue Heatmap (0 = palest near-white blue, 9 = darkest deep blue, x = grey diagonal)**:
+  - Row 1: [x, 1, 0, 1, 2, 1, 1, 1, 1, 1, 1, 2, 2, 0]
+  - Row 2: [1, x, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1]
+  - Row 3: [0, 1, x, 2, 2, 1, 2, 1, 1, 1, 1, 1, 0, 2]
+  - Row 4: [2, 2, 3, x, 7, 6, 6, 4, 3, 3, 3, 2, 2, 2]
+  - Row 5: [1, 0, 1, 8, x, 8, 6, 4, 3, 1, 1, 1, 0, 0]
+  - Row 6: [1, 0, 1, 6, 7, x, 9, 5, 2, 1, 0, 1, 0, 0]
+  - Row 7: [1, 0, 2, 5, 5, 9, x, 8, 5, 1, 0, 0, 0, 0]
+  - Row 8: [1, 1, 1, 3, 4, 5, 8, x, 8, 1, 0, 1, 0, 1]
+  - Row 9: [1, 0, 1, 2, 3, 2, 5, 8, x, 0, 0, 0, 0, 0]
+  - Row 10: [1, 1, 1, 1, 2, 1, 1, 1, 0, x, 2, 3, 3, 0]
+  - Row 11: [1, 0, 1, 1, 2, 0, 0, 0, 0, 2, x, 3, 4, 1]
+  - Row 12: [2, 1, 1, 0, 2, 1, 0, 1, 0, 3, 3, x, 4, 1]
+  - Row 13: [2, 0, 0, 0, 2, 0, 0, 0, 0, 3, 4, 4, x, 0]
+  - Row 14: [0, 1, 2, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, x]
+
+### Selection Overlays & Intersection
+- **Gene $i$ Row Highlight**: Spans horizontally across precisely Row 4 across all 14 columns as a flat, translucent soft blue band, bounded top and bottom by fine navy borders. Aligned directly to the left of row 4 outside the grid is the bold blue sans-serif label 'gene i'.
+- **Gene $j$ Column Highlight**: Spans vertically down precisely Column 5 (the fifth column from the left, containing the diagonal 'x' at row 5) across all 14 rows as a flat, translucent soft rose-pink band, bounded left and right by fine crimson borders. Aligned directly above column 5 outside the grid is the bold crimson sans-serif label 'gene j'.
+- **Target Intersection Cell $(4, 5)$**: The intersection of Row 4 and Column 5 contains the integer '7' on a strong blue sequential fill. It is highlighted with a crisp, solid black border around its perimeter, showing the deep blue tone tinted beneath the intersecting translucent blue and pink highlights.
+
+### Mathematical Annotation
+- **Bottom Equation**: Centered neatly beneath the heatmap grid with ample breathing space:
+  $$D_{ij} = \text{MI}(i, j) = 0.31$$
+  Typeset with italic serif variables $D, i, j$, standard upright text for 'MI', and crisp numerals for '0.31'.

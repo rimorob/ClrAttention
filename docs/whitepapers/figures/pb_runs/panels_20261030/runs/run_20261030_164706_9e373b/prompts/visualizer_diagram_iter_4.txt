@@ -1,0 +1,57 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Overall Layout
+A clean, publication-grade single-panel scientific method diagram on a pure white background, showing 3 sequential walk stages (t = 1, 3, 9) arranged horizontally from left to right. Each stage consists of an aligned column containing: stage index label, a 14x14 symmetrized walk matrix heatmap K_t with row/column annotations, connected by small horizontal magenta arrows, and directly beneath each heatmap, a corresponding discrete bar plot showing row i of K_t (with gene i omitted). Global headers anchor the top left and top right, and formal mathematical definitions and a clarifying legend are centered along the bottom margin.
+
+---
+
+### Header
+- **Top Left Section**:
+  - A solid black circular badge containing a clean white numeral **4**.
+  - Immediately to the right, the bold title **"Walk: depth"** in a modern sans-serif typeface.
+  - Directly beneath the title, a light grey rounded rectangle tag reading **"stacked attention layers"** in sans-serif text, framed with a vibrant solid magenta vertical stripe along its left edge.
+- **Top Right Section**:
+  - Clean mathematical formulation: **$P = 0.5I + 0.5A$** in standard LaTeX typesetting.
+
+---
+
+### Three-Stage Walk Columns (t = 1, 3, 9)
+Arranged in three horizontal stages connected between heatmaps by small, slender horizontal magenta arrows:
+
+1. **Column & Target Indicators**:
+   - Bold stage headings centered above each heatmap: **$t = 1$**, **$t = 3$**, and **$t = 9$**.
+   - Directly above the target column for gene $k$ in each matrix sits an italicized serif label **$k$**.
+
+2. **14 x 14 Symmetrized Walk Heatmaps ($K_t$)**:
+   - **Grid & Color Scale**: Discrete 14x14 grid with hairline white cell dividers. Sequential magenta color gradient where white/pale blush = zero/low probability, and deep saturated magenta = high probability. Diagonal cells (representing self-loops) are filled with uniform neutral light grey.
+   - **Precise Block Sparsity and Structure (Exact Content Fidelity)**:
+     - **t = 1**: Highly sparse matrix. The vast majority of the matrix is near-white. Strong non-zero magenta weights are restricted strictly to: (a) a diagonal chain block along genes 4–9, (b) a dense block at the lower right on genes 10–13, and (c) a few isolated off-diagonal cells. Crucially, the corners (top-right and bottom-left) do NOT have dense blocks; they remain mostly white.
+     - **t = 3**: The diagonal chain block (genes 4–9) and lower-right block (genes 10–13) begin to smooth and expand locally. Off-diagonal background regions away from these two active modules remain pale/white.
+     - **t = 9**: Multi-hop diffusion continues to soften and gently bridge the blocks. The overall matrix retains high modular contrast rather than being flooded into a uniform mid-pink or creating arbitrary corner clusters.
+   - **Row & Intersection Highlights**:
+     - A flat translucent soft cerulean blue horizontal band highlights the entire row $i$, labeled with an italicized serif **$i$** to the left of the matrix.
+     - A crisp, solid black square stroke encloses the specific target intersection cell at row $i$, column $k$.
+
+3. **Row $i$ Profiles (Bar Plots)**:
+   - Positioned directly below each heatmap, horizontally aligned with the 14 gene columns.
+   - Centered subtitle above each bar chart: **"row $i$ of $K_t$ (gene $i$ omitted)"**.
+   - **Bar Geometry & Distribution Profile**:
+     - Discrete, slender solid magenta vertical bars indicating diffusion weights across genes, leaving an empty slot for the omitted self-gene $i$.
+     - **At t = 1**: Non-zero magenta bars appear exclusively on the left cluster with a prominent tall peak near column 3; at gene $k$, the value is exactly zero ($K_{ik} = 0.000$), displayed as a flat hairline baseline with no vertical bar.
+     - **At t = 3**: Slight diffusion spreading across the left-side bars, and a very small non-zero magenta bar emerges at column $k$ ($K_{ik} = 0.025$).
+     - **At t = 9**: Broader multi-hop diffusion across genes; the bar at gene $k$ remains modest/small ($K_{ik} = 0.078$) and is not the tallest bar in the distribution.
+   - **Gene $k$ Target Marker**:
+     - A subtle light grey vertical rectangular band highlights column $k$ behind the bar.
+     - An upward-pointing solid black triangle is placed directly below the baseline at column $k$.
+     - Precise numeric annotations below the triangle:
+       - Below t = 1: **$K_{ik} = 0.000$**
+       - Below t = 3: **$K_{ik} = 0.025$**
+       - Below t = 9: **$K_{ik} = 0.078$**
+
+---
+
+### Bottom Annotations
+- **Formula**: Centered horizontally in standard mathematical serif notation: **$K_t = (P^t + (P^t)^T)/2$**.
+- **Explanatory Legend**: Directly below the formula, a clean dark charcoal sans-serif annotation: **"box / triangle: gene $k$, not attended directly ($A_{ik} = 0$)"**.

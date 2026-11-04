@@ -1,0 +1,34 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+This diagram illustrates the 'CLR as attention' method, mapping the steps of gene regulatory network inference to the components of a Transformer attention mechanism. The layout is organized in a clear 2x2 grid on a white background, following a logical progression from top-left to bottom-right.
+
+### Overall Layout and Style
+The figure is divided into four numbered quadrants. Each quadrant features a bold black sans-serif header accompanied by a pill-shaped tag in a muted pastel color containing the Transformer analogy. All matrices are 14x14 grids with thin, light grey lines and neutral light grey diagonal cells (no bright diagonal). Color coding is consistent within each step: blue for Step 1, orange for Step 2, violet for Step 3, and magenta/plum for Step 4.
+
+### Step 1: Dependence (Top-Left)
+*   **Header**: '1 Dependence' with a light slate grey tag: 'query–key score'.
+*   **Component**: Matrix D (Mutual Information) using a soft blue heatmap.
+*   **Annotations**: A horizontal 'soft sky blue' band highlights 'gene i' and a vertical 'dusty rose' band highlights 'gene j'. Their intersection is outlined in black and labeled 'Dij'. Below the matrix, the formula 'Dij = MI(i, j)' is shown in a serif font.
+
+### Step 2: Context Normalization (CLR) (Top-Right)
+*   **Header**: '2 Context normalization (CLR)' with a muted apricot tag: 'scaling the logits'.
+*   **Central Elements**: Two Gaussian-like background distribution plots. The top curve (blue) is labeled 'row i of D'; the bottom curve (pink) is labeled 'row j of D'. Ticks in the tails are labeled 'MI'.
+*   **Formulas**: Specific z-score calculations are shown next to the curves (z_ij = 2.2, z_ji = 1.8). To the right, the combination logic 'Sij = (z_ij+ + z_ji+) / sqrt(2)' and 'z+ = max(z, 0)' is displayed.
+*   **Resulting Matrix**: Matrix S using a warm apricot heatmap. The intersection is labeled 'Sij = 2.8'.
+
+### Step 3: Softmax Attention (Bottom-Left)
+*   **Header**: '3 Softmax attention' with a pale lavender tag: 'softmax over the keys'.
+*   **Visual Flow**: A wide, semi-transparent lavender arrow points from matrix S to a sparse matrix A (soft periwinkle heatmap). The intersection in A is labeled 'Aij = 0.64'.
+*   **Bar Charts**: Below S, a bar chart of 'row i of S' uses orange bars, with the top 5 highlighted in deep terracotta and labeled 'keep the top 5'. Below A, a bar chart of 'row i of A' uses violet bars and is labeled 'sums to 1'.
+*   **Formula**: 'Ai = softmax(Si / τi)' with the annotation 'τ per gene so that keff = 3 (real: 10)'.
+
+### Step 4: Walk: depth (Bottom-Right)
+*   **Header**: '4 Walk: depth' with a muted rose tag: 'stacked attention layers'.
+*   **Component**: Three matrices (t=1, 3, 9) using a muted plum heatmap, showing increasing density. 
+*   **Bar Charts**: Three histograms below the matrices show 'row i of Kt'. A specific bar for 'gene k' is enclosed in a dashed box and traced across the charts with medium-weight dashed lines to show growth (values: 0.000, 0.025, 0.078).
+*   **Formula**: 'P = 0.5I + 0.5A' and 'Kt = (Pt + (Pt)T)/2'.
+
+### Footer
+Centered at the bottom in a legible dark grey sans-serif: 'No learned parameters: every step is computed from the data.' and 'Toy example: 14 genes, 60 samples.'

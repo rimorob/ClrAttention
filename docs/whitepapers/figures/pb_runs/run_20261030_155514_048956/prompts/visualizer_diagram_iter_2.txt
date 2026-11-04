@@ -1,0 +1,47 @@
+You are an expert scientific diagram illustrator. Generate high-quality scientific diagrams based on user requests. Note that do not include figure titles in the image.
+
+CRITICAL: All text labels in the diagram must be rendered in clear, readable English. Use the EXACT label names specified in the description. Do not generate garbled, misspelled, or non-English text.
+
+### Diagram Description: CLR as Attention Pipeline
+
+This diagram illustrates a four-step computational pipeline that reinterprets the Context Likelihood of Relatedness (CLR) algorithm through the lens of modern Transformer attention mechanisms. The layout follows a 2x2 grid arrangement with a Z-pattern flow across a clean, pure white background, utilizing a 'Macro-Micro' organizational strategy where logical stages are grouped within subtle, light-colored zones.
+
+#### 1. Overall Layout and Styling
+- **Flow**: Four sequential phases arranged in a 2x2 grid. A horizontal arrow connects Phase 1 (top-left) to Phase 2 (top-right); a diagonal arrow connects Phase 2 to Phase 3 (bottom-left); and a horizontal arrow connects Phase 3 to Phase 4 (bottom-right).
+- **Aesthetic**: A 'Soft Tech' look characterized by softened geometry, sans-serif typography (Helvetica or Arial), and a palette of scientific pastels.
+- **Color Palette**: 
+    - **Phase 1**: Soft sky blue (Dependence)
+    - **Phase 2**: Warm apricot (CLR Normalization)
+    - **Phase 3**: Muted lavender (Softmax)
+    - **Phase 4**: Deep rose (Walk Depth)
+- **Containers**: Each phase is housed within a large, rounded rectangle with a very faint, 10% opacity fill of its respective theme color and a thin, matching dashed border.
+
+#### 2. Phase 1: Dependence (Query–Key Score)
+- **Header**: '1 Dependence' in bold black; a soft sky blue pill-shaped label below it reads 'query–key score' in white.
+- **Component**: A 14x14 grid matrix labeled 'D', styled as a flat heatmap with a light-to-medium sky blue gradient.
+- **Annotations**: A horizontal soft blue band highlights 'gene i' (row) and a vertical pale pink band highlights 'gene j' (column). The intersection cell is bordered in black and labeled 'D_ij'.
+- **Formula**: Below the matrix: 'D_ij = MI(i, j)'.
+
+#### 3. Phase 2: Context Normalization (CLR) (Scaling the Logits)
+- **Header**: '2 Context normalization (CLR)' in bold black; a warm apricot pill-shaped label reads 'scaling the logits'.
+- **Visual Logic**: Above the matrix, a blue bell curve for 'row i of D' shows a tick mark for the MI value labeled 'z_ij = (D_ij - mu_i)/sigma_i = 2.2'. To the right, a pink vertical bell curve for 'column j of D' shows a tick mark labeled 'z_ji = (D_ij - mu_j)/sigma_j = 1.8'.
+- **Output Component**: A 14x14 matrix labeled 'S' with a warm apricot-to-terracotta gradient. The intersection cell is labeled 'S_ij = 2.8'.
+- **Formula**: 'S_ij = (z_i^+ + z_j^+) / sqrt(2)', where 'z^+ = max(z, 0)'.
+
+#### 4. Phase 3: Softmax Attention (Softmax over the Keys)
+- **Header**: '3 Softmax attention' in bold black; a muted lavender pill-shaped label reads 'softmax over the keys'.
+- **Comparison Visual**: Side-by-side matrices 'S' (apricot) and 'A' (lavender). Below 'S', a bar chart shows uniform values for 'row i of S'. Below 'A', a bar chart shows a 'winner-take-all' effect where only the 'top 5' bars are prominent.
+- **Annotations**: Formula 'A_i = softmax(S_i / tau_i)' with a note: 'tau per gene so that k_eff = 3' (toy example values).
+
+#### 5. Phase 4: Walk: Depth (Stacked Attention Layers)
+- **Header**: '4 Walk: depth' in bold black; a deep rose pill-shaped label reads 'stacked attention layers'.
+- **Component**: A sequence of three matrices labeled t=1, t=3, and t=9, transitioning from sharp lavender to diffused deep rose gradients.
+- **Bar Charts**: Below the sequence, three bar charts show the evolution of 'row i of S_t'. A specific gene's value is shown increasing over time: '0.000 -> 0.025 -> 0.078'.
+- **Formula**: 'S_t = (P^t + (P^t)^T) / 2', where 'P = 0.5I + 0.5A'.
+
+#### 6. Footer and Metadata
+- **Summary Note**: Centered at the bottom: '**No learned parameters: every step is computed from the data.**'
+- **Metadata**: A small grey line at the bottom: 'Toy: 14 genes, 60 samples, planted modules; k_eff = 3, top 5, t = 1, 3, 9 (real method: 10, 50, 9).'
+
+
+Note: this plan was guided by a user-provided reference sketch; follow the description above faithfully.
