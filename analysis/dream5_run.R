@@ -4,6 +4,7 @@
 #
 #   Rscript analysis/dream5_run.R --net 4 --methods abs_pearson,clr,clrns,attention [--workers 16] [--input replicate]
 #   Rscript analysis/dream5_run.R --net 4 --refit_from 1 --refit_to 100 --workers 16     # SE_B refits (hash sidecars; resumable)
+#   Rscript analysis/dream5_run.R --net 4 --refit_unit series --refit_from 1 --refit_to 100 --workers 8   # supplementary series-level refits (net4 only)
 #   Rscript analysis/dream5_run.R --collect 1                                              # consolidate SCORE_MANIFEST.tsv
 #   Rscript analysis/dream5_run.R --net 1 --methods pidc --export_only 1                   # write expression file for the PIDC lane
 #
@@ -14,7 +15,7 @@
 
 args <- commandArgs(trailingOnly = TRUE)
 opt <- list(net = "", methods = "", input = "replicate", workers = 16L, out = "results/dream5", collect = 0L,
-            refit_from = 0L, refit_to = 0L, keep = "none", export_only = 0L, force = 0L)
+            refit_from = 0L, refit_to = 0L, refit_unit = "group", keep = "none", export_only = 0L, force = 0L)
 i <- 1L
 while (i <= length(args)) {
   key <- sub("^--", "", args[i]); if (!key %in% names(opt)) stop("unknown argument: ", args[i])
@@ -25,7 +26,8 @@ say <- function(...) message(sprintf("[%s] %s", format(Sys.time(), "%H:%M:%S"), 
 
 if (opt$collect == 1L) {
   r <- d5_collect_manifest(opt$out); say("manifest: ", nrow(r), " score files"); print(r[, c("net", "method", "input", "bytes", "seconds")])
-  for (n in D5$nets) if (length(Sys.glob(file.path(d5_refit_dir(n, opt$out), "rep*.sha256.tsv")))) { x <- d5_refit_manifest(n, opt$out); say("refit manifest net", n, ": ", length(unique(x$rep)), " replicates") }
+  for (u in c("group", "series")) for (n in D5$nets) if (length(Sys.glob(file.path(d5_refit_dir(n, opt$out, u), "rep*.sha256.tsv")))) {
+    x <- d5_refit_manifest(n, opt$out, u); say(u, "-level refit manifest net", n, ": ", length(unique(x$rep)), " replicates") }
   quit(save = "no")
 }
 net <- as.integer(opt$net); stopifnot(net %in% D5$nets)
@@ -39,12 +41,12 @@ if (nzchar(opt$methods)) for (m in strsplit(opt$methods, ",")[[1]]) {
   d5_run_method(nd, m, opt$input, opt$workers, opt$out, force = opt$force == 1L); invisible(gc(verbose = FALSE))
 }
 if (opt$refit_to > 0L) {
-  stopifnot(opt$input == "replicate")
+  stopifnot(opt$input == "replicate", opt$refit_unit %in% c("group", "series"), opt$refit_unit == "group" || net == 4L)
   for (b in seq(max(1L, opt$refit_from), opt$refit_to)) {
-    done <- file.exists(d5_refit_path(net, b, opt$out)); t0 <- Sys.time()
-    d5_refit_run(nd, b, opt$workers, opt$out, keep = opt$keep); invisible(gc(verbose = FALSE))
-    say(sprintf("refit %d/%d %s (%.1f min)", b, opt$refit_to, if (done) "reused" else "done", as.numeric(difftime(Sys.time(), t0, units = "mins"))))
+    done <- file.exists(d5_refit_path(net, b, opt$out, opt$refit_unit)); t0 <- Sys.time()
+    d5_refit_run(nd, b, opt$workers, opt$out, keep = opt$keep, unit = opt$refit_unit); invisible(gc(verbose = FALSE))
+    say(sprintf("%s-level refit %d/%d %s (%.1f min)", opt$refit_unit, b, opt$refit_to, if (done) "reused" else "done", as.numeric(difftime(Sys.time(), t0, units = "mins"))))
   }
-  d5_refit_manifest(net, opt$out)
+  d5_refit_manifest(net, opt$out, opt$refit_unit)
 }
 say("done")

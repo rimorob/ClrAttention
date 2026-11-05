@@ -67,13 +67,15 @@ d5_module_aupr <- function(v, bench, expected_ties = FALSE, ix = NULL) {
   if (!is.null(ix)) { sc <- sc[ix]; lab <- lab[ix] }
   if (expected_ties) ap_expected(sc, lab) else ap_fast(sc, lab)
 }
-# Evaluability gate for Y-M (structure only, no score): at least 20 regulons with >= 5 targets and at least 1,000
-# positive co-membership pairs in the expression gene set. Regulon count follows the design's wording (>= 5 targets, no
-# upper limit); positive pairs are those of the Y-M regulon set (5 to 500 targets). Both counts are reported.
+# Evaluability gate for Y-M (structure only, no score): at least 20 regulons AND at least 1,000 positive co-membership
+# pairs, BOTH counted on the regulon set that the readout scores (5 to 500 targets in the expression gene set; design
+# change log 2026-11-05, item 3). The unrestricted count (>= 5 targets, no upper limit) is reported as an extra field,
+# n_regulons_ge5 (and n_pos_pairs_ge5_noupper); it does not decide.
 d5_ym_gate <- function(edges, nd) {
   b5 <- d5_module_setup(edges, nd, 5L, .Machine$integer.max); b <- d5_module_setup(edges, nd, 5L, 500L)
-  data.frame(n_regulons_ge5 = b5$n_regulons, n_regulons_5_500 = b$n_regulons, n_pos_pairs = b$n_pos,
-             n_pos_pairs_ge5_noupper = b5$n_pos, evaluable = b5$n_regulons >= 20L && b$n_pos >= 1000L)
+  data.frame(n_regulons_5_500 = b$n_regulons, n_pos_pairs = b$n_pos,
+             n_regulons_ge5 = b5$n_regulons, n_pos_pairs_ge5_noupper = b5$n_pos,
+             evaluable = b$n_regulons >= 20L && b$n_pos >= 1000L)
 }
 # structure-only counts (needs truth; no score)
 d5_structure_counts <- function(edges, nd) {
@@ -279,7 +281,7 @@ d5_required <- function(nets = D5$nets, methods = D5$primary, input = "replicate
 # pushed; it lists every required score file; and every listed file exists with exactly the manifest's SHA-256.
 # `root` is the directory the manifest's file column is relative to (the repo root in production).
 d5_truth_guard <- function(manifest = file.path(D5$out, "SCORE_MANIFEST.tsv"), required = d5_required(), repo = ".",
-                           refit_manifest = NULL, refit_required = NULL, root = repo, verbose = TRUE) {
+                           refit_manifest = NULL, refit_required = NULL, series_manifest = NULL, series_required = NULL, root = repo, verbose = TRUE) {
   .git_clean_committed_pushed(repo, manifest, "score manifest")
   m <- utils::read.delim(file.path(repo, manifest), stringsAsFactors = FALSE, colClasses = c(sha256 = "character"))
   key <- paste(m$net, m$method, m$input); need <- paste(required$net, required$method, required$input)
@@ -299,6 +301,15 @@ d5_truth_guard <- function(manifest = file.path(D5$out, "SCORE_MANIFEST.tsv"), r
       if (length(miss)) stop("DREAM5 truth guard: the refit manifest lacks ", length(miss), " replicate/method hashes, e.g. ", miss[1])
     }
   }
+  # the supplementary series-level refit manifest (net4): same rule (tracked, unchanged, pushed, complete)
+  if (!is.null(series_manifest)) {
+    .git_clean_committed_pushed(repo, series_manifest, "series-level refit manifest")
+    r <- utils::read.delim(file.path(repo, series_manifest), stringsAsFactors = FALSE, colClasses = c(sha256 = "character"))
+    if (!is.null(series_required)) {
+      miss <- setdiff(paste(series_required$net, series_required$rep, series_required$method), paste(r$net, r$rep, r$method))
+      if (length(miss)) stop("DREAM5 truth guard: the series-level refit manifest lacks ", length(miss), " replicate/method hashes, e.g. ", miss[1])
+    }
+  }
   if (verbose) message("DREAM5 truth guard: ", sum(key %in% need), " score files verified against the committed manifest")
   invisible(m)
 }
@@ -309,7 +320,8 @@ d5_design_guard <- function(design = "docs/plans/dream5_design.md", data_log = "
   if (!any(grepl("^Status: FIXED", readLines(file.path(repo, design), n = 10)))) stop("DREAM5 truth guard: the design file does not carry a 'Status: FIXED' line")
   invisible(TRUE)
 }
-# verify a recomputed refit replicate against the committed hash (used by the truth stage before scoring it)
+# verify a recomputed refit replicate against the committed hash (used by the truth stage before scoring it); `refit_manifest` is
+# the group-level REFIT_MANIFEST.tsv or the series-level REFIT_SERIES_MANIFEST.tsv (same layout)
 d5_refit_verify <- function(rep_scores, b, net, refit_manifest) {
   r <- utils::read.delim(refit_manifest, stringsAsFactors = FALSE, colClasses = c(sha256 = "character"))
   for (m in names(rep_scores)) {
@@ -326,7 +338,8 @@ D5$seeds <- list(`4` = c(YE = 20261203L, YM = 20261204L), `3` = c(YE = 20261213L
 # The caller (analysis/dream5_truth_run.R) runs d5_truth_guard() first; this function does not read any file except the
 # score caches, the refit manifest and what it is handed. `refit_scorer(b)` returns the refit upper-triangle vectors.
 d5_truth_pipeline <- function(nd, edges, sw, methods = D5$primary, out = D5$out, nrep = 200L, refit_reps = integer(0),
-                              refit_scorer = NULL, refit_verify = NULL, universe = NULL, cap = 100000L,
+                              refit_scorer = NULL, refit_verify = NULL, series_reps = integer(0), series_scorer = NULL, series_verify = NULL,
+                              universe = NULL, cap = 100000L,
                               contrast = c("attention", "clr"), seeds = D5$seeds[[as.character(nd$net)]], delta = D5$delta, verbose = TRUE) {
   net <- nd$net; G <- length(nd$genes); nTF <- length(nd$tf_idx); tf_idx <- nd$tf_idx
   say <- function(...) if (verbose) message(sprintf("[%s] %s", format(Sys.time(), "%H:%M:%S"), paste0(...)))
@@ -359,6 +372,18 @@ d5_truth_pipeline <- function(nd, edges, sw, methods = D5$primary, out = D5$out,
       list(e = e, m = mm) })
     bE <- do.call(rbind, lapply(rr, `[[`, "e")); bM <- if (gate$evaluable) do.call(rbind, lapply(rr, `[[`, "m")) else NULL
   }
+  # ---- supplementary series-level jackknife (net4, descriptive; recomputed refits verified against the committed series hashes;
+  # never enters the verdict)
+  sE <- sM <- NULL
+  if (length(series_reps)) {
+    say("series-level supplementary jackknife, ", length(series_reps), " replicates")
+    sr <- lapply(series_reps, function(b) {
+      v <- series_scorer(b); if (!is.null(series_verify)) series_verify(v, b)
+      e <- vapply(names(v), function(m) unname(d5_edge_metrics(d5_edge_matrix_sym(v[[m]], nd), truth, tf_idx, sw, cap, universe = universe)["aupr"]), 0)
+      mm <- if (gate$evaluable) vapply(names(v), function(m) d5_module_aupr(v[[m]], bench), 0) else NULL
+      list(e = e, m = mm) })
+    sE <- do.call(rbind, lapply(sr, `[[`, "e")); sM <- if (gate$evaluable) do.call(rbind, lapply(sr, `[[`, "m")) else NULL
+  }
   # ---- effects and verdicts
   a <- contrast[1]; b <- contrast[2]; rows <- list()
   for (ep in c("YE", "YM")) {
@@ -376,7 +401,19 @@ d5_truth_pipeline <- function(nd, edges, sw, methods = D5$primary, out = D5$out,
                              p_noninf_lo = if (is.null(v)) NA else v$p_noninf_lo, p_noninf_hi = if (is.null(v)) NA else v$p_noninf_hi,
                              verdict = if (is.null(v)) "descriptive (no verdict: needs net4 and SE_B)" else v$verdict, stringsAsFactors = FALSE)
   }
-  list(point = pe, gate = gate, jack_edge = jE, jack_module = jM, refit_edge = bE, refit_module = bM, rows = rows)
+  list(point = pe, gate = gate, jack_edge = jE, jack_module = jM, refit_edge = bE, refit_module = bM, rows = rows,
+       series_edge = sE, series_module = sM, series_line = d5_series_line(net, a, b, sE, sM, bE, bM, gate))
+}
+
+# ONE supplementary line per endpoint: SD of the paired differences d_r = log2(AUPR_a / AUPR_b) over the series-level replicates.
+# Labelled series-level, supplementary and descriptive; it is not used in verdict.csv (SE_B of the group-level refits is shown
+# next to it for reference only).
+d5_series_line <- function(net, a, b, sE, sM, bE = NULL, bM = NULL, gate = NULL) {
+  if (is.null(sE)) return(NULL)
+  one <- function(ep, S, B) data.frame(net = net, endpoint = ep, contrast = paste(a, "vs", b), n_rep = nrow(S),
+    SD_series = d5_se_paired(S[, a], S[, b]), SE_B_group = if (is.null(B)) NA_real_ else d5_se_paired(B[, a], B[, b]),
+    label = "series-level supplementary jackknife (59 #Experiment series, delete-half; descriptive; not used in verdict.csv)", stringsAsFactors = FALSE)
+  rbind(one("YE", sE, bE), if (!is.null(sM)) one("YM", sM, bM))
 }
 
 # write verdict.csv (the two net4 rows) and the supporting tables
@@ -390,5 +427,8 @@ d5_write_results <- function(res, dir) {
   if (!is.null(res$jack_module)) utils::write.csv(cbind(rep = seq_len(nrow(res$jack_module)), as.data.frame(res$jack_module)), file.path(dir, "jack_module.csv"), row.names = FALSE)
   if (!is.null(res$refit_edge)) utils::write.csv(cbind(rep = seq_len(nrow(res$refit_edge)), as.data.frame(res$refit_edge)), file.path(dir, "refit_edge.csv"), row.names = FALSE)
   if (!is.null(res$refit_module)) utils::write.csv(cbind(rep = seq_len(nrow(res$refit_module)), as.data.frame(res$refit_module)), file.path(dir, "refit_module.csv"), row.names = FALSE)
+  if (!is.null(res$series_edge)) utils::write.csv(cbind(rep = seq_len(nrow(res$series_edge)), as.data.frame(res$series_edge)), file.path(dir, "series_edge.csv"), row.names = FALSE)
+  if (!is.null(res$series_module)) utils::write.csv(cbind(rep = seq_len(nrow(res$series_module)), as.data.frame(res$series_module)), file.path(dir, "series_module.csv"), row.names = FALSE)
+  if (!is.null(res$series_line)) utils::write.csv(res$series_line, file.path(dir, "supplementary_series_jackknife.csv"), row.names = FALSE)
   invisible(vv)
 }

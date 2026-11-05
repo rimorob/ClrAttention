@@ -7,7 +7,8 @@ test_that("replicate groups come from Repeat, not from #Experiment", {
   skip_if_not(file.exists("data/dream5/synapse/net4/net4_chip_features.tsv"))
   for (n in c(1, 3, 4)) { cf <- read.delim(sprintf("data/dream5/synapse/net%d/net%d_chip_features.tsv", n, n), check.names = FALSE, comment.char = "")
     g <- d5_replicate_groups(cf$Repeat); expect_equal(max(g), c(`1` = 487, `3` = 487, `4` = 321)[[as.character(n)]])
-    expect_gt(length(unique(cf[["#Experiment"]])), 0); expect_false(max(g) == length(unique(cf[["#Experiment"]]))) }
+    expect_gt(length(unique(cf[["#Experiment"]])), 0); expect_false(max(g) == length(unique(cf[["#Experiment"]])))
+    expect_equal(length(unique(cf[["#Experiment"]])), c(`1` = 107, `3` = 107, `4` = 59)[[as.character(n)]]) }
 })
 
 test_that("real data load: dimensions, TFs, no zero-variance genes (label-free)", {
@@ -28,6 +29,22 @@ test_that("SE_B group halves: seed 20263000 + b, half the groups, reproducible, 
   set.seed(20263007L); expect_identical(h1, sort(sample.int(321, 160)))      # the seed rule itself
   nd <- d5_synth_net(30, 4, 20, 2); sub <- d5_subset_groups(nd, h1[h1 <= 20]); expect_true(all(sub$group %in% h1))
   expect_equal(ncol(sub$X), sum(nd$group %in% h1))
+})
+
+test_that("series halves (supplementary jackknife): seed 20264000 + b, floor(n/2) of the series, whole series kept, caller RNG untouched", {
+  h1 <- d5_series_half(59, 7); expect_identical(h1, d5_series_half(59, 7)); expect_false(identical(h1, d5_series_half(59, 8)))
+  expect_length(h1, 29); expect_false(anyDuplicated(h1) > 0)
+  set.seed(20264007L); expect_identical(h1, sort(sample.int(59, 29)))                    # the seed rule itself
+  expect_false(identical(h1, sort(.with_seed(20263007L, sample.int(59, 29)))))           # not the SE_B stream
+  set.seed(5); a <- runif(1); set.seed(5); invisible(d5_series_half(59, 7)); expect_equal(runif(1), a)
+  nd <- d5_synth_net(30, 4, 20, 2); ids <- sort(unique(nd$series)); expect_length(ids, 7)
+  sub <- d5_subset_series(nd, 3L); keep <- ids[d5_series_half(7, 3L)]
+  expect_identical(sort(unique(sub$series)), keep); expect_equal(ncol(sub$X), sum(nd$series %in% keep)); expect_equal(sub$n_series_kept, 3)
+  expect_true(all(table(nd$series)[as.character(keep)] == table(sub$series)[as.character(keep)]))   # every chip of a kept series is kept
+  expect_error(d5_subset_series(list(series = NULL), 1L))
+  skip_if_not(file.exists("data/dream5/synapse/net4/net4_chip_features.tsv"))             # label-free real structure
+  cf <- read.delim("data/dream5/synapse/net4/net4_chip_features.tsv", check.names = FALSE, comment.char = ""); sr <- cf[["#Experiment"]]
+  k <- sort(unique(sr))[d5_series_half(59, 1L)]; expect_length(k, 29); expect_equal(sum(sr %in% k) + sum(!sr %in% k), 536)
 })
 
 test_that("blom_avg is the text of analysis/beeline.R", {
@@ -90,8 +107,25 @@ test_that("refit replicates: reproducible hashes under a fixed seed and thread c
   file.remove(p); r2 <- d5_refit_run(nd, 5L, 2L, out); expect_identical(r1$sha256, r2$sha256)       # recomputation gives the same hashes
   r3 <- d5_refit_run(nd, 6L, 2L, out); expect_false(any(r1$sha256 == r3$sha256))
   m <- d5_refit_manifest(0, out); expect_equal(nrow(m), 8)
+  expect_true("n_groups_kept" %in% names(r1)); expect_identical(names(r1)[1:5], c("net", "rep", "method", "n_groups_kept", "sha256"))   # group sidecar layout unchanged
   # the hash is of the refit scores as a verification of what the truth stage recomputes
   v <- d5_refit_scores(nd, 5L, 2L); expect_identical(vapply(v, d5_hash_scores, ""), setNames(r1$sha256, names(v)))
   # kept half only
   expect_equal(r1$n_groups_kept[1], 15)
+})
+
+test_that("series-level refit replicates: own directory and manifest, seed 20264000 + b, reproducible, resumable, differ from SE_B refits", {
+  nd <- d5_synth_net(40, 5, 30, 4); out <- tempfile()
+  expect_match(d5_refit_dir(4, out, "series"), "net4/refit_series$"); expect_match(d5_refit_dir(4, out), "net4/refit$")
+  expect_match(d5_refit_manifest_file(4, out, "series"), "refit_series/REFIT_SERIES_MANIFEST.tsv$")
+  s1 <- d5_refit_run(nd, 5L, 2L, out, unit = "series"); p <- d5_refit_path(0, 5L, out, "series"); expect_true(file.exists(p))
+  expect_match(p, "refit_series/rep005.sha256.tsv$"); expect_equal(s1$method, D5$refit_methods)
+  expect_true("n_series_kept" %in% names(s1)); expect_equal(unique(s1$n_series_kept), floor(length(unique(nd$series)) / 2))
+  file.remove(p); s2 <- d5_refit_run(nd, 5L, 2L, out, unit = "series"); expect_identical(s1$sha256, s2$sha256)
+  v <- d5_refit_scores(nd, 5L, 2L, unit = "series"); expect_identical(vapply(v, d5_hash_scores, ""), setNames(s1$sha256, names(v)))
+  g1 <- d5_refit_run(nd, 5L, 2L, out); expect_false(any(g1$sha256 == s1$sha256))                 # same b, different unit and stream
+  m <- d5_refit_manifest(0, out, "series"); expect_equal(nrow(m), 4); expect_true(file.exists(d5_refit_manifest_file(0, out, "series")))
+  expect_equal(length(Sys.glob(file.path(d5_refit_dir(0, out), "rep*.sha256.tsv"))), 1)           # group-level directory not touched by the series run
+  # series refit on the replicate-averaged input is not defined
+  nd$series <- NULL; expect_error(d5_refit_scores(nd, 1L, 2L, unit = "series"))
 })

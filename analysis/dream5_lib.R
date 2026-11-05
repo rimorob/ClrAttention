@@ -21,6 +21,7 @@ D5 <- list(
   out = "results/dream5", seed_trees = 20261016L, ntrees = 1000L,
   alpha = 0.5, keff = 10, cap = 50L, t = 9L,
   refit_seed_base = 20263000L, n_refit = 100L,
+  series_seed_base = 20264000L, n_series_refit = 100L,   # supplementary series-level jackknife (net4; design change log 2026-11-05, item 4)
   python = "~/venvs/clr-baselines/bin/python", julia = "~/.juliaup/bin/julia")
 D5$nets <- c(1L, 3L, 4L)
 # method codes; "sym" methods have a gene-gene cache, "tfrow" methods a TF-row (or directed all-gene) cache
@@ -62,8 +63,11 @@ d5_read_net <- function(net, input = c("replicate", "avg"), root = D5$synapse, a
   rownames(X) <- genes
   zv <- apply(X, 1, function(x) diff(range(x)) == 0)
   if (any(zv)) stop(sum(zv), " zero-variance genes (the design specifies 0 in all three networks)")
+  # series: the coarse `#Experiment` index of each chip (107, 107, 59 values); used only by the supplementary series-level
+  # jackknife, never by a method. Not defined for the replicate-averaged input.
+  series <- if (input == "replicate" && "#Experiment" %in% names(cf)) as.integer(cf[["#Experiment"]]) else NULL
   list(net = net, input = input, X = X, genes = genes, tf_ids = tfs, tf_idx = match(tfs, genes),
-       group = grp, n_groups = max(grp), gene_names = gid[[2]], chip_features = cf)
+       group = grp, n_groups = max(grp), series = series, gene_names = gid[[2]], chip_features = cf)
 }
 
 # TF-row matrix (|TF| x G, NA on self pairs) template
@@ -82,6 +86,14 @@ d5_group_half <- function(n_groups, b) .with_seed(D5$refit_seed_base + as.intege
 d5_subset_groups <- function(nd, keep_groups) {
   chips <- which(nd$group %in% keep_groups)
   nd$X <- nd$X[, chips, drop = FALSE]; nd$group <- nd$group[chips]; nd
+}
+# Supplementary series-level jackknife replicate b: keep a random half (floor(n/2)) of the `#Experiment` series, all chips of a
+# kept series; seed 20264000 + b. Returns indices into sort(unique(series)).
+d5_series_half <- function(n_series, b) .with_seed(D5$series_seed_base + as.integer(b), sort(sample.int(n_series, floor(n_series / 2))))
+d5_subset_series <- function(nd, b) {
+  stopifnot(!is.null(nd$series)); ids <- sort(unique(nd$series)); keep <- ids[d5_series_half(length(ids), b)]
+  chips <- which(nd$series %in% keep)
+  nd$X <- nd$X[, chips, drop = FALSE]; nd$group <- nd$group[chips]; nd$series <- nd$series[chips]; nd$n_series_kept <- length(keep); nd
 }
 
 ## ---- symmetric-matrix packing ------------------------------------------------------------------
@@ -245,8 +257,11 @@ d5_run_method <- function(nd, method, input = "replicate", workers = 16L, out = 
 ## ---- experiment-jackknife refits ----------------------------------------------------------------
 # One refit replicate: CLR, attention, |r| and CLR-NS refitted on a random half of the replicate groups (seed
 # 20263000 + b). Returns the upper-triangle vectors. The truth and gene universe are fixed (not touched here).
-d5_refit_scores <- function(nd, b, workers = 16L, methods = D5$refit_methods) {
-  nb <- d5_subset_groups(nd, d5_group_half(nd$n_groups, b)); X <- nb$X
+# unit = "group": SE_B (random half of the replicate groups, seed 20263000 + b); unit = "series": the supplementary
+# series-level jackknife (random half of the `#Experiment` series, seed 20264000 + b).
+d5_refit_scores <- function(nd, b, workers = 16L, methods = D5$refit_methods, unit = c("group", "series")) {
+  unit <- match.arg(unit)
+  nb <- if (unit == "group") d5_subset_groups(nd, d5_group_half(nd$n_groups, b)) else d5_subset_series(nd, b); X <- nb$X
   zv <- apply(X, 1, function(x) diff(range(x)) == 0)
   if (any(zv)) stop("replicate ", b, ": ", sum(zv), " zero-variance genes in the kept half")
   out <- list()
@@ -256,27 +271,30 @@ d5_refit_scores <- function(nd, b, workers = 16L, methods = D5$refit_methods) {
   if ("clrns" %in% methods) out$clrns <- d5_pack(d5_m_clrns(X))
   out[methods]
 }
-d5_refit_dir <- function(net, out = D5$out) file.path(d5_dir(net, out), "refit")
-d5_refit_path <- function(net, b, out = D5$out) file.path(d5_refit_dir(net, out), sprintf("rep%03d.sha256.tsv", b))
+d5_refit_dir <- function(net, out = D5$out, unit = c("group", "series")) file.path(d5_dir(net, out), if (match.arg(unit) == "group") "refit" else "refit_series")
+d5_refit_path <- function(net, b, out = D5$out, unit = "group") file.path(d5_refit_dir(net, out, unit), sprintf("rep%03d.sha256.tsv", b))
+d5_refit_manifest_file <- function(net, out = D5$out, unit = "group") file.path(d5_refit_dir(net, out, unit), if (unit == "group") "REFIT_MANIFEST.tsv" else "REFIT_SERIES_MANIFEST.tsv")
 d5_hash_scores <- function(v) { con <- rawConnection(raw(0), "wb"); on.exit(close(con)); writeBin(v, con, size = 8L); d5_sha256_raw(rawConnectionValue(con)) }
 # one replicate: compute, write the hash sidecar (one row per method). Resumable: an existing sidecar is kept.
 # keep = "none" stores only the hashes (the design's storage ceiling does not allow 100 x 4 gene-gene matrices; the
 # truth stage recomputes the refit and verifies the hashes before scoring). keep = "scores" also stores the vectors.
-d5_refit_run <- function(nd, b, workers = 16L, out = D5$out, methods = D5$refit_methods, keep = c("none", "scores")) {
-  keep <- match.arg(keep); net <- nd$net
-  dir.create(d5_refit_dir(net, out), recursive = TRUE, showWarnings = FALSE)
-  p <- d5_refit_path(net, b, out)
+d5_refit_run <- function(nd, b, workers = 16L, out = D5$out, methods = D5$refit_methods, keep = c("none", "scores"), unit = c("group", "series")) {
+  keep <- match.arg(keep); unit <- match.arg(unit); net <- nd$net
+  dir.create(d5_refit_dir(net, out, unit), recursive = TRUE, showWarnings = FALSE)
+  p <- d5_refit_path(net, b, out, unit)
   if (file.exists(p)) return(invisible(utils::read.delim(p, stringsAsFactors = FALSE, colClasses = c(sha256 = "character"))))
-  t0 <- Sys.time(); sc <- d5_refit_scores(nd, b, workers, methods)
-  rows <- data.frame(net = net, rep = b, method = names(sc), n_groups_kept = length(d5_group_half(nd$n_groups, b)),
+  t0 <- Sys.time(); sc <- d5_refit_scores(nd, b, workers, methods, unit)
+  kept <- if (unit == "group") length(d5_group_half(nd$n_groups, b)) else length(d5_series_half(length(unique(nd$series)), b))
+  rows <- data.frame(net = net, rep = b, method = names(sc), kept = kept,
                      sha256 = vapply(sc, d5_hash_scores, ""), mean = vapply(sc, mean, 0), sd = vapply(sc, stats::sd, 0),
                      threads = workers, seconds = round(as.numeric(difftime(Sys.time(), t0, units = "secs")), 1), stringsAsFactors = FALSE)
-  if (keep == "scores") for (m in names(sc)) d5_write_scores(sc[[m]], file.path(d5_refit_dir(net, out), sprintf("rep%03d_%s.scores", b, m)))
+  names(rows)[names(rows) == "kept"] <- if (unit == "group") "n_groups_kept" else "n_series_kept"
+  if (keep == "scores") for (m in names(sc)) d5_write_scores(sc[[m]], file.path(d5_refit_dir(net, out, unit), sprintf("rep%03d_%s.scores", b, m)))
   tmp <- paste0(p, ".tmp", Sys.getpid()); utils::write.table(rows, tmp, sep = "\t", quote = FALSE, row.names = FALSE); file.rename(tmp, p)
   invisible(rows)
 }
-d5_refit_manifest <- function(net, out = D5$out, file = file.path(d5_refit_dir(net, out), "REFIT_MANIFEST.tsv")) {
-  fs <- sort(Sys.glob(file.path(d5_refit_dir(net, out), "rep*.sha256.tsv")))
+d5_refit_manifest <- function(net, out = D5$out, unit = c("group", "series"), file = d5_refit_manifest_file(net, out, match.arg(unit))) {
+  fs <- sort(Sys.glob(file.path(d5_refit_dir(net, out, match.arg(unit)), "rep*.sha256.tsv")))
   rows <- do.call(rbind, lapply(fs, utils::read.delim, stringsAsFactors = FALSE, colClasses = c(sha256 = "character")))
   tmp <- paste0(file, ".tmp", Sys.getpid()); utils::write.table(rows, tmp, sep = "\t", quote = FALSE, row.names = FALSE); file.rename(tmp, file)
   invisible(rows)
@@ -294,6 +312,6 @@ d5_synth_net <- function(G = 60L, nTF = 8L, n_groups = 40L, seed = 1L, net = 0L)
     for (t in tf_idx) { tg <- sample(setdiff(seq_len(G), t), 6); for (g in tg) X[g, ] <- X[g, ] + 0.9 * sample(c(-1, 1), 1) * X[t, ] }
     rownames(X) <- genes; colnames(X) <- paste0("c", seq_len(n))
     list(net = net, input = "replicate", X = X, genes = genes, tf_ids = genes[tf_idx], tf_idx = tf_idx,
-         group = grp, n_groups = n_groups, gene_names = genes, chip_features = data.frame(Repeat = rep_col))
+         group = grp, n_groups = n_groups, series = (grp - 1L) %/% 3L + 1L, gene_names = genes, chip_features = data.frame(Repeat = rep_col))
   })
 }

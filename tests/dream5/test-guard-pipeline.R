@@ -31,6 +31,18 @@ test_that("guard passes only for a committed, pushed, unchanged manifest whose f
   rr <- data.frame(net = 4L, rep = 1:2, method = c("clr", "attention"))
   expect_silent(d5_truth_guard(M, fx$req, repo, refit_manifest = RM, refit_required = expand.grid(net = 4L, rep = 1:2, method = c("clr", "attention"), stringsAsFactors = FALSE), verbose = FALSE))
   expect_error(d5_truth_guard(M, fx$req, repo, refit_manifest = RM, refit_required = expand.grid(net = 4L, rep = 1:3, method = c("clr", "attention"), stringsAsFactors = FALSE), verbose = FALSE), "lacks")
+  # the supplementary series-level manifest is part of the required set: absent -> refused; incomplete -> refused; then committed -> passes
+  SM <- "results/dream5/net4/refit_series/REFIT_SERIES_MANIFEST.tsv"; sreq <- expand.grid(net = 4L, rep = 1:2, method = c("clr", "attention"), stringsAsFactors = FALSE)
+  expect_error(d5_truth_guard(M, fx$req, repo, refit_manifest = RM, series_manifest = SM, series_required = sreq, verbose = FALSE), "series-level refit manifest not found")
+  dir.create(file.path(repo, dirname(SM)), recursive = TRUE); sf <- sreq; sf$sha256 <- strrep("b", 64)
+  write.table(sf, file.path(repo, SM), sep = "\t", quote = FALSE, row.names = FALSE)
+  expect_error(d5_truth_guard(M, fx$req, repo, refit_manifest = RM, series_manifest = SM, series_required = sreq, verbose = FALSE), "not tracked")
+  git(repo, "add", "-f", SM); git(repo, "commit", "-q", "-m", "series"); expect_error(d5_truth_guard(M, fx$req, repo, refit_manifest = RM, series_manifest = SM, series_required = sreq, verbose = FALSE), "not pushed")
+  git(repo, "push", "-q")
+  expect_silent(d5_truth_guard(M, fx$req, repo, refit_manifest = RM, series_manifest = SM, series_required = sreq, verbose = FALSE))
+  expect_error(d5_truth_guard(M, fx$req, repo, refit_manifest = RM, series_manifest = SM, series_required = expand.grid(net = 4L, rep = 1:3, method = c("clr", "attention"), stringsAsFactors = FALSE), verbose = FALSE), "series-level refit manifest lacks")
+  writeLines(c(readLines(file.path(repo, SM)), ""), file.path(repo, SM))
+  expect_error(d5_truth_guard(M, fx$req, repo, refit_manifest = RM, series_manifest = SM, series_required = sreq, verbose = FALSE), "uncommitted"); git(repo, "checkout", "--", SM)
   # a required file missing from the manifest
   expect_error(d5_truth_guard(M, d5_required(c(1L, 4L), c("clr", "attention", "pidc")), repo, verbose = FALSE), "lacks required")
   # a score file changed after the manifest was committed
@@ -71,6 +83,7 @@ test_that("the truth driver calls both guards before it opens the truth file; no
   src <- paste(readLines("analysis/dream5_truth_run.R"), collapse = "\n")
   gpos <- regexpr("d5_truth_guard\\(", src); dpos <- regexpr("d5_design_guard\\(\\)", src); rpos <- regexpr("read\\.delim\\(opt\\$truth_edges", src)
   expect_true(gpos > 0 && dpos > 0 && rpos > 0 && gpos < rpos && dpos < rpos)
+  expect_match(src, "series_manifest = series_manifest"); expect_match(src, "REFIT_SERIES_MANIFEST.tsv"); expect_match(src, "d5_refit_verify\\(v, b, 4L, series_manifest\\)")
   # label-free files never mention the scoring archive or gold-standard file names
   fs <- c("analysis/dream5_lib.R", "analysis/dream5_score_lib.R", "analysis/dream5_run.R", "analysis/dream5_truth_run.R", "tools/grnboost2.py")
   for (f in fs) expect_false(any(grepl("Evaluation scripts|gold_standard|synapse/scoring|\\.zip", readLines(f))), info = f)
@@ -83,12 +96,32 @@ test_that("pipeline end to end on decoys: guards-free core, jackknives, refit ha
   meths <- c("abs_pearson", "clr", "clrns", "attention", "genie3_tf", "grnboost2_tf")
   for (m in meths) suppressMessages(d5_run_method(nd, m, "replicate", 2L, out))
   for (b in 1:4) d5_refit_run(nd, b, 2L, out)
+  for (b in 1:3) d5_refit_run(nd, b, 2L, out, unit = "series")
+  sman <- d5_refit_manifest(4, out, "series"); sfile <- d5_refit_manifest_file(4, out, "series")
   rman <- d5_refit_manifest(4, out); rfile <- file.path(d5_refit_dir(4, out), "REFIT_MANIFEST.tsv")
   edges <- d5_decoy_truth(40, 300, nd$tf_idx, 91, median_out = 12, sd_log = 0.4)
   sw <- TESTSW(jackknife_cap = "reapply_cap")
   run <- function(...) d5_truth_pipeline(nd, edges, sw, methods = meths, out = out, nrep = 10L, refit_reps = 1:4, cap = 600L,
          refit_scorer = function(b) d5_refit_scores(nd, b, 2L), refit_verify = function(v, b) d5_refit_verify(v, b, 4L, rfile), verbose = FALSE, ...)
   r1 <- run(); r2 <- run()
+  # supplementary series-level jackknife: scored, verified against its own committed hashes, never in the verdict
+  runs <- function(...) run(series_reps = 1:3, series_scorer = function(b) d5_refit_scores(nd, b, 2L, unit = "series"),
+                            series_verify = function(v, b) d5_refit_verify(v, b, 4L, sfile), ...)
+  rs <- runs(); expect_identical(rs$rows, r1$rows); expect_identical(rs$refit_edge, r1$refit_edge); expect_identical(rs$jack_edge, r1$jack_edge)  # verdict inputs unchanged
+  expect_null(r1$series_edge); expect_null(r1$series_line)
+  expect_equal(dim(rs$series_edge), c(3, 4)); expect_equal(dim(rs$series_module), c(3, 4))
+  sl <- rs$series_line; expect_equal(sl$endpoint, c("YE", "YM")); expect_equal(sl$n_rep, c(3, 3))
+  expect_equal(sl$SD_series[1], sd(log2(rs$series_edge[, "attention"] / rs$series_edge[, "clr"])))
+  expect_equal(sl$SD_series[2], sd(log2(rs$series_module[, "attention"] / rs$series_module[, "clr"])))
+  expect_equal(sl$SE_B_group, c(rs$rows$YE$SE_B, rs$rows$YM$SE_B)); expect_true(all(grepl("series-level supplementary", sl$label)) && all(grepl("not used in verdict", sl$label)))
+  dd <- tempfile(); d5_write_results(rs, dd); vcs <- read.csv(file.path(dd, "verdict.csv")); expect_false(any(grepl("series|SD_series", names(vcs))))
+  expect_true(all(file.exists(file.path(dd, c("series_edge.csv", "series_module.csv", "supplementary_series_jackknife.csv")))))
+  expect_equal(read.csv(file.path(dd, "supplementary_series_jackknife.csv"))$SD_series, sl$SD_series)
+  d0 <- tempfile(); d5_write_results(r1, d0); expect_false(file.exists(file.path(d0, "supplementary_series_jackknife.csv")))
+  expect_identical(read.csv(file.path(d0, "verdict.csv")), vcs)                                   # verdict.csv byte-for-byte the same content with or without the series replicates
+  badS <- read.delim(sfile, colClasses = c(sha256 = "character")); badS$sha256[1] <- strrep("0", 64); sbf <- tempfile(); write.table(badS, sbf, sep = "\t", quote = FALSE, row.names = FALSE)
+  expect_error(run(series_reps = 1L, series_scorer = function(b) d5_refit_scores(nd, b, 2L, unit = "series"), series_verify = function(v, b) d5_refit_verify(v, b, 4L, sbf)), "differs from the committed hash")
+  expect_error(run(series_reps = 4L, series_scorer = function(b) d5_refit_scores(nd, b, 2L, unit = "series"), series_verify = function(v, b) d5_refit_verify(v, b, 4L, sfile)), "no hash")
   expect_identical(r1$rows, r2$rows); expect_identical(r1$jack_edge, r2$jack_edge); expect_identical(r1$refit_edge, r2$refit_edge)       # fixed seeds
   expect_true(r1$gate$evaluable)
   expect_equal(dim(r1$jack_edge), c(10, 6)); expect_equal(dim(r1$refit_edge), c(4, 4)); expect_equal(dim(r1$jack_module), c(10, 4)); expect_equal(dim(r1$refit_module), c(4, 4))

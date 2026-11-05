@@ -7,5 +7,6 @@ req$have <- file.exists(mapply(d5_cache_path, req$net, req$method, req$input)) &
 req$kind <- ifelse(req$method %in% D5$primary, "required", "descriptive")
 print(reshape(req[, c("net", "method", "have")], idvar = "method", timevar = "net", direction = "wide"), row.names = FALSE)
 nrep <- length(Sys.glob(file.path(d5_refit_dir(4L), "rep*.sha256.tsv"))); cat(sprintf("net4 refit replicates with hashes: %d / %d\n", nrep, D5$n_refit))
+nser <- length(Sys.glob(file.path(d5_refit_dir(4L, unit = "series"), "rep*.sha256.tsv"))); cat(sprintf("net4 series-level (supplementary) refit replicates with hashes: %d / %d\n", nser, D5$n_series_refit))
 cat("required files missing:", sum(!req$have & req$kind == "required"), "\n")
 system("du -sh results/dream5")

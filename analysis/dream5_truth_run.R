@@ -18,7 +18,7 @@
 args <- commandArgs(trailingOnly = TRUE)
 opt <- list(net = "", truth_edges = "", out_dir = "", ties_at_cap = NA_character_, ties_in_list = NA_character_, tftf = NA_character_,
             universe = NA_character_, universe_tf = "", universe_gene = "", cap_order = NA_character_, jackknife_cap = NA_character_,
-            structure_only = 0L, workers = 16L, nrep = 200L, cap = 100000L, refit_n = 100L)
+            structure_only = 0L, workers = 16L, nrep = 200L, cap = 100000L, refit_n = 100L, series_n = 100L)
 i <- 1L
 while (i <= length(args)) {
   key <- sub("^--", "", args[i]); if (!key %in% names(opt)) stop("unknown argument: ", args[i])
@@ -30,8 +30,11 @@ net <- as.integer(opt$net); stopifnot(net %in% D5$nets, nzchar(opt$truth_edges),
 ## guards first: nothing below runs, and the truth file is not opened, unless they pass
 d5_design_guard()
 refit_manifest <- file.path(d5_refit_dir(4L), "REFIT_MANIFEST.tsv")
+series_manifest <- file.path(d5_refit_dir(4L, unit = "series"), "REFIT_SERIES_MANIFEST.tsv")   # supplementary series-level jackknife
 d5_truth_guard(refit_manifest = refit_manifest,
-               refit_required = expand.grid(net = 4L, rep = seq_len(opt$refit_n), method = D5$refit_methods, stringsAsFactors = FALSE))
+               refit_required = expand.grid(net = 4L, rep = seq_len(opt$refit_n), method = D5$refit_methods, stringsAsFactors = FALSE),
+               series_manifest = series_manifest,
+               series_required = expand.grid(net = 4L, rep = seq_len(opt$series_n), method = D5$refit_methods, stringsAsFactors = FALSE))
 
 nd <- d5_read_net(net)
 tab <- utils::read.delim(opt$truth_edges, header = FALSE, stringsAsFactors = FALSE)
@@ -45,7 +48,12 @@ sw <- d5_edge_switches(ties_at_cap = opt$ties_at_cap, ties_in_list = opt$ties_in
 universe <- if (nzchar(opt$universe_tf)) list(tf = match(readLines(opt$universe_tf), nd$tf_ids), gene = match(readLines(opt$universe_gene), nd$genes)) else NULL
 scorer <- if (net == 4L) function(b) d5_refit_scores(nd, b, opt$workers) else NULL
 verify <- if (net == 4L) function(v, b) d5_refit_verify(v, b, 4L, refit_manifest) else NULL
+sscorer <- if (net == 4L) function(b) d5_refit_scores(nd, b, opt$workers, unit = "series") else NULL
+sverify <- if (net == 4L) function(v, b) d5_refit_verify(v, b, 4L, series_manifest) else NULL
 res <- d5_truth_pipeline(nd, edges, sw, nrep = opt$nrep, refit_reps = if (net == 4L) seq_len(opt$refit_n) else integer(0),
-                         refit_scorer = scorer, refit_verify = verify, universe = universe, cap = opt$cap)
+                         refit_scorer = scorer, refit_verify = verify,
+                         series_reps = if (net == 4L) seq_len(opt$series_n) else integer(0), series_scorer = sscorer, series_verify = sverify,
+                         universe = universe, cap = opt$cap)
 d5_write_results(res, opt$out_dir)
 print(utils::read.csv(file.path(opt$out_dir, "verdict.csv")))
+if (!is.null(res$series_line)) { cat("\nSUPPLEMENTARY (series-level jackknife; descriptive; not used in verdict.csv):\n"); print(res$series_line[, c("net", "endpoint", "contrast", "n_rep", "SD_series", "SE_B_group")], row.names = FALSE) }

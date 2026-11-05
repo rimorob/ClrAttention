@@ -126,12 +126,36 @@ test_that("module scorer: regulons, pairs and evaluability gate on decoy truths"
   # limits: >= 10 targets gives a subset
   b10 <- d5_module_setup(e, nd, 10L, 500L); expect_lte(b10$n_regulons, b$n_regulons)
   # gate
-  g <- d5_ym_gate(e, nd); expect_equal(g$n_regulons_ge5, length(keep)); expect_equal(g$evaluable, length(keep) >= 20 && g$n_pos_pairs >= 1000)
+  g <- d5_ym_gate(e, nd); expect_equal(g$n_regulons_5_500, length(keep)); expect_equal(g$n_regulons_ge5, length(keep))   # no regulon exceeds 500 here
+  expect_equal(g$evaluable, length(keep) >= 20 && g$n_pos_pairs >= 1000)
   e2 <- d5_decoy_truth(10, G, nd$tf_idx, 3, median_out = 2, sd_log = 0.1); expect_false(d5_ym_gate(e2, nd)$evaluable)
   # a case that is evaluable
   nd2 <- d5_synth_net(300, 40, 20, 6); e3 <- d5_decoy_truth(40, 300, nd2$tf_idx, 9, median_out = 12, sd_log = 0.4)
   g3 <- d5_ym_gate(e3, nd2); expect_gte(g3$n_regulons_ge5, 20); expect_true(g3$evaluable)
   sc <- d5_structure_counts(e3, nd2); expect_equal(sc$n_edges, nrow(e3))
+})
+
+test_that("Y-M gate: both counts on the scored 5-500 regulon set; the unrestricted count is an extra, non-deciding field (change log 2026-11-05)", {
+  nd <- d5_synth_net(1300, 60, 20, 8); G <- 1300; set.seed(3)
+  targets <- function(a, n) sample(setdiff(seq_len(G), nd$tf_idx[a]), n)
+  mk <- function(sizes) do.call(rbind, lapply(seq_along(sizes), function(a) data.frame(tf = a, gene = targets(a, sizes[a]))))
+  # (a) the unrestricted count passes (25 regulons with >= 5 targets) but only 15 regulons are in 5-500 -> NOT evaluable
+  e <- mk(c(rep(30, 15), rep(600, 10))); g <- d5_ym_gate(e, nd)
+  expect_equal(g$n_regulons_ge5, 25L); expect_equal(g$n_regulons_5_500, 15L)
+  expect_gte(g$n_pos_pairs, 1000); expect_false(g$evaluable)                      # the old (unrestricted) rule would have passed
+  expect_true(g$n_regulons_ge5 >= 20 && g$n_pos_pairs >= 1000)
+  # (b) 20 regulons in 5-500 (so the regulon count passes) but < 1,000 positive pairs there, while the two huge regulons make
+  # the unrestricted pair count large: NOT evaluable; the unrestricted pair count is reported but does not decide
+  e <- mk(c(rep(5, 20), rep(600, 2))); g <- d5_ym_gate(e, nd)
+  expect_equal(g$n_regulons_5_500, 20L); expect_lt(g$n_pos_pairs, 1000); expect_gt(g$n_pos_pairs_ge5_noupper, 1000); expect_false(g$evaluable)
+  # (c) both counts pass on the 5-500 set -> evaluable, whatever sits above 500
+  e <- mk(c(rep(30, 20), 600)); g <- d5_ym_gate(e, nd)
+  expect_equal(g$n_regulons_5_500, 20L); expect_gte(g$n_pos_pairs, 1000); expect_true(g$evaluable); expect_equal(g$n_regulons_ge5, 21L)
+  # (d) exactly at the boundary: 19 regulons of 5-500 plus one of 600 is not evaluable (unrestricted count 20); 20 are
+  e <- mk(c(rep(30, 19), 600)); g <- d5_ym_gate(e, nd); expect_equal(g$n_regulons_ge5, 20L); expect_false(g$evaluable)
+  # the gate columns are all reported and the structure counts carry them
+  expect_true(all(c("n_regulons_5_500", "n_pos_pairs", "n_regulons_ge5", "n_pos_pairs_ge5_noupper", "evaluable") %in% names(g)))
+  expect_true(all(c("n_regulons_ge5", "evaluable") %in% names(d5_structure_counts(e, nd))))
 })
 
 test_that("truth jackknife: design seeds, halves, shared across methods, reproducible, caller RNG untouched", {
