@@ -1,0 +1,41 @@
+DREAM5 refit hashes: provenance (written 2026-11-05 for the step-6 review item S3; label-free, no truth read)
+
+What the hashes are
+  results/dream5/net4/refit/REFIT_MANIFEST.tsv         group-level SE_B refits, b = 1..100, seed 20263000 + b (400 rows)
+  results/dream5/net4/refit_series/REFIT_SERIES_MANIFEST.tsv   supplementary series-level refits, b = 1..100, seed 20264000 + b (400 rows)
+  Each row is the SHA-256 of the packed upper-triangle score vector (8-byte doubles) of one method on one refit replicate.
+
+Code that produced them (git commit on branch accuracy-review)
+  Group-level refits (jobs 2100-2103, started 2026-11-04 18:43 -0800, last finished 19:44):
+      analysis/dream5_lib.R and dream5_run.R as committed at a393c5a (2026-11-04 18:01); HEAD at the time was f22e83e
+      (18:13), which did not change them. The series-level additions to dream5_lib.R (commit 5e70bda) leave the
+      group-level code path (d5_group_half, d5_subset_groups, d5_refit_scores for unit = "group") unchanged.
+      Inferred from commit times and job logs; no commit id was recorded by the jobs themselves.
+  Series-level refits (jobs 2110-2113, started 2026-11-05 09:25:44, last finished 10:00):
+      commit 5e70bda (2026-11-05 09:24:23), started 80 s after that commit; the working tree was not checked to be clean
+      at launch (not recorded). The later commits (c832a9b, cb9a29f, 50cad17) change the scoring/truth code only,
+      not analysis/dream5_lib.R.
+  clr package: packageVersion("clr") = 0.1.0, installed from this repository and built 2026-10-16 06:52 UTC
+      (R 4.6.1; the library is /home/boris/R/x86_64-pc-linux-gnu-library/4.6/clr). The package source's last functional
+      change before that is 017e02b (2026-10-15, packed MI -> CLR); the later R/ change 11ec62c (2026-11-03,
+      R/calibrate.R, a one-line wording fix) post-dates the install and is not in the installed build.
+      UNCERTAINTY: the installed build was not tied to a commit hash at install time; 017e02b is inferred.
+
+Environment (the machine that produced and re-checked them)
+  Machine: crayon (Ubuntu 24.04.5 LTS), Intel Xeon E5-2690 v4, 56 logical CPUs, 125 GB RAM
+  R: R version 4.6.1 (2026-06-24); RNG Mersenne-Twister / Inversion / Rejection
+  BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3
+  LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.26.so (LAPACK 3.12.0)
+  Other packages: Matrix 1.7-6, Rcpp 1.1.2, foreach 1.5.2, iterators 1.0.14 (as loaded)
+
+Thread settings used by the refit jobs (jobs_pc/ scripts are not versioned; copied here)
+  export OMP_NUM_THREADS=8 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4
+  Rscript analysis/dream5_run.R --net 4 [--refit_unit series] --refit_from A --refit_to B --workers 8
+  (the sidecar column `threads` is 8 for all 800 rows; scheduler declaration: mem 12 GB, cpus 8)
+  The truth driver default is --workers 16.
+
+Cross-check at a different worker count (job 2300_d5_s3_refit_repro16, 2026-11-05 10:22-10:25, scheduler, no scoring)
+  net4 group-level refit b = 7 and series-level refit b = 7 recomputed with 16 workers (OMP_NUM_THREADS=16,
+  OPENBLAS_NUM_THREADS=4) with the committed code at cb9a29f, compared with the manifest and the sidecar through
+  d5_refit_verify: all 4 methods of both replicates are bit-identical (8 of 8 SHA-256 values match). Earlier,
+  job 2205 had matched group replicate 1 at 4 workers. No manifest or sidecar was altered.
