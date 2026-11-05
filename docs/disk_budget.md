@@ -37,6 +37,9 @@ Total counted: about 22 GB of 50 GB.
 | `results/dream5` (planned) | expected 2-4 GB, ceiling 5 GB for all of DREAM5 | method score caches (PIDC edge lists about 1.5 GB are the largest), refit-replicate tables. Counted for DREAM5 even though under `results/` | **Yes** for PIDC edge lists and score caches after the final numbers are archived; keep the committed tables |
 | `~/venvs/dream5` | 0.07 GB | `synapseclient` 4.14 only (downloads; holds no credentials) | **Yes**, rebuildable |
 
+| `results/dream5/net{1,3,4}/*.scores` (step 5, 4 Nov 2026) | measured at the time of writing: 1.0 GB (expression exports 13 + 65 + 80 MB, symmetric score caches 11 / 82 / 142 MB per method on net1 / net3 / net4, TF-row caches 2-16 MB, GRNBoost2 edge lists 9-70 MB); expected final about 2.5-3.5 GB with PIDC (edge lists 0.07 + 0.65 + 1.1 GB as tsv, then 11 / 82 / 142 MB caches) and the all-genes tree runs (GENIE3 full matrices 22 / 163 / 283 MB, GRNBoost2 edge lists) | method score caches (upper-triangle doubles, SHA-256 sidecars; manifests `results/dream5/SCORE_MANIFEST.tsv` and `results/dream5/net4/refit/REFIT_MANIFEST.tsv` are the committed record). Counted for DREAM5 | **Yes** after the final numbers are archived: PIDC edge lists (gzip them after conversion), expression exports, GRNBoost2 edge lists; keep the committed manifests |
+| `results/dream5/net4/refit` | < 0.01 GB | per-replicate SHA-256 sidecars of the 100 experiment-jackknife refits (hashes only: storing 100 x 4 gene-gene matrices would take 57 GB; the truth stage recomputes the refits and checks them against these hashes) | Keep (small) |
+
 DREAM5 projected total: well under 5 GB, so the counted total stays at about 22 to 27 GB of 50 GB.
 
 ## scFM fine-tuning
