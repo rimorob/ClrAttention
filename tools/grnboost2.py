@@ -9,7 +9,7 @@ Input: genes x samples TSV (first column = gene names).
 --regulators <file> (DREAM5 design, 4 Nov 2026): candidate regulators = the gene names listed in <file>
   (one per line); every gene is still a target, and a target that is itself in the list is removed from
   its own regulators exactly as before (arboreto clean()). With the list equal to all genes, in the same
-  order as the input, the output is identical to the run without the option (tests/dream5/test_grnboost2_regulators.sh).
+  order as the input, the output is identical to the run without the option (tests/dream5/test_grnboost2_regulators.py).
 
 --early_stop (decision of 27 Oct 2026, docs/plans/grnboost2_diagnostic.md):
   legacy   (default) arboreto's stopping rule with the out-of-bag improvement it was
