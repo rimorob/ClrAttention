@@ -105,6 +105,7 @@ test_that("pipeline end to end on decoys: guards-free core, jackknives, refit ha
   expect_true(all(file.exists(file.path(d, c("point_estimates.csv", "jack_edge.csv", "jack_module.csv", "refit_edge.csv", "refit_module.csv", "ym_gate.csv")))))
   # point estimates: |r| and the others finite; module AUPR above the base rate for CLR on planted structure is not asserted (decoy truth)
   expect_true(all(is.finite(r1$point$aupr)))
+  ym <- r1$point[r1$point$endpoint == "YM", ]; expect_true(all(is.finite(ym$aupr_min10))); expect_true(all(is.finite(ym$aupr_sens))); expect_true(all(ym$aupr_sens >= ym$aupr - 1e-12))
   # tampered hash in the refit manifest: the truth stage refuses to score
   bad <- read.delim(rfile, colClasses = c(sha256 = "character")); bad$sha256[1] <- strrep("0", 64); bf <- tempfile(); write.table(bad, bf, sep = "\t", quote = FALSE, row.names = FALSE)
   expect_error(d5_truth_pipeline(nd, edges, sw, methods = meths, out = out, nrep = 3L, refit_reps = 1L, cap = 600L, refit_scorer = function(b) d5_refit_scores(nd, b, 2L),

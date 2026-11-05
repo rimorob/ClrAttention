@@ -206,7 +206,7 @@ d5_edge_matrix_sym <- function(v, nd) {
   M <- matrix(v[idx], nTF, G); M[d5_selfmask(nd)] <- NA; M
 }
 # score of a method as the object the scorers need: list(edge = |TF| x G matrix | NULL, pair = packed vector | NULL)
-d5_method_scores <- function(net, method, nd, input = "replicate", out = D5$out) {
+d5_method_scores <- function(net, method, nd, input = nd$input, out = D5$out) {
   x <- d5_read_scores(d5_cache_path(net, method, input, out)); kind <- D5$methods[[method]]; G <- length(nd$genes)
   switch(kind,
     sym = list(edge = d5_edge_matrix_sym(x, nd), pair = x),
@@ -338,11 +338,12 @@ d5_truth_pipeline <- function(nd, edges, sw, methods = D5$primary, out = D5$out,
   # ---- point estimates
   pe <- do.call(rbind, lapply(methods, function(m) {
     ye <- d5_edge_metrics(Ms[[m]], truth, tf_idx, sw, cap, universe = universe)
-    data.frame(net = net, method = m, endpoint = "YE", aupr = ye[["aupr"]], auroc = ye[["auroc"]], n_pos = ye[["n_pos"]], N = ye[["N"]], aupr_sens = NA_real_)
+    data.frame(net = net, method = m, endpoint = "YE", aupr = ye[["aupr"]], auroc = ye[["auroc"]], n_pos = ye[["n_pos"]], N = ye[["N"]], aupr_sens = NA_real_, aupr_min10 = NA_real_)
   }))
   if (nrow(gate) && gate$evaluable) pe <- rbind(pe, do.call(rbind, lapply(names(vs), function(m)
     data.frame(net = net, method = m, endpoint = "YM", aupr = d5_module_aupr(vs[[m]], bench), auroc = NA_real_, n_pos = bench$n_pos,
-               N = bench$n_pairs, aupr_sens = d5_module_aupr(vs[[m]], bench, expected_ties = TRUE)))))
+               N = bench$n_pairs, aupr_sens = d5_module_aupr(vs[[m]], bench, expected_ties = TRUE),
+               aupr_min10 = if (bench10$n_pos > 0) d5_module_aupr(vs[[m]], bench10) else NA_real_))))
   # ---- SE_J
   say("truth jackknife, ", nrep, " replicates")
   jE <- d5_jack_edge(Ms, truth, tf_idx, sw, seeds[["YE"]], nrep, cap, universe)
