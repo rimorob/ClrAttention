@@ -11,6 +11,8 @@ make_repo <- function() {
 }
 guard_fixture <- function() {
   repo <- make_repo(); req <- d5_required(c(1L, 4L), c("clr", "attention"))
+  dir.create(file.path(repo, "analysis"))
+  for (f in D5$code_files) writeLines(paste("# code", f), file.path(repo, f))
   files <- character(0)
   for (k in seq_len(nrow(req))) { f <- sprintf("results/dream5/net%d/%s__replicate.scores", req$net[k], req$method[k]); writeLines(paste("x", k), file.path(repo, f)); files <- c(files, f) }
   m <- data.frame(net = req$net, method = req$method, input = req$input, file = files, bytes = 1,
@@ -26,7 +28,7 @@ M <- "results/dream5/SCORE_MANIFEST.tsv"; RM <- "results/dream5/net4/refit/REFIT
 test_that("guard passes only for a committed, pushed, unchanged manifest whose files still match", {
   fx <- guard_fixture(); repo <- fx$repo
   expect_error(d5_truth_guard(M, fx$req, repo, verbose = FALSE), "not tracked")                  # untracked
-  commit_push(repo, c(M, RM, list.files(file.path(repo, "results"), recursive = TRUE, full.names = FALSE) |> (\(x) file.path("results", x))()))
+  commit_push(repo, c(M, RM, D5$code_files, list.files(file.path(repo, "results"), recursive = TRUE, full.names = FALSE) |> (\(x) file.path("results", x))()))
   expect_silent(d5_truth_guard(M, fx$req, repo, verbose = FALSE))
   rr <- data.frame(net = 4L, rep = 1:2, method = c("clr", "attention"))
   expect_silent(d5_truth_guard(M, fx$req, repo, refit_manifest = RM, refit_required = expand.grid(net = 4L, rep = 1:2, method = c("clr", "attention"), stringsAsFactors = FALSE), verbose = FALSE))
@@ -67,7 +69,7 @@ test_that("guard passes only for a committed, pushed, unchanged manifest whose f
 
 test_that("guard refuses without an upstream branch, and the design guard needs FIXED + committed", {
   fx <- guard_fixture(); repo <- fx$repo
-  git(repo, "add", "-f", "results"); git(repo, "commit", "-q", "-m", "x")          # committed, never pushed, no upstream
+  git(repo, "add", "-f", "results", "analysis"); git(repo, "commit", "-q", "-m", "x")          # committed, never pushed, no upstream
   expect_error(d5_truth_guard(M, fx$req, repo, verbose = FALSE), "no upstream")
   dir.create(file.path(repo, "docs/plans"), recursive = TRUE); dir.create(file.path(repo, "docs/dream5_selections"), recursive = TRUE)
   writeLines(c("# t", "", "Status: DRAFT"), file.path(repo, "docs/plans/dream5_design.md")); writeLines("x", file.path(repo, "docs/dream5_selections/download_log.tsv"))
@@ -79,14 +81,43 @@ test_that("guard refuses without an upstream branch, and the design guard needs 
   expect_true(d5_design_guard(repo = repo))
 })
 
-test_that("the truth driver calls both guards before it opens the truth file; no code reads the sealed archive", {
+test_that("the truth driver validates options, then calls both guards, before it opens the truth file; no code reads the sealed archive", {
   src <- paste(readLines("analysis/dream5_truth_run.R"), collapse = "\n")
-  gpos <- regexpr("d5_truth_guard\\(", src); dpos <- regexpr("d5_design_guard\\(\\)", src); rpos <- regexpr("read\\.delim\\(opt\\$truth_edges", src)
-  expect_true(gpos > 0 && dpos > 0 && rpos > 0 && gpos < rpos && dpos < rpos)
-  expect_match(src, "series_manifest = series_manifest"); expect_match(src, "REFIT_SERIES_MANIFEST.tsv"); expect_match(src, "d5_refit_verify\\(v, b, 4L, series_manifest\\)")
+  opos <- regexpr("d5_truth_options\\(", src); gpos <- regexpr("d5_truth_guard,", src); dpos <- regexpr("d5_design_guard\\(\\)", src); rpos <- regexpr("read\\.delim\\(opt\\$truth_edges", src)
+  expect_true(opos > 0 && gpos > 0 && dpos > 0 && rpos > 0 && opos < dpos && opos < gpos && gpos < rpos && dpos < rpos)
+  expect_true(regexpr("structure_counts.csv", src) > rpos)                          # no structure count before the options, the guards and the truth are in
+  wpos <- regexpr("d5_write_results\\(res", src); spos <- regexpr("d5_run_series_supplementary\\(", src)
+  expect_true(wpos > 0 && spos > wpos)                                                # the series part runs after the primary outputs are written
+  expect_false(grepl("series_reps = ", src))                                          # and is not part of the primary pipeline call
+  expect_match(src, "REFIT_SERIES_MANIFEST.tsv"); expect_match(src, "d5_refit_verify\\(v, b, 4L, series_manifest\\)")
   # label-free files never mention the scoring archive or gold-standard file names
   fs <- c("analysis/dream5_lib.R", "analysis/dream5_score_lib.R", "analysis/dream5_run.R", "analysis/dream5_truth_run.R", "tools/grnboost2.py")
   for (f in fs) expect_false(any(grepl("Evaluation scripts|gold_standard|synapse/scoring|\\.zip", readLines(f))), info = f)
+})
+
+test_that("guard also covers the scoring code files, and series_n = 0 does not demand the series manifest (N1, S4)", {
+  fx <- guard_fixture(); repo <- fx$repo; rr <- expand.grid(net = 4L, rep = 1:2, method = c("clr", "attention"), stringsAsFactors = FALSE)
+  expect_true(all(c("analysis/dream5_lib.R", "analysis/dream5_score_lib.R", "analysis/dream5_truth_run.R") %in% D5$code_files))
+  commit_push(repo, c(M, RM, D5$code_files, "results/dream5/net1/clr__replicate.scores", "results/dream5/net1/attention__replicate.scores",
+                      "results/dream5/net4/clr__replicate.scores", "results/dream5/net4/attention__replicate.scores"))
+  expect_silent(d5_truth_guard(M, fx$req, repo, verbose = FALSE))
+  for (cf in c("analysis/dream5_lib.R", "analysis/dream5_score_lib.R", "analysis/dream5_truth_run.R")) {
+    f <- file.path(repo, cf); old <- readLines(f)
+    writeLines(c(old, "# edited"), f)                                                                  # uncommitted edit
+    expect_error(d5_truth_guard(M, fx$req, repo, verbose = FALSE), "scoring code file has uncommitted changes", info = cf)
+    git(repo, "commit", "-q", "-am", "edit"); expect_error(d5_truth_guard(M, fx$req, repo, verbose = FALSE), "scoring code file has commits that are not pushed", info = cf)
+    git(repo, "push", "-q"); expect_silent(d5_truth_guard(M, fx$req, repo, verbose = FALSE))
+    file.rename(f, paste0(f, ".bak")); expect_error(d5_truth_guard(M, fx$req, repo, verbose = FALSE), "scoring code file not found", info = cf); file.rename(paste0(f, ".bak"), f)
+  }
+  untracked <- file.path(repo, "analysis/dream5_truth_run.R"); git(repo, "rm", "-q", "--cached", "analysis/dream5_truth_run.R"); git(repo, "commit", "-q", "-m", "untrack"); git(repo, "push", "-q")
+  expect_error(d5_truth_guard(M, fx$req, repo, verbose = FALSE), "scoring code file is not tracked")
+  git(repo, "add", "analysis/dream5_truth_run.R"); git(repo, "commit", "-q", "-m", "retrack"); git(repo, "push", "-q")
+  # series_n: 0 -> no series manifest in the guard arguments; > 0 -> demanded (and absent here, so refused)
+  a0 <- d5_truth_guard_args(2L, 0L); expect_null(a0$series_manifest); expect_null(a0$series_required); expect_equal(nrow(a0$refit_required), 8)
+  a2 <- d5_truth_guard_args(2L, 2L); expect_match(a2$series_manifest, "REFIT_SERIES_MANIFEST.tsv"); expect_equal(nrow(a2$series_required), 8)
+  a0$refit_required <- a2$refit_required <- rr                      # the fixture's refit manifest holds clr and attention only
+  expect_silent(do.call(d5_truth_guard, c(list(manifest = M, required = fx$req, repo = repo, verbose = FALSE), a0)))
+  expect_error(do.call(d5_truth_guard, c(list(manifest = M, required = fx$req, repo = repo, verbose = FALSE), a2)), "series-level refit manifest not found")
 })
 
 ## ---- the truth pipeline on a synthetic network with decoy truths ----------------------------------------------
@@ -122,6 +153,24 @@ test_that("pipeline end to end on decoys: guards-free core, jackknives, refit ha
   badS <- read.delim(sfile, colClasses = c(sha256 = "character")); badS$sha256[1] <- strrep("0", 64); sbf <- tempfile(); write.table(badS, sbf, sep = "\t", quote = FALSE, row.names = FALSE)
   expect_error(run(series_reps = 1L, series_scorer = function(b) d5_refit_scores(nd, b, 2L, unit = "series"), series_verify = function(v, b) d5_refit_verify(v, b, 4L, sbf)), "differs from the committed hash")
   expect_error(run(series_reps = 4L, series_scorer = function(b) d5_refit_scores(nd, b, 2L, unit = "series"), series_verify = function(v, b) d5_refit_verify(v, b, 4L, sfile)), "no hash")
+  # S4: the driver-style flow: primary outputs first, then the supplementary part inside tryCatch; a failure cannot touch verdict.csv
+  dS <- tempfile(); d5_write_results(r1, dS); v_before <- readLines(file.path(dS, "verdict.csv"))
+  ok <- d5_run_series_supplementary(r1, dS, nd, edges, sw, 1:3, series_scorer = function(b) d5_refit_scores(nd, b, 2L, unit = "series"),
+                                    series_verify = function(v, b) d5_refit_verify(v, b, 4L, sfile), cap = 600L)
+  expect_true(ok$ok); expect_true(file.exists(file.path(dS, "supplementary_series_jackknife.csv"))); expect_false(file.exists(file.path(dS, "SUPPLEMENTARY_SERIES_FAILED.txt")))
+  expect_identical(ok$sup$series_line$SD_series, rs$series_line$SD_series)
+  expect_identical(readLines(file.path(dS, "verdict.csv")), v_before)
+  dF <- tempfile(); d5_write_results(r1, dF); v_before <- readLines(file.path(dF, "verdict.csv"))
+  msgs <- character(0)
+  fail <- withCallingHandlers(d5_run_series_supplementary(r1, dF, nd, edges, sw, 1L, series_scorer = function(b) d5_refit_scores(nd, b, 2L, unit = "series"),
+                                    series_verify = function(v, b) d5_refit_verify(v, b, 4L, sbf), cap = 600L),
+                              message = function(m) { msgs <<- c(msgs, conditionMessage(m)); invokeRestart("muffleMessage") })
+  expect_true(any(grepl("SUPPLEMENTARY series-level jackknife FAILED", msgs)))
+  expect_false(fail$ok); expect_match(fail$error, "differs from the committed hash")
+  expect_match(readLines(file.path(dF, "SUPPLEMENTARY_SERIES_FAILED.txt")), "primary verdict in verdict.csv is unaffected")
+  expect_identical(readLines(file.path(dF, "verdict.csv")), v_before); expect_false(file.exists(file.path(dF, "supplementary_series_jackknife.csv")))
+  # a scorer that errors outright is caught the same way
+  fail2 <- suppressMessages(d5_run_series_supplementary(r1, dF, nd, edges, sw, 1L, series_scorer = function(b) stop("boom"), cap = 600L)); expect_false(fail2$ok); expect_match(fail2$error, "boom")
   expect_identical(r1$rows, r2$rows); expect_identical(r1$jack_edge, r2$jack_edge); expect_identical(r1$refit_edge, r2$refit_edge)       # fixed seeds
   expect_true(r1$gate$evaluable)
   expect_equal(dim(r1$jack_edge), c(10, 6)); expect_equal(dim(r1$refit_edge), c(4, 4)); expect_equal(dim(r1$jack_module), c(10, 4)); expect_equal(dim(r1$refit_module), c(4, 4))
@@ -148,15 +197,34 @@ test_that("pipeline end to end on decoys: guards-free core, jackknives, refit ha
   for (m in c("clr", "attention")) file.copy(d5_cache_path(4, m, "replicate", out), { dir.create(d5_dir(3, out), showWarnings = FALSE); d5_cache_path(3, m, "replicate", out) })
   r3 <- d5_truth_pipeline(nd3, edges, sw, methods = c("clr", "attention"), out = out, nrep = 5L, cap = 600L, verbose = FALSE)
   expect_match(r3$rows$YE$verdict, "descriptive"); expect_true(is.na(r3$rows$YE$SE_B)); expect_true(is.finite(r3$rows$YE$SE_J))
+  # N2: net4 with an SE that cannot be computed (one refit replicate -> SE_B is NA): the row reads Inconclusive, with the reason, not 'descriptive'
+  r5 <- d5_truth_pipeline(nd, edges, sw, methods = meths, out = out, nrep = 10L, refit_reps = 1L, cap = 600L,
+                          refit_scorer = function(b) d5_refit_scores(nd, b, 2L), refit_verify = function(v, b) d5_refit_verify(v, b, 4L, rfile), verbose = FALSE)
+  for (ep in c("YE", "YM")) { rw <- r5$rows[[ep]]; expect_true(is.na(rw$SE)); expect_equal(rw$verdict, "Inconclusive"); expect_match(rw$verdict_note, "Inconclusive because SE is not finite"); expect_true(is.na(rw$p_sup)) }
+  d5 <- tempfile(); d5_write_results(r5, d5); v5 <- read.csv(file.path(d5, "verdict.csv")); expect_equal(v5$verdict, c("Inconclusive", "Inconclusive")); expect_false(any(grepl("descriptive", v5$verdict)))
+  expect_true(all(is.na(r1$rows$YE$verdict_note)) && all(is.na(r3$rows$YE$verdict_note)))      # finite SE: no note; net 3 stays descriptive
   # Y-M not evaluable: the row says so and nothing is scored for it
   e_small <- d5_decoy_truth(40, 300, nd$tf_idx, 5, median_out = 2, sd_log = 0.1)
   r4 <- d5_truth_pipeline(nd, e_small, sw, methods = meths, out = out, nrep = 3L, cap = 600L, verbose = FALSE)
   expect_equal(r4$rows$YM$verdict, "not evaluable"); expect_null(r4$jack_module); expect_false("YM" %in% r4$point$endpoint)
 })
 
+SWARGS <- c("--ties_at_cap", "keep_tied", "--ties_in_list", "end_of_block", "--tftf", "keep_both", "--universe", "all", "--jackknife_cap", "reapply_cap")
 test_that("the truth driver refuses to run in the current repository state when a guard fails (nonexistent truth path, never read)", {
-  out <- suppressWarnings(system2("Rscript", c("analysis/dream5_truth_run.R", "--net", "4", "--truth_edges", "/nonexistent/never_read.tsv", "--out_dir", tempfile()), stdout = TRUE, stderr = TRUE))
+  od <- tempfile()
+  out <- suppressWarnings(system2("Rscript", c("analysis/dream5_truth_run.R", "--net", "4", "--truth_edges", "/nonexistent/never_read.tsv", "--out_dir", od, SWARGS), stdout = TRUE, stderr = TRUE))
   expect_false(is.null(attr(out, "status")))
-  expect_true(any(grepl("truth guard|cannot open", out)))
+  expect_true(any(grepl("truth guard|cannot open|not found", out)))
   expect_false(any(grepl("truth: [0-9]+ edges kept", out)))
+  expect_false(dir.exists(od))                                                                # nothing written
 })
+test_that("the truth driver rejects bad or missing switches before the guards: no output directory, no truth read (S2)", {
+  od <- tempfile()
+  run <- function(...) suppressWarnings(system2("Rscript", c("analysis/dream5_truth_run.R", "--net", "4", "--truth_edges", "/nonexistent/never_read.tsv", "--out_dir", od, ...), stdout = TRUE, stderr = TRUE))
+  out <- run(); expect_true(any(grepl("TRUTH-STAGE switch 'ties_at_cap' is not set", out))); expect_false(any(grepl("truth guard", out)))
+  out <- run("--structure_only", "1"); expect_true(any(grepl("TRUTH-STAGE switch", out)))      # structure-only mode needs the switches too
+  out <- run(SWARGS, "--cap_order", "cap_then_universe"); expect_true(any(grepl("--cap_order was given but --universe is 'all'", out)))
+  out <- run(SWARGS, "--universe_tf", "x.txt"); expect_true(any(grepl("would be ignored", out)))
+  expect_false(dir.exists(od))
+})
+

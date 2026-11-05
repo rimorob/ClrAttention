@@ -5,14 +5,14 @@ perm_all <- function(v) { if (length(v) <= 1) return(list(v)); out <- list(); fo
 ap_of_order <- function(lab) { tp <- cumsum(lab); sum(lab * tp / seq_along(lab)) / sum(lab) }
 auc_of_order <- function(lab) { n1 <- sum(lab); n0 <- length(lab) - n1; r <- rank(-seq_along(lab)); (sum(r[lab == 1]) - n1 * (n1 + 1) / 2) / (n1 * n0) }
 
-test_that("ap_expected equals ap_fast without ties and the exact permutation mean with ties", {
-  set.seed(1); s <- rnorm(30); y <- rbinom(30, 1, .3); expect_equal(ap_expected(s, y), ap_fast(s, y))
+test_that("d5_ap_expected equals ap_fast without ties and the exact permutation mean with ties", {
+  set.seed(1); s <- rnorm(30); y <- rbinom(30, 1, .3); expect_equal(d5_ap_expected(s, y), ap_fast(s, y))
   s <- c(5, 4, 4, 4, 3, 3, 2, 1); y <- c(0, 1, 0, 1, 1, 0, 0, 1)
   nm <- split(seq_along(s), s); blocks <- nm[order(-as.numeric(names(nm)))]
   orders <- list(integer(0)); for (b in blocks) orders <- unlist(lapply(orders, function(a) lapply(perm_all(b), function(p) c(a, p))), recursive = FALSE)
   ex <- mean(vapply(orders, function(o) ap_of_order(y[o]), 0))
-  expect_equal(ap_expected(s, y), ex)
-  expect_lte(ap_fast(s, y), ap_expected(s, y) + 1e-12)                      # ties at the end of the block are the pessimistic convention
+  expect_equal(d5_ap_expected(s, y), ex)
+  expect_lte(ap_fast(s, y), d5_ap_expected(s, y) + 1e-12)                      # block-end credit lies below the expected-tie AP here
 })
 
 test_that("list + random tail: AP and AUROC equal the exact enumeration over tail orders", {
