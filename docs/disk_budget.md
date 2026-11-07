@@ -53,3 +53,6 @@ Step 3.10 (E17, E18), 3 Nov 2026. The fine-tuned state dicts (14 scPRINT at 74 M
 | `~/scfm_models/step5_ft/scoring` | 0.23 GB | float32 exports of the fine-tuned networks for the R scoring (`scfm_score_export_ft.py`) | **Yes**, re-exportable from the manifest-checked attention files |
 | `~/scfm_models/step5_ft/scprint_ckpt`, `scgpt_ckpt` | < 0.001 GB | per-case training json only (loss curves, SHA-256 of the deleted state dicts); the `.pt` files are gone | Keep (tiny, record of the training) |
 | `results/scfm_ft`, `results/scfm_score_ft` | < 0.001 GB | manifest, QC tables, metric table, contrasts (force-added to git) | No |
+
+| `data/dream5/truth_extracted`, `truth_extracted_tools`, `truth_extracted_universe` | about 0.1 GB incl. converted null densities (17 MB) | Truth stage 6 Nov 2026: extracted official scoring code, gold standards, Python port and converted densities (gitignored) | **Yes** after the DREAM5 scoring is archived; the zip is re-sealed and re-extractable |
+| `results/dream5/_pidc_par_test` | 0.08 GB | scratch test of parallel PIDC on net1 | **Yes**, any time |
