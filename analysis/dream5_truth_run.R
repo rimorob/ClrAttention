@@ -10,7 +10,17 @@
 #   Rscript analysis/dream5_truth_run.R --net 4 --truth_edges <file> --out_dir results/dream5/truth_net4 \
 #       --ties_at_cap keep_tied|drop_tied|list_order --ties_in_list end_of_block|expected --tftf keep_both|collapse_max|drop \
 #       --universe all|gs [--universe_tf <ids file> --universe_gene <ids file> --cap_order cap_then_universe|universe_then_cap] \
-#       --jackknife_cap reapply_cap|scaled_cap|restrict_after_cap [--structure_only 1] [--workers 16] [--nrep 200]
+#       --jackknife_cap reapply_cap|scaled_cap|restrict_after_cap [--run_kind primary|sensitivity] [--readout official|stepwise] \
+#       [--structure_only 1] [--workers 16] [--nrep 200]
+#   --run_kind primary: THE Y-E PRIMARY RUN. Only the design's decisions (change log 2026-11-06) are allowed: --universe gs
+#   --cap_order cap_then_universe --tftf keep_both --ties_at_cap drop_tied --ties_in_list expected --jackknife_cap
+#   restrict_after_cap (any other value stops the driver); the readout is the official trapezoid AUPR/(1-1/P) and AUROC with the
+#   expected-fraction tail; the gold-derived universe (regulators = TFs of the gold edges, targets = genes of any gold edge;
+#   d5_gold_universe) is derived from --truth_edges, written to <out_dir>/universe_{tf,gene}.txt and, if --universe_tf/
+#   --universe_gene are given, checked against it. Official p-values (density lookup) and per-net -log10 p are co-reported
+#   (official_scores.csv; descriptive), and the cap-boundary check (entries tied at the cap) is written to cap_boundary.csv.
+#   --run_kind sensitivity (the default): any switch values, labelled SENSITIVITY in run_info.txt and in verdict.csv; the readout is
+#   --readout (default stepwise = step-wise AP, never used for Y-E decisions).
 #   --truth_edges: TSV, no header; two columns (regulator gene ID, target gene ID; every row a positive edge) or three with a
 #   0/1 label last (only label-1 rows are kept, the dropped ones are reported); self-edges are dropped and reported. The
 #   extraction from the official gold-standard files is part of the truth stage and is not done here.
@@ -30,14 +40,26 @@ o <- d5_truth_options(commandArgs(trailingOnly = TRUE)); opt <- o$opt; sw <- o$s
 d5_design_guard()
 do.call(d5_truth_guard, d5_truth_guard_args(opt$refit_n, opt$series_n))
 
+primary <- opt$run_kind == "primary"; metric <- opt$readout
+if (metric == "official" && !all(file.exists(file.path(D5$densities_dir, sprintf("Network%d_%s.tsv", net, c("AUPR", "AUROC"))))))
+  stop("official density tables missing in ", D5$densities_dir, " (convert once: python3 -I analysis/dream5_official_tools.py convert-densities <scripts_root> ", D5$densities_dir, ")")
 nd <- d5_read_net(net)
-universe <- d5_universe_from_files(opt, nd)
+universe <- if (primary) NULL else d5_universe_from_files(opt, nd)
 if (!file.exists(opt$truth_edges)) stop("truth edge file not found: ", opt$truth_edges)
 tab <- utils::read.delim(opt$truth_edges, header = FALSE, stringsAsFactors = FALSE)
 edges <- d5_edges_from_ids(tab, nd)
 message(sprintf("truth: %d edges kept; dropped: %d with IDs not in the gene or TF lists, %d label-0 rows, %d self-edges, %d repeated rows",
                 nrow(edges), attr(edges, "n_dropped"), attr(edges, "n_label0"), attr(edges, "n_self"), attr(edges, "n_dup")))
 dir.create(opt$out_dir, recursive = TRUE, showWarnings = FALSE)
+if (primary && sw$universe == "gs") {          # gold-derived universe (documented in d5_gold_universe); verified against given files
+  universe <- d5_gold_universe(edges, nd); d5_write_universe(universe, file.path(opt$out_dir, "universe"))
+  if (nzchar(opt$universe_tf)) d5_check_universe_files(universe, opt$universe_tf, opt$universe_gene)
+  message(sprintf("gold-derived universe: %d regulators x %d genes", length(universe$tf), length(universe$gene)))
+}
+writeLines(c(sprintf("run_kind: %s", if (primary) "PRIMARY (Y-E primary run; design change log 2026-11-06 decisions)" else "SENSITIVITY (not a Y-E primary run; not for Y-E decisions)"),
+             sprintf("readout: %s", D5$ye_readouts[[metric]]),
+             sprintf("switches: %s", paste(names(sw), unlist(lapply(sw, as.character)), sep = " = ", collapse = "; ")),
+             sprintf("net: %d; cap: %d; nrep: %d", net, opt$cap, opt$nrep)), file.path(opt$out_dir, "run_info.txt"))
 utils::write.csv(d5_structure_counts(edges, nd), file.path(opt$out_dir, "structure_counts.csv"), row.names = FALSE)
 if (opt$structure_only == 1L) { print(utils::read.csv(file.path(opt$out_dir, "structure_counts.csv"))); quit(save = "no") }
 
@@ -47,15 +69,19 @@ scorer <- if (net == 4L) function(b) d5_refit_scores(nd, b, opt$workers) else NU
 verify <- if (net == 4L) function(v, b) d5_refit_verify(v, b, 4L, refit_manifest) else NULL
 ## 3. primary pipeline (no series part) and primary outputs first
 res <- d5_truth_pipeline(nd, edges, sw, nrep = opt$nrep, refit_reps = if (net == 4L) seq_len(opt$refit_n) else integer(0),
-                         refit_scorer = scorer, refit_verify = verify, universe = universe, cap = opt$cap)
+                         refit_scorer = scorer, refit_verify = verify, universe = universe, cap = opt$cap, metric = metric,
+                         densities = if (metric == "official") D5$densities_dir else NULL)
 d5_write_results(res, opt$out_dir)
+cat(sprintf("\nY-E readout: %s\n", D5$ye_readouts[[metric]]))
 print(utils::read.csv(file.path(opt$out_dir, "verdict.csv")))
+cat("\nCAP-BOUNDARY CHECK (entries tied at the cap boundary; expected 0; written to cap_boundary.csv):\n"); print(res$cap_boundary, row.names = FALSE)
+if (!is.null(res$official)) { cat("\nOFFICIAL p-values (density lookup; descriptive; p = 0 stays 0, -log10 p = Inf):\n"); print(res$official, row.names = FALSE) }
 
 ## 4. supplementary series-level jackknife: after the primary outputs, inside tryCatch
 if (net == 4L && opt$series_n > 0L) {
   sr <- d5_run_series_supplementary(res, opt$out_dir, nd, edges, sw, seq_len(opt$series_n),
           series_scorer = function(b) d5_refit_scores(nd, b, opt$workers, unit = "series"),
-          series_verify = function(v, b) d5_refit_verify(v, b, 4L, series_manifest), universe = universe, cap = opt$cap,
+          series_verify = function(v, b) d5_refit_verify(v, b, 4L, series_manifest), universe = universe, cap = opt$cap, metric = metric,
           say = function(...) message(sprintf("[%s] %s", format(Sys.time(), "%H:%M:%S"), paste0(...))))
   if (sr$ok) { cat("\nSUPPLEMENTARY (series-level jackknife; descriptive; not used in verdict.csv):\n")
     print(sr$sup$series_line[, c("net", "endpoint", "contrast", "n_rep", "SD_series", "SE_B_group")], row.names = FALSE) }
