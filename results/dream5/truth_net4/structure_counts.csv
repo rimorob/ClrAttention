@@ -1,0 +1,2 @@
+"n_edges","n_tfs_with_edges","median_edges_per_tf","max_edges_per_tf","n_tf_tf_edges","n_regulons_5_500","n_pos_pairs","n_regulons_ge5","n_pos_pairs_ge5_noupper","evaluable","n_regulons_ge10","n_pos_pairs_ge10"
+3940,114,18.5,217,324,90,141943,90,141943,TRUE,77,141774

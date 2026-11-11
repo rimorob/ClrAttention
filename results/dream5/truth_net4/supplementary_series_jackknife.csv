@@ -1,0 +1,3 @@
+"net","endpoint","contrast","n_rep","SD_series","SE_B_group","label"
+4,"YE","attention vs clr",100,0.0508261858867889,0.0372871335483197,"series-level supplementary jackknife (59 #Experiment series, delete-half; descriptive; not used in verdict.csv)"
+4,"YM","attention vs clr",100,0.0402058156772007,0.0173142119290914,"series-level supplementary jackknife (59 #Experiment series, delete-half; descriptive; not used in verdict.csv)"
