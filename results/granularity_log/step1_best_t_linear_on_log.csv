@@ -1,0 +1,9 @@
+data,truth,t_best_ge1,log2_t_best,t_lo,t_hi,width_octaves,edge_censored,interval_touches_edge,clr_beats_all_t,gain_at_best
+E. coli M3D,1 operons,4,2.0,4,5,0.32192809488736235,False,False,False,0.207936407559975
+E. coli M3D,2 TF regulons,32,5.0,26,32,0.29956028185890793,True,True,False,0.023590882703628996
+E. coli M3D,3 sigmulons,13,3.700439718141092,6,23,1.9385994553358568,False,False,False,0.043470212126298036
+K562 essential compendium,1 CORUM complexes,17,4.087462841250339,13,22,0.7589919004962051,False,False,True,-0.03716853521887681
+K562 essential compendium,2 KD-response modules,26,4.700439718141092,19,32,0.7520724865564145,False,True,False,0.017046477681612993
+K562 essential compendium,3 DoRothEA A-B,4,2.0,3,12,2.0,False,False,False,0.008039106239112997
+K562 essential compendium,4 DoRothEA A-C,7,2.807354922057604,3,17,2.5025003405291835,False,False,False,0.004765506049944995
+K562 essential compendium,5 CollecTRI,32,5.0,20,32,0.6780719051126377,True,True,False,0.013765882184879008
