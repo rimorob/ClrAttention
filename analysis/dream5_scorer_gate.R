@@ -1,24 +1,30 @@
 #!/usr/bin/env Rscript
 # DREAM5 SCORER GATE: does our implementation reproduce the organisers' published scores of public teams?
 # It runs only when BOTH data inputs exist (they are on Synapse only and are supplied by the PI; nothing is fetched here):
-#   --pred_dir     the organisers' public predictions, laid out as INPUT/predictions: <pred_dir>/<team>/DREAM5_NetworkInference_<team>_Network{1,3,4}.txt
-#                  (from Network_predictions.zip, syn2787251)
-#   --results_csv  the published results table, exported to CSV from DREAM5_NetworkInference_MethodScoringResults.xls (syn2787254)
+#   --pred_dir     the organisers' public predictions as a FLAT directory: <pred_dir>/<team>/DREAM5_NetworkInference_<team>_Network{1,3,4}.txt
+#                  (Network_predictions.zip, syn2787251, extracts into three folders; analysis/dream5_published_table.py flat-pred
+#                  builds this layout as symlinks without touching the extracted files)
+#   --results_csv  the published results table as the tidy CSV written by `python3 -I analysis/dream5_published_table.py tidy` from the
+#                  sheet survey4.xls of DREAM5_NetworkInference_MethodScoringResults.xls (syn2787254): team, score_overall, score_aupr,
+#                  score_auroc, aupr1/3/4, auroc1/3/4. The sheet has NO per-network p-values, so p-values are not compared directly;
+#                  they enter through the three aggregate scores (go_all.m: -mean log10 p over networks 1, 3, 4; overall = mean of the two).
 # plus the local extraction of the scoring archive (gold edges, .mat densities; --scripts_root) and the converted density TSVs.
-# For every team present in both, AUPR, AUROC, P_AUPR and P_AUROC are computed by (a) our R file-level scorer, (b) the Python port of the
-# official MATLAB scripts and (c) the pipeline's matrix path (d5_edge_metrics with the design's Y-E switches; skipped with --matrix 0),
-# compared with the published values at --tol (default 1e-3; see d5_gate_close for the p-value rule), and R vs port vs matrix to 1e-9.
-# PASS needs >= --min_teams (default 3) teams whose every quantity matches the published table for both R and the port, no
-# disagreement between R, port and matrix beyond 1e-9 in any team, and no team with a matrix path that fails. Writes <out_dir>/
+# For every team present in both (matched by NAME only, never by value), AUPR and AUROC per network and the three aggregate scores are
+# computed by (a) our R file-level scorer, (b) the Python port of the official MATLAB scripts and (c) the pipeline's matrix path
+# (d5_edge_metrics with the design's Y-E switches; skipped with --matrix 0 and for files that repeat a pair), compared with the published
+# values at --tol (default 1e-3 absolute; the rule and its justification are at d5_gate_close), and R vs port vs matrix to 1e-9 (AUPR,
+# AUROC, P_AUPR, P_AUROC and -log10 of both p-values). No floor or cap on p is applied anywhere (the official code has none; p = 0 gives Inf).
+# PASS needs >= --min_teams (default 3) teams whose every quantity matches the published table for R, the port and, where it ran, the
+# matrix path, no disagreement between R, port and matrix beyond 1e-9, and no team with a failing matrix path. Writes <out_dir>/
 # gate_report.md and gate_comparison.csv; exit status 0 = PASS, 1 = FAIL, 2 = refused (missing inputs).
 #
-#   Rscript analysis/dream5_scorer_gate.R --pred_dir <dir> --results_csv <file.csv> [--out_dir results/dream5/scorer_gate]
-#       [--teams a,b,c] [--min_teams 3] [--tol 1e-3] [--colmap "team=Team;aupr1=AUPR_Net1;..."] [--matrix 1] [--python python3]
+#   Rscript analysis/dream5_scorer_gate.R --pred_dir <dir> --results_csv <tidy.csv> [--out_dir results/dream5/scorer_gate]
+#       [--teams a,b,c] [--min_teams 3] [--tol 1e-3] [--matrix 1] [--python python3]
 #       [--scripts_root "data/dream5/truth_extracted/Evaluation scripts"] [--densities data/dream5/truth_extracted_tools/densities]
 source("analysis/dream5_official.R")
 
 d5_gate_args <- function(args) {
-  o <- list(pred_dir = "", results_csv = "", out_dir = "results/dream5/scorer_gate", teams = "", min_teams = "3", tol = "1e-3", colmap = "",
+  o <- list(pred_dir = "", results_csv = "", out_dir = "results/dream5/scorer_gate", teams = "", min_teams = "3", tol = "1e-3",
             matrix = "1", python = "python3", scripts_root = "data/dream5/truth_extracted/Evaluation scripts", densities = D5$densities_dir)
   i <- 1L
   while (i <= length(args)) {
@@ -36,12 +42,11 @@ d5_gate_run <- function(o, say = message) {
   miss <- names(need)[!nzchar(need) | !file.exists(need)]
   if (length(miss)) return(list(status = 2L, msg = paste0("REFUSED: required data input missing: ", paste(miss, collapse = "; "),
     ". The scorer gate runs only when the PI has supplied both Synapse files (Network_predictions.zip, syn2787251, extracted as INPUT/predictions; ",
-    "DREAM5_NetworkInference_MethodScoringResults.xls, syn2787254, exported to CSV).")))
+    "DREAM5_NetworkInference_MethodScoringResults.xls, syn2787254, converted to the tidy CSV by analysis/dream5_published_table.py).")))
   if (!dir.exists(o$pred_dir)) return(list(status = 2L, msg = paste0("REFUSED: --pred_dir is not a directory: ", o$pred_dir)))
   loc <- c(gold_dir, mat_dir, file.path(o$densities, sprintf("Network%d_%s.tsv", rep(D5$nets, each = 2), c("AUPR", "AUROC"))))
   if (!all(file.exists(loc))) return(list(status = 2L, msg = paste0("REFUSED: local scoring-archive extraction or converted densities missing: ", paste(loc[!file.exists(loc)], collapse = "; "))))
-  colmap <- if (nzchar(o$colmap)) { kv <- strsplit(strsplit(o$colmap, ";", fixed = TRUE)[[1]], "=", fixed = TRUE); stats::setNames(vapply(kv, `[`, "", 2), vapply(kv, `[`, "", 1)) } else NULL
-  pub <- d5_gate_read_results(o$results_csv, colmap)
+  pub <- d5_gate_read_results(o$results_csv)
   pf <- function(t, n) file.path(o$pred_dir, t, sprintf("DREAM5_NetworkInference_%s_Network%d.txt", t, n))
   teams <- sort(list.dirs(o$pred_dir, full.names = FALSE, recursive = FALSE)); teams <- teams[nzchar(teams)]
   full <- vapply(teams, function(t) all(file.exists(vapply(D5$nets, function(n) pf(t, n), ""))), NA); incomplete <- teams[!full]; teams <- teams[full]
@@ -72,22 +77,34 @@ d5_gate_run <- function(o, say = message) {
   }
   impls <- list(R = rr, port = pp); if (!is.null(mm)) impls$matrix <- mm[!is.na(mm$AUPR), ]
   cmp <- d5_gate_compare(impls, pub, o$tol)
-  # R vs port vs matrix agreement to 1e-9
-  q <- c("AUPR", "AUROC", "P_AUPR", "P_AUROC"); key <- function(d) paste(d$team, d$net)
-  agree <- function(a, b) { k <- intersect(key(a), key(b)); max(abs(unlist(lapply(q, function(m) a[[m]][match(k, key(a))] - b[[m]][match(k, key(b))]))), 0, na.rm = TRUE) }
-  d_rp <- agree(rr, pp); d_rm <- if (!is.null(mm)) agree(rr, mm[!is.na(mm$AUPR), ]) else 0
-  ok_t <- vapply(teams, function(t) all(cmp$pass[cmp$team == t & cmp$impl %in% c("R", "port")]) && all(cmp$pass[cmp$team == t & cmp$impl == "matrix"]), NA)
+  # R vs port vs matrix agreement to 1e-9 (AUPR, AUROC, both p-values, and -log10 of both p-values; equal Inf counts as agreeing)
+  key <- function(d) paste(d$team, d$net)
+  diffs <- function(a, b) { k <- intersect(key(a), key(b)); ia <- match(k, key(a)); ib <- match(k, key(b)); dd <- function(x, y) { z <- abs(x - y); z[x == y] <- 0; z }
+    unlist(lapply(c("AUPR", "AUROC", "P_AUPR", "P_AUROC"), function(m) c(dd(a[[m]][ia], b[[m]][ib]), if (grepl("^P_", m)) dd(-log10(a[[m]][ia]), -log10(b[[m]][ib]))))) }
+  agree <- function(a, b) max(diffs(a, b), 0, na.rm = TRUE)
+  mm_ok <- if (!is.null(mm)) mm[!is.na(mm$AUPR), ] else NULL
+  d_rp <- agree(rr, pp); d_rm <- if (!is.null(mm_ok)) agree(rr, mm_ok) else 0
+  if (anyNA(unlist(rr[, -1])) || anyNA(unlist(pp[, -1]))) d_rp <- Inf   # a missing value in R or port is a failure, not silence
+  ok_t <- vapply(teams, function(t) all(cmp$pass[cmp$team == t]), NA); names(ok_t) <- teams
   pass <- sum(ok_t) >= o$min_teams && d_rp <= 1e-9 && d_rm <= 1e-9
+  mx <- function(t, im, q) { v <- cmp$abs_diff[cmp$team == t & cmp$impl == im & cmp$quantity %in% q]; if (all(is.na(v)) || !length(v)) NA_real_ else max(v, na.rm = TRUE) }
+  fmt <- function(x) ifelse(is.na(x), "n/a", sprintf("%.3g", x))
+  failq <- function(t) { f <- cmp[cmp$team == t & !cmp$pass, ]; if (!nrow(f)) "" else paste(unique(sprintf("%s:%s%s", f$impl, f$quantity, ifelse(is.na(f$net), "", f$net))), collapse = " ") }
+  skipped <- if (!is.null(mm)) unique(sprintf("%s net%d", mm$team[is.na(mm$AUPR)], mm$net[is.na(mm$AUPR)])) else character(0)
+  mets <- c("AUPR", "AUROC"); scs <- c("score_overall", "score_aupr", "score_auroc")
   rpt <- c(sprintf("# DREAM5 scorer gate: %s", if (pass) "PASS" else "FAIL"), "",
-    sprintf("Run: %s. Tolerance vs published %g (p-values: see d5_gate_close); implementations vs each other 1e-9.", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), o$tol),
+    sprintf("Run: %s. Pass rule: |ours - published| <= %g for the six per-network AUPR/AUROC values and the three aggregate scores of a team (R, Python port, and matrix path where it ran); implementations vs each other 1e-9.", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), o$tol),
     sprintf("Inputs: pred_dir `%s`, results `%s`. Matrix path: %s.", o$pred_dir, o$results_csv, mnote),
-    sprintf("Teams compared: %d (%s). Teams fully matching the published table (R and Python port, and matrix path where run): %d; required %d.", length(teams), paste(teams, collapse = ", "), sum(ok_t), o$min_teams),
-    sprintf("Max |R - port| = %.3g; max |R - matrix path| = %.3g.", d_rp, d_rm),
+    sprintf("Teams compared: %d (%s). Teams fully matching the published table: %d; required %d.", length(teams), paste(teams, collapse = ", "), sum(ok_t), o$min_teams),
+    sprintf("Max |R - port| = %.3g; max |R - matrix path| = %.3g (AUPR, AUROC, P_AUPR, P_AUROC and their -log10).", d_rp, d_rm),
+    if (length(skipped)) sprintf("Matrix path skipped (file repeats a pair; the official scorer does not de-duplicate and the R and port scorers follow it): %s.", paste(skipped, collapse = ", ")),
     if (length(notpub)) sprintf("In pred_dir but not in the results table (not compared): %s.", paste(notpub, collapse = ", ")),
-    if (length(incomplete)) sprintf("Directories without all three network files (ignored): %s.", paste(incomplete, collapse = ", ")), "",
-    "| team | matches published | max abs diff (R) | max abs diff (port) |", "|---|---|---|---|",
-    vapply(teams, function(t) sprintf("| %s | %s | %.3g | %.3g |", t, if (ok_t[[t]]) "yes" else "NO",
-           max(cmp$abs_diff[cmp$team == t & cmp$impl == "R"], 0, na.rm = TRUE), max(cmp$abs_diff[cmp$team == t & cmp$impl == "port"], 0, na.rm = TRUE)), ""))
+    if (length(incomplete)) sprintf("Directories without all three network files (ignored): %s.", paste(incomplete, collapse = ", ")),
+    if (!nzchar(o$teams)) sprintf("Teams in the results table without a prediction directory: %s.", { m <- setdiff(d5_gate_team_key(pub$team), d5_gate_team_key(c(teams, notpub, incomplete))); if (length(m)) paste(pub$team[match(m, d5_gate_team_key(pub$team))], collapse = ", ") else "none" }), "",
+    "Columns: max abs difference to the published table over the six per-network AUPR/AUROC values and over the three aggregate scores, for R, the Python port and the matrix path; the last column lists failing quantities (impl:quantity[net]).", "",
+    "| team | matches | R: AUPR/AUROC | R: scores | port: AUPR/AUROC | port: scores | matrix: AUPR/AUROC | matrix: scores | failing |", "|---|---|---|---|---|---|---|---|---|",
+    vapply(teams, function(t) sprintf("| %s | %s | %s | %s | %s | %s | %s | %s | %s |", t, if (ok_t[[t]]) "yes" else "NO", fmt(mx(t, "R", mets)), fmt(mx(t, "R", scs)),
+           fmt(mx(t, "port", mets)), fmt(mx(t, "port", scs)), fmt(mx(t, "matrix", mets)), fmt(mx(t, "matrix", scs)), failq(t)), ""))
   dir.create(o$out_dir, recursive = TRUE, showWarnings = FALSE)
   writeLines(rpt, file.path(o$out_dir, "gate_report.md")); utils::write.csv(cmp, file.path(o$out_dir, "gate_comparison.csv"), row.names = FALSE)
   list(status = if (pass) 0L else 1L, msg = rpt[1], pass = pass, teams = teams, ok_teams = teams[ok_t], comparison = cmp, d_rp = d_rp, d_rm = d_rm)

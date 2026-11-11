@@ -138,3 +138,112 @@ Facts only: (a) AUPR integration: trapezoid on PR points / (1 - 1/P), implementa
 (b) the official list has no tie rule (file order is the rank); the implementation offers end_of_block / expected only;
 (c) the official universe is the gold box (universe = gs, cap before universe); (d) the p-values come from a lookup of the
 precomputed density, with p = 0 above the support top.
+
+## 6. Scorer gate (2026-11-10)
+
+Written by Claude (Sonnet 5.5) for the lead. This changes the VALIDATION harness only, before any score of ours exists: no method,
+endpoint, switch, seed or the official scorer itself was changed. No score file, verdict or refit file was opened and
+`analysis/dream5_truth_run.R` was not run.
+
+**Files received** (the PI downloaded them with their own login; rows of 2026-11-11T00:31Z UTC in `docs/dream5_selections/download_log.tsv`,
+`truth` stage; stored under `data/dream5/synapse/published/`):
+
+| file | Synapse id | bytes | SHA-256 |
+|---|---|---|---|
+| `DREAM5_NetworkInference_MethodScoringResults.xls` | syn2787254 | 58,368 | `244714913510e9bfc429aebe7efb2b3aa12a1c49afebb77eddcce21f16adc6ce` |
+| `Network_predictions.zip` | syn2787251 | 79,484,816 | `1d6a2d7bba57a55f1dbff8fc2bf8c704466266c6f8766947af430c85d4c1ef2e` |
+
+Both were extracted by the lead into the gitignored `data/dream5/published_extracted/` (`predictions/Network_predictions/`, `results/`;
+the extracted `r.xls` has the logged SHA-256). The extracted prediction files are untrusted data: only read.
+
+**Table structure.** The xls has one sheet, `survey4.xls` (a survey of the teams, exported to `r-survey4.xls.csv` with LibreOffice). Row 1-2 are
+titles; then, for each category, a header row (`Regression`, `Mutual information`, `Correlation`, `Bayesian networks`, `Other`, `Meta`,
+`Community`) followed by rows whose column 2 is the within-category number (1..8) or `RankSum` (Community). Columns (0-based): 2 overall score,
+3 AUPR score, 4 AUROC score (the organisers' -log10 p scores averaged over networks 1, 3, 4; overall = mean of the two), 5-7 AUPR networks 1, 3, 4,
+8-10 AUROC networks 1, 3, 4, 11-12 network 2 (S. aureus, not scored; ignored); columns 14 on are the survey answers. There are NO per-network
+p-values in the table, so p-values enter the gate only through the three aggregate scores. 36 rows: Regression 8, MI 5, Correlation 3, Bayesian 6,
+Other 8, Meta 5, Community 1. A re-export with "save cell contents as shown" off gave identical values: the sheet itself stores 3 decimals (a few
+cells 4), so the printed rounding is the stored precision. The archive holds 29 team folders in `Challenge participants`, 6 in `Off-the-shelf
+methods` (Correlation2-3, MI1-3, Regression8) and the four `Community` files: 36 names, the same 36 names as the table (matched by name only).
+Each team has `DREAM5_NetworkInference_<team>_Network{1,2,3,4}.txt`; every file has at most 100,000 lines (net1 files 99,999).
+
+**Converter and flat directory.** `analysis/dream5_published_table.py` (run with `python3 -I`): `tidy` writes
+`data/dream5/published_extracted/published_table_tidy.csv` (team = category prefix + number, `Regression3`, `MI4`, ..., `Community`; score_overall,
+score_aupr, score_auroc, aupr1/3/4, auroc1/3/4), asserting the row counts above, that every number parses, and that overall is within 2e-3 of the
+mean of the two scores. `flat-pred` builds `data/dream5/published_extracted/flat_pred/<team>/DREAM5_NetworkInference_<team>_Network<n>.txt` as symlinks (36
+teams x 4); the extracted files are not modified. Both are tested (synthetic sheet and tree, and the real sheet when present).
+
+**What was adapted in the harness** (`analysis/dream5_official.R`, `analysis/dream5_scorer_gate.R`): the results reader is strict (the tidy
+columns, duplicates and non-numbers are errors); the comparison covers per-network AUPR and AUROC (6 values) and the three aggregate scores, which
+our side computes as go_all.m does (`d5_official_overall`: aupr_score = -mean(log10 P_AUPR) over networks 1, 3, 4, auroc_score likewise, overall =
+their mean); R vs port vs matrix agreement (1e-9) now also covers -log10 of both p-values.
+Confirmation of the aggregate definition on the shipped demo (`OUTPUT/myteam.txt`, scores 0.794 / 0.013 / 1.574): from the printed p-values
+(P_AUPR 9.999e-01, 9.992e-01, 9.129e-01; P_AUROC 6.268e-01, 2.533e-04, 1.197e-01) the aggregates are AUPR score 0.013323, AUROC score 1.573714,
+overall 0.793518 = their mean; the file shows 0.013 / 1.574 / 0.794 (go_all.m:66-68 and :79).
+
+**Pass rule, fixed before the full run.** For a team, every one of the six per-network AUPR/AUROC values and the three aggregate scores must satisfy
+|ours - published| <= 1e-3, for R, for the Python port and, where it ran, for the matrix path. The OR "within the printed rounding" is not used as a
+second alternative: the table stores at most 3 decimals (rounding error <= 5e-4), and trailing zeros cannot be recovered from a stored number
+(8.8 may be 8.800), so the printed precision is never coarser than 3 decimals and 1e-3 already covers it. Gate PASS = at least 3 teams match fully
+(R and port), R vs port vs matrix agree to 1e-9 in every team. Teams are matched by name only. (A 3-team smoke run, Regression1, Community and Other7,
+was done to time the pipeline before the full run; all three matched; nothing was changed afterwards except the explanatory comment of the rule
+and an empty-result return value, neither of which affects any number.)
+
+**p = 0 finding.** The official code has no floor and no cap anywhere on p or on -log10 p: `probability.m:2-5` is `dx = X(2)-X(1); P = sum(double(X>=x) .* Y * dx)`;
+`DREAM5_Challenge4_Evaluation.m:112` and `:116` assign it to P_AUPR and P_AUROC unchanged; `go_all.m:66-67` take `-mean(log10(P))` directly, so an
+exact p of 0 gives `Inf` (MATLAB `log10(0) = -Inf`) in the aggregate score. p is exactly 0 only above the support top of the null density
+(AUPR 0.4134 / 0.3033 / 0.1217, AUROC 0.9082 / 0.8199 / 0.6174 for nets 1 / 3 / 4); below it the density is strictly positive (down to denormals,
+about 1e-322), so p can be tiny (smallest positive tail 5e-324) but is not 0. In the published table no value is Inf, the largest score is 58.6
+(Community AUPR score), and none of the 36 teams reached p = 0 in any network (all our aggregates are finite); so the gate never needed the p = 0 case. The gate mimics the official
+code (no floor, no cap; Inf compared as Inf, a finite published value would then fail and be reported). The design pipeline does not cap either
+(change-log decision 8).
+
+**Gate result: PASS** (`results/dream5/scorer_gate/gate_report.md`, `gate_comparison.csv`; force-added to git as other result files are). 36 teams, all
+fully matching for R, the Python port and the matrix path (required: 3). Command:
+`nice -n 19 Rscript analysis/dream5_scorer_gate.R --pred_dir data/dream5/published_extracted/flat_pred --results_csv data/dream5/published_extracted/published_table_tidy.csv --out_dir results/dream5/scorer_gate`
+(about 2 minutes wall, one process). Max |R - port| = 8.8e-12, max |R - matrix path| = 3.9e-15 over AUPR, AUROC, both p-values and their -log10.
+No file repeats a pair (matrix path skipped 0 of 108 team-networks), so the repeated-pair handling (R and port do not de-duplicate, as the
+official scorer; the matrix path would skip the file) was never exercised on real data. Largest differences to the published table: per-network
+metric 5.8e-4 (Correlation3 net3 AUROC: ours 0.575579, published 0.575, i.e. the sheet appears truncated rather than rounded in this cell; MI1 net1 AUROC
+0.773513 vs 0.773 likewise); 2 of 324 metric values exceed 5e-4, all within 1e-3; aggregate scores at most 4.9e-4. Differences are consistent with the sheet's 3-decimal
+storage, not with a systematic offset. The table below shows the three aggregate scores (published / ours) and the maximum absolute differences;
+port and matrix path equal R to 1e-11.
+
+| team | published overall / AUPR score / AUROC score | ours (R) | max abs diff, 6 per-net metrics | max abs diff, 3 scores | all 3 implementations pass |
+|---|---|---|---|---|---|
+| Bayesian1 | 4.973 / 9.947 / 0 | 4.9734 / 9.9466 / 0.0002 | 2.95e-04 | 4.19e-04 | yes |
+| Bayesian2 | 2.266 / 4.531 / 0 | 2.2656 / 4.5311 / 0.0002 | 3.31e-04 | 3.70e-04 | yes |
+| Bayesian3 | 0.331 / 0.173 / 0.489 | 0.3307 / 0.1726 / 0.4888 | 4.61e-04 | 3.68e-04 | yes |
+| Bayesian4 | 0.257 / 0.04 / 0.473 | 0.2566 / 0.0403 / 0.4729 | 3.54e-04 | 4.01e-04 | yes |
+| Bayesian5 | 0.256 / 0.04 / 0.472 | 0.2563 / 0.0403 / 0.4724 | 3.38e-04 | 4.07e-04 | yes |
+| Bayesian6 | 0.035 / 0.003 / 0.068 | 0.0352 / 0.0026 / 0.0679 | 4.32e-04 | 4.28e-04 | yes |
+| Community | 52.4271 / 58.5993 / 46.2549 | 52.4271 / 58.5993 / 46.2549 | 4.57e-04 | 2.69e-05 | yes |
+| Correlation1 | 8.126 / 5.632 / 10.619 | 8.1260 / 5.6324 / 10.6195 | 4.08e-04 | 4.87e-04 | yes |
+| Correlation2 | 1.191 / 1.717 / 0.666 | 1.1914 / 1.7171 / 0.6656 | 3.20e-04 | 4.27e-04 | yes |
+| Correlation3 | 0.834 / 1.422 / 0.246 | 0.8337 / 1.4217 / 0.2456 | 5.79e-04 | 3.63e-04 | yes |
+| MI1 | 20.462 / 23.906 / 17.018 | 20.4623 / 23.9062 / 17.0184 | 5.13e-04 | 3.67e-04 | yes |
+| MI2 | 12.013 / 8.477 / 15.549 | 12.0134 / 8.4775 / 15.5494 | 4.96e-04 | 4.93e-04 | yes |
+| MI3 | 9.2351 / 6.0926 / 12.3776 | 9.2351 / 6.0926 / 12.3776 | 4.90e-04 | 3.89e-05 | yes |
+| MI4 | 8.8 / 3.984 / 13.616 | 8.7998 / 3.9836 / 13.6160 | 3.39e-04 | 3.90e-04 | yes |
+| MI5 | 1.475 / 2.372 / 0.579 | 1.4754 / 2.3722 / 0.5787 | 4.39e-04 | 4.04e-04 | yes |
+| Meta1 | 22.711 / 36.795 / 8.627 | 22.7112 / 36.7953 / 8.6271 | 4.76e-04 | 3.01e-04 | yes |
+| Meta2 | 16.686 / 14.538 / 18.833 | 16.6856 / 14.5379 / 18.8333 | 4.83e-04 | 3.92e-04 | yes |
+| Meta3 | 10.586 / 10.491 / 10.681 | 10.5856 / 10.4905 / 10.6807 | 3.76e-04 | 4.87e-04 | yes |
+| Meta4 | 6.42 / 8.183 / 4.658 | 6.4204 / 8.1830 / 4.6578 | 4.66e-04 | 4.15e-04 | yes |
+| Meta5 | 6.332 / 8.337 / 4.327 | 6.3322 / 8.3375 / 4.3269 | 4.67e-04 | 4.79e-04 | yes |
+| Other1 | 40.279 / 41.295 / 39.263 | 40.2790 / 41.2953 / 39.2626 | 3.59e-04 | 3.53e-04 | yes |
+| Other2 | 34.023 / 30.908 / 37.137 | 34.0225 / 30.9082 / 37.1369 | 4.61e-04 | 4.65e-04 | yes |
+| Other3 | 8.887 / 3.076 / 14.699 | 8.8874 / 3.0757 / 14.6992 | 4.69e-04 | 4.22e-04 | yes |
+| Other4 | 2.484 / 2.133 / 2.835 | 2.4839 / 2.1327 / 2.8352 | 4.93e-04 | 2.88e-04 | yes |
+| Other5 | 1.897 / 0.066 / 3.727 | 1.8966 / 0.0665 / 3.7266 | 4.31e-04 | 4.78e-04 | yes |
+| Other6 | 0.144 / 0.25 / 0.038 | 0.1441 / 0.2502 / 0.0380 | 4.11e-04 | 2.02e-04 | yes |
+| Other7 | 0 / 0 / 0 | 0.0002 / 0.0002 / 0.0002 | 3.90e-04 | 1.65e-04 | yes |
+| Other8 | 0 / 0 / 0 | 0.0002 / 0.0002 / 0.0002 | 4.54e-04 | 1.65e-04 | yes |
+| Regression1 | 31.099 / 41.368 / 20.831 | 31.0990 / 41.3676 / 20.8305 | 4.11e-04 | 4.67e-04 | yes |
+| Regression2 | 28.747 / 44.689 / 12.806 | 28.7475 / 44.6890 / 12.8060 | 4.70e-04 | 4.87e-04 | yes |
+| Regression3 | 21.398 / 32.838 / 9.957 | 21.3979 / 32.8383 / 9.9575 | 4.09e-04 | 4.80e-04 | yes |
+| Regression4 | 20.694 / 31.965 / 9.422 | 20.6937 / 31.9652 / 9.4222 | 3.99e-04 | 3.26e-04 | yes |
+| Regression5 | 13.397 / 13.781 / 13.013 | 13.3969 / 13.7809 / 13.0128 | 3.94e-04 | 1.97e-04 | yes |
+| Regression6 | 6.026 / 8.924 / 3.128 | 6.0265 / 8.9244 / 3.1285 | 4.02e-04 | 4.91e-04 | yes |
+| Regression7 | 0.997 / 0 / 1.995 | 0.9974 / 0.0002 / 1.9945 | 4.11e-04 | 4.74e-04 | yes |
+| Regression8 | 0.045 / 0.058 / 0.032 | 0.0446 / 0.0577 / 0.0316 | 2.77e-04 | 4.37e-04 | yes |

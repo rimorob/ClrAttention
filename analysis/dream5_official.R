@@ -47,54 +47,54 @@ d5_off_score_team <- function(files, dens_dir, nets = D5$nets) {
 }
 
 # ---- scorer gate ---------------------------------------------------------------------------------------------------------------
-# Published results table (CSV exported from DREAM5_NetworkInference_MethodScoringResults.xls). The layout of the xls cannot be seen
-# here (it is on Synapse only), so columns are recognised by name after normalisation (lower case, non-alphanumerics to "_"):
-# a team column (team / method / name / submission) and, per network n in 1,3,4, columns containing "aupr" or "auroc" and the
-# network number, with or without a leading "p" / "p_" for the p-value (e.g. AUPR_Net1, P_AUPR_Net1, net1_aupr, "AUPR Network 1").
-# Anything else is given explicitly with colmap = c(team = "col", aupr1 = "col", ..., p_aupr1 = "col", ...).
-d5_gate_norm <- function(x) gsub("^_+|_+$", "", gsub("[^a-z0-9]+", "_", tolower(x)))
-d5_gate_read_results <- function(csv, colmap = NULL) {
+# Published results table: the tidy CSV written by analysis/dream5_published_table.py from the organisers' sheet survey4.xls (syn2787254).
+# Columns (exact names): team, score_overall, score_aupr, score_auroc, aupr1, aupr3, aupr4, auroc1, auroc3, auroc4. The sheet has NO
+# per-network p-values: what can be compared is the per-network AUPR and AUROC and the three aggregate scores, which are the
+# organisers' go_all.m scores (aupr_score = -mean(log10 P_AUPR) over networks 1, 3, 4, auroc_score likewise, overall = their mean).
+# The sheet stores every value rounded to 3 decimals (a few cells 4), so the rounding error of a stored number is at most 5e-4.
+d5_gate_cols <- c("team", "score_overall", "score_aupr", "score_auroc", paste0("aupr", D5$nets), paste0("auroc", D5$nets))
+d5_gate_read_results <- function(csv) {
   tb <- utils::read.csv(csv, check.names = FALSE, stringsAsFactors = FALSE, colClasses = "character")
-  nm <- d5_gate_norm(names(tb)); find <- function(key) {
-    if (!is.null(colmap) && !is.na(colmap[key])) return(match(colmap[[key]], names(tb)))
-    metric <- if (grepl("auroc", key)) "auroc" else "aupr"; isp <- grepl("^p_", key); net <- substring(key, nchar(key))
-    hit <- which(grepl(metric, nm) & grepl(paste0("(^|[^0-9])", net, "($|[^0-9])"), nm) & (grepl("(^|_)p(_|$)|pval|p_value", nm) == isp) & !grepl("rank|score$", nm))
-    if (length(hit) == 1L) hit else NA_integer_
+  miss <- setdiff(d5_gate_cols, names(tb))
+  if (length(miss)) stop("the results CSV lacks the columns ", paste(miss, collapse = ", "), " (it must be the tidy table written by analysis/dream5_published_table.py; its columns are: ", paste(names(tb), collapse = ", "), ")")
+  if (anyDuplicated(tb$team)) stop("duplicated team names in the results CSV: ", paste(tb$team[duplicated(tb$team)], collapse = ", "))
+  out <- data.frame(team = tb$team, stringsAsFactors = FALSE)
+  for (k in setdiff(d5_gate_cols, "team")) {
+    v <- suppressWarnings(as.numeric(tb[[k]])); if (anyNA(v)) stop("non-numeric or empty values in column ", k, " of the results CSV")
+    out[[k]] <- v
   }
-  keys <- c(paste0("aupr", D5$nets), paste0("auroc", D5$nets), paste0("p_aupr", D5$nets), paste0("p_auroc", D5$nets))
-  idx <- vapply(keys, find, 0L); names(idx) <- keys
-  tcol <- if (!is.null(colmap) && !is.na(colmap["team"])) match(colmap[["team"]], names(tb)) else which(grepl("team|method|name|submission", nm))[1]
-  miss <- c(if (is.na(tcol)) "team", names(idx)[is.na(idx)])
-  if (length(miss)) stop("cannot find these columns in the results CSV: ", paste(miss, collapse = ", "), "; its (normalised) headers are: ",
-                         paste(nm, collapse = ", "), ". Pass colmap = c(team = '<header>', aupr1 = '<header>', ...).")
-  num <- function(x) suppressWarnings(as.numeric(x))
-  out <- data.frame(team = tb[[tcol]], stringsAsFactors = FALSE)
-  for (k in keys) out[[k]] <- num(tb[[idx[[k]]]])
   out
 }
 d5_gate_team_key <- function(x) gsub("[^a-z0-9]", "", tolower(x))
-# tolerance rule: AUPR and AUROC absolute `tol`; p-values absolute `tol` and, where the published p is below `tol` (the absolute test
-# is vacuous there), also within 5% relative; a published p of exactly 0 needs ours to be 0.
-d5_gate_close <- function(ours, pub, tol, kind = c("metric", "p")) {
-  kind <- match.arg(kind); ok <- abs(ours - pub) <= tol
-  if (kind == "p") ok <- ok & ifelse(pub == 0, ours == 0, ifelse(pub < tol, abs(ours - pub) <= 0.05 * pub, TRUE))
-  ok
-}
-# the gate comparison for a set of teams. `ours`, `port` data.frames: team, net, AUPR, AUROC, P_AUPR, P_AUROC (R path = file-level R
-# scorer; port = Python port; `matrix` optional: the pipeline's matrix path). `pub`: d5_gate_read_results() output.
+# PASS RULE for one quantity (fixed before the full gate was run): |ours - published| <= tol (default 1e-3) in absolute value, for the
+# six per-network metrics and for the three aggregate scores alike. Justification: the table stores values rounded to 3 decimals
+# (rounding error <= 5e-4; truncation error < 1e-3, which two cells of the sheet turned out to need), so 1e-3 covers rounding or truncation of the last stored decimal; the "within the printed
+# rounding" alternative is not used because trailing zeros are not recoverable from a stored number (8.8 may be 8.800), so the printed
+# precision is never coarser than 3 decimals. Two exactly equal values (both Inf) match; a missing value never does.
+d5_gate_close <- function(ours, pub, tol) { ok <- ours == pub | abs(ours - pub) <= tol; ok[is.na(ok)] <- FALSE; ok }
+# Aggregate scores exactly as the official go_all.m:66-68 computes them: no floor and no cap on p or on -log10 p anywhere in the official
+# code (probability.m:2-5 is a plain sum; DREAM5_Challenge4_Evaluation.m:110-116 and go_all.m:66-68 take log10 of it), so p = 0 gives Inf
+# and the gate compares it as Inf; a published finite value then fails for that team and the failure is reported, never capped.
+d5_gate_aggregates <- function(p_aupr, p_auroc) { o <- d5_official_overall(p_aupr, p_auroc); c(score_overall = o[["overall"]], score_aupr = o[["aupr_score"]], score_auroc = o[["auroc_score"]]) }
+# The gate comparison. `impls`: named list of data.frames (team, net, AUPR, AUROC, P_AUPR, P_AUROC): R = file-level R scorer, port =
+# Python port, matrix = the pipeline's matrix path (rows of skipped team-networks absent). `pub`: d5_gate_read_results() output. Teams
+# are matched by name only. Returns impl, team, net (NA for an aggregate), quantity, ours, published, abs_diff, pass. An implementation
+# that lacks a network for a team (matrix path skipped it) gets no aggregate rows for that team.
 d5_gate_compare <- function(impls, pub, tol = 1e-3) {
   pk <- d5_gate_team_key(pub$team); rows <- list()
+  add <- function(impl, team, net, q, ours, pubv) rows[[length(rows) + 1L]] <<- data.frame(impl = impl, team = team, net = net, quantity = q, ours = ours, published = pubv,
+    abs_diff = abs(ours - pubv), pass = d5_gate_close(ours, pubv, tol), stringsAsFactors = FALSE)
   for (nm in names(impls)) { d <- impls[[nm]]
-    for (i in seq_len(nrow(d))) {
-      k <- match(d5_gate_team_key(d$team[i]), pk); if (is.na(k)) next
-      n <- d$net[i]
-      for (m in c("AUPR", "AUROC", "P_AUPR", "P_AUROC")) {
-        key <- paste0(if (grepl("^P_", m)) "p_" else "", tolower(sub("^P_", "", m)), n); pubv <- pub[[key]][k]
-        rows[[length(rows) + 1L]] <- data.frame(impl = nm, team = d$team[i], net = n, quantity = m, ours = d[[m]][i], published = pubv,
-          abs_diff = abs(d[[m]][i] - pubv), pass = d5_gate_close(d[[m]][i], pubv, tol, if (grepl("^P_", m)) "p" else "metric"), stringsAsFactors = FALSE)
-      }
+    for (t in unique(d$team)) {
+      k <- match(d5_gate_team_key(t), pk); if (is.na(k)) next
+      dt <- d[d$team == t, , drop = FALSE]
+      for (i in seq_len(nrow(dt))) { n <- dt$net[i]
+        add(nm, t, n, "AUPR", dt$AUPR[i], pub[[paste0("aupr", n)]][k]); add(nm, t, n, "AUROC", dt$AUROC[i], pub[[paste0("auroc", n)]][k]) }
+      if (setequal(dt$net, D5$nets)) { dt <- dt[match(D5$nets, dt$net), ]; a <- d5_gate_aggregates(dt$P_AUPR, dt$P_AUROC)
+        for (q in names(a)) add(nm, t, NA_integer_, q, a[[q]], pub[[q]][k]) }
     }
   }
+  if (!length(rows)) return(data.frame(impl = character(), team = character(), net = integer(), quantity = character(), ours = numeric(), published = numeric(), abs_diff = numeric(), pass = logical()))
   do.call(rbind, rows)
 }
 

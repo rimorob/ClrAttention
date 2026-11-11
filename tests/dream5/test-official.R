@@ -202,7 +202,61 @@ test_that("pipeline with the official readout on a synthetic net: labelled reado
   expect_match(rs$rows$YE$readout, "SENSITIVITY ONLY"); expect_equal(rs$point$aupr[1:2], r$point$aupr_stepwise[1:2]); expect_null(rs$official)
 })
 
-test_that("scorer gate: refuses without both data inputs; passes on the shipped demo (three renamed copies); fails on a wrong published table; port and R agree", {
+PUBTAB <- "analysis/dream5_published_table.py"
+# a synthetic export of the organisers' sheet: same layout as r-survey4.xls.csv (title rows, category rows, rows with the within-category number in column 2)
+synth_sheet <- function(path, drop = NULL, counts = c(Regression = 8, `Mutual information` = 5, Correlation = 3, `Bayesian networks` = 6, Other = 8, Meta = 5), bad = NULL) {
+  ln <- c(strrep(",", 46), ",Method,Score,,,AUPR,,,AUROC,,,\"Net2 (S. aureus, not used for scoring)\",,,,\"Survey\"", ",,Overall,AUPR,AUROC,Net1,Net3,Net4,Net1,Net3,Net4,AUPR,AUROC,,,1: yes")
+  k <- 0
+  for (cat in names(counts)) { ln <- c(ln, sprintf(",%s,,,,,,,,,,,,,%s", cat, cat))
+    for (i in seq_len(counts[[cat]])) { k <- k + 1; v <- c(k + 0.25, k + 0.2, k + 0.3, k / 100, k / 200, k / 300, 0.5 + k / 100, 0.6, 0.7, 0.08, 0.55)
+      if (identical(bad, c(cat, i))) v[3] <- NA
+      ln <- c(ln, paste0(",", i, ",", paste(ifelse(is.na(v), "", v), collapse = ","), ",,", i, ", ,*")) } }
+  ln <- c(ln, ",Community,,,,,,,,,,,,,Community", ",RankSum,52.4271,58.5993,46.2549,0.327,0.09,0.022,0.809,0.65,0.528,0.0971,0.5845", strrep(",", 12))
+  if (!is.null(drop)) ln <- ln[-grep(drop, ln)[1]]
+  writeLines(ln, path); path
+}
+test_that("published-table converter: tidy output, team naming, row-count assertions fail loudly", {
+  skip_if_not(nzchar(Sys.which("python3")))
+  td <- tempfile(); dir.create(td); src <- synth_sheet(file.path(td, "s.csv")); out <- file.path(td, "t.csv")
+  st <- system2("python3", c("-I", PUBTAB, "tidy", shQuote(src), shQuote(out)), stdout = TRUE, stderr = TRUE); expect_null(attr(st, "status"))
+  tb <- utils::read.csv(out, stringsAsFactors = FALSE)
+  expect_equal(names(tb), c("team", "score_overall", "score_aupr", "score_auroc", "aupr1", "aupr3", "aupr4", "auroc1", "auroc3", "auroc4")); expect_equal(nrow(tb), 36L)
+  expect_equal(tb$team[c(1, 8, 9, 13, 14, 16, 17, 22, 36)], c("Regression1", "Regression8", "MI1", "MI5", "Correlation1", "Correlation3", "Bayesian1", "Bayesian6", "Community"))
+  expect_equal(tb$team[nrow(tb)], "Community"); expect_equal(sum(grepl("^Other", tb$team)), 8L); expect_equal(sum(grepl("^Meta", tb$team)), 5L)
+  expect_equal(tb$aupr1[tb$team == "Regression3"], 0.03); expect_equal(tb$score_overall[tb$team == "Community"], 52.4271); expect_equal(tb$auroc4[tb$team == "Community"], 0.528)
+  # a missing row, an extra row, a missing number: nonzero status and a clear message; nothing is written
+  chk <- function(srcf, pat) { o <- file.path(td, "x.csv"); r <- suppressWarnings(system2("python3", c("-I", PUBTAB, "tidy", shQuote(srcf), shQuote(o)), stdout = TRUE, stderr = TRUE))
+    expect_true(!is.null(attr(r, "status")) && attr(r, "status") != 0L); expect_match(paste(r, collapse = " "), pat); expect_false(file.exists(o)) }
+  chk(synth_sheet(file.path(td, "d.csv"), drop = "^,Community,,"), "row label|unexpected row counts")
+  chk(synth_sheet(file.path(td, "d2.csv"), drop = "^,6,"), "unexpected row counts")
+  chk(synth_sheet(file.path(td, "e.csv"), counts = c(Regression = 9, `Mutual information` = 5, Correlation = 3, `Bayesian networks` = 6, Other = 8, Meta = 5)), "unexpected row counts")
+  chk(synth_sheet(file.path(td, "m.csv"), bad = c("Other", 2)), "column 4 \\(score_auroc\\) is empty")
+})
+test_that("published-table converter on the real sheet (when present): 36 named rows, values as printed", {
+  f <- "data/dream5/published_extracted/results/r-survey4.xls.csv"; skip_if_not(file.exists(f) && nzchar(Sys.which("python3")))
+  out <- tempfile(fileext = ".csv"); st <- system2("python3", c("-I", PUBTAB, "tidy", shQuote(f), shQuote(out)), stdout = TRUE, stderr = TRUE); expect_null(attr(st, "status"))
+  tb <- utils::read.csv(out, stringsAsFactors = FALSE); expect_equal(nrow(tb), 36L); expect_equal(anyDuplicated(tb$team), 0L)
+  expect_true(all(c("Regression8", "MI5", "Correlation3", "Bayesian6", "Other8", "Meta5", "Community") %in% tb$team))
+  expect_equal(abs(tb$score_overall - (tb$score_aupr + tb$score_auroc) / 2) <= 2e-3, rep(TRUE, 36))
+})
+test_that("flat prediction directory: symlinks for all folders, files untouched, refuses incomplete teams", {
+  skip_if_not(nzchar(Sys.which("python3")))
+  td <- tempfile(); root <- file.path(td, "Network_predictions")
+  mk <- function(sub, t) { d <- file.path(root, sub, t); dir.create(d, recursive = TRUE); for (n in 1:4) writeLines(paste("G1", "G2", n), file.path(d, sprintf("DREAM5_NetworkInference_%s_Network%d.txt", t, n))) }
+  mk("Challenge participants", "Regression1"); mk("Challenge participants", "Meta2"); mk("Off-the-shelf methods", "MI1")
+  dir.create(file.path(root, "Community integration"), recursive = TRUE); for (n in 1:4) writeLines("x", file.path(root, "Community integration", sprintf("DREAM5_NetworkInference_Community_Network%d.txt", n)))
+  before <- tools::md5sum(list.files(root, recursive = TRUE, full.names = TRUE))
+  flat <- file.path(td, "flat"); st <- system2("python3", c("-I", PUBTAB, "flat-pred", shQuote(root), shQuote(flat)), stdout = TRUE, stderr = TRUE); expect_null(attr(st, "status"))
+  expect_equal(sort(list.files(flat)), c("Community", "MI1", "Meta2", "Regression1"))
+  for (t in c("Community", "MI1", "Meta2", "Regression1")) { f <- file.path(flat, t, sprintf("DREAM5_NetworkInference_%s_Network3.txt", t)); expect_true(nzchar(Sys.readlink(f))); expect_true(file.exists(f)) }
+  expect_equal(readLines(file.path(flat, "MI1", "DREAM5_NetworkInference_MI1_Network3.txt")), "G1 G2 3")
+  expect_equal(tools::md5sum(list.files(root, recursive = TRUE, full.names = TRUE)), before)          # the extracted files are never modified
+  st2 <- system2("python3", c("-I", PUBTAB, "flat-pred", shQuote(root), shQuote(flat)), stdout = TRUE, stderr = TRUE); expect_null(attr(st2, "status"))   # idempotent
+  unlink(file.path(root, "Challenge participants", "Meta2", "DREAM5_NetworkInference_Meta2_Network4.txt"))
+  st3 <- suppressWarnings(system2("python3", c("-I", PUBTAB, "flat-pred", shQuote(root), shQuote(file.path(td, "flat2"))), stdout = TRUE, stderr = TRUE)); expect_true(!is.null(attr(st3, "status"))); expect_match(paste(st3, collapse = " "), "missing prediction file")
+})
+
+test_that("scorer gate: refuses without both data inputs; passes on the shipped demo (three renamed copies); fails on a wrong published table; R, port and matrix path agree", {
   skip_if_not(have_demo && have_py)
   source("analysis/dream5_scorer_gate.R", local = TRUE)
   o0 <- d5_gate_args(c("--out_dir", tempfile()))
@@ -211,37 +265,55 @@ test_that("scorer gate: refuses without both data inputs; passes on the shipped 
   for (t in teams) { dir.create(file.path(pred, t), recursive = TRUE)
     for (n in c(1, 3, 4)) file.copy(sprintf("%s/INPUT/predictions/myteam/DREAM5_NetworkInference_myteam_Network%d.txt", SCR, n), file.path(pred, t, sprintf("DREAM5_NetworkInference_%s_Network%d.txt", t, n))) }
   ref <- readLines(file.path(SCR, "OUTPUT", "myteam.txt")); num <- function(i) as.numeric(strsplit(trimws(ref[i]), "\t")[[1]])
-  mk <- function(f, fudge = 0) { tb <- data.frame(Team = teams, check.names = FALSE)
-    for (k in 1:3) { n <- c(1, 3, 4)[k]
-      tb[[sprintf("AUPR_Net%d", n)]] <- num(11)[k] + fudge; tb[[sprintf("AUROC_Net%d", n)]] <- num(14)[k]
-      tb[[sprintf("P_AUPR_Net%d", n)]] <- num(5)[k]; tb[[sprintf("P_AUROC_Net%d", n)]] <- num(8)[k] }
-    tb$Overall <- 0.794; utils::write.csv(tb, f, row.names = FALSE) }
+  # the shipped demo output: line 2 = overall / AUPR score / AUROC score, line 11 = AUPR nets, line 14 = AUROC nets
+  mk <- function(f, fudge = 0, score_fudge = 0, names = teams) { tb <- data.frame(team = names, score_overall = num(2)[1] + score_fudge, score_aupr = num(2)[2], score_auroc = num(2)[3], check.names = FALSE)
+    for (k in 1:3) { n <- c(1, 3, 4)[k]; tb[[sprintf("aupr%d", n)]] <- num(11)[k] + fudge; tb[[sprintf("auroc%d", n)]] <- num(14)[k] }
+    utils::write.csv(tb, f, row.names = FALSE) }
   csv <- file.path(tdir, "results.csv"); mk(csv)
   o <- d5_gate_args(c("--pred_dir", pred, "--results_csv", csv, "--out_dir", file.path(tdir, "out")))
   res <- d5_gate_run(o, say = function(...) NULL)
   expect_equal(res$status, 0L); expect_true(res$pass); expect_equal(sort(res$ok_teams), sort(teams)); expect_lt(res$d_rp, 1e-9); expect_lt(res$d_rm, 1e-9)
   expect_true(all(c("R", "port", "matrix") %in% res$comparison$impl)); expect_true(all(res$comparison$pass)); expect_lte(max(res$comparison$abs_diff), 1e-3)
+  expect_setequal(unique(res$comparison$quantity), c("AUPR", "AUROC", "score_overall", "score_aupr", "score_auroc")); expect_equal(nrow(res$comparison), 3 * 3 * (6 + 3))
   expect_true(all(file.exists(file.path(tdir, "out", c("gate_report.md", "gate_comparison.csv"))))); expect_match(readLines(file.path(tdir, "out", "gate_report.md"))[1], "PASS")
-  # fewer teams than required, a wrong published AUPR, a missing column
+  # fewer teams than required, a wrong published AUPR, a wrong published aggregate score, a missing column, a name that matches no directory
   o2 <- d5_gate_args(c("--pred_dir", pred, "--results_csv", csv, "--out_dir", file.path(tdir, "o2"), "--teams", "myteam", "--matrix", "0"))
   expect_equal(d5_gate_run(o2, say = function(...) NULL)$status, 1L)                                     # one team < min_teams 3
   csv2 <- file.path(tdir, "bad.csv"); mk(csv2, fudge = 0.01)
-  expect_equal(d5_gate_run(d5_gate_args(c("--pred_dir", pred, "--results_csv", csv2, "--out_dir", file.path(tdir, "o3"), "--matrix", "0")), say = function(...) NULL)$status, 1L)
-  tb <- utils::read.csv(csv, check.names = FALSE); utils::write.csv(tb[, !grepl("P_AUROC_Net3", names(tb))], file.path(tdir, "nocol.csv"), row.names = FALSE)
-  expect_error(d5_gate_run(d5_gate_args(c("--pred_dir", pred, "--results_csv", file.path(tdir, "nocol.csv"), "--out_dir", file.path(tdir, "o4"))), say = function(...) NULL), "cannot find these columns.*p_auroc3")
+  r3 <- d5_gate_run(d5_gate_args(c("--pred_dir", pred, "--results_csv", csv2, "--out_dir", file.path(tdir, "o3"), "--matrix", "0")), say = function(...) NULL); expect_equal(r3$status, 1L); expect_length(r3$ok_teams, 0)
+  csv2b <- file.path(tdir, "bad2.csv"); mk(csv2b, score_fudge = 0.01)
+  r3b <- d5_gate_run(d5_gate_args(c("--pred_dir", pred, "--results_csv", csv2b, "--out_dir", file.path(tdir, "o3b"), "--matrix", "0")), say = function(...) NULL); expect_equal(r3b$status, 1L)
+  expect_true(all(r3b$comparison$pass[r3b$comparison$quantity != "score_overall"])); expect_false(any(r3b$comparison$pass[r3b$comparison$quantity == "score_overall"]))
+  tb <- utils::read.csv(csv, check.names = FALSE); utils::write.csv(tb[, !grepl("auroc3", names(tb))], file.path(tdir, "nocol.csv"), row.names = FALSE)
+  expect_error(d5_gate_run(d5_gate_args(c("--pred_dir", pred, "--results_csv", file.path(tdir, "nocol.csv"), "--out_dir", file.path(tdir, "o4"))), say = function(...) NULL), "lacks the columns auroc3")
+  csv5 <- file.path(tdir, "other_names.csv"); mk(csv5, names = c("Alpha", "Beta", "Gamma"))
+  expect_equal(d5_gate_run(d5_gate_args(c("--pred_dir", pred, "--results_csv", csv5, "--out_dir", file.path(tdir, "o5"))), say = function(...) NULL)$status, 2L)   # matched by name, never by value
   # the command line script refuses (status 2) with a missing input
   st <- suppressWarnings(system2("Rscript", c("analysis/dream5_scorer_gate.R", "--pred_dir", shQuote(file.path(tdir, "nonexistent")), "--results_csv", shQuote(csv)), stdout = FALSE, stderr = FALSE))
   expect_equal(st, 2L)
 })
 
-test_that("gate helpers: results-table header recognition and the tolerance rule", {
-  tb <- data.frame(Team = "x", `AUPR Network 1` = "0.1", `AUPR Network 3` = "0.2", `AUPR Network 4` = "0.3", `AUROC Network 1` = "0.5", `AUROC Network 3` = "0.6", `AUROC Network 4` = "0.7",
-                   `AUPR p-value Net1` = "0.01", `AUPR p-value Net3` = "0.02", `AUPR p-value Net4` = "0.03", `AUROC p-value Net1` = "0.04", `AUROC p-value Net3` = "0.05", `AUROC p-value Net4` = "0.06",
-                   `AUPR score` = "1", `Overall score` = "2", check.names = FALSE)
-  f <- tempfile(fileext = ".csv"); utils::write.csv(tb, f, row.names = FALSE); pub <- d5_gate_read_results(f)
-  expect_equal(unlist(pub[1, -1], use.names = FALSE), c(.1, .2, .3, .5, .6, .7, .01, .02, .03, .04, .05, .06))
-  expect_equal(d5_gate_close(c(0.1, 0.1), c(0.1005, 0.102), 1e-3), c(TRUE, FALSE))
-  expect_equal(d5_gate_close(c(2.5e-4, 2.5e-4, 0, 1e-9), c(2.53e-4, 3e-4, 0, 0), 1e-3, "p"), c(TRUE, FALSE, TRUE, FALSE))
+test_that("demo evidence: the aggregate scores of go_all.m are mean(-log10 p) per metric and overall = their mean (shipped OUTPUT/myteam.txt)", {
+  skip_if_not(have_demo)
+  ref <- readLines(file.path(SCR, "OUTPUT", "myteam.txt")); num <- function(i) as.numeric(strsplit(trimws(ref[i]), "\t")[[1]])
+  a <- d5_gate_aggregates(num(5), num(8))                       # the printed p-values (4 significant digits)
+  expect_lte(abs(a[["score_overall"]] - num(2)[1]), 1e-3); expect_lte(abs(a[["score_aupr"]] - num(2)[2]), 1e-3); expect_lte(abs(a[["score_auroc"]] - num(2)[3]), 1e-3)
+  expect_equal(a[["score_overall"]], (a[["score_aupr"]] + a[["score_auroc"]]) / 2)
+})
+
+test_that("gate helpers: tolerance rule, Inf handling (no floor or cap), name matching, aggregates", {
+  expect_equal(d5_gate_close(c(0.1, 0.1, 0.1, Inf, Inf, NA, 5), c(0.1005, 0.102, NA, Inf, 50, 1, 5.0011), 1e-3), c(TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE))
+  a <- d5_gate_aggregates(c(0.1, 0.01, 0), c(0.5, 0.5, 0.5)); expect_true(is.infinite(a[["score_overall"]]) && is.infinite(a[["score_aupr"]]) && is.finite(a[["score_auroc"]]))
+  b <- d5_gate_aggregates(c(1e-300, 1e-300, 1e-300), c(0.1, 0.1, 0.1)); expect_equal(b[["score_aupr"]], 300)          # tiny but nonzero p is not floored either
+  pub <- data.frame(team = c("Regression1", "MI2"), score_overall = c(5, 1), score_aupr = c(6, 1), score_auroc = c(4, 1), aupr1 = .2, aupr3 = .1, aupr4 = .05, auroc1 = .7, auroc3 = .6, auroc4 = .55)
+  d <- data.frame(team = "regression1", net = c(1, 3, 4), AUPR = c(.2, .1, .05) + 1e-4, AUROC = c(.7, .6, .55), P_AUPR = 10^-6, P_AUROC = 10^-4)
+  cm <- d5_gate_compare(list(R = d), pub, 1e-3); expect_equal(nrow(cm), 3 * 2 + 3); expect_true(all(cm$team == "regression1"))              # matched by name, case-insensitively
+  expect_equal(cm$ours[cm$quantity == "score_aupr"], 6); expect_equal(cm$ours[cm$quantity == "score_auroc"], 4); expect_true(all(cm$pass))
+  d2 <- d[1:2, ]; expect_false(any(is.na(d5_gate_compare(list(matrix = d2), pub)$net) ))                                                         # a team lacking a network gets no aggregate rows
+  expect_equal(nrow(d5_gate_compare(list(R = transform(d, team = "Unknown")), pub)), 0L)                                                        # unknown names are never compared
+  tb <- data.frame(team = c("a", "b"), score_overall = 1, score_aupr = 1, score_auroc = 1, aupr1 = 1, aupr3 = 1, aupr4 = 1, auroc1 = 1, auroc3 = 1, auroc4 = "x")
+  f <- tempfile(fileext = ".csv"); utils::write.csv(tb, f, row.names = FALSE); expect_error(d5_gate_read_results(f), "non-numeric or empty values in column auroc4")
+  tb$auroc4 <- 1; tb$team <- "a"; utils::write.csv(tb, f, row.names = FALSE); expect_error(d5_gate_read_results(f), "duplicated team names")
 })
 
 test_that("overall official score combines the three per-network tables; Inf is not capped", {
