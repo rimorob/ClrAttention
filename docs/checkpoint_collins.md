@@ -1,6 +1,6 @@
 # CLR as attention: checkpoint for Jim Collins
 
-*Boris, 21 October 2026. Status of the project, what we have in hand, what did not work, and the decisions ahead. The key results below have been checked by an independent statistical review; numbers are from the reviewed outputs. **GRNBoost2 rows regenerated 29–31 Oct 2026 (legacy early stopping, after an early-stopping fault was found on 22 Oct); GRNBoost2 claims reviewed 31 Oct. The shared claude.ai page was republished with these values on 31 Oct 2026 (version 3; it also carries the draft abstract and graphical abstract, which are not in this file).***
+*Boris, 21 October 2026 (yeast test, item 8, added 11 November 2026). Status of the project, what we have in hand, what did not work, and the decisions ahead. The key results below have been checked by an independent statistical review; numbers are from the reviewed outputs. **GRNBoost2 rows regenerated 29–31 Oct 2026 (legacy early stopping, after an early-stopping fault was found on 22 Oct); GRNBoost2 claims reviewed 31 Oct. The shared claude.ai page was republished with these values on 31 Oct 2026 (version 3; it also carries the draft abstract and graphical abstract, which are not in this file).***
 
 ## In one paragraph
 
@@ -55,8 +55,17 @@ EcoMAC is not an independent replication of M3D. It is a larger, partly overlapp
 - Platform-level ComBat helps more than switching from correlation to MI.
 - One clean platform (735 arrays) beats all 2,198 pooled.
 
+**8. Yeast test: DREAM5 network 4 (fixed in advance, run once, 11 Nov)**
+- DREAM5 yeast compendium (536 chips, 5,950 genes; the challenge's gold standard of 3,940 interactions). Design frozen 4 Nov, 10% relative-AUPR margin (d = log2 ratio = 0.1375), two co-primary readouts reported together, one look at truth. Our implementation of the official scorer reproduced the published scores of all 36 challenge methods (to 1e-3) before ours were scored.
+- **Y-M (regulon co-membership):** attention 0.111 vs CLR 0.105, ratio 1.058, d = 0.082 [0.026, 0.137]. Preregistered verdict: Equivalent within 10%, and only just (upper bound 0.1374 against 0.1375). Fixed wording: the co-membership headline did not replicate in yeast at the stated margin; the direction is positive.
+- **Y-E (official directed-edge score):** attention 0.0216 vs CLR 0.0208, ratio 1.042, d = 0.060 [-0.093, 0.213]. Inconclusive. The estimate has the opposite sign from the prediction (not positive), but the interval runs from a 6% loss to a 16% gain.
+- Every method is near chance on yeast edges (AUPR about 0.02 against a base rate of 0.017; AUROC 0.51 to 0.52). Series-level resampling gives a larger spread than the group-level SE_B (Y-M SD 0.040 vs 0.017); the Y-M interval excluding zero rests on the group-level resampling.
+- Networks 3 and 1, descriptive (jackknife-only intervals, understated): E. coli net3 Y-M ratio 1.19, Y-E 0.89 (the M3D pattern; same lineage as the headline, not independent); in silico net1 Y-M 0.98, Y-E 1.15. Official challenge score (descriptive): attention has the best yeast AUROC significance of our seven methods (-log10 p 5.6); GENIE3 and GRNBoost2 are ahead of it on nets 1 and 3.
+- PIDC has a 2-entry tied block at the 100,000 cap on nets 1 and 4 (design expected none); dropped by the fixed rule, affects only PIDC. Not yet independently reviewed. Full report: `docs/dream5_selections/dream5_report.md`.
+
 ## What did not work (reported as negatives)
 - Hard FDR-thresholded operators: they isolate 62–77% of genes.
+- Yeast reciprocity test: not run; its preregistered data-quality gate failed in all 10 draws (median chance-corrected reproducibility 0.12 for mutants against 0.30 for wild types), so no truth was opened. Reciprocity stays a synthetic-only candidate (Supplementary Note 18).
 - Value transforms and diffused-profile readouts.
 - Wider gene contexts on single cells.
 - Data-driven choice of attention width: all three options failed review before running, and are being tested empirically anyway under a preregistration.
@@ -67,11 +76,12 @@ EcoMAC is not an independent replication of M3D. It is a larger, partly overlapp
 - Learned attention (done 2 Nov; see Results below).
 - GENIE3, GRNBoost2 and PIDC on the BEELINE single-cell benchmark: done. CLR is comparable to GENIE3 and PIDC. GRNBoost2 (legacy early stopping) is below CLR in 6 of 7 datasets (mean log2 −0.15; Wilcoxon P = 0.031, sign P = 0.125; hESC is the exception), a descriptive count, not a significant difference.
 - Preregistered attention-width test, including multi-head attention as the candidate fix for the complex loss.
-- Directed DREAM5-style evaluation with ARACNE; log-scale depth analysis; perturbation-diversity learning curves; differential CLR.
+- Directed DREAM5 evaluation: done (item 8; ARACNE was not part of the design), write-up in progress. Log-scale depth analysis; perturbation-diversity learning curves; differential CLR.
 
 ## Decisions for you and me
 1. **Venue:** Nature Machine Intelligence (150-word abstract) or Nature Communications.
 2. **Scope:** one paper on CLR attention, with perturbation targets and differential CLR as a second paper.
 3. **The central claim:** "better recovery of regulatory programs from expression alone", not "better network inference". Is that strong enough for the target venue?
 4. **The human single-cell story:** CLR-NS rather than attention is the single-cell result. Does it belong in this paper?
-5. **AI disclosure:** the analysis code, runs and drafts were produced with Claude (Anthropic), with independent AI statistical reviews, under my direction. A contributions statement is drafted to match Nature Portfolio policy.
+5. **The yeast result:** Y-M is positive but under the 10% margin, Y-E is inconclusive, and the network 3 pattern (module gain, edge cost) is not independent of the headline. How should this enter the paper and the abstract, which is scoped to E. coli?
+6. **AI disclosure:** the analysis code, runs and drafts were produced with Claude (Anthropic), with independent AI statistical reviews, under my direction. A contributions statement is drafted to match Nature Portfolio policy.
