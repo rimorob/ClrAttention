@@ -247,3 +247,163 @@ port and matrix path equal R to 1e-11.
 | Regression6 | 6.026 / 8.924 / 3.128 | 6.0265 / 8.9244 / 3.1285 | 4.02e-04 | 4.91e-04 | yes |
 | Regression7 | 0.997 / 0 / 1.995 | 0.9974 / 0.0002 / 1.9945 | 4.11e-04 | 4.74e-04 | yes |
 | Regression8 | 0.045 / 0.058 / 0.032 | 0.0446 / 0.0577 / 0.0316 | 2.77e-04 | 4.37e-04 | yes |
+
+## 7. Truth stage scoring of our methods (2026-11-11)
+
+Written by Claude (Sonnet 5.5) for the lead, after the PI's go ("yes, run") and the passed scorer gate (commit 95f78eb). Primary run, once per network, switches fixed by the design change log of 2026-11-06 (`--run_kind primary --universe gs --cap_order cap_then_universe --tftf keep_both --ties_at_cap drop_tied --ties_in_list expected --jackknife_cap restrict_after_cap`, official trapezoid readout, nrep 200, refit_n 100, series_n 100). Facts and tables only; no interpretation here. Jobs 3000 (net1), 3010 (net4), 3020 (net3; started after net1 finished, while net4 was running) went through the scheduler (`jobs_pc/sched`). Before the runs, `--structure_only 1` was run for nets 1 and 4 into a scratch directory outside the repo to check paths and options (structure counts only, no score read; nets 1 and 4 counts below equal the ones written by the primary runs). No code, switch, seed or endpoint was changed after any score was seen.
+
+### 7.1 net1
+
+Job `jobs_pc/sched/3000_d5_truth_net1.sh` (scheduler, nice 19, own systemd scope), runner.log START 10:26:40, END 10:28:30, rc=0, wall 1 min 50 s, peak memory 0.7 GB (declared 8). Command (run once; the design's switches of change log 2026-11-06):
+
+```
+Rscript analysis/dream5_truth_run.R --net 1 --truth_edges "data/dream5/truth_extracted/Evaluation scripts/INPUT/gold_standard_edges_only/DREAM5_NetworkInference_Edges_Network1.tsv" --out_dir results/dream5/truth_net1 --run_kind primary --universe gs --cap_order cap_then_universe --tftf keep_both --ties_at_cap drop_tied --ties_in_list expected --jackknife_cap restrict_after_cap --universe_tf data/dream5/truth_extracted_universe/net1_universe_tf.txt --universe_gene data/dream5/truth_extracted_universe/net1_universe_gene.txt --nrep 200
+```
+
+Guard passed (design, data log, manifests; 21 score files verified against the manifest). truth: 4012 edges kept; dropped: 0 with IDs not in the gene or TF lists, 0 label-0 rows, 0 self-edges, 0 repeated rows. Output files: cap_boundary.csv jack_edge.csv jack_module.csv official_scores.csv point_estimates.csv run_info.txt structure_counts.csv universe_gene.txt universe_tf.txt verdict.csv ym_gate.csv .
+
+`results/dream5/truth_net1/verdict.csv`:
+
+```
+"net","endpoint","readout","contrast","aupr_a","aupr_b","ratio","difference","d","delta","SE_J","SE_B","SE","ci_lo","ci_hi","ci_J_lo","ci_J_hi","p_sup","p_harm","p_noninf_lo","p_noninf_hi","verdict","verdict_note"
+1,"YE","official Y-E: trapezoid AUPR/(1-1/P) and AUROC with expected-fraction tail (design 2026-11-06, decision 6)","attention vs clr",0.296031438584405,0.25716743438424,1.15112335001988,0.038864004200165,0.203042435491924,0.137503523749935,0.0909450449786858,NA,NA,NA,NA,0.0247901473336998,0.381294723650148,NA,NA,NA,NA,"descriptive (no verdict: needs net4 and SE_B)",NA
+1,"YM","regulon co-membership AUPR (ap_fast)","attention vs clr",0.354828996573268,0.36258375592589,0.978612502005724,-0.00775475935262215,-0.0311903812289702,0.137503523749935,0.0237217736975759,NA,NA,NA,NA,-0.077685057676219,0.0153042952182786,NA,NA,NA,NA,"descriptive (no verdict: needs net4 and SE_B)",NA
+```
+
+`results/dream5/truth_net1/official_scores.csv`:
+
+```
+"net","method","aupr","auroc","P_AUPR","P_AUROC","neglog10_P_AUPR","neglog10_P_AUROC"
+1,"abs_pearson",0.188715142584564,0.756727419152994,3.62865921605201e-13,1.5899517706002e-32,12.4402538164612,31.7986160493147
+1,"clr",0.25716743438424,0.783475216252983,1.18498393727936e-64,1.08007143332157e-60,63.9262875365722,59.9665475203728
+1,"clrns",0.241671021302459,0.755532550428022,1.50871441128392e-49,1.70910234359551e-31,48.8213929612461,30.7672319302998
+1,"attention",0.296031438584405,0.81471110349613,2.78769483075654e-111,4.85819544204899e-106,110.554754770234,105.313525017794
+1,"genie3_tf",0.303023845355248,0.816131376626008,5.60314989898134e-121,1.98713862188676e-108,120.251567758859,107.701771835648
+1,"grnboost2_tf",0.336277085581036,0.824505810053621,1.59968943648297e-172,4.30976766266952e-123,171.79596432304,122.365546141798
+1,"pidc",0.225257869014847,0.766170517258633,1.00186691117909e-35,2.22525080201482e-41,34.9991899666718,40.652621033765
+```
+
+`results/dream5/truth_net1/cap_boundary.csv`:
+
+```
+"net","method","cap","n_candidates","n_tied_at_cap","ties_at_cap"
+1,"abs_pearson",100000,320190,0,"drop_tied"
+1,"clr",100000,320190,0,"drop_tied"
+1,"clrns",100000,320190,0,"drop_tied"
+1,"attention",100000,320190,0,"drop_tied"
+1,"genie3_tf",100000,320190,0,"drop_tied"
+1,"grnboost2_tf",100000,320190,0,"drop_tied"
+1,"pidc",100000,320190,2,"drop_tied"
+```
+
+`results/dream5/truth_net1/ym_gate.csv`:
+
+```
+"n_regulons_5_500","n_pos_pairs","n_regulons_ge5","n_pos_pairs_ge5_noupper","evaluable"
+130,208688,130,208688,TRUE
+```
+
+`results/dream5/truth_net1/structure_counts.csv`:
+
+```
+"n_edges","n_tfs_with_edges","median_edges_per_tf","max_edges_per_tf","n_tf_tf_edges","n_regulons_5_500","n_pos_pairs","n_regulons_ge5","n_pos_pairs_ge5_noupper","evaluable","n_regulons_ge10","n_pos_pairs_ge10"
+4012,178,8,432,246,130,208688,130,208688,TRUE,76,207968
+```
+
+`results/dream5/truth_net1/point_estimates.csv`:
+
+```
+"net","method","endpoint","aupr","auroc","n_pos","N","aupr_sens","aupr_min10","readout","aupr_stepwise","K_listed","n_tied_at_cap"
+1,"abs_pearson","YE",0.188715142584564,0.756727419152994,4012,278392,NA,NA,"official",0.189058577721966,88374,0
+1,"clr","YE",0.25716743438424,0.783475216252983,4012,278392,NA,NA,"official",0.257451449928463,87798,0
+1,"clrns","YE",0.241671021302459,0.755532550428022,4012,278392,NA,NA,"official",0.241922269497326,87530,0
+1,"attention","YE",0.296031438584405,0.81471110349613,4012,278392,NA,NA,"official",0.296292033150108,85923,0
+1,"genie3_tf","YE",0.303023845355248,0.816131376626008,4012,278392,NA,NA,"official",0.303263297709182,87371,0
+1,"grnboost2_tf","YE",0.336277085581036,0.824505810053621,4012,278392,NA,NA,"official",0.336505857984445,88306,0
+1,"pidc","YE",0.225257869014847,0.766170517258633,4012,278392,NA,NA,"official",0.22557084090286,87558,2
+1,"abs_pearson","YM",0.347542188523932,NA,208688,1087075,0.347542188523932,0.369661164125166,"ap_fast (Y-M)",NA,NA,NA
+1,"clr","YM",0.36258375592589,NA,208688,1087075,0.371256317790033,0.38601803385533,"ap_fast (Y-M)",NA,NA,NA
+1,"clrns","YM",0.324855091373573,NA,208688,1087075,0.332664312750866,0.347504680790533,"ap_fast (Y-M)",NA,NA,NA
+1,"attention","YM",0.354828996573268,NA,208688,1087075,0.354828996573268,0.383350803250596,"ap_fast (Y-M)",NA,NA,NA
+1,"pidc","YM",0.354670094674556,NA,208688,1087075,0.354670094674556,0.379265318273972,"ap_fast (Y-M)",NA,NA,NA
+```
+
+**Cap-boundary finding (net1):** every method has 0 entries tied at the cap except pidc, which has a 2-entry tied block straddling rank 100,000 (`n_tied_at_cap = 2`; K_listed 87,558 after the cap, restriction to the gold universe and `drop_tied`). The design assumed none. Nets 1 and 3 have no refits, so SE_B and the verdict are not defined (`descriptive`); the net1 and net3 rows are exploratory context (net3: same lineage as the headline; net1: simulated).
+
+### 7.2 net3
+
+Job `jobs_pc/sched/3020_d5_truth_net3.sh` (scheduler, nice 19, own systemd scope), runner.log START 10:28:30, END 10:32:49, rc=0, wall 4 min 19 s, peak memory 1.2 GB (declared 12). Command (run once; the design's switches of change log 2026-11-06):
+
+```
+Rscript analysis/dream5_truth_run.R --net 3 --truth_edges "data/dream5/truth_extracted/Evaluation scripts/INPUT/gold_standard_edges_only/DREAM5_NetworkInference_Edges_Network3.tsv" --out_dir results/dream5/truth_net3 --run_kind primary --universe gs --cap_order cap_then_universe --tftf keep_both --ties_at_cap drop_tied --ties_in_list expected --jackknife_cap restrict_after_cap --universe_tf data/dream5/truth_extracted_universe/net3_universe_tf.txt --universe_gene data/dream5/truth_extracted_universe/net3_universe_gene.txt --nrep 200
+```
+
+Guard passed (design, data log, manifests; 21 score files verified against the manifest). truth: 2066 edges kept; dropped: 0 with IDs not in the gene or TF lists, 0 label-0 rows, 0 self-edges, 0 repeated rows. Output files: cap_boundary.csv jack_edge.csv jack_module.csv official_scores.csv point_estimates.csv run_info.txt structure_counts.csv universe_gene.txt universe_tf.txt verdict.csv ym_gate.csv .
+
+`results/dream5/truth_net3/verdict.csv`:
+
+```
+"net","endpoint","readout","contrast","aupr_a","aupr_b","ratio","difference","d","delta","SE_J","SE_B","SE","ci_lo","ci_hi","ci_J_lo","ci_J_hi","p_sup","p_harm","p_noninf_lo","p_noninf_hi","verdict","verdict_note"
+3,"YE","official Y-E: trapezoid AUPR/(1-1/P) and AUROC with expected-fraction tail (design 2026-11-06, decision 6)","attention vs clr",0.0665459505248364,0.0751333913916403,0.885704069685328,-0.00858744086680388,-0.175103347025059,0.137503523749935,0.158970266394531,NA,NA,NA,NA,-0.486685069158341,0.136478375108222,NA,NA,NA,NA,"descriptive (no verdict: needs net4 and SE_B)",NA
+3,"YM","regulon co-membership AUPR (ap_fast)","attention vs clr",0.290998353583234,0.244296423028847,1.19116911322469,0.0467019305543873,0.252378250725659,0.137503523749935,0.0319881535893591,NA,NA,NA,NA,0.189681469690515,0.315075031760803,NA,NA,NA,NA,"descriptive (no verdict: needs net4 and SE_B)",NA
+```
+
+`results/dream5/truth_net3/official_scores.csv`:
+
+```
+"net","method","aupr","auroc","P_AUPR","P_AUROC","neglog10_P_AUPR","neglog10_P_AUROC"
+3,"abs_pearson",0.0635930818465963,0.572054519095835,3.53092093922031e-05,0.960181870165606,4.45211200660704,0.0176464984932526
+3,"clr",0.0751333913916403,0.589701633607431,6.55692533017442e-10,0.0455463714970742,9.18329976202173,1.34154621587138
+3,"clrns",0.0570100210268406,0.577372443645452,0.0035326838264497,0.762496071185252,2.45189522997889,0.117762389708339
+3,"attention",0.0665459505248364,0.577314681586699,3.03211253187163e-06,0.7661993943771,5.51825468461519,0.115658195629876
+3,"genie3_tf",0.0955767360853231,0.617295227379445,1.03982502166602e-21,3.69432659010249e-11,20.9830397361997,10.432464714199
+3,"grnboost2_tf",0.0959753296352086,0.624169337708084,5.56648497265279e-22,8.5252286097836e-15,21.2544189590204,14.0692939662784
+3,"pidc",0.0686974589363444,0.584114322488816,4.33918704034358e-07,0.262158881734096,6.36259162923507,0.581435424149892
+```
+
+`results/dream5/truth_net3/cap_boundary.csv`:
+
+```
+"net","method","cap","n_candidates","n_tied_at_cap","ties_at_cap"
+3,"abs_pearson",100000,1506340,0,"drop_tied"
+3,"clr",100000,1506340,0,"drop_tied"
+3,"clrns",100000,1506340,0,"drop_tied"
+3,"attention",100000,1506340,0,"drop_tied"
+3,"genie3_tf",100000,1506340,0,"drop_tied"
+3,"grnboost2_tf",100000,1506340,0,"drop_tied"
+3,"pidc",100000,1506340,0,"drop_tied"
+```
+
+`results/dream5/truth_net3/ym_gate.csv`:
+
+```
+"n_regulons_5_500","n_pos_pairs","n_regulons_ge5","n_pos_pairs_ge5_noupper","evaluable"
+82,67929,82,67929,TRUE
+```
+
+`results/dream5/truth_net3/structure_counts.csv`:
+
+```
+"n_edges","n_tfs_with_edges","median_edges_per_tf","max_edges_per_tf","n_tf_tf_edges","n_regulons_5_500","n_pos_pairs","n_regulons_ge5","n_pos_pairs_ge5_noupper","evaluable","n_regulons_ge10","n_pos_pairs_ge10"
+2066,141,5,275,143,82,67929,82,67929,TRUE,43,67544
+```
+
+`results/dream5/truth_net3/point_estimates.csv`:
+
+```
+"net","method","endpoint","aupr","auroc","n_pos","N","aupr_sens","aupr_min10","readout","aupr_stepwise","K_listed","n_tied_at_cap"
+3,"abs_pearson","YE",0.0635930818465963,0.572054519095835,2066,152280,NA,NA,"official",0.0642905920553846,8101,0
+3,"clr","YE",0.0751333913916403,0.589701633607431,2066,152280,NA,NA,"official",0.0757882983484346,10059,0
+3,"clrns","YE",0.0570100210268406,0.577372443645452,2066,152280,NA,NA,"official",0.0576753057600549,10620,0
+3,"attention","YE",0.0665459505248364,0.577314681586699,2066,152280,NA,NA,"official",0.0672096197483561,9768,0
+3,"genie3_tf","YE",0.0955767360853231,0.617295227379445,2066,152280,NA,NA,"official",0.0962518908842801,11509,0
+3,"grnboost2_tf","YE",0.0959753296352086,0.624169337708084,2066,152280,NA,NA,"official",0.0966572478530855,12121,0
+3,"pidc","YE",0.0686974589363444,0.584114322488816,2066,152280,NA,NA,"official",0.0690657809980135,11194,0
+3,"abs_pearson","YM",0.226942963964905,NA,67929,448878,0.226942963964905,0.263742072242601,"ap_fast (Y-M)",NA,NA,NA
+3,"clr","YM",0.244296423028847,NA,67929,448878,0.24776980692718,0.280582608754304,"ap_fast (Y-M)",NA,NA,NA
+3,"clrns","YM",0.242341120828865,NA,67929,448878,0.24571675290476,0.280494695267443,"ap_fast (Y-M)",NA,NA,NA
+3,"attention","YM",0.290998353583234,NA,67929,448878,0.290998353583234,0.332053359639246,"ap_fast (Y-M)",NA,NA,NA
+3,"pidc","YM",0.239763707015419,NA,67929,448878,0.239763707015419,0.277069320558169,"ap_fast (Y-M)",NA,NA,NA
+```
+
+**Cap-boundary finding (net3):** 0 entries tied at the cap for every method.

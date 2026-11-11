@@ -1,0 +1,8 @@
+"net","method","cap","n_candidates","n_tied_at_cap","ties_at_cap"
+3,"abs_pearson",100000,1506340,0,"drop_tied"
+3,"clr",100000,1506340,0,"drop_tied"
+3,"clrns",100000,1506340,0,"drop_tied"
+3,"attention",100000,1506340,0,"drop_tied"
+3,"genie3_tf",100000,1506340,0,"drop_tied"
+3,"grnboost2_tf",100000,1506340,0,"drop_tied"
+3,"pidc",100000,1506340,0,"drop_tied"

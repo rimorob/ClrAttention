@@ -1,0 +1,4 @@
+run_kind: PRIMARY (Y-E primary run; design change log 2026-11-06 decisions)
+readout: official Y-E: trapezoid AUPR/(1-1/P) and AUROC with expected-fraction tail (design 2026-11-06, decision 6)
+switches: ties_at_cap = drop_tied; ties_in_list = expected; tftf = keep_both; universe = gs; cap_order = cap_then_universe; jackknife_cap = restrict_after_cap
+net: 3; cap: 100000; nrep: 200
