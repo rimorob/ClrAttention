@@ -1,0 +1,6 @@
+"variant","n_splits","t_median","t_q25","t_q75","t_min","t_max","tmax_scanned","within1pct_lo_median","within1pct_hi_median"
+"V0",8,9,9,10,9,10,20,7.5,12
+"V1",8,7,6,7,6,8,20,6,9
+"V2",8,6,5,6,5,7,20,4.5,8.5
+"V3",8,6,5.75,6,5,7,20,5,8
+"V4",8,6,6,7,6,7,20,5.5,8.5

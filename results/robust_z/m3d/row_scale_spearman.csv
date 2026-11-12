@@ -1,0 +1,25 @@
+"row_quantity","versus","spearman","n_genes","module_label"
+"mean_diag0","n_strong_global",0.774154920795405,4297,NA
+"mean_diag0","n_z4_gt3",0.258642791571861,4297,NA
+"mean_diag0","module_size",-0.0642338131309929,1879,"largest RegulonDB strong-evidence regulon containing the gene"
+"sd_diag0","n_strong_global",0.863295711644913,4297,NA
+"sd_diag0","n_z4_gt3",0.429543240853159,4297,NA
+"sd_diag0","module_size",-0.0473901750639251,1879,"largest RegulonDB strong-evidence regulon containing the gene"
+"median","n_strong_global",0.713398370760181,4297,NA
+"median","n_z4_gt3",0.144463638622803,4297,NA
+"median","module_size",-0.076965396508576,1879,"largest RegulonDB strong-evidence regulon containing the gene"
+"iqr_scale","n_strong_global",0.717264785642188,4297,NA
+"iqr_scale","n_z4_gt3",0.222731951188646,4297,NA
+"iqr_scale","module_size",-0.0539458062958589,1879,"largest RegulonDB strong-evidence regulon containing the gene"
+"mad_scale","n_strong_global",0.705721484827873,4297,NA
+"mad_scale","n_z4_gt3",0.174328498778151,4297,NA
+"mad_scale","module_size",-0.0646610851024081,1879,"largest RegulonDB strong-evidence regulon containing the gene"
+"sd_over_iqr","n_strong_global",0.34637910792508,4297,NA
+"sd_over_iqr","n_z4_gt3",0.784583054649938,4297,NA
+"sd_over_iqr","module_size",0.0963736568634219,1879,"largest RegulonDB strong-evidence regulon containing the gene"
+"sd_over_mad","n_strong_global",0.493723387212531,4297,NA
+"sd_over_mad","n_z4_gt3",0.89400070403439,4297,NA
+"sd_over_mad","module_size",0.0987970628976717,1879,"largest RegulonDB strong-evidence regulon containing the gene"
+"mean_minus_median_in_iqr","n_strong_global",0.615723191353914,4297,NA
+"mean_minus_median_in_iqr","n_z4_gt3",0.905548039185512,4297,NA
+"mean_minus_median_in_iqr","module_size",0.0412025561975598,1879,"largest RegulonDB strong-evidence regulon containing the gene"

@@ -1,0 +1,25 @@
+"row_quantity","versus","spearman","n_genes","module_label"
+"mean_diag0","n_strong_global",0.796980635549206,5671,NA
+"mean_diag0","n_z4_gt3",0.644928671146745,5671,NA
+"mean_diag0","module_size",0.10584114827535,2260,"largest CORUM complex containing the gene"
+"sd_diag0","n_strong_global",0.889942636031007,5671,NA
+"sd_diag0","n_z4_gt3",0.861459959975812,5671,NA
+"sd_diag0","module_size",0.168010759536655,2260,"largest CORUM complex containing the gene"
+"median","n_strong_global",0.649977202049442,5671,NA
+"median","n_z4_gt3",0.43199954648394,5671,NA
+"median","module_size",0.0634530550114882,2260,"largest CORUM complex containing the gene"
+"iqr_scale","n_strong_global",0.846415146984441,5671,NA
+"iqr_scale","n_z4_gt3",0.763942330208746,5671,NA
+"iqr_scale","module_size",0.131427730853773,2260,"largest CORUM complex containing the gene"
+"mad_scale","n_strong_global",0.831111957158635,5671,NA
+"mad_scale","n_z4_gt3",0.718241110610917,5671,NA
+"mad_scale","module_size",0.124302917178912,2260,"largest CORUM complex containing the gene"
+"sd_over_iqr","n_strong_global",0.771799709689244,5671,NA
+"sd_over_iqr","n_z4_gt3",0.941302851583947,5671,NA
+"sd_over_iqr","module_size",0.243575980431165,2260,"largest CORUM complex containing the gene"
+"sd_over_mad","n_strong_global",0.819753672740142,5671,NA
+"sd_over_mad","n_z4_gt3",0.982169082949665,5671,NA
+"sd_over_mad","module_size",0.220538138417197,2260,"largest CORUM complex containing the gene"
+"mean_minus_median_in_iqr","n_strong_global",0.826017773206469,5671,NA
+"mean_minus_median_in_iqr","n_z4_gt3",0.985225042761595,5671,NA
+"mean_minus_median_in_iqr","module_size",0.191386482052011,2260,"largest CORUM complex containing the gene"

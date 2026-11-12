@@ -1,0 +1,80 @@
+[15:58:26] options: dataset=m3d out=results/robust_z/m3d quick=0 threads=8 workers=8 nsplit=8 tmax=20 jack=100 jack_reg=100 t=9 alpha=0.5 seed=20261016 depth_seed=20261014 variants=V0,V0x,V1,V2,V3,V4 top_pairs=100000 
+[15:58:31] m3d: 4297 genes x 466 samples (39 labs) 
+[15:58:38] truth SC             155 regulons,  1762067 pairs, base rate 0.0943 
+[15:58:38] truth all            196 regulons,  3031397 pairs, base rate 0.1205 
+[15:58:38] depth stage: 8 splits, t = 1..20, variants V0,V1,V2,V3,V4, 8 workers 
+[15:59:59] options: dataset=m3d out=results/robust_z/m3d quick=0 threads=8 workers=8 nsplit=8 tmax=20 jack=100 jack_reg=100 t=9 alpha=0.5 seed=20261016 depth_seed=20261014 variants=V0,V0x,V1,V2,V3,V4 top_pairs=100000 
+[16:00:04] m3d: 4297 genes x 466 samples (39 labs) 
+[16:00:12] truth SC             155 regulons,  1762067 pairs, base rate 0.0943 
+[16:00:12] truth all            196 regulons,  3031397 pairs, base rate 0.1205 
+[16:00:12] depth stage: 8 splits, t = 1..20, variants V0,V1,V2,V3,V4, 8 workers 
+[16:14:31] depth stage done; per-split seconds: 835 830 856 833 834 854 859 845 
+[16:14:31] held-out t* (median over splits): V0=9 V1=7 V2=6 V3=6 V4=6 
+[16:14:42] MI + CLR: 10.2 s; min MI 0.00109 
+[16:15:22] EQUIVALENCE PASSED (V0 path reproduces the package CLR, operator and walk mass to < 1e-8) 
+[16:15:39] row-scale diagnostics written (global strong-partner threshold = MI 0.2398, top 1% of cells) 
+[16:15:39] variants: V0,V0x,V1,V2,V3,V4; t* used for the depth read-out: V0=9 V0x=9 V1=7 V2=6 V3=6 V4=6 
+[16:15:46]     evaluate: pooled + jackknife 6 s 
+[16:16:17]     evaluate: two hub-stratified scorings 31 s 
+[16:19:20]     evaluate: macro tables + gene jackknife 184 s 
+[16:19:21] V0 pairwise scored (222 s) 
+[16:19:45]     evaluate: pooled + jackknife 6 s 
+[16:20:12]     evaluate: two hub-stratified scorings 27 s 
+[16:23:17]     evaluate: macro tables + gene jackknife 184 s 
+[16:23:18] V0 attention t=9 scored 
+[16:23:18] V0 attention t*=9 scored 
+[16:23:18] V0 done (459 s); rows hit by the zero-scale guard: 0 
+[16:23:26]     evaluate: pooled + jackknife 6 s 
+[16:23:27] V0x pairwise scored (10 s) 
+[16:23:50]     evaluate: pooled + jackknife 6 s 
+[16:23:51] V0x attention t=9 scored 
+[16:23:51] V0x done (33 s); rows hit by the zero-scale guard: 0 
+[16:24:01]     evaluate: pooled + jackknife 6 s 
+[16:24:25]     evaluate: two hub-stratified scorings 24 s 
+[16:27:25]     evaluate: macro tables + gene jackknife 180 s 
+[16:27:26] V1 pairwise scored (215 s) 
+[16:27:50]     evaluate: pooled + jackknife 6 s 
+[16:28:17]     evaluate: two hub-stratified scorings 28 s 
+[16:31:21]     evaluate: macro tables + gene jackknife 184 s 
+[16:31:22] V1 attention t=9 scored 
+[16:31:29]     evaluate: pooled + jackknife 6 s 
+[16:31:56]     evaluate: two hub-stratified scorings 28 s 
+[16:31:57] V1 attention t*=7 scored 
+[16:31:57] V1 done (486 s); rows hit by the zero-scale guard: 0 
+[16:32:08]     evaluate: pooled + jackknife 6 s 
+[16:32:34]     evaluate: two hub-stratified scorings 26 s 
+[16:35:39]     evaluate: macro tables + gene jackknife 185 s 
+[16:35:40] V2 pairwise scored (222 s) 
+[16:36:04]     evaluate: pooled + jackknife 6 s 
+[16:36:31]     evaluate: two hub-stratified scorings 28 s 
+[16:39:37]     evaluate: macro tables + gene jackknife 186 s 
+[16:39:38] V2 attention t=9 scored 
+[16:39:44]     evaluate: pooled + jackknife 6 s 
+[16:40:14]     evaluate: two hub-stratified scorings 30 s 
+[16:40:15] V2 attention t*=6 scored 
+[16:40:15] V2 done (498 s); rows hit by the zero-scale guard: 0 
+[16:40:45]     evaluate: pooled + jackknife 6 s 
+[16:41:14]     evaluate: two hub-stratified scorings 29 s 
+[16:44:20]     evaluate: macro tables + gene jackknife 186 s 
+[16:44:21] V3 pairwise scored (246 s) 
+[16:44:45]     evaluate: pooled + jackknife 6 s 
+[16:45:13]     evaluate: two hub-stratified scorings 28 s 
+[16:48:18]     evaluate: macro tables + gene jackknife 185 s 
+[16:48:19] V3 attention t=9 scored 
+[16:48:25]     evaluate: pooled + jackknife 6 s 
+[16:48:52]     evaluate: two hub-stratified scorings 27 s 
+[16:48:53] V3 attention t*=6 scored 
+[16:48:53] V3 done (518 s); rows hit by the zero-scale guard: 0 
+[16:49:03]     evaluate: pooled + jackknife 6 s 
+[16:49:28]     evaluate: two hub-stratified scorings 25 s 
+[16:52:29]     evaluate: macro tables + gene jackknife 181 s 
+[16:52:30] V4 pairwise scored (217 s) 
+[16:52:53]     evaluate: pooled + jackknife 6 s 
+[16:53:20]     evaluate: two hub-stratified scorings 27 s 
+[16:56:28]     evaluate: macro tables + gene jackknife 188 s 
+[16:56:29] V4 attention t=9 scored 
+[16:56:36]     evaluate: pooled + jackknife 6 s 
+[16:57:05]     evaluate: two hub-stratified scorings 29 s 
+[16:57:06] V4 attention t*=6 scored 
+[16:57:06] V4 done (493 s); rows hit by the zero-scale guard: 0 
+[16:57:06] done 

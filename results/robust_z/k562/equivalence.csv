@@ -1,0 +1,6 @@
+"check","value"
+"max |C(V0) - package clr_scores|",3.37507799486048e-14
+"max |A(V0) - package operator|",1.21014309684142e-14
+"max |S_t9(V0) - package walk mass|",1.13797860024079e-15
+"max |C(V0) - C(V0x)| (diagonal convention)",0.00531768116438691
+"cor(C(V0), C(V0x)) over upper triangle",0.999999980757636

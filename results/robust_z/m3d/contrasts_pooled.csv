@@ -1,0 +1,107 @@
+"scope","truth","contrast","a","b","d_enrichment","lo","hi","n_rep"
+"raw","SC","pairwise: variant - V0","V0x pair","V0 pair",-1.65102850185566e-05,-3.07472647270339e-05,-2.27330531007923e-06,100
+"raw","SC","attention t=9: variant - V0","V0x att9","V0 att9",1.25724205108758e-05,-2.1005245116034e-05,4.61500861377856e-05,100
+"raw","SC","pairwise: variant - V0","V1 pair","V0 pair",0.0129766355035593,-0.00350321143531263,0.0294564824424312,100
+"raw","SC","attention t=9: variant - V0","V1 att9","V0 att9",-0.0085092689512701,-0.0369784356820112,0.019959897779471,100
+"raw","SC","attention t*: variant - V0","V1 attT","V0 attT",-0.0282175683333091,-0.0517445295481769,-0.00469060711844141,100
+"raw","SC","pairwise: variant - V0","V2 pair","V0 pair",0.0218455280529069,0.00341210195799607,0.0402789541478177,100
+"raw","SC","attention t=9: variant - V0","V2 att9","V0 att9",-0.0137789778293823,-0.0470964414378944,0.0195384857791297,100
+"raw","SC","attention t*: variant - V0","V2 attT","V0 attT",-0.0443487337871706,-0.0717722434927684,-0.0169252240815727,100
+"raw","SC","pairwise: variant - V0","V3 pair","V0 pair",0.0773764799415479,0.0422745175585543,0.112478442324542,100
+"raw","SC","attention t=9: variant - V0","V3 att9","V0 att9",-0.0199818956429143,-0.070384229011657,0.0304204377258284,100
+"raw","SC","attention t*: variant - V0","V3 attT","V0 attT",-0.049924616325575,-0.0954445673773905,-0.00440466527375945,100
+"raw","SC","pairwise: variant - V0","V4 pair","V0 pair",0.00903133511282185,-0.00835274526989812,0.0264154154955418,100
+"raw","SC","attention t=9: variant - V0","V4 att9","V0 att9",-0.0110146468257692,-0.0379352075943521,0.0159059139428138,100
+"raw","SC","attention t*: variant - V0","V4 attT","V0 attT",-0.0417515352539132,-0.0638996601805751,-0.0196034103272512,100
+"raw","SC","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",0.233771119494972,0.169143309931568,0.298398929058376,100
+"raw","SC","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",0.225261850543702,0.149430537123892,0.301093163963511,100
+"raw","SC","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",0.21999214166559,0.141061439164478,0.298922844166701,100
+"raw","SC","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.213789223852058,0.129745329462456,0.297833118241659,100
+"raw","SC","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",0.222756472669203,0.14957536055845,0.295937584779955,100
+"raw","all","pairwise: variant - V0","V0x pair","V0 pair",-2.58173000098743e-05,-3.47966601692254e-05,-1.68379398505233e-05,100
+"raw","all","attention t=9: variant - V0","V0x att9","V0 att9",-2.52333242229292e-05,-6.01512682071982e-05,9.68461976133978e-06,100
+"raw","all","pairwise: variant - V0","V1 pair","V0 pair",0.0471428484339546,0.0351242645185909,0.0591614323493183,100
+"raw","all","attention t=9: variant - V0","V1 att9","V0 att9",0.000465128483782194,-0.0182799383054451,0.0192101952730095,100
+"raw","all","attention t*: variant - V0","V1 attT","V0 attT",-0.0109985237994817,-0.0273675976068552,0.00537055000789172,100
+"raw","all","pairwise: variant - V0","V2 pair","V0 pair",0.0428656948845333,0.0310272702956069,0.0547041194734597,100
+"raw","all","attention t=9: variant - V0","V2 att9","V0 att9",-0.0226393947357736,-0.0464524869739844,0.00117369750243726,100
+"raw","all","attention t*: variant - V0","V2 attT","V0 attT",-0.0339107536474331,-0.0538497681030434,-0.0139717391918227,100
+"raw","all","pairwise: variant - V0","V3 pair","V0 pair",0.10165921791125,0.0724118997740869,0.130906536048413,100
+"raw","all","attention t=9: variant - V0","V3 att9","V0 att9",-0.00962546341894581,-0.0374487385530318,0.0181978117151402,100
+"raw","all","attention t*: variant - V0","V3 attT","V0 attT",-0.0240366128806799,-0.0496364622226459,0.00156323646128623,100
+"raw","all","pairwise: variant - V0","V4 pair","V0 pair",0.0580261042862153,0.0429942264989314,0.0730579820734992,100
+"raw","all","attention t=9: variant - V0","V4 att9","V0 att9",0.0106671992301146,-0.00926626109316544,0.0306006595533946,100
+"raw","all","attention t*: variant - V0","V4 attT","V0 attT",-0.00961908515233222,-0.0262658789636746,0.00702770865901017,100
+"raw","all","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",0.0709580777294778,0.039392105910848,0.102524049548108,100
+"raw","all","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",0.07142320621326,0.0349394698550668,0.107906942571453,100
+"raw","all","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",0.0483186829937043,0.00877807061136631,0.0878592953760422,100
+"raw","all","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.061332614310532,0.0202315660955932,0.102433662525471,100
+"raw","all","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",0.0816252769595924,0.0457249339076615,0.117525620011523,100
+"hub-strat (pi of V0 attention)","SC","pairwise: variant - V0","V1 pair","V0 pair",-0.00409928191376418,-0.0175018427951305,0.00930327896760211,100
+"hub-strat (pi of V0 attention)","SC","attention t=9: variant - V0","V1 att9","V0 att9",-0.0223844521539381,-0.0439915363002237,-0.0007773680076524,100
+"hub-strat (pi of V0 attention)","SC","attention t*: variant - V0","V1 attT","V0 attT",-0.0288879665541736,-0.0482754207846938,-0.00950051232365347,100
+"hub-strat (pi of V0 attention)","SC","pairwise: variant - V0","V2 pair","V0 pair",0.00286533865054492,-0.011372166975173,0.0171028442762628,100
+"hub-strat (pi of V0 attention)","SC","attention t=9: variant - V0","V2 att9","V0 att9",-0.0242685422621202,-0.0527412962375631,0.00420421171332263,100
+"hub-strat (pi of V0 attention)","SC","attention t*: variant - V0","V2 attT","V0 attT",-0.032294271534849,-0.0564463291385464,-0.00814221393115148,100
+"hub-strat (pi of V0 attention)","SC","pairwise: variant - V0","V3 pair","V0 pair",0.0508579316964489,0.0156717015082988,0.0860441618845989,100
+"hub-strat (pi of V0 attention)","SC","attention t=9: variant - V0","V3 att9","V0 att9",-0.0102981108160296,-0.0550247472415844,0.0344285256095253,100
+"hub-strat (pi of V0 attention)","SC","attention t*: variant - V0","V3 attT","V0 attT",-0.0161938925425666,-0.0553163291835874,0.0229285440984542,100
+"hub-strat (pi of V0 attention)","SC","pairwise: variant - V0","V4 pair","V0 pair",-0.00667654835353254,-0.0228494594303965,0.00949636272333143,100
+"hub-strat (pi of V0 attention)","SC","attention t=9: variant - V0","V4 att9","V0 att9",-0.0217211255555147,-0.0427034570178732,-0.000738794093156175,100
+"hub-strat (pi of V0 attention)","SC","attention t*: variant - V0","V4 attT","V0 attT",-0.0324193416748287,-0.0516572081406243,-0.0131814752090331,100
+"hub-strat (pi of V0 attention)","SC","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",0.15666754581372,0.100280002460648,0.213055089166791,100
+"hub-strat (pi of V0 attention)","SC","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",0.134283093659782,0.0713254398831778,0.197240747436386,100
+"hub-strat (pi of V0 attention)","SC","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",0.1323990035516,0.0644179221787211,0.200380084924478,100
+"hub-strat (pi of V0 attention)","SC","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.14636943499769,0.0704226445050696,0.222316225490311,100
+"hub-strat (pi of V0 attention)","SC","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",0.134946420258205,0.0740290654247497,0.19586377509166,100
+"hub-strat (pi of V0 attention)","all","pairwise: variant - V0","V1 pair","V0 pair",0.0203031940935307,0.0101127115694062,0.0304936766176552,100
+"hub-strat (pi of V0 attention)","all","attention t=9: variant - V0","V1 att9","V0 att9",-0.0319037267013529,-0.0471917904497873,-0.0166156629529186,100
+"hub-strat (pi of V0 attention)","all","attention t*: variant - V0","V1 attT","V0 attT",-0.0278713540799121,-0.0415347619230335,-0.0142079462367907,100
+"hub-strat (pi of V0 attention)","all","pairwise: variant - V0","V2 pair","V0 pair",0.0159361106438561,0.00584918002919202,0.0260230412585203,100
+"hub-strat (pi of V0 attention)","all","attention t=9: variant - V0","V2 att9","V0 att9",-0.0444466053810289,-0.0641409490151579,-0.0247522617468998,100
+"hub-strat (pi of V0 attention)","all","attention t*: variant - V0","V2 attT","V0 attT",-0.0342031591911104,-0.0509176565835617,-0.0174886617986591,100
+"hub-strat (pi of V0 attention)","all","pairwise: variant - V0","V3 pair","V0 pair",0.0675843488222094,0.0380213131625718,0.097147384481847,100
+"hub-strat (pi of V0 attention)","all","attention t=9: variant - V0","V3 att9","V0 att9",-0.0158019932311738,-0.0409836572378151,0.00937967077546757,100
+"hub-strat (pi of V0 attention)","all","attention t*: variant - V0","V3 attT","V0 attT",-0.00688521660234469,-0.0295717116299219,0.0158012784252325,100
+"hub-strat (pi of V0 attention)","all","pairwise: variant - V0","V4 pair","V0 pair",0.0306957058526646,0.0164017105273356,0.0449897011779935,100
+"hub-strat (pi of V0 attention)","all","attention t=9: variant - V0","V4 att9","V0 att9",-0.0255926654871515,-0.0421005671921207,-0.00908476378218233,100
+"hub-strat (pi of V0 attention)","all","attention t*: variant - V0","V4 attT","V0 attT",-0.0197409955943779,-0.0341844759831428,-0.00529751520561297,100
+"hub-strat (pi of V0 attention)","all","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",0.0162725404532285,-0.0153099472713953,0.0478550281778523,100
+"hub-strat (pi of V0 attention)","all","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.0156311862481245,-0.0529183915502529,0.021656019054004,100
+"hub-strat (pi of V0 attention)","all","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.0281740649278004,-0.0687035407595687,0.0123554109039679,100
+"hub-strat (pi of V0 attention)","all","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.000470547222054705,-0.0431792553797293,0.0441203498238387,100
+"hub-strat (pi of V0 attention)","all","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.00932012503392301,-0.0458419112462387,0.0272016611783927,100
+"hub-strat (MI row mean)","SC","pairwise: variant - V0","V1 pair","V0 pair",0.0070814247476979,-0.00980864107179851,0.0239714905671943,100
+"hub-strat (MI row mean)","SC","attention t=9: variant - V0","V1 att9","V0 att9",-0.0127328562501494,-0.0408865576153277,0.0154208451150289,100
+"hub-strat (MI row mean)","SC","attention t*: variant - V0","V1 attT","V0 attT",-0.0335497662705604,-0.056830678422518,-0.0102688541186028,100
+"hub-strat (MI row mean)","SC","pairwise: variant - V0","V2 pair","V0 pair",0.00691797338808703,-0.010453429723725,0.024289376499899,100
+"hub-strat (MI row mean)","SC","attention t=9: variant - V0","V2 att9","V0 att9",-0.0256486982851488,-0.05742406034449,0.00612666377419235,100
+"hub-strat (MI row mean)","SC","attention t*: variant - V0","V2 attT","V0 attT",-0.0566523667634408,-0.0830888530639322,-0.0302158804629494,100
+"hub-strat (MI row mean)","SC","pairwise: variant - V0","V3 pair","V0 pair",0.0127050753825141,-0.0120423445618906,0.0374524953269188,100
+"hub-strat (MI row mean)","SC","attention t=9: variant - V0","V3 att9","V0 att9",-0.0373227086970151,-0.0869852045945433,0.012339787200513,100
+"hub-strat (MI row mean)","SC","attention t*: variant - V0","V3 attT","V0 attT",-0.067690479034665,-0.112863821766572,-0.0225171363027579,100
+"hub-strat (MI row mean)","SC","pairwise: variant - V0","V4 pair","V0 pair",0.0109386487684201,-0.00788184617052884,0.0297591437073691,100
+"hub-strat (MI row mean)","SC","attention t=9: variant - V0","V4 att9","V0 att9",-0.0128683487084535,-0.0401099897183056,0.0143732923013986,100
+"hub-strat (MI row mean)","SC","attention t*: variant - V0","V4 attT","V0 attT",-0.0452982805950389,-0.0677676208474351,-0.0228289403426428,100
+"hub-strat (MI row mean)","SC","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",0.18197806063325,0.123763112481925,0.240193008784574,100
+"hub-strat (MI row mean)","SC","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",0.1692452043831,0.101207238406879,0.237283170359322,100
+"hub-strat (MI row mean)","SC","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",0.156329362348101,0.0876623293333265,0.224996395362875,100
+"hub-strat (MI row mean)","SC","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.144655351936235,0.0708432882917993,0.21846741558067,100
+"hub-strat (MI row mean)","SC","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",0.169109711924796,0.10281375319082,0.235405670658773,100
+"hub-strat (MI row mean)","all","pairwise: variant - V0","V1 pair","V0 pair",0.04977422311099,0.0368709833482977,0.0626774628736823,100
+"hub-strat (MI row mean)","all","attention t=9: variant - V0","V1 att9","V0 att9",0.00370775255392956,-0.0147650878302922,0.0221805929381514,100
+"hub-strat (MI row mean)","all","attention t*: variant - V0","V1 attT","V0 attT",-0.00813423468999487,-0.0241089946401143,0.0078405252601246,100
+"hub-strat (MI row mean)","all","pairwise: variant - V0","V2 pair","V0 pair",0.0437923651709177,0.0316369405320542,0.0559477898097811,100
+"hub-strat (MI row mean)","all","attention t=9: variant - V0","V2 att9","V0 att9",-0.0211016789769169,-0.0437999534055644,0.00159659545173051,100
+"hub-strat (MI row mean)","all","attention t*: variant - V0","V2 attT","V0 attT",-0.0328414768718001,-0.0516588543446286,-0.0140240993989716,100
+"hub-strat (MI row mean)","all","pairwise: variant - V0","V3 pair","V0 pair",0.0733616164761943,0.0552776657512652,0.0914455672011234,100
+"hub-strat (MI row mean)","all","attention t=9: variant - V0","V3 att9","V0 att9",-0.0119719772857314,-0.0377435228441155,0.0137995682726527,100
+"hub-strat (MI row mean)","all","attention t*: variant - V0","V3 attT","V0 attT",-0.0263091400537561,-0.0500414199161386,-0.00257686019137366,100
+"hub-strat (MI row mean)","all","pairwise: variant - V0","V4 pair","V0 pair",0.0630631382556181,0.0468528092256773,0.0792734672855589,100
+"hub-strat (MI row mean)","all","attention t=9: variant - V0","V4 att9","V0 att9",0.0137809602170192,-0.00642014993644268,0.0339820703704811,100
+"hub-strat (MI row mean)","all","attention t*: variant - V0","V4 attT","V0 attT",-0.00679395347732739,-0.0235535670442775,0.00996566008962271,100
+"hub-strat (MI row mean)","all","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",0.03071386491875,0.0021280898466978,0.0592996399908021,100
+"hub-strat (MI row mean)","all","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",0.0344216174726795,0.00137208610538421,0.0674711488399748,100
+"hub-strat (MI row mean)","all","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",0.00961218594183302,-0.0251798485660966,0.0444042204497626,100
+"hub-strat (MI row mean)","all","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.0187418876330185,-0.0146892666694494,0.0521730419354864,100
+"hub-strat (MI row mean)","all","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",0.0444948251357692,0.0110442292814746,0.0779454209900637,100

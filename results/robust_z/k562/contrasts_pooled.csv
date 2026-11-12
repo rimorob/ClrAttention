@@ -1,0 +1,372 @@
+"scope","truth","contrast","a","b","d_enrichment","lo","hi","n_rep"
+"raw","DoRothEA_AB","pairwise: variant - V0","V0x pair","V0 pair",-1.85747220665717e-06,-5.28643928437571e-06,1.57149487106138e-06,100
+"raw","DoRothEA_AB","attention t=9: variant - V0","V0x att9","V0 att9",1.11242452607402e-05,2.16793358793798e-06,2.00805569335423e-05,100
+"raw","DoRothEA_AB","pairwise: variant - V0","V1 pair","V0 pair",-0.00232425028714656,-0.00656785830616399,0.00191935773187088,100
+"raw","DoRothEA_AB","attention t=9: variant - V0","V1 att9","V0 att9",-0.0169995684173815,-0.0270533304950243,-0.00694580633973866,100
+"raw","DoRothEA_AB","attention t*: variant - V0","V1 attT","V0 attT",-0.0104337927463092,-0.0191308692343215,-0.00173671625829687,100
+"raw","DoRothEA_AB","pairwise: variant - V0","V2 pair","V0 pair",0.00160672935274657,-0.00284418094626182,0.00605763965175495,100
+"raw","DoRothEA_AB","attention t=9: variant - V0","V2 att9","V0 att9",-0.0109643474923258,-0.0229836417096554,0.00105494672500372,100
+"raw","DoRothEA_AB","attention t*: variant - V0","V2 attT","V0 attT",-0.00504635680241161,-0.0158620814053993,0.00576936780057611,100
+"raw","DoRothEA_AB","pairwise: variant - V0","V3 pair","V0 pair",0.0248347255042047,0.0128062074078353,0.0368632436005741,100
+"raw","DoRothEA_AB","attention t=9: variant - V0","V3 att9","V0 att9",-0.0130822039577345,-0.0401414864867657,0.0139770785712968,100
+"raw","DoRothEA_AB","attention t*: variant - V0","V3 attT","V0 attT",-0.00262899759664001,-0.0265399452143138,0.0212819500210338,100
+"raw","DoRothEA_AB","pairwise: variant - V0","V4 pair","V0 pair",-0.00768619194568646,-0.0126020445167971,-0.0027703393745758,100
+"raw","DoRothEA_AB","attention t=9: variant - V0","V4 att9","V0 att9",-0.0252355238124008,-0.0386113495228495,-0.0118596981019521,100
+"raw","DoRothEA_AB","attention t*: variant - V0","V4 attT","V0 attT",-0.0178486670387668,-0.0297715957522258,-0.00592573832530789,100
+"raw","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",0.0348300702336788,0.00731670610419725,0.0623434343631604,100
+"raw","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",0.0178305018162973,-0.0107351163835677,0.0463961200161623,100
+"raw","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",0.023865722741353,-0.00442689862632169,0.0521583441090276,100
+"raw","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.0217478662759443,-0.0130475968105098,0.0565433293623985,100
+"raw","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",0.00959454642127803,-0.0191922630291124,0.0383813558716685,100
+"raw","CORUM_all","pairwise: variant - V0","V0x pair","V0 pair",-0.000533583845119039,-0.000926810188219654,-0.000140357502018425,100
+"raw","CORUM_all","attention t=9: variant - V0","V0x att9","V0 att9",0.000218461731776222,-3.26004191470914e-05,0.000469523882699536,100
+"raw","CORUM_all","pairwise: variant - V0","V1 pair","V0 pair",0.547247324637744,0.345247468140339,0.749247181135149,100
+"raw","CORUM_all","attention t=9: variant - V0","V1 att9","V0 att9",-0.250103089867824,-0.538936147105697,0.038729967370049,100
+"raw","CORUM_all","attention t*: variant - V0","V1 attT","V0 attT",-0.398379175565485,-0.703588457954248,-0.0931698931767217,100
+"raw","CORUM_all","pairwise: variant - V0","V2 pair","V0 pair",-0.0175839504881812,-0.267017822198333,0.231849921221971,100
+"raw","CORUM_all","attention t=9: variant - V0","V2 att9","V0 att9",-0.0673497740607216,-0.447350472420318,0.312650924298875,100
+"raw","CORUM_all","attention t*: variant - V0","V2 attT","V0 attT",-0.249147474893557,-0.62913118749736,0.130836237710247,100
+"raw","CORUM_all","pairwise: variant - V0","V3 pair","V0 pair",-0.318384618119211,-0.78357552815453,0.146806291916108,100
+"raw","CORUM_all","attention t=9: variant - V0","V3 att9","V0 att9",0.27200276011514,-0.351216906605348,0.895222426835628,100
+"raw","CORUM_all","attention t*: variant - V0","V3 attT","V0 attT",-0.0338625113977276,-0.546702051346579,0.478977028551124,100
+"raw","CORUM_all","pairwise: variant - V0","V4 pair","V0 pair",0.0517458414540507,-0.223585280320848,0.32707696322895,100
+"raw","CORUM_all","attention t=9: variant - V0","V4 att9","V0 att9",-0.519437758563968,-0.979550290805026,-0.0593252263229098,100
+"raw","CORUM_all","attention t*: variant - V0","V4 attT","V0 attT",-0.483824633965978,-0.844747098308059,-0.122902169623897,100
+"raw","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-2.87959108163025,-4.31552011465879,-1.44366204860171,100
+"raw","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-3.12969417149807,-4.73337789343245,-1.5260104495637,100
+"raw","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-2.94694085569097,-4.56503784759339,-1.32884386378855,100
+"raw","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-2.60758832151511,-4.28328776777096,-0.931888875259259,100
+"raw","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-3.39902884019422,-5.06029653958584,-1.73776114080259,100
+"raw","KD_response","pairwise: variant - V0","V0x pair","V0 pair",-0.000153848788971167,-0.000177375880621445,-0.000130321697320889,100
+"raw","KD_response","attention t=9: variant - V0","V0x att9","V0 att9",-0.000119857417080486,-0.000143447223836134,-9.62676103248395e-05,100
+"raw","KD_response","pairwise: variant - V0","V1 pair","V0 pair",0.189131983654875,0.158082456211148,0.220181511098602,100
+"raw","KD_response","attention t=9: variant - V0","V1 att9","V0 att9",0.0400090364513864,0.00180701644289055,0.0782110564598822,100
+"raw","KD_response","attention t*: variant - V0","V1 attT","V0 attT",-0.0656779548943529,-0.0990146596698963,-0.0323412501188094,100
+"raw","KD_response","pairwise: variant - V0","V2 pair","V0 pair",0.101715117135053,0.0752055923506174,0.128224641919489,100
+"raw","KD_response","attention t=9: variant - V0","V2 att9","V0 att9",-0.180554421415571,-0.230932734421015,-0.130176108410126,100
+"raw","KD_response","attention t*: variant - V0","V2 attT","V0 attT",-0.262470646385614,-0.306967416170098,-0.21797387660113,100
+"raw","KD_response","pairwise: variant - V0","V3 pair","V0 pair",0.127423790763183,0.0570578577801827,0.197789723746182,100
+"raw","KD_response","attention t=9: variant - V0","V3 att9","V0 att9",-0.302317858170906,-0.386254702763274,-0.218381013578539,100
+"raw","KD_response","attention t*: variant - V0","V3 attT","V0 attT",-0.381426144848437,-0.458401332306279,-0.304450957390595,100
+"raw","KD_response","pairwise: variant - V0","V4 pair","V0 pair",0.177924076790239,0.134587909505821,0.221260244074657,100
+"raw","KD_response","attention t=9: variant - V0","V4 att9","V0 att9",0.0710075847471422,0.0189157469422224,0.123099422552062,100
+"raw","KD_response","attention t*: variant - V0","V4 attT","V0 attT",-0.0339627015090856,-0.0761047850639367,0.00817938204576543,100
+"raw","KD_response","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.0490765531215238,-0.153115573367679,0.0549624671246311,100
+"raw","KD_response","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.00906751667013743,-0.118314622017405,0.10017958867713,100
+"raw","KD_response","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.229630974537095,-0.345432327720705,-0.113829621353484,100
+"raw","KD_response","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.35139441129243,-0.481333070916512,-0.221455751668349,100
+"raw","KD_response","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",0.0219310316256184,-0.0912925359208787,0.135154599172116,100
+"raw","CORUM_noRP","pairwise: variant - V0","V0x pair","V0 pair",-8.00513376632575e-05,-0.000463171503738813,0.000303068828412298,100
+"raw","CORUM_noRP","attention t=9: variant - V0","V0x att9","V0 att9",0.000105826508857298,-7.48038668044176e-05,0.000286456884519014,100
+"raw","CORUM_noRP","pairwise: variant - V0","V1 pair","V0 pair",0.100298783198315,0.0187421218704673,0.181855444526162,100
+"raw","CORUM_noRP","attention t=9: variant - V0","V1 att9","V0 att9",-0.0881090526807747,-0.233075475094186,0.0568573697326365,100
+"raw","CORUM_noRP","attention t*: variant - V0","V1 attT","V0 attT",-0.0783973191121406,-0.198536917645571,0.0417422794212898,100
+"raw","CORUM_noRP","pairwise: variant - V0","V2 pair","V0 pair",0.157583108212071,0.0496522294430698,0.265513986981072,100
+"raw","CORUM_noRP","attention t=9: variant - V0","V2 att9","V0 att9",0.0404033173113354,-0.112348459123887,0.193155093746558,100
+"raw","CORUM_noRP","attention t*: variant - V0","V2 attT","V0 attT",0.0138663809675687,-0.106957945191513,0.13469070712665,100
+"raw","CORUM_noRP","pairwise: variant - V0","V3 pair","V0 pair",0.38142494781711,0.181581089915371,0.581268805718849,100
+"raw","CORUM_noRP","attention t=9: variant - V0","V3 att9","V0 att9",0.215766471298725,0.0306174104854949,0.400915532111954,100
+"raw","CORUM_noRP","attention t*: variant - V0","V3 attT","V0 attT",0.176828574611386,-0.00542444634294556,0.359081595565717,100
+"raw","CORUM_noRP","pairwise: variant - V0","V4 pair","V0 pair",-0.0189590824336046,-0.155159445761827,0.117241280894618,100
+"raw","CORUM_noRP","attention t=9: variant - V0","V4 att9","V0 att9",-0.195643852468684,-0.390125115013385,-0.00116258992398355,100
+"raw","CORUM_noRP","attention t*: variant - V0","V4 attT","V0 attT",-0.115187792798218,-0.280268253604423,0.0498926680079866,100
+"raw","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.133665086693552,-0.349977424724724,0.0826472513376205,100
+"raw","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.221774139374327,-0.467358190022041,0.0238099112733876,100
+"raw","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.0932617693822164,-0.345037635431733,0.1585140966673,100
+"raw","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.0821013846051727,-0.178615768014922,0.342818537225267,100
+"raw","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.329308939162236,-0.572138651873723,-0.0864792264507494,100
+"raw","CORUM_RP","pairwise: variant - V0","V0x pair","V0 pair",-8.93876549583304e-06,-4.5766815067255e-05,2.78892840755889e-05,100
+"raw","CORUM_RP","attention t=9: variant - V0","V0x att9","V0 att9",2.39427610183997e-06,-6.13236187888733e-06,1.09209140825673e-05,100
+"raw","CORUM_RP","pairwise: variant - V0","V1 pair","V0 pair",0.00476642531967425,0.000880594310105813,0.00865225632924269,100
+"raw","CORUM_RP","attention t=9: variant - V0","V1 att9","V0 att9",-0.00217199774445112,-0.0133096194271912,0.00896562393828896,100
+"raw","CORUM_RP","attention t*: variant - V0","V1 attT","V0 attT",-0.00301219436609692,-0.0119901163757195,0.00596572764352565,100
+"raw","CORUM_RP","pairwise: variant - V0","V2 pair","V0 pair",0.00303570385252157,-0.00268587312153214,0.00875728082657528,100
+"raw","CORUM_RP","attention t=9: variant - V0","V2 att9","V0 att9",-0.00353635834285271,-0.0197564355289492,0.0126837188432438,100
+"raw","CORUM_RP","attention t*: variant - V0","V2 attT","V0 attT",-0.0040833895385223,-0.0178689809392242,0.00970220186217964,100
+"raw","CORUM_RP","pairwise: variant - V0","V3 pair","V0 pair",0.00383442221993774,-0.00440054659505664,0.0120693910349321,100
+"raw","CORUM_RP","attention t=9: variant - V0","V3 att9","V0 att9",0.0127294138235069,-0.0060703643531064,0.0315291920001202,100
+"raw","CORUM_RP","attention t*: variant - V0","V3 attT","V0 attT",0.00717922859990115,-0.0109440564172747,0.025302513617077,100
+"raw","CORUM_RP","pairwise: variant - V0","V4 pair","V0 pair",0.00436015581013283,0.000632543836195193,0.00808776778407047,100
+"raw","CORUM_RP","attention t=9: variant - V0","V4 att9","V0 att9",0.00134244825548553,-0.00708040962612202,0.00976530613709309,100
+"raw","CORUM_RP","attention t*: variant - V0","V4 attT","V0 attT",-0.000398980397548903,-0.00781208573146137,0.00701412493636356,100
+"raw","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.0245399126023369,-0.0523919776523893,0.00331215244771548,100
+"raw","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.026711910346788,-0.0576906562125674,0.00426683551899137,100
+"raw","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.0280762709451896,-0.0614297017467794,0.00527715985640018,100
+"raw","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.01181049877883,-0.039269533994429,0.015648536436769,100
+"raw","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.0231974643468514,-0.0521586122225056,0.00576368352880293,100
+"raw","CORUM_small","pairwise: variant - V0","V0x pair","V0 pair",8.4369537172744e-05,-0.000444977571396257,0.000613716645741745,100
+"raw","CORUM_small","attention t=9: variant - V0","V0x att9","V0 att9",0.000380487890881082,-0.000659845550805132,0.0014208213325673,100
+"raw","CORUM_small","pairwise: variant - V0","V1 pair","V0 pair",-0.110460188029751,-0.378907012860099,0.157986636800598,100
+"raw","CORUM_small","attention t=9: variant - V0","V1 att9","V0 att9",-0.154385995077499,-0.503906237916978,0.19513424776198,100
+"raw","CORUM_small","attention t*: variant - V0","V1 attT","V0 attT",-0.174272541473588,-0.51047368158936,0.161928598642183,100
+"raw","CORUM_small","pairwise: variant - V0","V2 pair","V0 pair",-0.0825949110201782,-0.399045397158652,0.233855575118295,100
+"raw","CORUM_small","attention t=9: variant - V0","V2 att9","V0 att9",0.0393707665568541,-0.303331221552428,0.382072754666136,100
+"raw","CORUM_small","attention t*: variant - V0","V2 attT","V0 attT",-0.0138110247587977,-0.244159088494024,0.216537038976429,100
+"raw","CORUM_small","pairwise: variant - V0","V3 pair","V0 pair",0.0689869711179897,-0.354836235336465,0.492810177572444,100
+"raw","CORUM_small","attention t=9: variant - V0","V3 att9","V0 att9",0.205621730425604,-0.140552998667651,0.551796459518858,100
+"raw","CORUM_small","attention t*: variant - V0","V3 attT","V0 attT",0.0510226706451685,-0.267089720698157,0.369135061988494,100
+"raw","CORUM_small","pairwise: variant - V0","V4 pair","V0 pair",-0.230078057434031,-0.580741270528458,0.120585155660397,100
+"raw","CORUM_small","attention t=9: variant - V0","V4 att9","V0 att9",-0.20402069767994,-0.640531648621195,0.232490253261315,100
+"raw","CORUM_small","attention t*: variant - V0","V4 attT","V0 attT",-0.204651483901361,-0.597504566775968,0.188201598973246,100
+"raw","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.149762592485714,-1.09313097915346,0.79360579418203,100
+"raw","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.304148587563214,-1.30048603956932,0.692188864442896,100
+"raw","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.11039182592886,-1.17851195288755,0.957728301029828,100
+"raw","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.0558591379398896,-0.988622637225072,1.10034091310485,100
+"raw","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.353783290165654,-1.32217277885164,0.614606198520334,100
+"raw","CORUM_large","pairwise: variant - V0","V0x pair","V0 pair",-2.16595561902753e-05,-7.31081800943719e-05,2.97890677138213e-05,100
+"raw","CORUM_large","attention t=9: variant - V0","V0x att9","V0 att9",9.41033047695251e-05,5.36648740402945e-05,0.000134541735498756,100
+"raw","CORUM_large","pairwise: variant - V0","V1 pair","V0 pair",0.022528870992389,-8.4609423720225e-06,0.04506620292715,100
+"raw","CORUM_large","attention t=9: variant - V0","V1 att9","V0 att9",-0.126886612981824,-0.171412297903521,-0.0823609280601271,100
+"raw","CORUM_large","attention t*: variant - V0","V1 attT","V0 attT",-0.0787890206938072,-0.120333431126889,-0.0372446102607259,100
+"raw","CORUM_large","pairwise: variant - V0","V2 pair","V0 pair",0.00997749102518966,-0.0101018699451823,0.0300568519955616,100
+"raw","CORUM_large","attention t=9: variant - V0","V2 att9","V0 att9",-0.0389251601505698,-0.0927212755033352,0.0148709552021957,100
+"raw","CORUM_large","attention t*: variant - V0","V2 attT","V0 attT",0.00234658409698638,-0.0497650979558353,0.0544582661498081,100
+"raw","CORUM_large","pairwise: variant - V0","V3 pair","V0 pair",0.0973933261303792,0.045798661849715,0.148987990411043,100
+"raw","CORUM_large","attention t=9: variant - V0","V3 att9","V0 att9",0.157869619649659,0.0511692518087907,0.264569987490528,100
+"raw","CORUM_large","attention t*: variant - V0","V3 attT","V0 attT",0.20303301060709,0.0975391583940005,0.308526862820179,100
+"raw","CORUM_large","pairwise: variant - V0","V4 pair","V0 pair",-0.0213486409660087,-0.0555993220170514,0.0129020400850339,100
+"raw","CORUM_large","attention t=9: variant - V0","V4 att9","V0 att9",-0.17970637783126,-0.251875740046354,-0.107537015616166,100
+"raw","CORUM_large","attention t*: variant - V0","V4 attT","V0 attT",-0.111429295980401,-0.169184693147138,-0.0536738988136645,100
+"raw","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.364589379205163,-0.524597562211544,-0.204581196198781,100
+"raw","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.491475992186987,-0.664157066883097,-0.318794917490877,100
+"raw","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.403514539355732,-0.581250493650482,-0.225778585060983,100
+"raw","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.206719759555504,-0.383004276995533,-0.0304352421154744,100
+"raw","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.544295757036422,-0.722775386760087,-0.365816127312758,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","pairwise: variant - V0","V1 pair","V0 pair",-0.0043036745366798,-0.00894841731114751,0.000341068237787915,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t=9: variant - V0","V1 att9","V0 att9",-0.0129838035959434,-0.0231512748850002,-0.00281633230688663,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t*: variant - V0","V1 attT","V0 attT",-0.0116887415646775,-0.0202838537762629,-0.00309362935309209,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","pairwise: variant - V0","V2 pair","V0 pair",0.000245737434463491,-0.00445836320961166,0.00494983807853864,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t=9: variant - V0","V2 att9","V0 att9",-0.00762110453431914,-0.0201160246934609,0.00487381562482265,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t*: variant - V0","V2 attT","V0 attT",-0.00670195028663469,-0.0173601107675329,0.00395621019426354,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","pairwise: variant - V0","V3 pair","V0 pair",0.0206288071068446,0.006772796921583,0.0344848172921062,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t=9: variant - V0","V3 att9","V0 att9",-0.0143812958128808,-0.0398572380375819,0.0110946464118203,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t*: variant - V0","V3 attT","V0 attT",-0.00540727203018889,-0.0269115321540397,0.0160969880936619,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","pairwise: variant - V0","V4 pair","V0 pair",-0.00958474781467036,-0.0149806861968806,-0.00418880943246009,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t=9: variant - V0","V4 att9","V0 att9",-0.026380126684209,-0.041795547969816,-0.010964705398602,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t*: variant - V0","V4 attT","V0 attT",-0.0215205297465066,-0.0341845593517285,-0.00885650014128468,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",0.0309899207444706,0.00873463905217759,0.0532452024367635,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",0.0180061171485271,-0.00414704221050291,0.0401592765075572,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",0.0233688162101514,0.000973133276424242,0.0457644991438786,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.0166086249315898,-0.0155641402514425,0.0487813901146221,100
+"hub-strat (pi of V0 attention)","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",0.0046097940602616,-0.0197756428646879,0.0289952309852111,100
+"hub-strat (pi of V0 attention)","CORUM_all","pairwise: variant - V0","V1 pair","V0 pair",0.014159519820537,-0.17791433504931,0.206233374690384,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t=9: variant - V0","V1 att9","V0 att9",-0.129983815910154,-0.275776309751938,0.015808677931629,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t*: variant - V0","V1 attT","V0 attT",-0.124591196505554,-0.246878867553881,-0.00230352545722584,100
+"hub-strat (pi of V0 attention)","CORUM_all","pairwise: variant - V0","V2 pair","V0 pair",-0.209688804608187,-0.477555944248974,0.0581783350325996,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t=9: variant - V0","V2 att9","V0 att9",-0.0277654207682177,-0.230801145998933,0.175270304462498,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t*: variant - V0","V2 attT","V0 attT",-0.0119023909168237,-0.171873804789247,0.1480690229556,100
+"hub-strat (pi of V0 attention)","CORUM_all","pairwise: variant - V0","V3 pair","V0 pair",-0.220025306145339,-0.624315093657947,0.184264481367268,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t=9: variant - V0","V3 att9","V0 att9",0.258186656168085,-0.00766587854735484,0.524039190883524,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t*: variant - V0","V3 attT","V0 attT",0.313476088357001,0.104122111751315,0.522830064962686,100
+"hub-strat (pi of V0 attention)","CORUM_all","pairwise: variant - V0","V4 pair","V0 pair",-0.255624346268492,-0.504955831670662,-0.0062928608663228,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t=9: variant - V0","V4 att9","V0 att9",-0.22808817840381,-0.391689232736379,-0.0644871240712408,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t*: variant - V0","V4 attT","V0 attT",-0.160847451141175,-0.305486445850804,-0.0162084564315466,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-1.32490204375068,-2.15302153147119,-0.496782556030161,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-1.45488585966083,-2.35304156024729,-0.556730159074373,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-1.35266746451889,-2.26841223140654,-0.436922697631249,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-1.06671538758259,-2.00292600077171,-0.130504774393473,100
+"hub-strat (pi of V0 attention)","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-1.55299022215449,-2.47185877975929,-0.634121664549678,100
+"hub-strat (pi of V0 attention)","KD_response","pairwise: variant - V0","V1 pair","V0 pair",0.0496831235309216,0.0248280966477166,0.0745381504141266,100
+"hub-strat (pi of V0 attention)","KD_response","attention t=9: variant - V0","V1 att9","V0 att9",-0.051747132351888,-0.0791276913710571,-0.0243665733327189,100
+"hub-strat (pi of V0 attention)","KD_response","attention t*: variant - V0","V1 attT","V0 attT",-0.0295781088111113,-0.0539643740202343,-0.00519184360198834,100
+"hub-strat (pi of V0 attention)","KD_response","pairwise: variant - V0","V2 pair","V0 pair",0.0126090786789097,-0.0091630650226998,0.0343812223805192,100
+"hub-strat (pi of V0 attention)","KD_response","attention t=9: variant - V0","V2 att9","V0 att9",-0.153468614268683,-0.190577938469607,-0.11635929006776,100
+"hub-strat (pi of V0 attention)","KD_response","attention t*: variant - V0","V2 attT","V0 attT",-0.112430220749922,-0.145726772087529,-0.0791336694123148,100
+"hub-strat (pi of V0 attention)","KD_response","pairwise: variant - V0","V3 pair","V0 pair",0.147424577367916,0.0886876127128561,0.206161542022976,100
+"hub-strat (pi of V0 attention)","KD_response","attention t=9: variant - V0","V3 att9","V0 att9",-0.112273670391056,-0.173963269702699,-0.050584071079413,100
+"hub-strat (pi of V0 attention)","KD_response","attention t*: variant - V0","V3 attT","V0 attT",-0.0391173038602339,-0.0927911188420329,0.014556511121565,100
+"hub-strat (pi of V0 attention)","KD_response","pairwise: variant - V0","V4 pair","V0 pair",0.0436480269118822,0.0111368425659666,0.0761592112577978,100
+"hub-strat (pi of V0 attention)","KD_response","attention t=9: variant - V0","V4 att9","V0 att9",-0.0318185905311415,-0.0703964650558411,0.00675928399355815,100
+"hub-strat (pi of V0 attention)","KD_response","attention t*: variant - V0","V4 attT","V0 attT",-0.00964042055931148,-0.0416713284129752,0.0223904872943522,100
+"hub-strat (pi of V0 attention)","KD_response","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.310824394509113,-0.395246795536192,-0.226401993482034,100
+"hub-strat (pi of V0 attention)","KD_response","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.362571526861001,-0.451117435175654,-0.274025618546348,100
+"hub-strat (pi of V0 attention)","KD_response","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.464293008777796,-0.557919365214064,-0.370666652341529,100
+"hub-strat (pi of V0 attention)","KD_response","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.423098064900169,-0.53413074111674,-0.312065388683598,100
+"hub-strat (pi of V0 attention)","KD_response","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.342642985040255,-0.433021818233683,-0.252264151846826,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","pairwise: variant - V0","V1 pair","V0 pair",0.0227095978945706,-0.0389407575988784,0.0843599533880195,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t=9: variant - V0","V1 att9","V0 att9",-0.0395166508073328,-0.109494141432299,0.0304608398176334,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t*: variant - V0","V1 attT","V0 attT",-0.0200586677324484,-0.0779611744319834,0.0378438389670867,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","pairwise: variant - V0","V2 pair","V0 pair",0.0656767419720703,0.00712817286643846,0.124225311077702,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t=9: variant - V0","V2 att9","V0 att9",0.0379827423093943,-0.0449599162713162,0.120925400890105,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t*: variant - V0","V2 attT","V0 attT",0.0523887310596326,-0.0198186067619009,0.124596068881166,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","pairwise: variant - V0","V3 pair","V0 pair",0.243912689400198,0.131649723266849,0.356175655533547,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t=9: variant - V0","V3 att9","V0 att9",0.274982617801875,0.141296623855262,0.408668611748487,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t*: variant - V0","V3 attT","V0 attT",0.296106107046628,0.180373552480712,0.411838661612545,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","pairwise: variant - V0","V4 pair","V0 pair",-0.0331352646281136,-0.11418794609287,0.047917416836643,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t=9: variant - V0","V4 att9","V0 att9",-0.0889663313130127,-0.197478311045824,0.0195456484197985,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t*: variant - V0","V4 attT","V0 attT",-0.0429515388476304,-0.130202655171796,0.0442995774765349,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.128649527162265,-0.268997798291113,0.0116987439665835,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.168166177969598,-0.312553973885188,-0.0237783820540077,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.0906667848528705,-0.245745141689658,0.0644115719839173,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",0.14633309063961,-0.0410563312368153,0.333722512516035,100
+"hub-strat (pi of V0 attention)","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.217615858475277,-0.374375624832787,-0.0608560921177682,100
+"hub-strat (pi of V0 attention)","CORUM_RP","pairwise: variant - V0","V1 pair","V0 pair",0.00362102480122463,-0.00022013608057407,0.00746218568302333,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t=9: variant - V0","V1 att9","V0 att9",-0.00439456571923505,-0.016024170817775,0.00723503937930487,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t*: variant - V0","V1 attT","V0 attT",-0.00486383452836431,-0.0142109545465549,0.00448328548982628,100
+"hub-strat (pi of V0 attention)","CORUM_RP","pairwise: variant - V0","V2 pair","V0 pair",0.00287299189059904,-0.0030718480825868,0.00881783186378487,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t=9: variant - V0","V2 att9","V0 att9",-0.00535313363027167,-0.0223891122346835,0.0116828449741401,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t*: variant - V0","V2 attT","V0 attT",-0.00514340015663734,-0.0194322401397628,0.00914543982648808,100
+"hub-strat (pi of V0 attention)","CORUM_RP","pairwise: variant - V0","V3 pair","V0 pair",0.00418864438222637,-0.00435861863397699,0.0127359073984297,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t=9: variant - V0","V3 att9","V0 att9",0.0111033791441672,-0.00785011469769521,0.0300568729860296,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t*: variant - V0","V3 attT","V0 attT",0.00724865092036439,-0.0112048665050734,0.0257021683458022,100
+"hub-strat (pi of V0 attention)","CORUM_RP","pairwise: variant - V0","V4 pair","V0 pair",0.00373659097281074,-0.000356591490815859,0.00782977343643735,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t=9: variant - V0","V4 att9","V0 att9",-0.000801922023385796,-0.010163943831691,0.00856009978491945,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t*: variant - V0","V4 attT","V0 attT",-0.00244726649910993,-0.0107500077622406,0.00585547476402071,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.0259920821997541,-0.0551260992947354,0.00314193489522719,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.0303866479189891,-0.0630927949206617,0.00231949908268341,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.0313452158300258,-0.0665345069117702,0.0038440752517187,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.0148887030555869,-0.0435414037711341,0.0137639976599602,100
+"hub-strat (pi of V0 attention)","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.0267940042231399,-0.0578495320753565,0.00426152362907675,100
+"hub-strat (pi of V0 attention)","CORUM_small","pairwise: variant - V0","V1 pair","V0 pair",-0.0903047126203872,-0.267934603692253,0.0873251784514782,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t=9: variant - V0","V1 att9","V0 att9",-0.0508921008675714,-0.215172355448949,0.113388153713806,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t*: variant - V0","V1 attT","V0 attT",-0.0337918187487528,-0.148664000072741,0.0810803625752355,100
+"hub-strat (pi of V0 attention)","CORUM_small","pairwise: variant - V0","V2 pair","V0 pair",0.0586387550278809,-0.11436386296726,0.231641373023022,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t=9: variant - V0","V2 att9","V0 att9",0.0298250371076449,-0.171143074513211,0.230793148728501,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t*: variant - V0","V2 attT","V0 attT",0.035528061526855,-0.0629347502879858,0.133990873341696,100
+"hub-strat (pi of V0 attention)","CORUM_small","pairwise: variant - V0","V3 pair","V0 pair",0.103360655350424,-0.185556192002647,0.392277502703495,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t=9: variant - V0","V3 att9","V0 att9",0.164803213634626,-0.193146028646014,0.522752455915266,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t*: variant - V0","V3 attT","V0 attT",0.133122970087459,-0.0258402036258539,0.292086143800772,100
+"hub-strat (pi of V0 attention)","CORUM_small","pairwise: variant - V0","V4 pair","V0 pair",-0.177537817146486,-0.476461237940599,0.121385603647627,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t=9: variant - V0","V4 att9","V0 att9",-0.0982282294391274,-0.397579180168481,0.201122721290226,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t*: variant - V0","V4 attT","V0 attT",-0.0669827505943936,-0.237766153123151,0.103800651934363,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.170863608345077,-0.66388479228035,0.322157575590196,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.221755709212649,-0.65243196912224,0.208920550696942,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.141038571237432,-0.617185860748855,0.33510871827399,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.00606039471045122,-0.572096735360977,0.559975945940075,100
+"hub-strat (pi of V0 attention)","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.269091837784205,-0.713073859679684,0.174890184111275,100
+"hub-strat (pi of V0 attention)","CORUM_large","pairwise: variant - V0","V1 pair","V0 pair",-0.0342269378551715,-0.0744197621918578,0.00596588648151486,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t=9: variant - V0","V1 att9","V0 att9",-0.128874670788018,-0.185659328409818,-0.0720900131662178,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t*: variant - V0","V1 attT","V0 attT",-0.109072146067427,-0.158284162742191,-0.0598601293926624,100
+"hub-strat (pi of V0 attention)","CORUM_large","pairwise: variant - V0","V2 pair","V0 pair",-0.0650414266499973,-0.102114455674477,-0.0279683976255172,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t=9: variant - V0","V2 att9","V0 att9",-0.0591066389714016,-0.12907291079178,0.010859632848977,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t*: variant - V0","V2 attT","V0 attT",-0.0451317126465343,-0.106754203452849,0.0164907781597799,100
+"hub-strat (pi of V0 attention)","CORUM_large","pairwise: variant - V0","V3 pair","V0 pair",-0.0424826263513751,-0.128078710953731,0.043113458250981,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t=9: variant - V0","V3 att9","V0 att9",0.0476392356169549,-0.0802015910876184,0.175480062321528,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t*: variant - V0","V3 attT","V0 attT",0.0833602844650227,-0.0285587291398826,0.195279298069928,100
+"hub-strat (pi of V0 attention)","CORUM_large","pairwise: variant - V0","V4 pair","V0 pair",-0.0845832671159731,-0.14991452799018,-0.0192520062417666,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t=9: variant - V0","V4 att9","V0 att9",-0.185932598354466,-0.26183024497843,-0.110034951730502,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t*: variant - V0","V4 attT","V0 attT",-0.138484754359278,-0.201068414082292,-0.0759010946362627,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.248114300818909,-0.429946611386112,-0.0662819902517054,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.376988971606927,-0.57755076213759,-0.176427181076263,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.30722093979031,-0.514217833141176,-0.100224046439444,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.200475065201954,-0.420686255456653,0.0197361250527453,100
+"hub-strat (pi of V0 attention)","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.434046899173374,-0.632001915810062,-0.236091882536687,100
+"hub-strat (MI row mean)","DoRothEA_AB","pairwise: variant - V0","V1 pair","V0 pair",0.00315318687508315,-0.00220224397505332,0.00850861772521963,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t=9: variant - V0","V1 att9","V0 att9",-0.0139733921235111,-0.0246709323248804,-0.00327585192214193,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t*: variant - V0","V1 attT","V0 attT",-0.00936196491982091,-0.0183207477840347,-0.000403182055607135,100
+"hub-strat (MI row mean)","DoRothEA_AB","pairwise: variant - V0","V2 pair","V0 pair",0.00466264401700272,-0.000537645382213913,0.00986293341621935,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t=9: variant - V0","V2 att9","V0 att9",-0.0133489940661743,-0.0254781241171248,-0.00121986401522387,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t*: variant - V0","V2 attT","V0 attT",-0.00863075245142688,-0.0195050773737649,0.00224357247091113,100
+"hub-strat (MI row mean)","DoRothEA_AB","pairwise: variant - V0","V3 pair","V0 pair",0.00106777917652232,-0.00709081949868799,0.00922637785173264,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t=9: variant - V0","V3 att9","V0 att9",-0.0265151456762479,-0.0485893081338199,-0.00444098321867593,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t*: variant - V0","V3 attT","V0 attT",-0.0176373290694621,-0.036696906001671,0.00142224786274682,100
+"hub-strat (MI row mean)","DoRothEA_AB","pairwise: variant - V0","V4 pair","V0 pair",0.000942997353597059,-0.00509028103032799,0.00697627573752211,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t=9: variant - V0","V4 att9","V0 att9",-0.0207044159167744,-0.0339262176737408,-0.00748261415980797,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t*: variant - V0","V4 attT","V0 attT",-0.0154492579440601,-0.0269714497735839,-0.0039270661145363,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",0.0160364683371274,-0.00960201749540488,0.0416749541696596,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",0.00206307621361623,-0.0256498484873906,0.0297760009146231,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",0.00268747427095305,-0.0245340461840247,0.0299089947259308,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.0104786773391205,-0.0404982300273393,0.0195408753490983,100
+"hub-strat (MI row mean)","DoRothEA_AB","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.004667947579647,-0.0325767752672182,0.0232408801079242,100
+"hub-strat (MI row mean)","CORUM_all","pairwise: variant - V0","V1 pair","V0 pair",0.483129277235469,0.233641631591689,0.732616922879248,100
+"hub-strat (MI row mean)","CORUM_all","attention t=9: variant - V0","V1 att9","V0 att9",-0.159110603920127,-0.393007476124055,0.0747862682838005,100
+"hub-strat (MI row mean)","CORUM_all","attention t*: variant - V0","V1 attT","V0 attT",-0.291920431558865,-0.507291326469941,-0.0765495366477902,100
+"hub-strat (MI row mean)","CORUM_all","pairwise: variant - V0","V2 pair","V0 pair",0.139473658980488,-0.114807283994885,0.393754601955862,100
+"hub-strat (MI row mean)","CORUM_all","attention t=9: variant - V0","V2 att9","V0 att9",-0.00388593403024275,-0.314866660058095,0.30709479199761,100
+"hub-strat (MI row mean)","CORUM_all","attention t*: variant - V0","V2 attT","V0 attT",-0.130552078638128,-0.405812489286045,0.144708332009788,100
+"hub-strat (MI row mean)","CORUM_all","pairwise: variant - V0","V3 pair","V0 pair",0.430345130433635,0.0617612796027495,0.79892898126452,100
+"hub-strat (MI row mean)","CORUM_all","attention t=9: variant - V0","V3 att9","V0 att9",0.542987436857479,-0.0355590506115194,1.12153392432648,100
+"hub-strat (MI row mean)","CORUM_all","attention t*: variant - V0","V3 attT","V0 attT",0.218823173632601,-0.164005240211129,0.60165158747633,100
+"hub-strat (MI row mean)","CORUM_all","pairwise: variant - V0","V4 pair","V0 pair",0.195208526348945,-0.0327202897720983,0.423137342469988,100
+"hub-strat (MI row mean)","CORUM_all","attention t=9: variant - V0","V4 att9","V0 att9",-0.416866008829963,-0.667865045834257,-0.16586697182567,100
+"hub-strat (MI row mean)","CORUM_all","attention t*: variant - V0","V4 attT","V0 attT",-0.373886654137375,-0.623642774013657,-0.124130534261093,100
+"hub-strat (MI row mean)","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-2.06587476218091,-3.2882981992068,-0.84345132515503,100
+"hub-strat (MI row mean)","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-2.22498536610104,-3.52246985950819,-0.92750087269389,100
+"hub-strat (MI row mean)","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-2.06976069621116,-3.37210110696688,-0.767420285455437,100
+"hub-strat (MI row mean)","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-1.52288732532343,-2.78037188201229,-0.26540276863458,100
+"hub-strat (MI row mean)","CORUM_all","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-2.48274077101088,-3.84753363638703,-1.11794790563473,100
+"hub-strat (MI row mean)","KD_response","pairwise: variant - V0","V1 pair","V0 pair",0.176828062982255,0.151179163941482,0.202476962023028,100
+"hub-strat (MI row mean)","KD_response","attention t=9: variant - V0","V1 att9","V0 att9",0.0210135374981465,-0.0162294747116113,0.0582565497079042,100
+"hub-strat (MI row mean)","KD_response","attention t*: variant - V0","V1 attT","V0 attT",-0.0599437166669288,-0.0924603074556944,-0.0274271258781632,100
+"hub-strat (MI row mean)","KD_response","pairwise: variant - V0","V2 pair","V0 pair",0.0804557129932197,0.0552398140284248,0.105671611958015,100
+"hub-strat (MI row mean)","KD_response","attention t=9: variant - V0","V2 att9","V0 att9",-0.154402882246976,-0.198678283874395,-0.110127480619557,100
+"hub-strat (MI row mean)","KD_response","attention t*: variant - V0","V2 attT","V0 attT",-0.216188985703666,-0.25603637824911,-0.176341593158221,100
+"hub-strat (MI row mean)","KD_response","pairwise: variant - V0","V3 pair","V0 pair",0.173403391772416,0.129040533323283,0.21776625022155,100
+"hub-strat (MI row mean)","KD_response","attention t=9: variant - V0","V3 att9","V0 att9",-0.145233146376512,-0.216841593128167,-0.0736246996248567,100
+"hub-strat (MI row mean)","KD_response","attention t*: variant - V0","V3 attT","V0 attT",-0.21407380425454,-0.275742814786142,-0.152404793722938,100
+"hub-strat (MI row mean)","KD_response","pairwise: variant - V0","V4 pair","V0 pair",0.204857710448183,0.173463970402284,0.236251450494081,100
+"hub-strat (MI row mean)","KD_response","attention t=9: variant - V0","V4 att9","V0 att9",0.0532257354995698,0.00649321035205411,0.0999582606470856,100
+"hub-strat (MI row mean)","KD_response","attention t*: variant - V0","V4 attT","V0 attT",-0.0267494788778794,-0.0665715437627753,0.0130725860070165,100
+"hub-strat (MI row mean)","KD_response","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.00634913484346904,-0.0869445506922253,0.0742462810052873,100
+"hub-strat (MI row mean)","KD_response","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",0.0146644026546774,-0.0727254856258276,0.102054290935183,100
+"hub-strat (MI row mean)","KD_response","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.160752017090445,-0.247053802547322,-0.0744502316335681,100
+"hub-strat (MI row mean)","KD_response","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.151582281219981,-0.243351201331731,-0.0598133611082309,100
+"hub-strat (MI row mean)","KD_response","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",0.0468766006561008,-0.0442014787323837,0.137954680044585,100
+"hub-strat (MI row mean)","CORUM_noRP","pairwise: variant - V0","V1 pair","V0 pair",0.167415140041655,0.0857783011676151,0.249051978915694,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t=9: variant - V0","V1 att9","V0 att9",-0.120764272648395,-0.239037124462845,-0.00249142083394499,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t*: variant - V0","V1 attT","V0 attT",-0.128777267710375,-0.256833392767596,-0.000721142653153123,100
+"hub-strat (MI row mean)","CORUM_noRP","pairwise: variant - V0","V2 pair","V0 pair",0.130563945671477,0.047576749916775,0.213551141426178,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t=9: variant - V0","V2 att9","V0 att9",-0.0551379961768009,-0.190671608912246,0.0803956165586444,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t*: variant - V0","V2 attT","V0 attT",-0.0757903923328586,-0.208822882100309,0.0572420974345913,100
+"hub-strat (MI row mean)","CORUM_noRP","pairwise: variant - V0","V3 pair","V0 pair",0.246762522940467,0.133934490229244,0.359590555651689,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t=9: variant - V0","V3 att9","V0 att9",0.0981660725155167,-0.102429566698682,0.298761711729715,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t*: variant - V0","V3 attT","V0 attT",0.0734811126675456,-0.130333799861379,0.27729602519647,100
+"hub-strat (MI row mean)","CORUM_noRP","pairwise: variant - V0","V4 pair","V0 pair",0.165749082455706,0.0609773714465773,0.270520793464835,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t=9: variant - V0","V4 att9","V0 att9",-0.189132565854858,-0.356579970914259,-0.0216851607954564,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t*: variant - V0","V4 attT","V0 attT",-0.149190101657193,-0.305534025052858,0.00715382173847209,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.118998315357117,-0.32928376580976,0.0912871350955267,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.239762588005512,-0.476771878030458,-0.00275329798056559,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.174136311533918,-0.411746673629849,0.0634740505620136,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.0208322428416,-0.305141633343874,0.263477147660674,100
+"hub-strat (MI row mean)","CORUM_noRP","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.308130881211974,-0.551224579584517,-0.0650371828394317,100
+"hub-strat (MI row mean)","CORUM_RP","pairwise: variant - V0","V1 pair","V0 pair",0.00376703135255421,-0.000532506704236267,0.00806656940934469,100
+"hub-strat (MI row mean)","CORUM_RP","attention t=9: variant - V0","V1 att9","V0 att9",-0.00433116021814889,-0.0165189159484613,0.00785659551216356,100
+"hub-strat (MI row mean)","CORUM_RP","attention t*: variant - V0","V1 attT","V0 attT",-0.0038847570043009,-0.0136318246600683,0.00586231065146646,100
+"hub-strat (MI row mean)","CORUM_RP","pairwise: variant - V0","V2 pair","V0 pair",0.00160196790500221,-0.00443964019230096,0.00764357600230539,100
+"hub-strat (MI row mean)","CORUM_RP","attention t=9: variant - V0","V2 att9","V0 att9",-0.00411044900455194,-0.0210402030505641,0.0128193050414602,100
+"hub-strat (MI row mean)","CORUM_RP","attention t*: variant - V0","V2 attT","V0 attT",-0.00363474256393338,-0.0180727408659319,0.0108032557380651,100
+"hub-strat (MI row mean)","CORUM_RP","pairwise: variant - V0","V3 pair","V0 pair",0.00155349401901514,-0.00620377619638085,0.00931076423441112,100
+"hub-strat (MI row mean)","CORUM_RP","attention t=9: variant - V0","V3 att9","V0 att9",0.0150536800796396,-0.00334266258365065,0.0334500227429298,100
+"hub-strat (MI row mean)","CORUM_RP","attention t*: variant - V0","V3 attT","V0 attT",0.010678452500052,-0.00716724395403354,0.0285241489541376,100
+"hub-strat (MI row mean)","CORUM_RP","pairwise: variant - V0","V4 pair","V0 pair",0.00329540717646614,-0.000782562241924544,0.00737337659485683,100
+"hub-strat (MI row mean)","CORUM_RP","attention t=9: variant - V0","V4 att9","V0 att9",-0.00118326915334392,-0.0113521607412502,0.00898562243456238,100
+"hub-strat (MI row mean)","CORUM_RP","attention t*: variant - V0","V4 attT","V0 attT",-0.0018363870305107,-0.0103400524673947,0.00666727840637332,100
+"hub-strat (MI row mean)","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.0307480662249549,-0.0619882649417756,0.000492132491865874,100
+"hub-strat (MI row mean)","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.0350792264431038,-0.068790352321892,-0.00136810056431547,100
+"hub-strat (MI row mean)","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.0348585152295068,-0.0706075132781763,0.000890482819162687,100
+"hub-strat (MI row mean)","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.0156943861453153,-0.0446137131283588,0.0132249408377283,100
+"hub-strat (MI row mean)","CORUM_RP","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.0319313353782988,-0.0639740169292083,0.00011134617261075,100
+"hub-strat (MI row mean)","CORUM_small","pairwise: variant - V0","V1 pair","V0 pair",-0.037046542459954,-0.296975384432028,0.22288229951212,100
+"hub-strat (MI row mean)","CORUM_small","attention t=9: variant - V0","V1 att9","V0 att9",-0.108479925433642,-0.31548681067253,0.0985269598052452,100
+"hub-strat (MI row mean)","CORUM_small","attention t*: variant - V0","V1 attT","V0 attT",-0.15158565096408,-0.397016974481347,0.0938456725531874,100
+"hub-strat (MI row mean)","CORUM_small","pairwise: variant - V0","V2 pair","V0 pair",-0.0789816700018618,-0.398278533860982,0.240315193857259,100
+"hub-strat (MI row mean)","CORUM_small","attention t=9: variant - V0","V2 att9","V0 att9",0.00502731831238827,-0.329037309183155,0.339091945807931,100
+"hub-strat (MI row mean)","CORUM_small","attention t*: variant - V0","V2 attT","V0 attT",-0.0558687370970215,-0.286220910489877,0.174483436295834,100
+"hub-strat (MI row mean)","CORUM_small","pairwise: variant - V0","V3 pair","V0 pair",0.040192768310506,-0.257106195690285,0.337491732311297,100
+"hub-strat (MI row mean)","CORUM_small","attention t=9: variant - V0","V3 att9","V0 att9",0.14834849051179,-0.268685378946365,0.565382359969945,100
+"hub-strat (MI row mean)","CORUM_small","attention t*: variant - V0","V3 attT","V0 attT",0.0254736505024374,-0.2872437257841,0.338191026788975,100
+"hub-strat (MI row mean)","CORUM_small","pairwise: variant - V0","V4 pair","V0 pair",-0.0818179672866924,-0.373745519445367,0.210109584871982,100
+"hub-strat (MI row mean)","CORUM_small","attention t=9: variant - V0","V4 att9","V0 att9",-0.142093017372077,-0.390770000504513,0.106583965760359,100
+"hub-strat (MI row mean)","CORUM_small","attention t*: variant - V0","V4 attT","V0 attT",-0.162240485259946,-0.448882674382738,0.124401703862846,100
+"hub-strat (MI row mean)","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.240950176496378,-1.09030523298941,0.608404879996656,100
+"hub-strat (MI row mean)","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.34943010193002,-1.25138717643787,0.552526972577833,100
+"hub-strat (MI row mean)","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.235922858183989,-1.2631986081713,0.791352891803319,100
+"hub-strat (MI row mean)","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.0926016859845874,-1.01370976319605,0.828506391226872,100
+"hub-strat (MI row mean)","CORUM_small","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.383043193868455,-1.24410949915307,0.478023111416163,100
+"hub-strat (MI row mean)","CORUM_large","pairwise: variant - V0","V1 pair","V0 pair",0.0181522369848399,-0.00942004880243145,0.0457245227721113,100
+"hub-strat (MI row mean)","CORUM_large","attention t=9: variant - V0","V1 att9","V0 att9",-0.128423671203598,-0.17727350108243,-0.0795738413247669,100
+"hub-strat (MI row mean)","CORUM_large","attention t*: variant - V0","V1 attT","V0 attT",-0.0826655122668352,-0.125729664137006,-0.0396013603966646,100
+"hub-strat (MI row mean)","CORUM_large","pairwise: variant - V0","V2 pair","V0 pair",-0.00560978544278653,-0.034755894141381,0.0235363232558079,100
+"hub-strat (MI row mean)","CORUM_large","attention t=9: variant - V0","V2 att9","V0 att9",-0.0539524745175326,-0.111627401131532,0.00372245209646663,100
+"hub-strat (MI row mean)","CORUM_large","attention t*: variant - V0","V2 attT","V0 attT",-0.00975726911716286,-0.0646964013259404,0.0451818630916147,100
+"hub-strat (MI row mean)","CORUM_large","pairwise: variant - V0","V3 pair","V0 pair",0.0271981903493923,-0.0169441328183765,0.071340513517161,100
+"hub-strat (MI row mean)","CORUM_large","attention t=9: variant - V0","V3 att9","V0 att9",0.141531930965255,0.0327500798084636,0.250313782122047,100
+"hub-strat (MI row mean)","CORUM_large","attention t*: variant - V0","V3 attT","V0 attT",0.177808902717033,0.077084439898019,0.278533365536047,100
+"hub-strat (MI row mean)","CORUM_large","pairwise: variant - V0","V4 pair","V0 pair",-0.0218056978464134,-0.059632508994274,0.0160211133014472,100
+"hub-strat (MI row mean)","CORUM_large","attention t=9: variant - V0","V4 att9","V0 att9",-0.187182666301219,-0.245707404731529,-0.12865792787091,100
+"hub-strat (MI row mean)","CORUM_large","attention t*: variant - V0","V4 attT","V0 attT",-0.115814592358521,-0.166917575381436,-0.0647116093356057,100
+"hub-strat (MI row mean)","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V0 att9","V0 pair",-0.451445257220361,-0.637321146496963,-0.26556936794376,100
+"hub-strat (MI row mean)","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V1 att9","V0 pair",-0.57986892842396,-0.788421594215151,-0.371316262632768,100
+"hub-strat (MI row mean)","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V2 att9","V0 pair",-0.505397731737894,-0.710785231579356,-0.300010231896432,100
+"hub-strat (MI row mean)","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V3 att9","V0 pair",-0.309913326255106,-0.491446919451265,-0.128379733058947,100
+"hub-strat (MI row mean)","CORUM_large","attention t=9 minus CLR(V0 pairwise)","V4 att9","V0 pair",-0.638627923521581,-0.844578065207641,-0.43267778183552,100
