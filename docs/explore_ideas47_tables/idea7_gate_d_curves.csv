@@ -1,0 +1,2 @@
+"check","max_abs_diff","pass"
+"(d) r = 1 held-out criterion curves vs robust_z V0 heldout_curves.csv (6 splits x 2 directions x 20 t)",4.9960036108132e-16,TRUE

@@ -1,0 +1,13 @@
+"check","max_abs_diff","pass"
+"(a) clr vs robust_z cache V0__pair.rds, scope raw, 7 truths x (AUPR + 100 replicates)",0,TRUE
+"(a) clr vs robust_z cache V0__pair.rds, scope hub_att, 7 truths x (AUPR + 100 replicates)",0,TRUE
+"(a) clr vs robust_z cache V0__pair.rds, scope hub_mi, 7 truths x (AUPR + 100 replicates)",0,TRUE
+"(a) k10 vs robust_z cache V0__att9.rds, scope raw, 7 truths x (AUPR + 100 replicates)",0,TRUE
+"(a) k10 vs robust_z cache V0__att9.rds, scope hub_att, 7 truths x (AUPR + 100 replicates)",0,TRUE
+"(a) k10 vs robust_z cache V0__att9.rds, scope hub_mi, 7 truths x (AUPR + 100 replicates)",0,TRUE
+"(b) clr vs baselines metrics.csv, 4 truths",3.05311331771918e-16,TRUE
+"(b) k10 vs baselines metrics.csv, 4 truths",3.88578058618805e-16,TRUE
+"(c) clr vs corum_expert2 t9_jackknife, 7 truths",2.22044604925031e-16,TRUE
+"(c) k10 vs corum_expert2 t9_jackknife, 7 truths",4.16333634234434e-16,TRUE
+"(c) a3r vs corum_expert2 t9_jackknife, 7 truths",3.88578058618805e-16,TRUE
+"(c) a3r CORUM_all enrichment 7.9533 prints as 7.95",0,TRUE

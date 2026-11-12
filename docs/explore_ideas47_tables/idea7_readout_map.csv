@@ -1,0 +1,14 @@
+"name","canonical","r","t"
+"K10","K10",NA,NA
+"CLR","CLR",NA,NA
+"a3r","a3r",NA,NA
+"K10_min","K10_min",NA,NA
+"K10_deg","K10_deg",NA,NA
+"IN-J","INF_r1.0_t9",1,9
+"IN-r1.1-own","INF_r1.1_t3",1.1,3
+"IN-r1.1-t9","INF_r1.1_t9",1.1,9
+"IN-r1.2-own","INF_r1.2_t3",1.2,3
+"IN-r1.2-t9","INF_r1.2_t9",1.2,9
+"IN-r1.5-own","INF_r1.5_t3",1.5,3
+"IN-r1.5-t9","INF_r1.5_t9",1.5,9
+"IN-J-min","INF_r1.0_t9_min",1,9

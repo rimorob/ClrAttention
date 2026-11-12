@@ -63,3 +63,5 @@ Step 3.10 (E17, E18), 3 Nov 2026. The fine-tuned state dicts (14 scPRINT at 74 M
 | `results/robust_z/{m3d,k562}` (11 Nov 2026) | 36 MB (tables and CSVs about 2 MB; `cache/` rds with replicate-level results 34 MB, gitignored and not committed) | Exploratory robust row-z run (`analysis/robust_z/`). Tables, CSVs and logs force-added to git | `cache/` **yes** (recomputable by the two scheduler jobs, about 5.5 h); the rest no |
 
 | `results/granularity_log` (11 Nov 2026) | 0.9 MB (CSV curves, bootstrap draws, two PNGs, logs; force-added to git) | Log-scale depth re-test (`analysis/granularity_log.R`, `depth_log_analysis.py`) | No (the committed record of the re-test) |
+
+| `results/explore_ideas47/` (12 Nov 2026) | 2.3 MB measured (rds readout caches of ideas 4 and 7: 3 scopes x 100 replicates x 10 truths per readout; no matrices are kept) | exploratory ideas 4 and 7 (`docs/plans/explore_ideas47_plan.md`); caches not committed, small CSVs copied to `docs/explore_ideas47_tables/` | **Yes** (recomputable in about 3 h; keep the committed tables) |
