@@ -99,7 +99,7 @@ Form 1 against the better of the two controls (PPR or heat kernel): -0.0096 - 0.
 
 ## K562 gate (plan section 11)
 
-Condition (i), form 1 meets the literal rule on SC: no. Condition (ii), at least 3 of 10 deciles with t_d at least 1 octave from 9 AND real between-decile SD of log2 t_d above the rewired SD: 8 of 10 deciles (t_d <= 4) and real SD 0.489 against rewired SD 0.367: met. The gate therefore opened on condition (ii) only, and K562 was run (K562_STATUS_PLACEHOLDER).
+Condition (i), form 1 meets the literal rule on SC: no. Condition (ii), at least 3 of 10 deciles with t_d at least 1 octave from 9 AND real between-decile SD of log2 t_d above the rewired SD: 8 of 10 deciles (t_d <= 4) and real SD 0.489 against rewired SD 0.367: met. The gate therefore opened on condition (ii) only, and K562 was submitted to the scheduler on 12 Nov at 14:52 (`5310_i3_knee_k562`, `5311_i3_select_k562`, `5312_i3_score_k562`, chained with `# after`; declared 16, 40 and 26 GB, expected about 5 h in total). **K562 results are not in this document yet**; when the jobs finish, run `python3 analysis/explore_idea3/idea3_summarize.py k562` and append the K562 section (tables in `results/explore_idea3/k562/tables.md`). The K562 selection stage uses 6 profile splits x 2 directions (12 curves per decile) as planned.
 
 ## Deviations from the plan
 
