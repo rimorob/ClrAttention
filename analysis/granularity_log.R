@@ -96,7 +96,7 @@ bootstrap <- function(bench, genes, st) {
     dr <- matrix(sample.int(nm_mod, nm_mod * opt$boot, replace = TRUE), nm_mod, opt$boot)
     ordn <- st$ord[[nm]]; lastn <- st$last[[nm]]
     res <- parallel::mclapply(seq_len(opt$boot), function(d) { mk <- tabulate(dr[, d], nm_mod); w <- wfun(mk); wp <- w * lab
-      a <- vapply(as.character(tv), function(tt) wap(ordn[[tt]], lastn[[tt]], wp, w), numeric(1))
+      a <- vapply(as.character(tv), function(tt) { v <- wap(ordn[[tt]], lastn[[tt]], wp, w); gc(FALSE); v }, numeric(1))
       c(tv[which.max(a)], stats::median(msz[dr[, d]])) }, mc.cores = opt$cores)
     bad <- which(vapply(res, function(z) length(z) != 2L, TRUE)); if (length(bad)) stop("a bootstrap worker failed for ", nm, ": ", paste(capture.output(str(res[[bad[1]]])), collapse = " "), " (", length(bad), " bad of ", length(res), ")")
     r <- do.call(rbind, res)
@@ -112,7 +112,7 @@ bootstrap <- function(bench, genes, st) {
 finish <- function(st, bench, genes) {
   utils::write.csv(st$curves, file.path(opt$out, sprintf("curves_%s.csv", opt$org)), row.names = FALSE)
   check_equiv(st$curves)
-  if (opt$boot > 0L) { bs <- bootstrap(bench, genes, st)
+  if (opt$boot > 0L) { invisible(gc()); bs <- bootstrap(bench, genes, st)
     gz <- gzfile(file.path(opt$out, sprintf("boot_%s.csv.gz", opt$org)), "w"); utils::write.csv(bs$draws, gz, row.names = FALSE); close(gz)
     utils::write.csv(bs$sizes, file.path(opt$out, sprintf("truth_sizes_%s.csv", opt$org)), row.names = FALSE) }
   say("done")
