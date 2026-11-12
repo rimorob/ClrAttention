@@ -72,7 +72,7 @@ if (opt$dataset == "m3d") {
              CollecTRI = collectri_sets(genes))
   cr <- tr$CORUM; cx <- utils::read.csv("analysis/corum_exploratory/corum_complexes.csv", stringsAsFactors = FALSE)
   sz <- lengths(cr$members); nm <- names(cr$members); rp <- nm %in% cx$complex[cx$group == "RP-dominated"]
-  stopifnot(sum(rp) == 8L, all(sz == cx$size[match(nm, cx$complex)]))
+  if (opt$quick == 0L) stopifnot(sum(rp) == 8L, all(sz == cx$size[match(nm, cx$complex)]))
   sub_of <- function(keep) list(members = cr$members[keep], class = cr$class[keep])
   mk <- function(reg) list(pairs = comembership_pairs(reg, none, genes))
   bench <- list(DoRothEA_AB = mk(tr$DoRothEA_AB), CORUM_all = mk(cr), KD_response = mk(tr$KD_response), CORUM_noRP = mk(sub_of(!rp)), CollecTRI = mk(tr$CollecTRI))

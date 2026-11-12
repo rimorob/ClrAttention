@@ -1,0 +1,5 @@
+"stratifier","real_sd","null_sd_mean","null_sd_q95","frac_null_sd_ge_real","real_range","null_range_mean","frac_null_range_ge_real","real_spearman","null_spearman_mean","n_rewirings","real_sd_above_q95"
+"mi",0,0,0,1,0,0,1,NA,NA,50,FALSE
+"pi",0.316227766016838,0,0,0,1,0,0,-0.522232967867094,NA,50,TRUE
+"mi_labelperm",0,0,0,1,0,0,1,NA,NA,2000,FALSE
+"pi_labelperm",0.316227766016838,0,0,0,1,0,0,-0.522232967867094,NA,2000,TRUE

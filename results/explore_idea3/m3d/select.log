@@ -1,0 +1,6 @@
+[10:24:44] options: dataset=m3d out=results/explore_idea3/m3d nsplit=16 workers=6 quick=0 depth_seed=20261014 perm_seed=20261113 nperm=4 rewire=1 rz_curves=results/robust_z/m3d/heldout_curves.csv 
+[10:24:49] m3d: 4297 genes x 466 samples (39 labs) 
+[10:25:00] 16 splits to run (0 done), 6 workers; label sets: mi,pi,perm1,perm2,perm3,perm4; rewired operator: yes 
+[12:02:07] split seconds: 1961 1964 1910 1919 1972 1970 1902 1896 1885 1898 1898 1895 1966 1962 1965 1964 
+[12:02:07] EQUIVALENCE (criterion machinery vs robust_z V0): 128 rows, max |diff| 4.996e-16 
+[12:02:08] selection done 

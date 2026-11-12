@@ -1,0 +1,19 @@
+[12:02:10] options: dataset=m3d out=results/explore_idea3/m3d workers=8 threads=4 jack=100 jack_reg=100 alpha=0.5 seed=20261016 quick=0 perm=1 
+[12:02:16] m3d: 4297 genes x 466 samples 
+[12:02:17] frozen selection: global grid t_g = 8; PPR alpha = 0.9; heat kernel tau = 8 
+[12:02:17] t_d (MI deciles 1..10): 6 6 4 4 4 3 3 3 2 3 | (pi deciles): 3 2 2 2 2 2 3 3 3 4 
+[12:02:49] truth SC            1762067 pairs, base rate 0.0943 
+[12:02:49] truth all           3031397 pairs, base rate 0.1205 
+[12:06:29] walk to t = 128 done (219 s); stored depths: 1,2,3,4,6,8,9,12,16,24,32,48,64,96,128 
+[12:07:12] readout t9           scored (43 s) 
+[12:07:12] EQUIVALENCE gate 1: max |diff| 2.498e-16; gate 3: max |diff| 3.553e-15 
+[12:07:54] readout global_grid  scored (43 s) 
+[12:08:36] readout form1_mi     scored (42 s) 
+[12:09:17] readout form1_pi     scored (40 s) 
+[12:10:00] readout form2_mi     scored (43 s) 
+[12:10:43] readout form2_pi     scored (43 s) 
+[12:11:24] readout form2raw     scored (42 s) 
+[12:12:05] readout form1_perm1  scored (41 s) 
+[12:12:46] readout ppr          scored (41 s) 
+[12:13:23] readout hk           scored (37 s) 
+[12:13:23] scoring done 

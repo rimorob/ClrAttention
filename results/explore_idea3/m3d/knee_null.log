@@ -1,0 +1,6 @@
+[09:50:51] options: dataset=m3d out=results/explore_idea3/m3d nrew=50 workers=6 quick=0 threads=2 alpha=0.5 seed=20261112 
+[09:50:57] m3d: 4297 genes x 466 samples 
+[09:51:44] deciles written; Spearman(MI row mean, pi) = 0.111; decile agreement (same decile) = 0.105 
+[09:54:53] real operator knee walk: 189 s 
+[09:54:57] 50 rewirings, 6 workers 
+[10:24:42] knee null done 

@@ -1,0 +1,2 @@
+gate 1: t = 9 readout vs results/baselines_m3d/metrics.csv (attention): max |diff| pooled AUPR 2.498e-16 over truths SC,all; tolerance 1e-9 PASS
+gate 3: t = 9 enrichment (raw, hub MI, hub pi) vs results/robust_z/m3d V0 att9: max |diff| 3.553e-15 over truths SC,all; tolerance 1e-9 PASS
