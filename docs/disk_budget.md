@@ -66,4 +66,4 @@ Step 3.10 (E17, E18), 3 Nov 2026. The fine-tuned state dicts (14 scPRINT at 74 M
 
 | `results/explore_ideas47/` (12 Nov 2026) | 2.3 MB measured (rds readout caches of ideas 4 and 7: 3 scopes x 100 replicates x 10 truths per readout; no matrices are kept) | exploratory ideas 4 and 7 (`docs/plans/explore_ideas47_plan.md`); caches not committed, small CSVs copied to `docs/explore_ideas47_tables/` | **Yes** (recomputable in about 3 h; keep the committed tables) |
 
-| `results/explore_idea3/{m3d,k562}` (12 Nov 2026) | M3D 2.7 MB (2.3 MB CSV, PNG, logs, force-added to git; 0.4 MB `cache/` rds); K562 expected under 20 MB | Exploratory idea 3 (adaptive depth by hub decile; `analysis/explore_idea3/`, `docs/explore_idea3_results.md`). `cache/` not committed | `cache/` **yes** (recomputable, M3D about 2.2 h, K562 about 5 h); the rest no |
+| `results/idea5` (12 Nov 2026) | 0.02 GB kept (prep X matrix 16 MB, model run records and curves, score tables); 6.7 GB of exported logits was transient and deleted after scoring | exploratory idea 5 (`docs/plans/explore_idea5_plan.md`); small CSVs committed | **Yes** (recomputable in about 2.5 h on GPU 1 plus 1 h CPU) |

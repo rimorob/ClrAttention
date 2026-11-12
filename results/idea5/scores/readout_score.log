@@ -1,0 +1,22 @@
+[11:24:29] options: prep=results/idea5/prep models=results/idea5/models out=results/idea5/scores truth=1 workers=8 threads=8 tmax=32 jack=100 seed=20261016 t=9 alpha=0.5 
+[11:26:49] GATES G1 and G3 PASSED 
+[11:26:49] models found: 40 half, 20 refit, 10 control 
+[11:26:49] depth curves: 42 operators, t = 1..32, 8 workers 
+[11:39:45] depth curves written 
+[11:39:45] t* of the half-CLR operators on this lab split: 8 (directions 9, 8) 
+[11:39:48] truth SC     155 regulons,  1762067 pairs, base rate 0.0943 
+[11:39:48] truth all    196 regulons,  3031397 pairs, base rate 0.1205 
+[11:40:06] scoring CLR_full first (gate G2) 
+[11:42:53] GATE G2 PASSED (scoring code reproduces robust_z V0 pooled AUPR and the 100 jackknife values to 1e-10) 
+[11:42:53] scoring 72 tasks with 8 workers 
+[11:44:08] options: prep=results/idea5/prep models=results/idea5/models out=results/idea5/scores truth=1 workers=8 threads=8 tmax=32 jack=100 seed=20261016 t=9 alpha=0.5 
+[11:44:10] equivalence.csv present (gates passed earlier) 
+[11:44:10] models found: 40 half, 20 refit, 10 control 
+[11:44:10] t* of the half-CLR operators on this lab split: 8 (directions 9, 8) 
+[11:44:13] truth SC     155 regulons,  1762067 pairs, base rate 0.0943 
+[11:44:13] truth all    196 regulons,  3031397 pairs, base rate 0.1205 
+[11:44:30] scoring CLR_full first (gate G2) 
+[11:44:30] GATE G2 PASSED (scoring code reproduces robust_z V0 pooled AUPR and the 100 jackknife values to 1e-10) 
+[11:44:30] scoring 72 tasks with 8 workers 
+[12:13:23] timings: CLRhalf_h1 254 s; CLRhalf_h2 258 s; ctrl_scratch_d32_s1 186 s; ctrl_scratch_d32_s2 181 s; ctrl_scratch_d32_s3 185 s; ctrl_scratch_d32_s4 187 s; ctrl_scratch_d32_s5 182 s; ctrl_scratch_d128_s1 188 s; ctrl_scratch_d128_s2 188 s; ctrl_scratch_d128_s3 189 s; ctrl_scratch_d128_s4 188 s; ctrl_scratch_d128_s5 190 s; clr_d32_s1_h1 139 s; clr_d32_s1_h2 138 s; clr_d32_s2_h1 138 s; clr_d32_s2_h2 138 s; clr_d32_s3_h1 135 s; clr_d32_s3_h2 138 s; clr_d32_s4_h1 137 s; clr_d32_s4_h2 136 s; clr_d32_s5_h1 139 s; clr_d32_s5_h2 137 s; clr_d128_s1_h1 154 s; clr_d128_s1_h2 161 s; clr_d128_s2_h1 157 s; clr_d128_s2_h2 158 s; clr_d128_s3_h1 159 s; clr_d128_s3_h2 162 s; clr_d128_s4_h1 152 s; clr_d128_s4_h2 154 s; clr_d128_s5_h1 158 s; clr_d128_s5_h2 159 s; scratch_d32_s1_h1 160 s; scratch_d32_s1_h2 161 s; scratch_d32_s2_h1 165 s; scratch_d32_s2_h2 166 s; scratch_d32_s3_h1 159 s; scratch_d32_s3_h2 158 s; scratch_d32_s4_h1 159 s; scratch_d32_s4_h2 157 s; scratch_d32_s5_h1 154 s; scratch_d32_s5_h2 152 s; scratch_d128_s1_h1 156 s; scratch_d128_s1_h2 157 s; scratch_d128_s2_h1 169 s; scratch_d128_s2_h2 158 s; scratch_d128_s3_h1 157 s; scratch_d128_s3_h2 159 s; scratch_d128_s4_h1 152 s; scratch_d128_s4_h2 154 s; scratch_d128_s5_h1 154 s; scratch_d128_s5_h2 153 s; clr_d32_s1_full 229 s; clr_d32_s2_full 229 s; clr_d32_s3_full 225 s; clr_d32_s4_full 229 s; clr_d32_s5_full 227 s; clr_d128_s1_full 241 s; clr_d128_s2_full 241 s; clr_d128_s3_full 241 s; clr_d128_s4_full 240 s; clr_d128_s5_full 240 s; scratch_d32_s1_full 242 s; scratch_d32_s2_full 239 s; scratch_d32_s3_full 241 s; scratch_d32_s4_full 240 s; scratch_d32_s5_full 233 s; scratch_d128_s1_full 237 s; scratch_d128_s2_full 238 s; scratch_d128_s3_full 230 s; scratch_d128_s4_full 229 s; scratch_d128_s5_full 233 s 
+[12:13:23] done 

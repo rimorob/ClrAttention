@@ -1,0 +1,13 @@
+"readout","scope","truth","d_aupr","d_jack"
+"pair","pooled","SC",0,0
+"pair","pooled","all",0,0
+"pair","hub_att","SC",0,0
+"pair","hub_att","all",0,0
+"pair","hub_mi","SC",0,0
+"pair","hub_mi","all",0,0
+"att9","pooled","SC",0,0
+"att9","pooled","all",0,0
+"att9","hub_att","SC",0,0
+"att9","hub_att","all",0,0
+"att9","hub_mi","SC",0,0
+"att9","hub_mi","all",0,0

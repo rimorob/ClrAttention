@@ -50,6 +50,6 @@ wcsv(do.call(rbind, pf2), "passfail_half_matched.csv")
 write.csv(sel[sel$init == "clr" & sel$d == 32 & sel$readout == "attT" & sel$scope == "hub (pi)" & sel$truth == "SC", ], file.path(odir, "primary_per_seed.csv"), row.names = FALSE)
 
 ## 4. training summaries -------------------------------------------------------------------------------------------------
-js <- do.call(rbind, lapply(list.files(mdir, "\\.json$", full.names = TRUE), function(f) { j <- jsonlite::fromJSON(f); data.frame(j[c("tag", "init", "d", "seed", "mode", "lr", "best_epoch", "epochs_run", "steps", "val_mse_step0", "val_r2_step0", "val_mse_best", "val_r2_best", "seconds", "peak_gpu_mb")]) }))
+js <- do.call(rbind, lapply(list.files(mdir, "\\.json$", full.names = TRUE), function(f) { j <- jsonlite::fromJSON(gsub("NaN", "null", paste(readLines(f), collapse = ""))); data.frame(lapply(j[c("tag", "init", "d", "seed", "mode", "lr", "best_epoch", "epochs_run", "steps", "val_mse_step0", "val_r2_step0", "val_mse_best", "val_r2_best", "seconds", "peak_gpu_mb")], function(v) if (is.null(v)) NA else v)) }))
 wcsv(js, "training_runs.csv")
 cat("summary written to", odir, "\n")

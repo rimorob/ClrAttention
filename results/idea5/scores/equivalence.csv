@@ -1,0 +1,17 @@
+"gate","data","check","value"
+"G3","full","max |softmax weights from ported temperatures - clr:::.softmax_rows|",0
+"G1","full","exported D and gamma are exactly 0 (max |D|, max |gamma|)",0
+"G1","full","max |Z file - package clr_scores|",0
+"G1","full","max |C(learned readout, step 0) - package clr_scores|",3.5527136788005e-15
+"G1","full","max |operator - package operator|",1.49880108324396e-15
+"G1","full","max |S_9 - package walk mass|",1.2490009027033e-16
+"G1","h1","exported D and gamma are exactly 0 (max |D|, max |gamma|)",0
+"G1","h1","max |Z file - package clr_scores|",0
+"G1","h1","max |C(learned readout, step 0) - package clr_scores|",3.5527136788005e-15
+"G1","h1","max |operator - package operator|",1.52655665885959e-15
+"G1","h1","max |S_9 - package walk mass|",1.11022302462516e-16
+"G1","h2","exported D and gamma are exactly 0 (max |D|, max |gamma|)",0
+"G1","h2","max |Z file - package clr_scores|",0
+"G1","h2","max |C(learned readout, step 0) - package clr_scores|",3.5527136788005e-15
+"G1","h2","max |operator - package operator|",1.66533453693773e-15
+"G1","h2","max |S_9 - package walk mass|",1.2490009027033e-16

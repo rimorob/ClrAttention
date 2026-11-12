@@ -1,0 +1,7 @@
+[09:52:25] options: out=results/idea5/prep quick=0 threads=8 split_seed=20261112 
+[09:52:30] 4297 genes x 466 experiments, 39 labs 
+[09:52:30] lab halves: 254 and 212 experiments 
+[09:52:46] full: 466 experiments, CLR in 16 s; tau0 = 0.68291 (rows with a temperature: 4297 of 4297; positive scores per row median 2089) 
+[09:52:58] h1: 254 experiments, CLR in 11 s; tau0 = 0.59804 (rows with a temperature: 4297 of 4297; positive scores per row median 2102) 
+[09:53:09] h2: 212 experiments, CLR in 11 s; tau0 = 0.59785 (rows with a temperature: 4297 of 4297; positive scores per row median 2130) 
+[09:53:10] prep done 
