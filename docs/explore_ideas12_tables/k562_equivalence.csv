@@ -1,0 +1,51 @@
+"check","readout","scope","truth","max_abs_diff_aupr","max_abs_diff_jack","pass"
+"robust_z V0 cache","CLR","pooled","DoRothEA_AB",0,0,TRUE
+"robust_z V0 cache","CLR","pooled","CORUM_all",0,0,TRUE
+"robust_z V0 cache","CLR","pooled","KD_response",0,0,TRUE
+"robust_z V0 cache","CLR","pooled","CORUM_noRP",0,0,TRUE
+"robust_z V0 cache","CLR","pooled","CORUM_RP",0,0,TRUE
+"robust_z V0 cache","CLR","pooled","CORUM_small",0,0,TRUE
+"robust_z V0 cache","CLR","pooled","CORUM_large",0,0,TRUE
+"robust_z V0 cache","CLR","hub_att","DoRothEA_AB",0,0,TRUE
+"robust_z V0 cache","CLR","hub_att","CORUM_all",0,0,TRUE
+"robust_z V0 cache","CLR","hub_att","KD_response",0,0,TRUE
+"robust_z V0 cache","CLR","hub_att","CORUM_noRP",0,0,TRUE
+"robust_z V0 cache","CLR","hub_att","CORUM_RP",0,0,TRUE
+"robust_z V0 cache","CLR","hub_att","CORUM_small",0,0,TRUE
+"robust_z V0 cache","CLR","hub_att","CORUM_large",0,0,TRUE
+"robust_z V0 cache","CLR","hub_mi","DoRothEA_AB",0,0,TRUE
+"robust_z V0 cache","CLR","hub_mi","CORUM_all",0,0,TRUE
+"robust_z V0 cache","CLR","hub_mi","KD_response",0,0,TRUE
+"robust_z V0 cache","CLR","hub_mi","CORUM_noRP",0,0,TRUE
+"robust_z V0 cache","CLR","hub_mi","CORUM_RP",0,0,TRUE
+"robust_z V0 cache","CLR","hub_mi","CORUM_small",0,0,TRUE
+"robust_z V0 cache","CLR","hub_mi","CORUM_large",0,0,TRUE
+"robust_z V0 cache","K10","pooled","DoRothEA_AB",0,0,TRUE
+"robust_z V0 cache","K10","pooled","CORUM_all",0,0,TRUE
+"robust_z V0 cache","K10","pooled","KD_response",0,0,TRUE
+"robust_z V0 cache","K10","pooled","CORUM_noRP",0,0,TRUE
+"robust_z V0 cache","K10","pooled","CORUM_RP",0,0,TRUE
+"robust_z V0 cache","K10","pooled","CORUM_small",0,0,TRUE
+"robust_z V0 cache","K10","pooled","CORUM_large",0,0,TRUE
+"robust_z V0 cache","K10","hub_att","DoRothEA_AB",0,0,TRUE
+"robust_z V0 cache","K10","hub_att","CORUM_all",0,0,TRUE
+"robust_z V0 cache","K10","hub_att","KD_response",0,0,TRUE
+"robust_z V0 cache","K10","hub_att","CORUM_noRP",0,0,TRUE
+"robust_z V0 cache","K10","hub_att","CORUM_RP",0,0,TRUE
+"robust_z V0 cache","K10","hub_att","CORUM_small",0,0,TRUE
+"robust_z V0 cache","K10","hub_att","CORUM_large",0,0,TRUE
+"robust_z V0 cache","K10","hub_mi","DoRothEA_AB",0,0,TRUE
+"robust_z V0 cache","K10","hub_mi","CORUM_all",0,0,TRUE
+"robust_z V0 cache","K10","hub_mi","KD_response",0,0,TRUE
+"robust_z V0 cache","K10","hub_mi","CORUM_noRP",0,0,TRUE
+"robust_z V0 cache","K10","hub_mi","CORUM_RP",0,0,TRUE
+"robust_z V0 cache","K10","hub_mi","CORUM_small",0,0,TRUE
+"robust_z V0 cache","K10","hub_mi","CORUM_large",0,0,TRUE
+"baselines metrics.csv","CLR","pooled","DoRothEA_AB",2.22044604925031e-16,NA,TRUE
+"baselines metrics.csv","K10","pooled","DoRothEA_AB",3.88578058618805e-16,NA,TRUE
+"baselines metrics.csv","CLR","pooled","CORUM_all",2.77555756156289e-17,NA,TRUE
+"baselines metrics.csv","K10","pooled","CORUM_all",2.08166817117217e-17,NA,TRUE
+"baselines metrics.csv","CLR","pooled","KD_response",3.05311331771918e-16,NA,TRUE
+"baselines metrics.csv","K10","pooled","KD_response",3.60822483003176e-16,NA,TRUE
+"baselines metrics.csv","CLR","pooled","CollecTRI",8.32667268468867e-17,NA,TRUE
+"baselines metrics.csv","K10","pooled","CollecTRI",1.66533453693773e-16,NA,TRUE

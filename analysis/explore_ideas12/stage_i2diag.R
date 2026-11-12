@@ -18,8 +18,9 @@ load_Y <- function(h5) {
   Y <- Y[apply(Y, 1, function(x) diff(range(x))) > 0, ]
   list(Y = Y, n_profiles = ncol(Y), n_genes = nrow(Y), n_dropped = sum(bad), n_imputed = n_imp) }
 res <- list(); diag_rows <- list()
-for (nm in c(gwps = "data/perturbseq/K562_gwps_normalized_bulk_01.h5ad", rpe1 = "data/perturbseq/rpe1_normalized_bulk_01.h5ad")) {
-  key <- names(nm)[1]; yl <- load_Y(nm); Y <- yl$Y
+h5s <- c(gwps = "data/perturbseq/K562_gwps_normalized_bulk_01.h5ad", rpe1 = "data/perturbseq/rpe1_normalized_bulk_01.h5ad")
+for (key in names(h5s)) {
+  yl <- load_Y(h5s[[key]]); Y <- yl$Y
   uidx <- which(genes %in% rownames(Y)); U <- genes[uidx]; Yu <- Y[U, , drop = FALSE]; rm(Y); invisible(gc(verbose = FALSE))
   say(sprintf("%s: %d profiles, %d genes (%d dropped >1%% missing, %d values set to 0); universe U = %d of %d essential-compendium genes", key, yl$n_profiles, yl$n_genes, yl$n_dropped, yl$n_imputed, length(U), G))
   f <- ClrAttention$new(Yu)$estimate_mi(bins = "hg", transform = "none", threads = threads); f$calibrate(method = "normal", combine = "stouffer")

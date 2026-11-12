@@ -1,0 +1,13 @@
+"readout","scope","truth","max_abs_diff_aupr","max_abs_diff_jack","pass"
+"CLR","pooled","SC",0,0,TRUE
+"CLR","pooled","all",0,0,TRUE
+"CLR","hub_att","SC",0,0,TRUE
+"CLR","hub_att","all",0,0,TRUE
+"CLR","hub_mi","SC",0,0,TRUE
+"CLR","hub_mi","all",0,0,TRUE
+"K10","pooled","SC",0,0,TRUE
+"K10","pooled","all",0,0,TRUE
+"K10","hub_att","SC",0,0,TRUE
+"K10","hub_att","all",0,0,TRUE
+"K10","hub_mi","SC",0,0,TRUE
+"K10","hub_mi","all",0,0,TRUE
