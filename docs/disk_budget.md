@@ -59,3 +59,5 @@ Step 3.10 (E17, E18), 3 Nov 2026. The fine-tuned state dicts (14 scPRINT at 74 M
 | `data/dream5/published_extracted` | about 0.26 GB (predictions 0.25 GB, results xls and CSV, symlink dir `flat_pred`, tidy table) | Scorer gate 10 Nov 2026: extraction of `Network_predictions.zip` and `DREAM5_NetworkInference_MethodScoringResults.xls` (PI's downloads, `data/dream5/synapse/published`), gitignored | **Yes** after the gate report is archived; re-extractable from the zip, `flat_pred` and the tidy CSV rebuilt by `analysis/dream5_published_table.py` |
 
 | `results/dream5/truth_net{1,3,4}` (11 Nov 2026) | < 0.5 MB each (CSV tables, universe lists, run_info) | Truth stage primary scoring runs of our methods (step 7 part 3). Force-added to git | No (the committed record of the truth stage) |
+
+| `results/robust_z/{m3d,k562}` (11 Nov 2026) | 36 MB (tables and CSVs about 2 MB; `cache/` rds with replicate-level results 34 MB, gitignored and not committed) | Exploratory robust row-z run (`analysis/robust_z/`). Tables, CSVs and logs force-added to git | `cache/` **yes** (recomputable by the two scheduler jobs, about 5.5 h); the rest no |
