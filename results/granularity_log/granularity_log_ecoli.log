@@ -1,0 +1,96 @@
+[15:53:35] start: org ecoli, grid 1,2,3,4,6,8,12,16,24,32,48,64,96,128,192,256, boot 1000, cores 8 
+[15:53:46] E. coli 1 operons: 786 sets, 3234696 pairs, base rate 0.0013 
+[15:53:46] E. coli 2 TF regulons: 158 sets, 2357154 pairs, base rate 0.1129 
+[15:53:46] E. coli 3 sigmulons: 5 sets, 110077 pairs, base rate 0.2713 
+[15:54:15] E. coli M3D t=1 scored 
+[15:54:28] E. coli M3D t=2 scored 
+[15:54:41] E. coli M3D t=3 scored 
+[15:54:55] E. coli M3D t=4 scored 
+[15:55:10] E. coli M3D t=6 scored 
+[15:55:25] E. coli M3D t=8 scored 
+[15:55:44] E. coli M3D t=12 scored 
+[15:56:01] E. coli M3D t=16 scored 
+[15:56:24] E. coli M3D t=24 scored 
+[15:56:48] E. coli M3D t=32 scored 
+[15:57:23] E. coli M3D t=48 scored 
+[15:57:56] E. coli M3D t=64 scored 
+[15:58:18] E. coli M3D t=80 (walk only) 
+[15:58:54] E. coli M3D t=96 scored 
+[15:59:17] E. coli M3D t=112 (walk only) 
+[15:59:52] E. coli M3D t=128 scored 
+[16:00:14] E. coli M3D t=144 (walk only) 
+[16:00:37] E. coli M3D t=160 (walk only) 
+[16:01:00] E. coli M3D t=176 (walk only) 
+[16:01:37] E. coli M3D t=192 scored 
+[16:01:59] E. coli M3D t=208 (walk only) 
+[16:02:22] E. coli M3D t=224 (walk only) 
+[16:02:44] E. coli M3D t=240 (walk only) 
+[16:03:21] E. coli M3D t=256 scored 
+[16:03:22] EQUIVALENCE vs results/granularity/granularity_curves.csv: 21 rows (depths 0,1,2,4,8,16,32), max |diff| AUPR 3.89e-16, base rate 4.58e-16, coherence 4.44e-16 
+[16:03:22] bootstrap 1 operons: 786 modules, 3234696 pairs, weighted-AP identity at m=1 OK 
+[16:03:34] start: org ecoli, grid 1,2,3,4,6,8,12,16,24,32,48,64,96,128,192,256, boot 1000, cores 8 
+[16:03:45] E. coli 1 operons: 786 sets, 3234696 pairs, base rate 0.0013 
+[16:03:45] E. coli 2 TF regulons: 158 sets, 2357154 pairs, base rate 0.1129 
+[16:03:45] E. coli 3 sigmulons: 5 sets, 110077 pairs, base rate 0.2713 
+[16:04:15] E. coli M3D t=1 scored 
+[16:04:26] E. coli M3D t=2 scored 
+[16:04:42] E. coli M3D t=3 scored 
+[16:04:58] E. coli M3D t=4 scored 
+[16:05:15] E. coli M3D t=6 scored 
+[16:05:32] E. coli M3D t=8 scored 
+[16:05:53] E. coli M3D t=12 scored 
+[16:06:12] E. coli M3D t=16 scored 
+[16:06:38] E. coli M3D t=24 scored 
+[16:07:03] E. coli M3D t=32 scored 
+[16:07:40] E. coli M3D t=48 scored 
+[16:08:16] E. coli M3D t=64 scored 
+[16:08:38] E. coli M3D t=80 (walk only) 
+[16:09:15] E. coli M3D t=96 scored 
+[16:09:37] E. coli M3D t=112 (walk only) 
+[16:10:14] E. coli M3D t=128 scored 
+[16:10:37] E. coli M3D t=144 (walk only) 
+[16:11:00] E. coli M3D t=160 (walk only) 
+[16:11:23] E. coli M3D t=176 (walk only) 
+[16:11:59] E. coli M3D t=192 scored 
+[16:12:22] E. coli M3D t=208 (walk only) 
+[16:12:44] E. coli M3D t=224 (walk only) 
+[16:13:07] E. coli M3D t=240 (walk only) 
+[16:13:44] E. coli M3D t=256 scored 
+[16:13:44] EQUIVALENCE vs results/granularity/granularity_curves.csv: 21 rows (depths 0,1,2,4,8,16,32), max |diff| AUPR 3.89e-16, base rate 4.58e-16, coherence 4.44e-16 
+[16:13:45] bootstrap 1 operons: 786 modules, 3234696 pairs, weighted-AP identity at m=1 OK 
+[17:32:25] start: org ecoli, grid 1,2,3,4,6,8,12,16,24,32,48,64,96,128,192,256, boot 1000, cores 8 
+[17:32:36] E. coli 1 operons: 786 sets, 3234696 pairs, base rate 0.0013 
+[17:32:36] E. coli 2 TF regulons: 158 sets, 2357154 pairs, base rate 0.1129 
+[17:32:36] E. coli 3 sigmulons: 5 sets, 110077 pairs, base rate 0.2713 
+[17:33:04] E. coli M3D t=1 scored 
+[17:33:14] E. coli M3D t=2 scored 
+[17:33:28] E. coli M3D t=3 scored 
+[17:33:42] E. coli M3D t=4 scored 
+[17:33:57] E. coli M3D t=6 scored 
+[17:34:12] E. coli M3D t=8 scored 
+[17:34:31] E. coli M3D t=12 scored 
+[17:34:50] E. coli M3D t=16 scored 
+[17:35:15] E. coli M3D t=24 scored 
+[17:35:38] E. coli M3D t=32 scored 
+[17:36:13] E. coli M3D t=48 scored 
+[17:36:48] E. coli M3D t=64 scored 
+[17:37:10] E. coli M3D t=80 (walk only) 
+[17:37:45] E. coli M3D t=96 scored 
+[17:38:07] E. coli M3D t=112 (walk only) 
+[17:38:42] E. coli M3D t=128 scored 
+[17:39:04] E. coli M3D t=144 (walk only) 
+[17:39:26] E. coli M3D t=160 (walk only) 
+[17:39:48] E. coli M3D t=176 (walk only) 
+[17:40:24] E. coli M3D t=192 scored 
+[17:40:46] E. coli M3D t=208 (walk only) 
+[17:41:08] E. coli M3D t=224 (walk only) 
+[17:41:30] E. coli M3D t=240 (walk only) 
+[17:42:06] E. coli M3D t=256 scored 
+[17:42:07] EQUIVALENCE vs results/granularity/granularity_curves.csv: 21 rows (depths 0,1,2,4,8,16,32), max |diff| AUPR 3.89e-16, base rate 4.58e-16, coherence 4.44e-16 
+[17:42:07] bootstrap 1 operons: 786 modules, 3234696 pairs, weighted-AP identity at m=1 OK 
+[17:55:01] bootstrap 1 operons done: t_best median 4, 2.5% 4, 97.5% 4 
+[17:55:02] bootstrap 2 TF regulons: 158 modules, 2357154 pairs, weighted-AP identity at m=1 OK 
+[18:06:27] bootstrap 2 TF regulons done: t_best median 96, 2.5% 16, 97.5% 128 
+[18:06:28] bootstrap 3 sigmulons: 5 modules, 110077 pairs, weighted-AP identity at m=1 OK 
+[18:12:12] bootstrap 3 sigmulons done: t_best median 12, 2.5% 0, 97.5% 256 
+[18:12:12] done 

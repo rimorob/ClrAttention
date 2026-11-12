@@ -1,0 +1,74 @@
+[15:53:37] start: org k562, grid 1,2,3,4,6,8,12,16,24,32,48,64,96,128,192,256, boot 1000, cores 8 
+[15:54:08] K562 1 CORUM complexes: 1186 sets, base rate 0.0132 
+[15:54:08] K562 2 KD-response modules: 585 sets, base rate 0.0661 
+[15:54:08] K562 3 DoRothEA A-B: 105 sets, base rate 0.1815 
+[15:54:08] K562 4 DoRothEA A-C: 269 sets, base rate 0.1172 
+[15:54:08] K562 5 CollecTRI: 490 sets, base rate 0.1096 
+[16:02:21] K562 essential compendium t=1 scored 
+[16:06:39] K562 essential compendium t=2 scored 
+[16:14:11] K562 essential compendium t=3 scored 
+[16:22:02] K562 essential compendium t=4 scored 
+[16:28:29] K562 essential compendium t=6 scored 
+[16:35:33] K562 essential compendium t=8 scored 
+[16:43:17] K562 essential compendium t=12 scored 
+[16:50:25] K562 essential compendium t=16 scored 
+[16:57:57] K562 essential compendium t=24 scored 
+[17:05:29] K562 essential compendium t=32 scored 
+[17:14:17] K562 essential compendium t=48 scored 
+[17:23:30] K562 essential compendium t=64 scored 
+[17:25:35] K562 essential compendium t=80 (walk only) 
+[17:34:09] K562 essential compendium t=96 scored 
+[17:36:15] K562 essential compendium t=112 (walk only) 
+[17:45:35] K562 essential compendium t=128 scored 
+[17:48:18] K562 essential compendium t=144 (walk only) 
+[17:51:02] K562 essential compendium t=160 (walk only) 
+[17:53:58] K562 essential compendium t=176 (walk only) 
+[18:05:40] K562 essential compendium t=192 scored 
+[18:08:13] K562 essential compendium t=208 (walk only) 
+[18:10:57] K562 essential compendium t=224 (walk only) 
+[18:13:20] K562 essential compendium t=240 (walk only) 
+[18:22:26] K562 essential compendium t=256 scored 
+[18:22:26] EQUIVALENCE vs results/granularity/granularity_curves.csv: 35 rows (depths 0,1,2,4,8,16,32), max |diff| AUPR 5e-16, base rate 4.3e-16, coherence 4.44e-16 
+[18:22:27] bootstrap 1 CORUM complexes: 1186 modules, 2557191 pairs, weighted-AP identity at m=1 OK 
+[18:22:41] start: org k562, grid 1,2,3,4,6,8,12,16,24,32,48,64,96,128,192,256, boot 1000, cores 8 
+[18:23:12] K562 1 CORUM complexes: 1186 sets, base rate 0.0132 
+[18:23:12] K562 2 KD-response modules: 585 sets, base rate 0.0661 
+[18:23:12] K562 3 DoRothEA A-B: 105 sets, base rate 0.1815 
+[18:23:12] K562 4 DoRothEA A-C: 269 sets, base rate 0.1172 
+[18:23:12] K562 5 CollecTRI: 490 sets, base rate 0.1096 
+[18:31:35] K562 essential compendium t=1 scored 
+[18:35:34] K562 essential compendium t=2 scored 
+[18:41:20] K562 essential compendium t=3 scored 
+[18:48:02] K562 essential compendium t=4 scored 
+[18:55:07] K562 essential compendium t=6 scored 
+[19:02:06] K562 essential compendium t=8 scored 
+[19:09:12] K562 essential compendium t=12 scored 
+[19:16:26] K562 essential compendium t=16 scored 
+[19:24:12] K562 essential compendium t=24 scored 
+[19:31:45] K562 essential compendium t=32 scored 
+[19:40:27] K562 essential compendium t=48 scored 
+[19:49:10] K562 essential compendium t=64 scored 
+[19:51:19] K562 essential compendium t=80 (walk only) 
+[20:00:15] K562 essential compendium t=96 scored 
+[20:02:25] K562 essential compendium t=112 (walk only) 
+[20:11:21] K562 essential compendium t=128 scored 
+[20:13:27] K562 essential compendium t=144 (walk only) 
+[20:15:36] K562 essential compendium t=160 (walk only) 
+[20:17:50] K562 essential compendium t=176 (walk only) 
+[20:26:48] K562 essential compendium t=192 scored 
+[20:28:54] K562 essential compendium t=208 (walk only) 
+[20:31:01] K562 essential compendium t=224 (walk only) 
+[20:33:06] K562 essential compendium t=240 (walk only) 
+[20:41:16] K562 essential compendium t=256 scored 
+[20:41:16] EQUIVALENCE vs results/granularity/granularity_curves.csv: 35 rows (depths 0,1,2,4,8,16,32), max |diff| AUPR 5e-16, base rate 4.3e-16, coherence 4.44e-16 
+[20:41:17] bootstrap 1 CORUM complexes: 1186 modules, 2557191 pairs, weighted-AP identity at m=1 OK 
+[20:51:48] bootstrap 1 CORUM complexes done: t_best median 0, 2.5% 0, 97.5% 0 
+[20:51:53] bootstrap 2 KD-response modules: 585 modules, 11875501 pairs, weighted-AP identity at m=1 OK 
+[21:25:27] bootstrap 2 KD-response modules done: t_best median 24, 2.5% 24, 97.5% 32 
+[21:25:28] bootstrap 3 DoRothEA A-B: 105 modules, 3012285 pairs, weighted-AP identity at m=1 OK 
+[21:37:15] bootstrap 3 DoRothEA A-B done: t_best median 4, 2.5% 3, 97.5% 24.2 
+[21:37:17] bootstrap 4 DoRothEA A-C: 269 modules, 8203275 pairs, weighted-AP identity at m=1 OK 
+[21:59:39] bootstrap 4 DoRothEA A-C done: t_best median 6, 2.5% 3, 97.5% 32 
+[21:59:40] bootstrap 5 CollecTRI: 490 modules, 3436131 pairs, weighted-AP identity at m=1 OK 
+[22:11:34] bootstrap 5 CollecTRI done: t_best median 48, 2.5% 32, 97.5% 256 
+[22:11:34] done 

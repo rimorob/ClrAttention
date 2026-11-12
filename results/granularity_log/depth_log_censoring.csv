@@ -1,0 +1,4 @@
+scope,n,n_censored,n_interval_touches_edge
+ecoli,3,0,0
+k562,5,0,1
+total,8,0,1

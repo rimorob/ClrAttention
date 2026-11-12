@@ -1,0 +1,1 @@
+rows 35 depths 0,1,2,4,8,16,32 max_abs_diff aupr 4.996e-16 base_rate 4.302e-16 coherence 4.441e-16 tolerance 1e-9 PASS
