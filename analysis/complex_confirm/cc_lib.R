@@ -5,6 +5,7 @@
 
 suppressPackageStartupMessages({ library(clr); library(Matrix) })
 source("analysis/dream5_lib.R")            # d5_* (net reader, replicate groups, series, refit halves, packing, hashes); regulondb.R (ap_fast); regulons.R
+source("analysis/dream5_score_lib.R")      # d5_edges_from_ids, d5_module_setup (Y-M regulons of the DREAM5 gold standard; structure only)
 source("analysis/robust_z/robust_z_lib.R") # rz_operator, rz_stationary, rz_hub_stratify
 source("analysis/explore_stack/stack_lib.R") # sk_a3r, sk_reach, sk_diag (unchanged since d8fdb58)
 
@@ -21,7 +22,7 @@ CC <- list(
   libs_commit = "d8fdb58",
   code = c("analysis/complex_confirm/cc_lib.R", "analysis/complex_confirm/cc_run.R", "analysis/complex_confirm/gate_a_k562.R",
            "analysis/complex_confirm/gate_a_m3d.R", "analysis/explore_stack/stack_lib.R", "analysis/explore_ideas47/ideas47_lib.R",
-           "analysis/robust_z/robust_z_lib.R", "analysis/dream5_lib.R", "analysis/regulondb.R", "analysis/regulons.R"))
+           "analysis/robust_z/robust_z_lib.R", "analysis/dream5_lib.R", "analysis/dream5_score_lib.R", "analysis/regulondb.R", "analysis/regulons.R"))
 stopifnot(D5$refit_seed_base == CC$group_seed_base, D5$series_seed_base == CC$series_seed_base, D5$t == CC$t)
 CC$main_names <- CC$order
 
