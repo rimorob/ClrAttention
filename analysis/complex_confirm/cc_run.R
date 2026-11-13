@@ -155,6 +155,9 @@ if (opt$mode == "truth") {
   if (!SYN) cc_guard_prior_a3r(file.path(TR, "guard_no_prior_a3r_6020.csv"), say)
   nd <- cc_load_net(opt$quick); G <- nrow(nd$X); tf <- get_truth_files(nd); rm_x <- nd$X; nd$X <- matrix(0, G, 1)   # the truth stage never reads expression values
   rm(rm_x); invisible(gc(verbose = FALSE))
+  ## secondary item 8: the replicate-averaged input (321 x 5,950), the same three readouts (label-free fit), scored on the main truth below
+  nda <- cc_load_net(opt$quick, "avg"); Ra <- cc_fit_three(nda$X, opt$workers); Savg <- stats::setNames(Ra[c("clr", "attention", "a3r")], paste0("avg_", c("clr", "attention", "a3r"))); rm(nda, Ra)
+  say(sprintf("replicate-averaged input fitted (321 groups); RSS %.2f GB", cc_vmrss_gb())); invisible(gc(verbose = FALSE))
   T <- cc_build_truths(nd, tf, synthetic = SYN, ym = TRUE); tn <- names(T)
   halves <- cc_draw_halves(T, opt$jack, opt$seed)      # RNG: set.seed(20261114), then all truths in table order
   say("truths: ", paste(sprintf("%s (%d pairs, %d pos)", tn, vapply(T, function(p) length(p$label), 0L), vapply(T, function(p) sum(p$label), 0L)), collapse = "; "))
@@ -178,6 +181,13 @@ if (opt$mode == "truth") {
       for (cn_ in names(CONTRASTS)) { a <- CONTRASTS[[cn_]]; d <- r$aupr[[paste0(pf, a[1])]] - r$aupr[[paste0(pf, a[2])]]; reps <- r$jack[, paste0(pf, a[1])] - r$jack[, paste0(pf, a[2])]
         con[[length(con) + 1L]] <- cbind(data.frame(truth = v, role = p$role, scope = sc, row = cn_, contrast = cc_contrast_names[[cn_]], stringsAsFactors = FALSE), cc_interval(d, reps)) } }
     say(sprintf("truth %-18s scored and jackknifed (%.0f s)", v, as.numeric(difftime(Sys.time(), t1, units = "secs")))) }
+  ra <- cc_score_truth(Savg, T$main, halves$main, G, nc); rm(Savg)       # same halves as the main truth (paired draws), raw scope only
+  for (m in names(ra$aupr)) { rd <- sub("^avg_", "", m)
+    met[[length(met) + 1L]] <- data.frame(truth = "main", role = "descriptive_avg_input", scope = "avg_input", readout = rd, aupr = ra$aupr[[m]], n_pairs = length(T$main$label), n_pos = sum(T$main$label), base_rate = mean(T$main$label), enrichment = ra$aupr[[m]] / mean(T$main$label), stringsAsFactors = FALSE)
+    rep_l[[length(rep_l) + 1L]] <- data.frame(truth = "main", scope = "avg_input", readout = rd, rep = seq_len(nrow(ra$jack)), aupr = ra$jack[, m], stringsAsFactors = FALSE) }
+  for (cn_ in names(CONTRASTS)) { a <- CONTRASTS[[cn_]]; con[[length(con) + 1L]] <- cbind(data.frame(truth = "main", role = "descriptive_avg_input", scope = "avg_input", row = cn_, contrast = cc_contrast_names[[cn_]], stringsAsFactors = FALSE),
+    cc_interval(ra$aupr[[paste0("avg_", a[1])]] - ra$aupr[[paste0("avg_", a[2])]], ra$jack[, paste0("avg_", a[1])] - ra$jack[, paste0("avg_", a[2])])) }
+  say("replicate-averaged input scored on the main truth (descriptive)")
   met <- do.call(rbind, met); repdf <- do.call(rbind, rep_l); con <- do.call(rbind, con)
   ## complex-level jackknife (labelled sensitivity; raw scope, main truth)
   k_all <- cc_excl_keys(tf$excl, "all", nd); cmain <- T$main$sets; nC <- length(cmain)

@@ -100,8 +100,8 @@ cc_lib_identity <- function() {
 }
 
 ## ---- net4 and the three readouts ------------------------------------------------------------------------------------
-cc_load_net <- function(quick = 0L) {
-  nd <- d5_read_net(4L)
+cc_load_net <- function(quick = 0L, input = "replicate") {
+  nd <- d5_read_net(4L, input = input)
   stopifnot(nrow(nd$X) == 5950L || quick > 0L, !anyDuplicated(nd$gene_names), length(nd$gene_names) == nrow(nd$X))
   if (quick > 0L) { set.seed(77L); idx <- sort(sample(nrow(nd$X), quick)); nd$X <- nd$X[idx, , drop = FALSE]; nd$genes <- nd$genes[idx]
     nd$gene_names <- nd$gene_names[idx]; nd$tf_idx <- integer(0); nd$tf_ids <- character(0); set.seed(NULL) }
