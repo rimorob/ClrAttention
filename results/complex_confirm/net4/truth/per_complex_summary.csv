@@ -1,0 +1,4 @@
+"comparison","n_complexes_ge10pos","mean_d_ap","median_d_ap","n_improved","n_worse"
+"a3r minus attention",125,0.00182867539341412,-4.99036555957579e-06,60,65
+"attention minus clr",125,0.00333507133292811,-9.68051219136129e-05,50,75
+"a3r minus clr",125,0.00516374672634223,-5.87151065155813e-05,53,72

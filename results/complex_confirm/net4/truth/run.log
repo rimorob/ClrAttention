@@ -1,0 +1,27 @@
+[2026-11-13 11:46:07] TRUTH STAGE start; git be76687; options mode=truth root=results/complex_confirm quick=0 synthetic=0 jack=500 t=9 seed=20261114 cjack=500 cseed=20261115 exp_n=100 workers=8 threads=8 lane=0 nlanes=1 collect=0 
+[2026-11-13 11:46:07] guard passed: no a3r score on net4 under results/ (9000 files searched) 
+[2026-11-13 11:47:08] replicate-averaged input fitted (321 groups); RSS 1.19 GB 
+[2026-11-13 11:48:55] TRUTH STAGE start; git eabb2ee; options mode=truth root=results/complex_confirm quick=0 synthetic=0 jack=500 t=9 seed=20261114 cjack=500 cseed=20261115 exp_n=100 workers=8 threads=8 lane=0 nlanes=1 collect=0 
+[2026-11-13 11:48:55] guard passed: no a3r score on net4 under results/ (9000 files searched) 
+[2026-11-13 11:49:54] replicate-averaged input fitted (321 groups); RSS 1.19 GB 
+[2026-11-13 11:49:59] truths: main (1282352 pairs, 13438 pos); main_xsub_excl (1277018 pairs, 13438 pos); main_ribo_joined (1282352 pairs, 18772 pos); noribo (1090025 pairs, 9552 pos); nomerge (1282352 pairs, 13297 pos); size2 (1913897 pairs, 13656 pos); main_paralog_incl (1282401 pairs, 13487 pos); small_3to6 (1270166 pairs, 1252 pos); mid_7to19 (1271695 pairs, 2781 pos); large_ge20 (1278445 pairs, 9531 pos); dream5_ym (1838403 pairs, 141943 pos) 
+[2026-11-13 11:50:46] six score matrices ready (raw and hub-stratified); RSS 4.40 GB 
+[2026-11-13 11:50:58] TRUTH STAGE start; git eabb2ee; options mode=truth root=results/complex_confirm quick=0 synthetic=0 jack=500 t=9 seed=20261114 cjack=500 cseed=20261115 exp_n=100 workers=8 threads=8 lane=0 nlanes=1 collect=0 
+[2026-11-13 11:50:58] guard passed: no a3r score on net4 under results/ (9000 files searched) 
+[2026-11-13 11:51:59] replicate-averaged input fitted (321 groups); RSS 1.19 GB 
+[2026-11-13 11:52:04] truths: main (1282352 pairs, 13438 pos); main_xsub_excl (1277018 pairs, 13438 pos); main_ribo_joined (1282352 pairs, 18772 pos); noribo (1090025 pairs, 9552 pos); nomerge (1282352 pairs, 13297 pos); size2 (1913897 pairs, 13656 pos); main_paralog_incl (1282401 pairs, 13487 pos); small_3to6 (1270166 pairs, 1252 pos); mid_7to19 (1271695 pairs, 2781 pos); large_ge20 (1278445 pairs, 9531 pos); dream5_ym (1838403 pairs, 141943 pos) 
+[2026-11-13 11:52:51] six score matrices ready (raw and hub-stratified); RSS 4.40 GB 
+[2026-11-13 11:53:08] truth main               scored and jackknifed (17 s) 
+[2026-11-13 11:53:25] truth main_xsub_excl     scored and jackknifed (17 s) 
+[2026-11-13 11:53:42] truth main_ribo_joined   scored and jackknifed (17 s) 
+[2026-11-13 11:53:56] truth noribo             scored and jackknifed (15 s) 
+[2026-11-13 11:54:15] truth nomerge            scored and jackknifed (19 s) 
+[2026-11-13 11:54:41] truth size2              scored and jackknifed (26 s) 
+[2026-11-13 11:54:59] truth main_paralog_incl  scored and jackknifed (17 s) 
+[2026-11-13 11:55:16] truth small_3to6         scored and jackknifed (17 s) 
+[2026-11-13 11:55:33] truth mid_7to19          scored and jackknifed (17 s) 
+[2026-11-13 11:55:50] truth large_ge20         scored and jackknifed (17 s) 
+[2026-11-13 11:56:14] truth dream5_ym          scored and jackknifed (24 s) 
+[2026-11-13 11:56:24] replicate-averaged input scored on the main truth (descriptive) 
+[2026-11-13 11:56:41] complex-level jackknife: 500 replicates (17 s) 
+[2026-11-13 11:56:57] TRUTH STAGE done; peak RSS 5.12 GB 
