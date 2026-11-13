@@ -1,0 +1,2 @@
+gate 1: t = 9 readout vs results/baselines_k562ess_truthgenes_genie3/metrics.csv (attention): max |diff| pooled AUPR 3.886e-16 over truths DoRothEA_AB,CollecTRI,CORUM_all; tolerance 1e-9 PASS
+gate 3: t = 9 enrichment (raw, hub MI, hub pi) vs results/robust_z/k562 V0 att9: max |diff| 4.219e-15 over truths DoRothEA_AB,CORUM_all,CORUM_noRP; tolerance 1e-9 PASS

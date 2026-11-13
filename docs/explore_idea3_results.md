@@ -99,16 +99,55 @@ Form 1 against the better of the two controls (PPR or heat kernel): -0.0096 - 0.
 
 ## K562 gate (plan section 11)
 
-Condition (i), form 1 meets the literal rule on SC: no. Condition (ii), at least 3 of 10 deciles with t_d at least 1 octave from 9 AND real between-decile SD of log2 t_d above the rewired SD: 8 of 10 deciles (t_d <= 4) and real SD 0.489 against rewired SD 0.367: met. The gate therefore opened on condition (ii) only, and K562 was submitted to the scheduler on 12 Nov at 14:52 (`5310_i3_knee_k562`, `5311_i3_select_k562`, `5312_i3_score_k562`, chained with `# after`; declared 16, 40 and 26 GB, expected about 5 h in total). **K562 results are not in this document yet**; when the jobs finish, run `python3 analysis/explore_idea3/idea3_summarize.py k562` and append the K562 section (tables in `results/explore_idea3/k562/tables.md`). The K562 selection stage uses 6 profile splits x 2 directions (12 curves per decile) as planned.
+Condition (i), form 1 meets the literal rule on SC: no. Condition (ii), at least 3 of 10 deciles with t_d at least 1 octave from 9 AND real between-decile SD of log2 t_d above the rewired SD: 8 of 10 deciles (t_d <= 4) and real SD 0.489 against rewired SD 0.367: met. The gate therefore opened on condition (ii) only, and K562 was run (section "K562" below).
+
+## K562 (run because the gate opened on condition (ii))
+
+Essential Perturb-seq pseudobulk half A, 5,671 genes, 707 profiles (each its own "lab"); 6 random profile halvings x 2 directions = 12 curves per decile (the `robust_z` splits); everything else as for M3D. Truths: DoRothEA A-B (base rate 0.1830), CollecTRI (0.1278), CORUM all (0.0133), CORUM noRP (0.0119). K562 CORUM and DoRothEA are not held out. Full tables (both stratifiers, both truth families, intervals): `results/explore_idea3/k562/tables.md`; figure `results/explore_idea3/k562/criterion_curves_per_decile.png`.
+
+**Equivalence gate (all PASS, 1e-9):** t = 9 readout vs `results/baselines_k562ess_truthgenes_genie3` (DoRothEA A-B, CollecTRI, CORUM all) 3.9e-16; criterion machinery vs `results/robust_z/k562` V0 (96 rows) 5.0e-16; hub-stratified and raw enrichments at t = 9 vs `robust_z` V0 att9 (DoRothEA A-B, CORUM all, CORUM noRP) 4.2e-15.
+
+**Jobs:** `5310_i3_knee_k562` 14:52-15:58, 15.0 GB peak (declared 16); `5311_i3_select_k562` 15:58-17:53 (1 h 55 min), 32.8 GB (declared 40, 3 workers); `5312_i3_score_k562` 17:53-18:15, 19.4 GB (declared 26). No OOM kill, no retry.
+
+**Selected depth per decile (MI row mean; mean over 12 split-directions):**
+
+| decile | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| t_d | 12 | 12 | 8 | 8 | 8 | 6 | 3 | 3 | 2 | 3 |
+| within-1% width (octaves) | 0 | 0 | 0.58 | 0 | 0 | 0.42 | 0.42 | 0 | 0.58 | 0 |
+
+t_d decreases with hub degree (Spearman -0.95; range 2.58 octaves; SD of log2 t_d 0.93); 4 of 10 deciles are at least 1 octave from t = 9; 7 of 10 differ from the global-grid depth t_g = 8 (interval 8-8). With pi deciles: t_d = 6, 4, 4, 4, 4, 3, 3, 3, 3, 3 (Spearman -0.90, SD 0.33). Nulls on t_d (SD of log2 t_d): four label permutations 0.28, 0.30, 0.28, 0.28; rewired operator 0.37 (t_d = 24 to 48, widths 2.4 to 4.4 octaves). Controls: PPR alpha 0.85 (interval 0.8-0.9), heat kernel tau 8, global grid t_g = 8.
+
+**Knee (step 0):** the real decile-median knee is t = 12 in MI deciles 1-8 and 16 in deciles 9-10 (SD of log2 knee 0.175, range 0.415 octave, Spearman +0.70); pi deciles t = 12 except deciles 7-9 at 16 (SD 0.200). The rewired operators gave t = 12 in every decile (SD 0) and the 2,000 label permutations also give SD 0 (the decile median of the per-gene knees is t = 12 under every permutation), so the real SD is above both nulls, and both nulls are degenerate (no spread to compare with).
+
+**Literal pass rule (hub-stratified MI diff >= +0.005 and raw diff >= -0.005; K562 has no SC, so the same two lines are evaluated on DoRothEA A-B and CollecTRI, AUPR readout minus t = 9):**
+
+| readout | DoRothEA A-B hub MI / raw | CollecTRI hub MI / raw | Rule |
+|---|---|---|---|
+| form 1, MI deciles | -0.0016 / +0.0006 | -0.0027 / -0.0010 | FAIL both |
+| form 1, pi deciles | -0.0025 / -0.0014 | -0.0078 / -0.0064 | FAIL both |
+| form 2, MI deciles | -0.0008 / -0.0013 | +0.0025 / +0.0016 | FAIL both |
+| form 2, pi deciles | -0.0010 / -0.0015 | +0.0028 / +0.0019 | FAIL both |
+| form 2raw | -0.0026 / -0.0030 | +0.0024 / +0.0013 | FAIL both |
+| global grid t = 8 | +0.0001 / +0.0003 | -0.0008 / -0.0006 | FAIL both |
+| PPR (alpha 0.85) | -0.0007 / -0.0008 | +0.0007 / +0.0005 | FAIL both |
+| heat kernel (tau 8) | -0.0001 / -0.0000 | -0.0002 / -0.0001 | FAIL both |
+
+No readout reaches +0.005 on either truth with either stratifier.
+
+**CORUM (descriptive, no pass rule):** AUPR differences to t = 9 (raw 0.04654; hub-MI 0.03934): form 1 MI deciles -0.0091 [-0.0150, -0.0031] raw and -0.0060 [-0.0102, -0.0018] hub-MI; form 2 MI deciles +0.0034 [+0.0005, +0.0063] raw and +0.0032 [-0.0002, +0.0065] hub-MI (decile depth 12 or 16, deeper than 9); PPR -0.0047; heat kernel -0.0017. CORUM noRP: form 1 MI -0.0019 raw and -0.0015 hub-MI; form 2 MI -0.0001 and -0.0001; PPR -0.0012 and -0.0016.
+
+Form 1 against the better of PPR and heat kernel on DoRothEA A-B (hub MI): -0.0016 against heat kernel -0.0001; on CollecTRI: -0.0027 against PPR +0.0007.
 
 ## Deviations from the plan
 
 1. **Label-permutation null for the knee added** (2,000 random gene-to-decile labellings of the real per-gene knees) after the 500-gene smoke test showed the rewired-operator knee null is degenerate (identical knee for all genes on a rewired operator). Decided after a smoke test on 500 genes, before any full-data result. It adds a row; it changes nothing else.
-2. **Number of rewirings** is 50 for the knee null as planned; the criterion null uses one rewiring per split-direction (32), as planned.
-3. **Criterion for deciles is directed** (rows of P^t) and the readout is the symmetrised mass, as the plan specifies; the global criterion (symmetrised) and the decile criterion therefore peak at different depths (t_g = 8 against decile t_d of 2-6 in MI deciles). This is a property of the plan as written, noted here; it was not altered.
-4. Job names, memory declarations and peaks are in the Jobs table; the select job exceeded its declaration (36.3 GB against 30 GB, within the 1.3x cap 39 GB), no OOM-retry occurred.
-5. Nothing else changed after the first result: no depth grid, truth, stratifier, selection rule or pass rule was altered.
+2. **K562 pass rule:** the plan's rule is stated for M3D SC; for K562 (no SC) the same two lines are evaluated on DoRothEA A-B and CollecTRI, as the plan's truth list for K562 implies. Decided before the K562 numbers existed.
+3. **Number of rewirings** is 50 for the knee null as planned; the criterion null uses one rewiring per split-direction (32), as planned.
+4. **Criterion for deciles is directed** (rows of P^t) and the readout is the symmetrised mass, as the plan specifies; the global criterion (symmetrised) and the decile criterion therefore peak at different depths (t_g = 8 against decile t_d of 2-6 in MI deciles). This is a property of the plan as written, noted here; it was not altered.
+5. Job names, memory declarations and peaks are in the Jobs table; the select job exceeded its declaration (36.3 GB against 30 GB, within the 1.3x cap 39 GB), no OOM-retry occurred.
+6. Nothing else changed after the first result: no depth grid, truth, stratifier, selection rule or pass rule was altered.
 
 ## Disk
 
-`results/explore_idea3/m3d`: 2.7 MB of CSV, PNG and logs (force-added to git); rds caches under `results/explore_idea3/*/cache/` are not committed (row in `docs/disk_budget.md`).
+`results/explore_idea3/k562`: 1.8 MB (0.24 MB of it rds cache); `results/explore_idea3/m3d`: 2.7 MB of CSV, PNG and logs (force-added to git); rds caches under `results/explore_idea3/*/cache/` are not committed (row in `docs/disk_budget.md`).

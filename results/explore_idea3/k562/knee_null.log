@@ -1,0 +1,6 @@
+[14:52:51] options: dataset=k562 out=results/explore_idea3/k562 nrew=50 workers=6 quick=0 threads=2 alpha=0.5 seed=20261112 
+[14:53:07] k562: 5671 genes x 707 samples 
+[14:54:47] deciles written; Spearman(MI row mean, pi) = 0.204; decile agreement (same decile) = 0.140 
+[15:01:17] real operator knee walk: 390 s 
+[15:01:21] 50 rewirings, 6 workers 
+[15:58:38] knee null done 

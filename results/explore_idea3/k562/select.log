@@ -1,0 +1,6 @@
+[15:58:42] options: dataset=k562 out=results/explore_idea3/k562 nsplit=6 workers=3 quick=0 depth_seed=20261014 perm_seed=20261113 nperm=4 rewire=1 rz_curves=results/robust_z/k562/heldout_curves.csv 
+[15:58:58] k562: 5671 genes x 707 samples (707 labs) 
+[15:59:12] 6 splits to run (0 done), 3 workers; label sets: mi,pi,perm1,perm2,perm3,perm4; rewired operator: yes 
+[17:53:11] split seconds: 3455 3362 3367 3369 3471 3355 
+[17:53:11] EQUIVALENCE (criterion machinery vs robust_z V0): 96 rows, max |diff| 4.996e-16 
+[17:53:11] selection done 

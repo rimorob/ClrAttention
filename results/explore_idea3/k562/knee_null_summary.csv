@@ -1,0 +1,5 @@
+"stratifier","real_sd","null_sd_mean","null_sd_q95","frac_null_sd_ge_real","real_range","null_range_mean","frac_null_range_ge_real","real_spearman","null_spearman_mean","n_rewirings","real_sd_above_q95"
+"mi",0.174995174946885,0,0,0,0.415037499278844,0,0,0.696310623822791,NA,50,TRUE
+"pi",0.200482158861535,0,0,0,0.415037499278844,0,0,0.56980288229819,NA,50,TRUE
+"mi_labelperm",0.174995174946885,0,0,0,0.415037499278844,0,0,0.696310623822791,NA,2000,TRUE
+"pi_labelperm",0.200482158861535,0,0,0,0.415037499278844,0,0,0.56980288229819,NA,2000,TRUE
