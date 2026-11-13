@@ -50,7 +50,7 @@ chip <- function(present, x, y, w, label, col, tcol = "white") {
 v <- data.frame(
   name = c("CLR", "CLR-NS", "|r| (correlation)",
            "Attention on |r|", "Attention on mutual information",
-           "Attention on CLR of |r|", "Attention on CLR-NS", "CLR attention (this work)",
+           "Attention on CLR of |r|", "Attention on CLR-NS", "CLR attention (adopted)",
            "a3r (exploratory)", "a3r2: two layers (exploratory)", "a3r3: three layers (exploratory)"),
   sub = c("context normalization, scores ranked directly",
           "CLR on |r| of normal scores (Blom)",

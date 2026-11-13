@@ -20,7 +20,7 @@ out_dir <- "docs/whitepapers/figures"
 FONT <- "Liberation Sans"   # Arial-metric sans
 
 # ---- numbers (docs/whitepapers/sota_table.md, raw scores) -------------------
-this_lab <- "CLR + softmax + walk (this work)"
+this_lab <- "CLR + softmax + walk (adopted)"
 # The two exploratory rows (a3r, a3r2) are values of results/explore_stack/{m3d,k562}/pooled_levels.csv
 # (raw scope; same base rate as the other bars). Neither was adopted: 26 Oct preregistered test and
 # 12 Nov stacked-layer run (docs/explore_stack_results.md); K562 is in-sample for a3r.
