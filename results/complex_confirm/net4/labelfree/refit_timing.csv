@@ -1,0 +1,2 @@
+"unit","rep","n_chips","workers","seconds_total","peak_rss_gb","rss_after_load_gb","clr_hash_matches_dream5_manifest","attention_hash_matches_dream5_manifest","clr_sha256","attention_sha256","a3r_sha256","declared_mem_6030_if_one_lane_gb","git_head"
+"group",1,272,8,57,3.33,0.3,TRUE,TRUE,"2f6f826acd42e8d64756f9e40f3f2c487cb133273ce53fc89a11260d049e1d48","18c22feeb3368fa3788ccb3fa30bb8680c34641e76cf02d64c68638c1d98a0e5","b5008a44af9be48834b2fe571feba3376d11e8b70f45a66982366a43f0f3258d",5,"6ea7f8c"

@@ -1,0 +1,18 @@
+[11:28:11] k562: 5671 genes x 707 profiles (quick = 0) 
+[11:28:29] truth DoRothEA_AB          105 sets,   2797795 pairs, base rate 0.1830 
+[11:28:29] truth CORUM_all           1185 sets,   2552670 pairs, base rate 0.0133 
+[11:28:29] truth KD_response          566 sets,   5279625 pairs, base rate 0.0787 
+[11:28:30] truth CollecTRI            491 sets,   3605955 pairs, base rate 0.1278 
+[11:28:30] truth CORUM_noRP          1177 sets,   2353365 pairs, base rate 0.0119 
+[11:28:30] truth CORUM_RP               8 sets,      8001 pairs, base rate 0.7502 
+[11:28:30] truth CORUM_small          871 sets,   1036080 pairs, base rate 0.0033 
+[11:28:30] truth CORUM_large           28 sets,    195625 pairs, base rate 0.1263 
+[11:28:30] truth CORUM_merged         634 sets,   2552670 pairs, base rate 0.0137 
+[11:28:30] truth CORUM_merged_noRP    630 sets,   2353365 pairs, base rate 0.0120 
+[11:29:09] MI + CLR + operator 38 s; max|A(rz_operator) - package operator| = 0 
+[11:29:42] complex_confirm gate a, K562: G = 5671, workers 8, threads 8 
+[11:31:36] scored CLR                    (114 s) 
+[11:33:45] scored K10                    (130 s) 
+[11:35:49] scored a3r                    (121 s) 
+[11:35:49] EQUIVALENCE GATE PASSED (a)-(c) 
+[11:36:25] K562 GATE PASSED 

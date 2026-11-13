@@ -1,0 +1,8 @@
+[2026-11-13 11:39:45] label-free stage; git 6ea7f8c; options mode=labelfree root=results/complex_confirm quick=0 synthetic=0 jack=500 t=9 seed=20261114 cjack=500 cseed=20261115 exp_n=100 workers=8 threads=8 lane=0 nlanes=1 collect=0 
+[2026-11-13 11:39:46] guard passed: no a3r score on net4 under results/ (9000 files searched) 
+[2026-11-13 11:39:48] net4: 5950 genes x 536 chips, 321 replicate groups, 59 series 
+[2026-11-13 11:40:49] fit, operator, P^9, three readouts: 61 s 
+[2026-11-13 11:41:30] Ga parts 4/4b and Gb passed 
+[2026-11-13 11:41:37] label-free stage done; peak RSS 4.10 GB 
+[2026-11-13 11:41:42] refit timing (group half rep 1, label-free): data loaded, RSS 0.30 GB 
+[2026-11-13 11:42:46] refit timing done: 57 s, peak RSS 3.33 GB 

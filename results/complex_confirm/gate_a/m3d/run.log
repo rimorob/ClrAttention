@@ -1,0 +1,10 @@
+[11:36:27] options: out=results/complex_confirm/gate_a/m3d threads=8 workers=8 jack=100 quick=0 
+[11:36:33] m3d: 4297 genes x 466 experiments (quick = 0) 
+[11:36:54] max|A(rz_operator) - package operator| = 0 
+[11:37:23] truth complexes        156267 pairs,    1150 positive, base rate 0.0074 
+[11:37:23] truth regulons_SC     1762067 pairs,  166112 positive, base rate 0.0943 
+[11:37:23] truth regulons_all    3031397 pairs,  365163 positive, base rate 0.1205 
+[11:37:55] scored CLR          (33 s) 
+[11:38:32] scored K10          (37 s) 
+[11:39:07] scored a3r          (35 s) 
+[11:39:28] M3D GATE PASSED 

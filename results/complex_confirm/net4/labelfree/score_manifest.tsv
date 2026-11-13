@@ -1,0 +1,5 @@
+file	bytes	sha256	n_values	dims	finished_utc	git_head
+results/complex_confirm/net4/labelfree/cache/cc_clr.scores	141586208	0d3ffc77a67e8d4bbfb1db01cf99c99f901223a0748dc2d1d491d48816ec159b	17698275	5950	2026-11-13T19:41:35Z	6ea7f8c
+results/complex_confirm/net4/labelfree/cache/cc_attention.scores	141586208	2570f94bc6266f8997d051cd5b13cf9e2a7636566aee4b52eab01e1f8caeed9d	17698275	5950	2026-11-13T19:41:36Z	6ea7f8c
+results/complex_confirm/net4/labelfree/cache/cc_a3r.scores	141586208	7f1709911a726eefccd1c439db220fec467735b1566408c2790ec336bb18cb44	17698275	5950	2026-11-13T19:41:37Z	6ea7f8c
+results/complex_confirm/net4/labelfree/cache/cc_mi_rowmean.scores	47608	653cc59efc02ef7584fca8aaa7b875b5aead57b5d96ddae3f650de033011bed5	5950	5950	2026-11-13T19:41:37Z	6ea7f8c

@@ -1,0 +1,7 @@
+"check","value","tolerance","gating","pass"
+"Ga4: new CLR scores vs results/dream5/net4/clr__replicate.scores, max |diff|",0,1e-12,TRUE,TRUE
+"Ga4: new CLR scores, SHA-256 of the packed file identical (1 = yes; informative)",0,1,FALSE,TRUE
+"Ga4: new attention scores vs results/dream5/net4/attention__replicate.scores, max |diff|",0,1e-12,TRUE,TRUE
+"Ga4: new attention scores, SHA-256 identical (informative)",0,1,FALSE,TRUE
+"Ga4b: (P9 + P9')/2 from the P9 fed to sk_a3r vs attention__replicate.scores, max |diff|",0,1e-12,TRUE,TRUE
+"info: package operator vs rz_operator(CLR), max |diff| (stack path vs package path)",0,1e-12,FALSE,TRUE

@@ -1,0 +1,2 @@
+"n_decoys","n_real","decoy_fraction_of_genes","mean_decoy_share_of_P9_row_mass_real_rows","median_decoy_share_of_P9_row_mass","decoy_share_of_reachable_entries_real_rows","git_head"
+283,5667,0.047563025210084,0.000796512163244983,0.000165531050821122,0.0476350669507573,"6ea7f8c"
