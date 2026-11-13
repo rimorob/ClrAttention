@@ -1,0 +1,9 @@
+"dataset","readout","layers","variant","matched_control","cond1_corum_vs_a3r","cond1_lo","cond1_ok","cond2_dorothea","cond2_collectri","cond2_ok","cond3_corum_vs_c1","cond3_lo","cond3_ok","cond4_hub_corum_vs_a3r","cond4_ok","pass"
+"k562","a3r2",2,"MI (primary): cond 1-3 raw, cond 4 hub MI","c1_t18","+0.0031","-0.0027",FALSE,"-0.0023","-0.0061",FALSE,"+0.0025","-0.0036",FALSE,"-0.0009",FALSE,FALSE
+"k562","a3r2",2,"pi (sensitivity): cond 1-3 raw, cond 4 hub pi","c1_t18","+0.0031","-0.0027",FALSE,"-0.0023","-0.0061",FALSE,"+0.0025","-0.0036",FALSE,"-0.0005",FALSE,FALSE
+"k562","a3r2",2,"strict MI: cond 1-3 and 4 on hub-MI scores","c1_t18","-0.0009","-0.0062",FALSE,"-0.0050","-0.0092",FALSE,"+0.0006","-0.0053",FALSE,"-0.0009",FALSE,FALSE
+"k562","a3r2",2,"strict pi: cond 1-3 and 4 on hub-pi scores","c1_t18","-0.0005","-0.0045",FALSE,"-0.0036","-0.0042",TRUE,"-0.0006","-0.0046",FALSE,"-0.0005",FALSE,FALSE
+"k562","a3r3",3,"MI (primary): cond 1-3 raw, cond 4 hub MI","c1_t27","+0.0027","-0.0062",FALSE,"-0.0077","-0.0108",FALSE,"+0.0039","-0.0063",FALSE,"+0.0020",TRUE,FALSE
+"k562","a3r3",3,"pi (sensitivity): cond 1-3 raw, cond 4 hub pi","c1_t27","+0.0027","-0.0062",FALSE,"-0.0077","-0.0108",FALSE,"+0.0039","-0.0063",FALSE,"+0.0017",TRUE,FALSE
+"k562","a3r3",3,"strict MI: cond 1-3 and 4 on hub-MI scores","c1_t27","+0.0020","-0.0061",FALSE,"-0.0112","-0.0147",FALSE,"+0.0064","-0.0035",FALSE,"+0.0020",TRUE,FALSE
+"k562","a3r3",3,"strict pi: cond 1-3 and 4 on hub-pi scores","c1_t27","+0.0017","-0.0045",FALSE,"-0.0089","-0.0055",FALSE,"+0.0031","-0.0042",FALSE,"+0.0017",TRUE,FALSE

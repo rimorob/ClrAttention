@@ -1,0 +1,7 @@
+"dataset","readout","layers","variant","SC_d","SC_lo","SC_noninf","all_d","all_lo","all_noninf","complexes_d","complexes_not_decreased","pass"
+"m3d","a3r2",2,"raw","+0.0006","-0.0043",TRUE,"-0.0055","-0.0092",FALSE,"+0.0362",TRUE,FALSE
+"m3d","a3r2",2,"hub MI (primary stratifier)","+0.0003","-0.0043",TRUE,"-0.0062","-0.0098",FALSE,"+0.0184",TRUE,FALSE
+"m3d","a3r2",2,"hub pi (sensitivity)","+0.0015","-0.0030",TRUE,"-0.0034","-0.0070",FALSE,"+0.0353",TRUE,FALSE
+"m3d","a3r3",3,"raw","-0.0056","-0.0111",FALSE,"-0.0120","-0.0163",FALSE,"+0.0468",TRUE,FALSE
+"m3d","a3r3",3,"hub MI (primary stratifier)","-0.0060","-0.0111",FALSE,"-0.0131","-0.0174",FALSE,"+0.0222",TRUE,FALSE
+"m3d","a3r3",3,"hub pi (sensitivity)","-0.0045","-0.0095",FALSE,"-0.0088","-0.0129",FALSE,"+0.0518",TRUE,FALSE

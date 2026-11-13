@@ -1,0 +1,3 @@
+"dataset","layer","t","unreach_share","rows_lt2_reachable","S_frac_nonzero","S_rows_all_zero"
+"k562",2,2,0.904555899830102,0,0.0698915892826432,0
+"k562",2,4,0.223515817502769,0,0.565577707927676,0

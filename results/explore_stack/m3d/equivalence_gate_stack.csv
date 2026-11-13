@@ -1,0 +1,10 @@
+"check","max_abs_diff","pass"
+"(e) generic stack N = 1 vs a3r of the package path: max |S1' - S1|",0,TRUE
+"(e) generic stack N = 1 operator vs package operator: max |A' - A|",0,TRUE
+"(b) CLR, K10, a3r pooled AUPR (3 truths) vs results/clr_logpt_test/truth/m3d/metrics.csv",4.9960036108132e-16,TRUE
+"(c) CLR, K10, a3r: 100 stored jackknife replicates x 3 truths vs jack_replicates.csv",4.9960036108132e-16,TRUE
+"(b) hub-pi stratified AUPR of CLR, K10, a3r (3 truths) vs metrics.csv (_hubstrat)",4.16333634234434e-16,TRUE
+"(c) hub-pi stratified replicates of CLR, K10, a3r vs jack_replicates.csv (_hubstrat)",4.9960036108132e-16,TRUE
+"(d) a3r AUPR, a3r minus comparator d and SE vs docs/clr_logpt_verdict/endpoints_all.csv (P1, P3, S1, S3)",4.9960036108132e-16,TRUE
+"(a) K10 pooled AUPR (SC, all) vs results/baselines_m3d/metrics.csv",2.4980018054066e-16,TRUE
+"(a) K10 enrichment raw, hub MI, hub pi (SC, all) vs results/robust_z/m3d/pooled_metrics.csv (V0 att9)",3.5527136788005e-15,TRUE

@@ -69,3 +69,5 @@ Step 3.10 (E17, E18), 3 Nov 2026. The fine-tuned state dicts (14 scPRINT at 74 M
 | `results/idea5` (12 Nov 2026) | 0.02 GB kept (prep X matrix 16 MB, model run records and curves, score tables); 6.7 GB of exported logits was transient and deleted after scoring | exploratory idea 5 (`docs/plans/explore_idea5_plan.md`); small CSVs committed | **Yes** (recomputable in about 2.5 h on GPU 1 plus 1 h CPU) |
 
 | `results/explore_ideas12/` (12 Nov 2026) | 0.52 GB kept (rds readout caches 0.36 GB, attention graphs 0.14 GB, memberships and tables); 1.9 GB of uint8 count matrices deleted after scoring | exploratory ideas 1-2 (consensus co-membership sweep, partner-less gate); regenerable from `analysis/explore_ideas12/` | **Yes** after the numbers are archived |
+
+| `results/explore_stack/` (12 Nov 2026) | 0.8 MB measured (CSV, md, logs; rds readout caches under `cache/` about 0.3 MB, not committed; no matrices kept) | exploratory stacked a3r layers (`docs/plans/explore_stack_plan.md`); small tables force-added to git | **Yes** for `cache/` (recomputable in about 40 min); keep the committed tables |

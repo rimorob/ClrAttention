@@ -1,0 +1,9 @@
+"check","max_abs_diff","pass"
+"(d) a3r minus K10, DoRothEA_AB: d, lo, hi vs metrics_robust.csv",2.60208521396521e-18,TRUE
+"(d) a3r minus K10, CollecTRI: d, lo, hi vs metrics_robust.csv",3.46944695195361e-18,TRUE
+"(d) a3r minus K10, CORUM: d, lo, hi vs metrics_robust.csv",1.38777878078145e-17,TRUE
+"(d) CORUM a3r minus K10 prints +0.059 [+0.033, +0.084], document table +0.059 [+0.033, +0.084]",0,TRUE
+"(d) a3r minus K10, KD_response: d, lo, hi vs metrics_robust.csv",4.16333634234434e-17,TRUE
+"(d) a3r minus K10, CORUM_noRP: d only vs metrics_robust.csv",8.67361737988404e-19,TRUE
+"(e) generic stack N = 1 (operator from CLR scores, walk, a3r) vs a3r of the package path: max |S1' - S1|",0,TRUE
+"(e) generic stack N = 1 operator vs package operator: max |A' - A|",0,TRUE

@@ -1,0 +1,19 @@
+[20:38:14] options: out=results/explore_stack/m3d threads=8 workers=8 jack=100 quick=0 
+[20:38:20] m3d: 4297 genes x 466 experiments (quick = 0) 
+[20:38:41] max|A(rz_operator) - package operator| = 0 
+[20:39:09] truth complexes        156267 pairs,    1150 positive, base rate 0.0074 
+[20:39:09] truth regulons_SC     1762067 pairs,  166112 positive, base rate 0.0943 
+[20:39:09] truth regulons_all    3031397 pairs,  365163 positive, base rate 0.1205 
+[20:39:42] scored CLR          (33 s) 
+[20:40:20] scored K10          (38 s) 
+[20:40:57] scored a3r          (37 s) 
+[20:41:17] EQUIVALENCE GATE PASSED: equivalence_gate_stack.csv 
+[20:42:43] scored a3r2         (39 s) 
+[20:43:15] scored a3r2_t2_2    (32 s) 
+[20:43:52] scored a3r2_t2_4    (36 s) 
+[20:44:58] scored a3r3         (38 s) 
+[20:47:20] scored c1_t18       (38 s) 
+[20:48:00] scored c1_t27       (39 s) 
+[20:48:39] scored c2_z         (38 s) 
+[20:49:18] scored c2_log       (39 s) 
+[20:49:18] done 

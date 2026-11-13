@@ -1,0 +1,44 @@
+[20:38:28] k562: 5671 genes x 707 profiles (quick = 0) 
+[20:38:45] truth DoRothEA_AB          105 sets,   2797795 pairs, base rate 0.1830 
+[20:38:45] truth CORUM_all           1185 sets,   2552670 pairs, base rate 0.0133 
+[20:38:45] truth KD_response          566 sets,   5279625 pairs, base rate 0.0787 
+[20:38:45] truth CollecTRI            491 sets,   3605955 pairs, base rate 0.1278 
+[20:38:45] truth CORUM_noRP          1177 sets,   2353365 pairs, base rate 0.0119 
+[20:38:45] truth CORUM_RP               8 sets,      8001 pairs, base rate 0.7502 
+[20:38:45] truth CORUM_small          871 sets,   1036080 pairs, base rate 0.0033 
+[20:38:45] truth CORUM_large           28 sets,    195625 pairs, base rate 0.1263 
+[20:38:45] truth CORUM_merged         634 sets,   2552670 pairs, base rate 0.0137 
+[20:38:45] truth CORUM_merged_noRP    630 sets,   2353365 pairs, base rate 0.0120 
+[20:39:26] MI + CLR + operator 39 s; max|A(rz_operator) - package operator| = 0 
+[20:40:01] stack k562: G = 5671, workers 8, threads 8 
+[20:42:03] scored CLR                    (122 s) 
+[20:44:23] scored K10                    (140 s) 
+[20:46:35] scored a3r                    (128 s) 
+[20:46:35] EQUIVALENCE GATE PASSED (a)-(c) 
+[20:48:39] k562: 5671 genes x 707 profiles (quick = 0) 
+[20:48:58] truth DoRothEA_AB          105 sets,   2797795 pairs, base rate 0.1830 
+[20:48:58] truth CORUM_all           1185 sets,   2552670 pairs, base rate 0.0133 
+[20:48:58] truth KD_response          566 sets,   5279625 pairs, base rate 0.0787 
+[20:48:58] truth CollecTRI            491 sets,   3605955 pairs, base rate 0.1278 
+[20:48:58] truth CORUM_noRP          1177 sets,   2353365 pairs, base rate 0.0119 
+[20:48:58] truth CORUM_RP               8 sets,      8001 pairs, base rate 0.7502 
+[20:48:58] truth CORUM_small          871 sets,   1036080 pairs, base rate 0.0033 
+[20:48:58] truth CORUM_large           28 sets,    195625 pairs, base rate 0.1263 
+[20:48:58] truth CORUM_merged         634 sets,   2552670 pairs, base rate 0.0137 
+[20:48:58] truth CORUM_merged_noRP    630 sets,   2353365 pairs, base rate 0.0120 
+[20:49:39] MI + CLR + operator 39 s; max|A(rz_operator) - package operator| = 0 
+[20:50:13] stack k562: G = 5671, workers 8, threads 8 
+[20:50:13] cached: CLR 
+[20:50:13] cached: K10 
+[20:50:17] cached: a3r 
+[20:50:17] EQUIVALENCE GATE PASSED (a)-(c) 
+[20:50:53] EQUIVALENCE GATE PASSED: equivalence_gate_stack.csv 
+[20:54:28] scored a3r2                   (136 s) 
+[20:56:27] scored a3r2_t2_2              (118 s) 
+[20:58:47] scored a3r2_t2_4              (140 s) 
+[21:01:47] scored a3r3                   (134 s) 
+[21:07:01] scored c1_t18                 (143 s) 
+[21:09:27] scored c1_t27                 (147 s) 
+[21:11:56] scored c2_z                   (146 s) 
+[21:14:28] scored c2_log                 (152 s) 
+[21:14:28] done 
