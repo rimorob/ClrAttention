@@ -65,7 +65,9 @@ raw_rows <- list(
   R("CORUM protein complexes (merged)", "rpe1", "CORUM_merged", PM),
   list(group = "Single cells (BEELINE: 14 dataset-and-gene-set cases, 44 case-truth cells)"),
   R("Median AUPRC ratio, primary truths", "beeline", "all_14_cases", "beeline_median_auprc_ratio_primary"),
-  R("Median AUPRC ratio, cell-type ChIP truth", "beeline", "all_14_cases", "beeline_median_auprc_ratio_celltypeChIP"))
+  R("Median AUPRC ratio, cell-type ChIP truth", "beeline", "all_14_cases", "beeline_median_auprc_ratio_celltypeChIP"),
+  list(group = "Yeast, DREAM5 net4 expression (536 chips)"),
+  R("Protein complexes (Complex Portal, exploratory estimation)", "dream5_yeast", "complexes_main", PM))
 hub_rows <- list(
   list(group = "E. coli, M3D compendium"),
   R("Regulons, strong evidence", "m3d", "SC", PM, "hub_att"),
@@ -91,13 +93,13 @@ cell_vals <- function(r) { x <- D[D$dataset == r$ds & D$truth == r$truth & D$met
 fmt <- function(v, digits) if (digits == 2 && v >= 10) sprintf("%.1f", v) else sprintf(paste0("%.", digits, "f"), v)
 
 # ---- one page ----------------------------------------------------------------------------------------------------------
-draw_page <- function(rows, sub, y_top, footer) {
+draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43) {
   grid.newpage(); grid.rect(gp = gpar(fill = "white", col = NA))
   pushViewport(viewport(xscale = c(0, 16), yscale = c(0, 9)))
   txt("Every metric, wins and losses", 0.3, 8.65, 21, face = "bold", just = "left")
   txt(sub, 0.3, 8.28, 11, ink[["secondary"]], just = "left")
   nr <- sum(vapply(rows, function(r) is.null(r$group), NA)); ng <- length(rows) - nr
-  y_bot <- 1.12; GH <- 0.74                                   # group-header height relative to a row
+  GH <- 0.74                                   # group-header height relative to a row
   pitch <- (y_top - y_bot) / (nr + ng * GH)
   # column bands (adopted and exploratory columns) and headers
   hy <- y_top + 0.5
@@ -147,12 +149,20 @@ foot_common <- list(
        size = 9, col = ink[["secondary"]], face = "plain"),
   list(text = "Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; BEELINE median over the 44 case-truth cells of the primary truths (14 cases); a3r was picked among about 20 read-outs by its K562 scores (selected, not fitted);",
        size = 9, col = ink[["secondary"]], face = "plain"),
-  list(text = "K562 and M3D are tuning sets; attention and a3r settings were developed on M3D; DREAM5 yeast is separate (page 2 / section 8) and was not run for a3r.",
+  list(text = "K562 and M3D are tuning sets; attention and a3r settings were developed on M3D.",
        size = 9, col = ink[["secondary"]], face = "plain"))
 foot_raw <- c(foot_common, list(
+  list(text = "Yeast row: one exploratory estimation run (plan fixed 13 Nov, docs/plans/complex_confirm_design.md); not a confirmatory test; the net4 matrix was also used for the earlier DREAM5 regulon and edge test;",
+       size = 9, col = ink[["secondary"]], face = "plain"),
+  list(text = "a3r was not run on the DREAM5 regulon or edge truths except a descriptive Y-M line in the study. Complex Portal main truth (262 merged complexes, 13,438 positive pairs); a3r2, a3r3 and the competitors were not run.",
+       size = 9, col = ink[["secondary"]], face = "plain"),
   list(text = "BEELINE: scores of CLR-NS for the attention and a3r columns (attention at its held-out depth, a3r family at t = 9, not tuned); CLR is plain CLR; median over 14 cases x BEELINE primary truths (44 case-truth cells), second row cell-type ChIP only.",
        size = 9, col = ink[["secondary"]], face = "plain")))
 foot_hub <- c(foot_common, list(
+  list(text = "The yeast complex row (page 3) is left out here: the study stored its hub-controlled scores only with the MI row-mean stratifier (hub_mi), not the pi stratifier used on this page, so they are not comparable.",
+       size = 9, col = ink[["secondary"]], face = "plain"),
+  list(text = "Yeast row (page 3): one exploratory estimation run (plan fixed 13 Nov); not a confirmatory test; a3r was not run on the DREAM5 regulon or edge truths except a descriptive Y-M line in the study.",
+       size = 9, col = ink[["secondary"]], face = "plain"),
   list(text = "Hub-controlled: each method's scores are converted to percentiles within 10 strata of pi_i + pi_j (pi of the attention walk), the stratifier of the method table. Not run for direct edges, per-regulon AP and BEELINE.",
        size = 9, col = ink[["secondary"]], face = "plain")))
 

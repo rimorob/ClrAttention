@@ -95,8 +95,16 @@ for (ts in c("primary", "celltype_ChIP")) { mt <- if (ts == "primary") "beeline_
           attention_t9 = "soft10 attention on CLR-NS at t = 9; extra method, not a scoreboard column", "a3r family on CLR-NS at t = 9 in every layer, not tuned"))) } }
 cells[[length(cells) + 1L]] <- data.frame(dataset = "beeline", truth = "all_14_cases", metric = "beeline_median_auprc_ratio_primary", scope = "raw")   # keep Attention_t9 / CLR-NS rows
 
-## ---- DREAM5 yeast network 4 (held-out test, run once): not_run for every method ---------------------------------------------------------
+## ---- DREAM5 yeast network 4 regulon truth (held-out test, run once): not_run for every method ---------------------------------------------------------
 cell("dream5_yeast", "network4_truth", PM, "raw")
+## ---- DREAM5 net4 yeast complexes (Complex Portal, main truth): one exploratory estimation run (results/complex_confirm; plan docs/plans/complex_confirm_design.md) ----
+## Stored scopes are raw and hub_mi (MI row-mean stratifier); no hub_att (pi stratifier) was computed. Read-only on the study files.
+cc_src <- "results/complex_confirm/net4/truth/metrics.csv"; cx <- rd(cc_src); cx <- cx[cx$truth == "main" & cx$role == "primary", ]
+for (sc in c("raw", "hub_mi")) { cell("dream5_yeast", "complexes_main", PM, sc)
+  for (rn in c("clr", "attention", "a3r")) { y <- cx[cx$scope == sc & cx$readout == rn, ]; stopifnot(nrow(y) == 1L)
+    add("dream5_yeast", "complexes_main", PM, sc, c(clr = "CLR", attention = "Attention", a3r = "a3r")[[rn]], y$enrichment, y$base_rate, cc_src, "from_existing",
+        paste0("DREAM5 net4 yeast expression (536 chips), Complex Portal main truth (262 merged complexes, 13,438 positive pairs); one exploratory estimation run, not a confirmatory test (see estimate_final.csv in the same folder)",
+               if (sc == "hub_mi") "; within-stratum percentile in 10 strata of the raw-MI row mean (hub_mi); no hub_att run exists" else "")) } }
 
 D <- do.call(rbind, L); C <- unique(do.call(rbind, cells))
 # complete: every cell x 9 methods; missing -> not_run
@@ -104,7 +112,7 @@ grid <- merge(C, data.frame(method = M9), by = NULL)
 key <- function(x) paste(x$dataset, x$truth, x$metric, x$scope, x$method, sep = "|")
 miss <- grid[!key(grid) %in% key(D), ]
 if (nrow(miss)) {
-  nr <- function(r) if (r$dataset == "dream5_yeast") "held-out test truth (run once); not scored for any method here" else if (r$dataset == "beeline") "not run" else
+  nr <- function(r) if (r$truth == "complexes_main") "not run (the yeast complex estimation scored CLR, attention and a3r only)" else if (r$dataset == "dream5_yeast") "held-out test truth (run once); not scored for any method here" else if (r$dataset == "beeline") "not run" else
     if (r$scope %in% c("hub_att", "hub_mi") && r$metric != PM) "no hub-stratified run exists for this metric" else
     if (r$metric %in% c("tf_aupr_ratio", "tf_auroc_median", "per_regulon_mean_ap_over_base", "per_regulon_mean_ap", "per_regulon_mean_ap_norm")) "not run" else
     if (r$truth %in% c("complexes", "CORUM_merged") || r$dataset == "k562" && grepl("^CORUM_", r$truth)) "no competitor run on this truth (GENIE3, PIDC, GRNBoost2 were not run on complex truths)" else
