@@ -63,7 +63,7 @@ raw_rows <- list(
   R("Knockdown-response modules", "k562", "KD_response", PM),
   list(group = "Human RPE1 Perturb-seq"),
   R("CORUM protein complexes (merged)", "rpe1", "CORUM_merged", PM),
-  list(group = "Single cells (BEELINE, 14 cases)"),
+  list(group = "Single cells (BEELINE: 14 dataset-and-gene-set cases, 44 case-truth cells)"),
   R("Median AUPRC ratio, primary truths", "beeline", "all_14_cases", "beeline_median_auprc_ratio_primary"),
   R("Median AUPRC ratio, cell-type ChIP truth", "beeline", "all_14_cases", "beeline_median_auprc_ratio_celltypeChIP"))
 hub_rows <- list(
@@ -145,7 +145,7 @@ foot_common <- list(
        size = 9, col = ink[["secondary"]], face = "plain"),
   list(text = "Ties are not marked here (see the method table, docs/whitepapers/sota_table.md, for Bonferroni-tied cells). No intervals, no tests. A grey dash is a cell that was not run.",
        size = 9, col = ink[["secondary"]], face = "plain"),
-  list(text = "Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; BEELINE median over 14 cases; a3r was picked among about 20 read-outs by its K562 scores (selected, not fitted);",
+  list(text = "Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; BEELINE median over the 44 case-truth cells of the primary truths (14 cases); a3r was picked among about 20 read-outs by its K562 scores (selected, not fitted);",
        size = 9, col = ink[["secondary"]], face = "plain"),
   list(text = "K562 and M3D are tuning sets; attention and a3r settings were developed on M3D; DREAM5 yeast is separate (page 2 / section 8) and was not run for a3r.",
        size = 9, col = ink[["secondary"]], face = "plain"))

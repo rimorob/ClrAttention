@@ -80,7 +80,7 @@ draw_p2 <- function() {
 
   txt("The versions of CLR we tested, from raw dependence to the full method and its exploratory extensions",
       0.5, 8.55, 20, face = "bold", just = "left")
-  txt("E. coli: strong-evidence regulons, 466 experiments (RegulonDB).  K562: CORUM complexes.  Single cells: BEELINE, median over 14 dataset-and-gene-set cases.",
+  txt("E. coli: strong-evidence regulons, 466 experiments (RegulonDB).  K562: CORUM complexes.  Single cells: BEELINE, median over 44 case-truth cells (14 dataset-and-gene-set cases).",
       0.5, 8.1, 11.5, ink[["secondary"]], just = "left")
 
   # column x positions
