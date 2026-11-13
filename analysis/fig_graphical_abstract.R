@@ -26,16 +26,17 @@ this_lab <- "CLR + softmax + walk (this work)"
 # 12 Nov stacked-layer run (docs/explore_stack_results.md); K562 is in-sample for a3r.
 a3r_lab <- "a3r: + log, 2nd CLR (exploratory)"
 a3r2_lab <- "a3r2: two layers (exploratory)"
+a3r3_lab <- "a3r3: three layers (exploratory)"
 strip_a <- data.frame(   # M3D, strong-evidence (SC) RegulonDB regulons
-  label = c(this_lab, a3r_lab, a3r2_lab, "GENIE3", "PIDC", "CLR"),
-  value = c(1.68, 1.72, 1.73, 1.51, 1.45, 1.44),
-  col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", ink[["muted"]], ink[["muted"]], pal[["orange"]]),
+  label = c(this_lab, a3r_lab, a3r2_lab, a3r3_lab, "GENIE3", "PIDC", "CLR"),
+  value = c(1.68, 1.72, 1.73, 1.66, 1.51, 1.45, 1.44),
+  col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", "#bfe6d8", ink[["muted"]], ink[["muted"]], pal[["orange"]]),
   stringsAsFactors = FALSE)
 strip_b <- data.frame(   # K562, CORUM complexes
   label = c(this_lab, "a3r: + log, 2nd CLR (in-sample)", "a3r2: two layers (in-sample)",
-            "CLR", "GENIE3", "|r| (correlation)"),
-  value = c(3.51, 7.95, 8.19, 6.39, 6.32, 7.00),
-  col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", pal[["orange"]], ink[["muted"]], ink[["muted"]]),
+            "a3r3: three layers (in-sample)", "CLR", "GENIE3", "|r| (correlation)"),
+  value = c(3.51, 7.95, 8.19, 8.15, 6.39, 6.32, 7.00),
+  col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", "#bfe6d8", pal[["orange"]], ink[["muted"]], ink[["muted"]]),
   stringsAsFactors = FALSE)
 
 # ---- helpers ----------------------------------------------------------------
@@ -94,7 +95,7 @@ band <- function(x0, x1, y, fill, label) {   # labelled band + bracket over a gr
 bar_strip <- function(d, x0, w, y_top, xmax, ticks, loss = FALSE) {
   lab_x <- x0 + 0.25; bx0 <- x0 + 2.85; bx1 <- x0 + w - 0.6
   sc <- (bx1 - bx0) / xmax
-  n <- nrow(d); ry <- y_top - (seq_len(n) - 1) * 0.255; bh <- 0.18
+  n <- nrow(d); ry <- y_top - (seq_len(n) - 1) * 0.21; bh <- 0.15
   # grid + random line
   for (t in ticks) seg(bx0 + t * sc, ry[1] + 0.17, bx0 + t * sc, ry[n] - 0.17, ink[["grid"]], 0.9)
   for (k in seq_len(n)) {
@@ -331,9 +332,9 @@ draw_abstract <- function() {
   node(ix, iy, 0.09, fill = pal[["aqua"]], col = "#0d6e4c", lwd = 1)
   txt("E. coli regulons (experimentally\nsupported, RegulonDB)", x5 + 0.25, 7.0, 12.5,
       face = "bold", just = "left", lineheight = 1.0)
-  txt("regulon = genes controlled by one transcription factor (TF)", x5 + 0.25, 6.5, 10,
+  txt("regulon = genes controlled by one transcription factor (TF)", x5 + 0.25, 6.6, 10,
       ink[["secondary"]], just = "left")
-  bar_strip(strip_a, x5, W5, 6.05, 2, c(0, 0.5, 1, 1.5, 2))
+  bar_strip(strip_a, x5, W5, 6.08, 2, c(0, 0.5, 1, 1.5, 2))
   txt("per regulon: tie with CLR and GENIE3;\nahead in 1,000/1,000 resamplings vs CLR",
       x5 + 0.25, 3.98, 10, ink[["secondary"]], face = "italic", just = "left")
 
