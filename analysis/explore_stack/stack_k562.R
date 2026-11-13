@@ -22,8 +22,10 @@ if (!QUICK) {      # (d) a3r minus K10: point difference and jackknife interval 
   mr <- utils::read.csv("analysis/corum_exploratory/metrics_robust.csv", stringsAsFactors = FALSE); mr <- mr[mr$variant == "a_clr_bilateral_logP_t9_robust", ]
   mp <- c(DoRothEA_AB = "DoRothEA_AB", CollecTRI = "CollecTRI", CORUM = "CORUM_all", KD_response = "KD_response", CORUM_noRP = "CORUM_noRP")
   for (tn in names(mp)) { e <- mp[[tn]]; d <- res_a3r$raw[[e]]$aupr - res_k10$raw[[e]]$aupr; s <- stats::sd(res_a3r$raw[[e]]$jack - res_k10$raw[[e]]$jack); r <- mr[mr$truth == tn, ]
-    rows <- sk_gate_add(rows, sprintf("(d) a3r minus K10, %s: d, lo, hi vs metrics_robust.csv (d_vs_att9, att9_lo, att9_hi)", tn),
-      max(abs(d - r$d_vs_att9), abs(d - 1.96 * s - r$att9_lo), abs(d + 1.96 * s - r$att9_hi)))
+    # CORUM_noRP: metrics_robust.csv drew its halves right after the five original truths (no robust_z delete-20% draws in between), so only
+    # the point difference is gated for it (deviation from plan section 5, logged); the other four truths share the stream and gate d, lo, hi.
+    gv <- if (tn == "CORUM_noRP") abs(d - r$d_vs_att9) else max(abs(d - r$d_vs_att9), abs(d - 1.96 * s - r$att9_lo), abs(d + 1.96 * s - r$att9_hi))
+    rows <- sk_gate_add(rows, sprintf("(d) a3r minus K10, %s: %s vs metrics_robust.csv", tn, if (tn == "CORUM_noRP") "d only" else "d, lo, hi"), gv)
     if (tn == "CORUM") { pr <- sprintf("%+.3f [%+.3f, %+.3f]", d, d - 1.96 * s, d + 1.96 * s)
       rows <- sk_gate_add(rows, sprintf("(d) CORUM a3r minus K10 prints %s, document table +0.059 [+0.033, +0.084]", pr), as.numeric(pr != "+0.059 [+0.033, +0.084]")) } }
 }
