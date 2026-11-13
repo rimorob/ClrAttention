@@ -1,0 +1,22 @@
+[10:53:16] k562: 5671 genes x 707 profiles (quick = 0) 
+[10:53:34] truth DoRothEA_AB          105 sets,   2797795 pairs, base rate 0.1830 
+[10:53:34] truth CORUM_all           1185 sets,   2552670 pairs, base rate 0.0133 
+[10:53:34] truth KD_response          566 sets,   5279625 pairs, base rate 0.0787 
+[10:53:34] truth CollecTRI            491 sets,   3605955 pairs, base rate 0.1278 
+[10:53:34] truth CORUM_noRP          1177 sets,   2353365 pairs, base rate 0.0119 
+[10:53:34] truth CORUM_RP               8 sets,      8001 pairs, base rate 0.7502 
+[10:53:34] truth CORUM_small          871 sets,   1036080 pairs, base rate 0.0033 
+[10:53:34] truth CORUM_large           28 sets,    195625 pairs, base rate 0.1263 
+[10:53:34] truth CORUM_merged         634 sets,   2552670 pairs, base rate 0.0137 
+[10:53:34] truth CORUM_merged_noRP    630 sets,   2353365 pairs, base rate 0.0120 
+[10:54:16] MI + CLR + operator 40 s; max|A(rz_operator) - package operator| = 0 
+[10:54:57] truth DoRothEA_ABC   271 sets,   8600878 pairs, base rate 0.1305 
+[10:55:38] generic stack N = 1 vs a3r: max|diff| = 0 
+[10:57:30] scored CLR 
+[10:58:19] scored attention 
+[10:59:05] scored a3r 
+[10:59:46] scored a3r2 
+[11:00:27] scored a3r3 
+[11:00:27] EQUIVALENCE GATE PASSED: equivalence_gate.csv 
+[11:00:27] DoRothEA ABC enrichment: 
+[11:00:27] done 

@@ -1,0 +1,15 @@
+[10:52:57] options: dataset=ecomac out=results/scoreboard/ecomac threads=8 
+[10:53:20] ecomac: 4189 genes x 2198 samples; truths SC (1673101 pairs, 157159 pos); all (2837596 pairs, 343485 pos) 
+[10:54:33] MI + CLR + operator 45 s; max|A(rz_operator) - package operator| = 0 
+[10:55:15] generic stack N = 1 vs a3r of the package path: max|diff| = 0 
+[10:56:24] scored CLR 
+[10:56:59] scored attention 
+[10:57:32] scored a3r 
+[10:58:04] scored a3r2 
+[10:58:34] scored a3r3 
+[10:59:08] scored abs_pearson 
+[10:59:09] EQUIVALENCE GATE PASSED: equivalence_gate.csv 
+[10:59:09] pooled enrichment (AUPR / base rate): 
+[10:59:09] TF edges: 
+[10:59:09] per-regulon: 
+[10:59:09] done 

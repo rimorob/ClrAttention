@@ -1,0 +1,18 @@
+[10:53:01] options: out=results/scoreboard/beeline threads=4 
+[10:53:43] hESC TFs+500: 873 genes x 758 cells, t* = 7 (0.3 min) 
+[10:54:32] hESC TFs+1000: 1323 genes x 758 cells, t* = 8 (0.5 min) 
+[10:54:57] hHep TFs+500: 911 genes x 425 cells, t* = 10 (0.4 min) 
+[10:55:33] hHep TFs+1000: 1367 genes x 425 cells, t* = 10 (0.5 min) 
+[10:55:48] mDC TFs+500: 807 genes x 383 cells, t* = 10 (0.2 min) 
+[10:56:11] mDC TFs+1000: 1270 genes x 383 cells, t* = 11 (0.4 min) 
+[10:57:01] mESC TFs+500: 1071 genes x 421 cells, t* = 7 (0.5 min) 
+[10:57:58] mESC TFs+1000: 1528 genes x 421 cells, t* = 6 (0.7 min) 
+[10:58:18] mHSC-E TFs+500: 666 genes x 1071 cells, t* = 6 (0.3 min) 
+[10:58:48] mHSC-E TFs+1000: 1135 genes x 1071 cells, t* = 5 (0.4 min) 
+[10:59:05] mHSC-GM TFs+500: 593 genes x 889 cells, t* = 7 (0.2 min) 
+[10:59:32] mHSC-GM TFs+1000: 1055 genes x 889 cells, t* = 8 (0.4 min) 
+[10:59:47] mHSC-L TFs+500: 514 genes x 847 cells, t* = 10 (0.2 min) 
+[11:00:06] mHSC-L TFs+1000: 692 genes x 847 cells, t* = 10 (0.3 min) 
+[11:00:06] EQUIVALENCE GATE PASSED: equivalence_gate.csv 
+[11:00:06] median AUPRC ratio: 
+[11:00:06] done 

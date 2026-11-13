@@ -1,0 +1,26 @@
+"check","max_abs_diff","tol","pass"
+"attention SC raw AUPR vs baselines metrics.csv (attention)",2.22044604925031e-16,1e-09,TRUE
+"attention SC hub_att AUPR vs baselines metrics.csv (attention_hubstrat)",5.55111512312578e-17,1e-09,TRUE
+"attention SC tf_aupr_ratio / tf_auroc_median vs baselines metrics.csv",2.66453525910038e-15,1e-09,TRUE
+"attention all raw AUPR vs baselines metrics.csv (attention)",2.4980018054066e-16,1e-09,TRUE
+"attention all hub_att AUPR vs baselines metrics.csv (attention_hubstrat)",2.77555756156289e-17,1e-09,TRUE
+"attention all tf_aupr_ratio / tf_auroc_median vs baselines metrics.csv",4.44089209850063e-15,1e-09,TRUE
+"CLR SC raw AUPR vs baselines metrics.csv (clr)",2.22044604925031e-16,1e-09,TRUE
+"CLR SC hub_att AUPR vs baselines metrics.csv (clr_hubstrat)",2.4980018054066e-16,1e-09,TRUE
+"CLR SC tf_aupr_ratio / tf_auroc_median vs baselines metrics.csv",3.5527136788005e-15,1e-09,TRUE
+"CLR all raw AUPR vs baselines metrics.csv (clr)",1.94289029309402e-16,1e-09,TRUE
+"CLR all hub_att AUPR vs baselines metrics.csv (clr_hubstrat)",4.71844785465692e-16,1e-09,TRUE
+"CLR all tf_aupr_ratio / tf_auroc_median vs baselines metrics.csv",3.99680288865056e-15,1e-09,TRUE
+"abs_pearson SC raw AUPR vs baselines metrics.csv (abs_pearson)",2.63677968348475e-16,1e-09,TRUE
+"abs_pearson SC hub_att AUPR vs baselines metrics.csv (abs_pearson_hubstrat)",1.94289029309402e-16,1e-09,TRUE
+"abs_pearson SC tf_aupr_ratio / tf_auroc_median vs baselines metrics.csv",4.44089209850063e-16,1e-09,TRUE
+"abs_pearson all raw AUPR vs baselines metrics.csv (abs_pearson)",3.60822483003176e-16,1e-09,TRUE
+"abs_pearson all hub_att AUPR vs baselines metrics.csv (abs_pearson_hubstrat)",3.60822483003176e-16,1e-09,TRUE
+"abs_pearson all tf_aupr_ratio / tf_auroc_median vs baselines metrics.csv",3.33066907387547e-15,1e-09,TRUE
+"attention SC per-regulon AP (119 regulons scored) vs per_regulon.csv",4.9960036108132e-16,1e-09,TRUE
+"attention all per-regulon AP (155 regulons scored) vs per_regulon.csv",4.9960036108132e-16,1e-09,TRUE
+"CLR SC per-regulon AP (119 regulons scored) vs per_regulon.csv",4.9960036108132e-16,1e-09,TRUE
+"CLR all per-regulon AP (155 regulons scored) vs per_regulon.csv",4.9960036108132e-16,1e-09,TRUE
+"abs_pearson SC per-regulon AP (119 regulons scored) vs per_regulon.csv",4.9960036108132e-16,1e-09,TRUE
+"abs_pearson all per-regulon AP (155 regulons scored) vs per_regulon.csv",4.71844785465692e-16,1e-09,TRUE
+"a3r SC raw AUPR vs docs/clr_logpt_verdict/endpoints_all.csv (ecomac regulons_SC, S2 and P4)",4.9960036108132e-16,1e-09,TRUE

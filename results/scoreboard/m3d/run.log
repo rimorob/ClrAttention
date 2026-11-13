@@ -1,0 +1,15 @@
+[10:52:55] options: dataset=m3d out=results/scoreboard/m3d threads=8 
+[10:53:06] m3d: 4297 genes x 466 samples; truths SC (1762067 pairs, 166112 pos); all (3031397 pairs, 365163 pos) 
+[10:53:31] MI + CLR + operator 19 s; max|A(rz_operator) - package operator| = 0 
+[10:54:10] generic stack N = 1 vs a3r of the package path: max|diff| = 0 
+[10:55:16] scored CLR 
+[10:55:48] scored attention 
+[10:56:18] scored a3r 
+[10:56:47] scored a3r2 
+[10:57:17] scored a3r3 
+[10:57:50] scored abs_pearson 
+[10:57:50] EQUIVALENCE GATE PASSED: equivalence_gate.csv 
+[10:57:50] pooled enrichment (AUPR / base rate): 
+[10:57:50] TF edges: 
+[10:57:50] per-regulon: 
+[10:57:50] done 

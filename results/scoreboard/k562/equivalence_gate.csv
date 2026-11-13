@@ -1,0 +1,14 @@
+"check","max_abs_diff","tol","pass"
+"attention: AUPR on 10 stored truths x 3 scopes vs explore_stack/k562/pooled_levels.csv (K10)",4.44089209850063e-16,1e-09,TRUE
+"CLR: AUPR on 10 stored truths x 3 scopes vs explore_stack/k562/pooled_levels.csv (CLR)",4.44089209850063e-16,1e-09,TRUE
+"a3r: AUPR on 10 stored truths x 3 scopes vs explore_stack/k562/pooled_levels.csv (a3r)",4.71844785465692e-16,1e-09,TRUE
+"a3r2: AUPR on 10 stored truths x 3 scopes vs explore_stack/k562/pooled_levels.csv (a3r2)",4.85722573273506e-16,1e-09,TRUE
+"a3r3: AUPR on 10 stored truths x 3 scopes vs explore_stack/k562/pooled_levels.csv (a3r3)",4.9960036108132e-16,1e-09,TRUE
+"attention DoRothEA_ABC raw AUPR vs baselines metrics.csv",4.44089209850063e-16,1e-09,TRUE
+"attention DoRothEA_ABC hub_att AUPR vs baselines metrics.csv (attention_hubstrat)",4.9960036108132e-16,1e-09,TRUE
+"attention DoRothEA_AB raw AUPR vs baselines metrics.csv",3.88578058618805e-16,1e-09,TRUE
+"attention DoRothEA_AB hub_att AUPR vs baselines metrics.csv (attention_hubstrat)",3.05311331771918e-16,1e-09,TRUE
+"CLR DoRothEA_ABC raw AUPR vs baselines metrics.csv",3.60822483003176e-16,1e-09,TRUE
+"CLR DoRothEA_ABC hub_att AUPR vs baselines metrics.csv (clr_hubstrat)",1.66533453693773e-16,1e-09,TRUE
+"CLR DoRothEA_AB raw AUPR vs baselines metrics.csv",2.22044604925031e-16,1e-09,TRUE
+"CLR DoRothEA_AB hub_att AUPR vs baselines metrics.csv (clr_hubstrat)",1.66533453693773e-16,1e-09,TRUE
