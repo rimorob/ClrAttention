@@ -33,8 +33,8 @@ strip_a <- data.frame(   # M3D, strong-evidence (SC) RegulonDB regulons
   col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", "#bfe6d8", ink[["muted"]], ink[["muted"]], pal[["orange"]]),
   stringsAsFactors = FALSE)
 strip_b <- data.frame(   # K562, CORUM complexes
-  label = c(this_lab, "a3r: + log, 2nd CLR (in-sample)", "a3r2: two layers (in-sample)",
-            "a3r3: three layers (in-sample)", "CLR", "GENIE3", "|r| (correlation)"),
+  label = c(this_lab, "a3r: + log, 2nd CLR (picked on K562)", "a3r2: two layers (picked on K562)",
+            "a3r3: three layers (picked on K562)", "CLR", "GENIE3", "|r| (correlation)"),
   value = c(3.51, 7.95, 8.19, 8.15, 6.39, 6.32, 7.00),
   col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", "#bfe6d8", pal[["orange"]], ink[["muted"]], ink[["muted"]]),
   stringsAsFactors = FALSE)

@@ -6,6 +6,10 @@
 #   BEELINE median AUPRC ratio over 14 cases: results/beeline_baselines/summary.csv
 #     (|r| 1.20, CLR 1.48, CLR-NS 1.60, GENIE3 1.69, PIDC 1.56, GRNBoost2 1.47)
 #   scFM: results/scfm_score (BEELINE, preregistered primary: CLR-NS minus scPRINT R0, log2 AUPRC, +1.03)
+#   a3r rows (added 13 Nov; exploratory, not adopted): E. coli SC AUPR at t = 9 in every layer from
+#     results/explore_stack/m3d/pooled_levels.csv (a3r 0.1622, a3r2 0.1629, a3r3 0.1566); K562 CORUM enrichment
+#     from results/explore_stack/k562/pooled_levels.csv (7.95, 8.19, 8.15); K562 CORUM for CLR 6.39, |r| 7.00,
+#     CLR attention 3.51 from docs/whitepapers/sota_table.md. a3r was picked among ~20 readouts on K562 truths.
 # Versions without a number in those files show a dash; nothing is interpolated.
 #
 # Output: docs/whitepapers/figures/graphical_abstract_p2.{png,pdf}
@@ -46,7 +50,8 @@ chip <- function(present, x, y, w, label, col, tcol = "white") {
 v <- data.frame(
   name = c("CLR", "CLR-NS", "|r| (correlation)",
            "Attention on |r|", "Attention on mutual information",
-           "Attention on CLR of |r|", "Attention on CLR-NS", "CLR attention (this work)"),
+           "Attention on CLR of |r|", "Attention on CLR-NS", "CLR attention (this work)",
+           "a3r (exploratory)", "a3r2: two layers (exploratory)", "a3r3: three layers (exploratory)"),
   sub = c("context normalization, scores ranked directly",
           "CLR on |r| of normal scores (Blom)",
           "no normalization, scores ranked directly",
@@ -54,13 +59,18 @@ v <- data.frame(
           "softmax + walk, no CLR normalization",
           "CLR normalization, then softmax + walk",
           "CLR-NS scores, then softmax + walk",
-          "MI, CLR normalization, softmax + walk"),
-  dep = c("MI", "NS", "r", "r", "MI", "r", "NS", "MI"),
-  cn  = c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE),
-  sm  = c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE),
-  tstar = c(NA, NA, NA, 8, 6, 7, 5, 9),
-  ecoli = c(0.136, NA, NA, 0.143, 0.143, 0.153, 0.151, 0.158),
-  beeline = c("1.48", "1.60", "1.20", "", "", "", "no gain over CLR-NS", ""),
+          "MI, CLR normalization, softmax + walk",
+          "attention, then log of the walk + a second CLR",
+          "a3r fed back as the score of a second layer",
+          "a3r fed back twice"),
+  dep = c("MI", "NS", "r", "r", "MI", "r", "NS", "MI", "MI", "MI", "MI"),
+  cn  = c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
+  sm  = c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
+  lc  = c(rep(FALSE, 8), TRUE, TRUE, TRUE),
+  walklab = c(NA, NA, NA, "t* = 8", "t* = 6", "t* = 7", "t* = 5", "t* = 9", "t = 9", "t = 9 ×2", "t = 9 ×3"),
+  ecoli = c(0.136, NA, NA, 0.143, 0.143, 0.153, 0.151, 0.158, 0.1622, 0.1629, 0.1566),
+  corum = c("6.39", "", "7.00", "", "", "", "", "3.51", "7.95", "8.19", "8.15"),
+  beeline = c("1.48", "1.60", "1.20", "", "", "", "no gain over CLR-NS", "", "", "", ""),
   stringsAsFactors = FALSE)
 
 draw_p2 <- function() {
@@ -68,57 +78,64 @@ draw_p2 <- function() {
   grid.rect(gp = gpar(fill = "white", col = NA))
   pushViewport(viewport(xscale = c(0, 16), yscale = c(0, 9)))
 
-  txt("The eight versions of CLR we tested, from raw dependence to the full method",
+  txt("The versions of CLR we tested, from raw dependence to the full method and its exploratory extensions",
       0.5, 8.55, 20, face = "bold", just = "left")
-  txt("E. coli: strong-evidence regulons, 466 experiments (RegulonDB).  Single cells: BEELINE, median over 14 dataset-and-gene-set cases.",
+  txt("E. coli: strong-evidence regulons, 466 experiments (RegulonDB).  K562: CORUM complexes.  Single cells: BEELINE, median over 14 dataset-and-gene-set cases.",
       0.5, 8.1, 11.5, ink[["secondary"]], just = "left")
 
   # column x positions
-  xn <- 0.5; xd <- 5.4; xc <- 7.45; xs <- 8.95; xw <- 10.2; xe0 <- 11.45; xe1 <- 13.6; xb <- 14.05
-  hy <- 7.55
+  xn <- 0.4; xd <- 4.95; xc <- 6.75; xs <- 8.0; xw <- 9.1; xl <- 10.6; xe0 <- 11.3; xe1 <- 12.9; xk <- 13.25; xb <- 14.5
+  hy <- 7.6
   for (h in list(list("Version", xn, "left"), list("Dependence", xd, "centre"),
                  list("Context\nnormalization", xc, "centre"), list("Softmax", xs, "centre"),
-                 list("Walk", xw, "centre"), list("E. coli\nAUPR (SC)", (xe0 + xe1) / 2, "centre"),
+                 list("Walk", xw, "centre"), list("Log +\nsecond CLR", xl, "centre"),
+                 list("E. coli\nAUPR (SC)", (xe0 + xe1) / 2, "centre"),
+                 list("K562 CORUM\n(× random)", xk, "left"),
                  list("BEELINE\nmedian ratio", xb, "left")))
     txt(h[[1]], h[[2]], hy, 11, ink[["secondary"]], "bold", just = h[[3]], lineheight = 0.95)
-  seg(0.5, hy - 0.34, 15.5, hy - 0.34, ink[["secondary"]], 1.2)
+  seg(0.4, hy - 0.34, 15.7, hy - 0.34, ink[["secondary"]], 1.2)
 
-  ys <- seq(6.78, by = -0.7, length.out = nrow(v))
-  # E. coli dot axis 0.13 .. 0.16 (deliberately not from zero; ticks labelled)
-  ax <- function(a) xe0 + (a - 0.13) / (0.16 - 0.13) * (xe1 - xe0)
-  for (a in c(0.13, 0.14, 0.15, 0.16)) {
+  ys <- seq(6.85, by = -0.52, length.out = nrow(v))
+  # E. coli dot axis 0.13 .. 0.17 (deliberately not from zero; ticks labelled)
+  ax <- function(a) xe0 + (a - 0.13) / (0.17 - 0.13) * (xe1 - xe0)
+  for (a in c(0.13, 0.14, 0.15, 0.16, 0.17)) {
     seg(ax(a), ys[1] + 0.3, ax(a), ys[length(ys)] - 0.3, ink[["grid"]], 0.9)
-    txt(sprintf("%.2f", a), ax(a), ys[length(ys)] - 0.52, 9.5, ink[["secondary"]])
+    txt(sprintf("%.2f", a), ax(a), ys[length(ys)] - 0.34, 9, ink[["secondary"]])
   }
-  txt("axis starts at 0.13", (xe0 + xe1) / 2, ys[length(ys)] - 0.8, 9.5, ink[["secondary"]], "italic")
+  txt("axis starts at 0.13", (xe0 + xe1) / 2, ys[length(ys)] - 0.5, 9, ink[["secondary"]], "italic")
 
   for (k in seq_len(nrow(v))) {
-    y <- ys[k]; last <- k == nrow(v)
-    if (last) grid.roundrect(0.35, y, 15.3, 0.64, default.units = "native", just = c("left", "centre"),
+    y <- ys[k]; last <- k == 8; expl <- k > 8
+    if (last || expl) grid.roundrect(0.3, y, 15.5, 0.5, default.units = "native", just = c("left", "centre"),
                              r = unit(0.08, "inches"),
-                             gp = gpar(fill = "#e3f5ee", col = pal[["aqua"]], lwd = 1.4))
-    txt(v$name[k], xn, y + 0.12, 13, face = "bold", just = "left")
-    txt(v$sub[k], xn, y - 0.17, 10, ink[["secondary"]], just = "left")
-    chip(TRUE, xd, y, 2.3, dep_lab[[v$dep[k]]], dep_cols[[v$dep[k]]])
-    chip(v$cn[k], xc, y, 1.35, "CLR z", pal[["orange"]])
-    chip(v$sm[k], xs, y, 1.1, "softmax", pal[["violet"]])
-    chip(v$sm[k], xw, y, 1.0, if (is.na(v$tstar[k])) "walk" else sprintf("t* = %d", v$tstar[k]),
-         pal[["magenta"]])
+                             gp = gpar(fill = if (last) "#e3f5ee" else "#f4fbf8", col = pal[["aqua"]],
+                                       lwd = if (last) 1.4 else 1, lty = if (last) 1 else 2))
+    txt(v$name[k], xn, y + 0.1, 12, face = "bold", just = "left")
+    txt(v$sub[k], xn, y - 0.14, 9, ink[["secondary"]], just = "left")
+    chip(TRUE, xd, y, 2.0, dep_lab[[v$dep[k]]], dep_cols[[v$dep[k]]])
+    chip(v$cn[k], xc, y, 1.15, "CLR z", pal[["orange"]])
+    chip(v$sm[k], xs, y, 1.0, "softmax", pal[["violet"]])
+    chip(v$sm[k], xw, y, 1.0, if (is.na(v$walklab[k])) "walk" else v$walklab[k], pal[["magenta"]])
+    chip(v$lc[k], xl, y, 1.45, "log + CLR", pal[["aqua"]])
     if (!is.na(v$ecoli[k])) {
-      grid.circle(ax(v$ecoli[k]), y, 0.085, default.units = "native",
-                  gp = gpar(fill = if (last) pal[["aqua"]] else ink[["secondary"]], col = NA))
-      txt(sprintf("%.3f", v$ecoli[k]), ax(v$ecoli[k]) + 0.16, y + 0.2, 9.5, just = "left",
+      grid.circle(ax(v$ecoli[k]), y, 0.075, default.units = "native",
+                  gp = gpar(fill = if (last || expl) pal[["aqua"]] else ink[["secondary"]], col = NA))
+      txt(sprintf("%.3f", v$ecoli[k]), ax(v$ecoli[k]) + 0.13, y + 0.17, 9, just = "left",
           face = if (last) "bold" else "plain")
-    } else txt("not in the ablation", (xe0 + xe1) / 2, y, 9.5, ink[["muted"]], "italic")
-    if (nzchar(v$beeline[k])) txt(v$beeline[k], xb, y, 11, just = "left",
+    } else txt("not in the ablation", (xe0 + xe1) / 2, y, 9, ink[["muted"]], "italic")
+    if (nzchar(v$corum[k])) txt(v$corum[k], xk, y, 11, just = "left",
+                                face = if (last || expl) "bold" else "plain")
+    if (nzchar(v$beeline[k])) txt(v$beeline[k], xb, y, if (k == 7) 9 else 11, just = "left",
                                   face = if (k == 2) "bold" else "plain")
   }
-  txt("t* = held-out depth, chosen per version; the method comparison itself fixes t = 9.",
-      0.5, ys[length(ys)] - 0.52, 9.5, ink[["secondary"]], just = "left")
+  txt("t* = held-out depth, chosen per version; the method comparison itself fixes t = 9. Exploratory rows: t = 9 in every layer, not re-selected; none was adopted (26 Oct preregistered test, 12 Nov stacked-layer run).",
+      0.4, ys[length(ys)] - 0.5, 9, ink[["secondary"]], just = "left")
+  txt("a3r was picked among about 20 read-outs by its K562 scores (a selection, not a fit: it has no fitted parameters). Gaps between a3r, a3r2 and a3r3 are inside the noise. BEELINE: not run for a3r.",
+      0.4, ys[length(ys)] - 0.75, 9, ink[["secondary"]], just = "left")
 
   # footer strip: what CLR was compared with
-  fy <- 0.62
-  grid.roundrect(0.35, fy, 15.3, 0.62, default.units = "native", just = c("left", "centre"),
+  fy <- 0.4
+  grid.roundrect(0.3, fy, 15.5, 0.5, default.units = "native", just = c("left", "centre"),
                  r = unit(0.08, "inches"), gp = gpar(fill = "#f1f0ec", col = NA))
   txt("Compared with (BEELINE median ratio):", 0.55, fy, 11, face = "bold", just = "left")
   txt("GENIE3 1.69    PIDC 1.56    GRNBoost2 1.47", 5.15, fy, 11, just = "left")
