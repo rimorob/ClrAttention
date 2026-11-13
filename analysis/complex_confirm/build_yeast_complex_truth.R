@@ -14,13 +14,14 @@
 #   $RAW/cp/559292.tsv                 EBI Complex Portal complextab, S. cerevisiae S288C (curated)
 #   $RAW/uniprot/uniprot_559292.tsv    UniProt accession -> ordered locus (ORF)
 #   data/yeast/SGD_features.tab        ORF -> standard name (for the r-protein rule)
-# Universes: DREAM5 net4 (data/dream5/synapse/net4/net4_gene_ids.tsv, decoys removed; candidate A) and the
-# Kemmeren responsive-700 deleteome rows (data/yeast/deleteome_responsive_700.tsv, first column; candidate B).
+# Universe: DREAM5 net4 (data/dream5/synapse/net4/net4_gene_ids.tsv, decoys removed). (rev 1 also counted the
+# Kemmeren responsive-700 universe as a fallback; dropped in rev 2.)
 # Outputs (docs/complex_confirm_selections/):
 #   yeast_complexes_members.tsv   long: variant, dataset, complex, orf   (SHA-256 gated at the run stage)
 #   yeast_complexes_counts.csv    counts per variant x dataset (genes, pairs, positives, n_eff, shares)
 #   yeast_complexes_sizes.csv     per merged complex: genes, positive-pair weight, r-protein fraction
-#   yeast_complexes.sha256
+#   yeast_complexes_excluded_pairs.tsv  pairs removed from the universe: paralog sets (all variants), cross-subunit (one variant)
+#   yeast_complexes.sha256        SHA-256 of the member list and of the excluded-pair list
 # Usage: Rscript analysis/complex_confirm/build_yeast_complex_truth.R data/complex_confirm_raw
 args <- commandArgs(trailingOnly = TRUE); RAW <- if (length(args)) args[1] else "data/complex_confirm_raw"
 Sys.setlocale("LC_COLLATE", "C")
@@ -31,8 +32,7 @@ ORF_RE <- "^(Y[A-P][LR][0-9]{3}[WC](-[A-Z])?|Q[0-9]{4})$"
 gid <- utils::read.delim("data/dream5/synapse/net4/net4_gene_ids.tsv", stringsAsFactors = FALSE, comment.char = "", quote = "")
 names(gid) <- c("id", "name")
 universe <- list(dream5_net4 = sort(unique(gid$name[!grepl("^decoy", gid$name)])))
-kem <- sub("\t.*$", "", readLines("data/yeast/deleteome_responsive_700.tsv"))[-1]
-universe$kemmeren_700 <- sort(unique(toupper(kem)))
+# rev 2 (13 Nov, review m2 / lead decision c): the Kemmeren fallback universe is dropped (no fallback).
 
 ## ---- UniProt -> ORF ----
 up <- utils::read.delim(file.path(RAW, "uniprot", "uniprot_559292.tsv"), stringsAsFactors = FALSE, quote = "", comment.char = "")
@@ -65,7 +65,13 @@ acc <- lapply(names(parts), flatten); names(acc) <- names(parts)
 gen <- lapply(acc, function(a) sort(unique(unlist(orf_of[a[a %in% names(orf_of)]]))))
 gen <- gen[!duplicated(names(gen))]
 paralog_sets <- lapply(sets_acc, function(p) sort(unique(unlist(orf_of[intersect(strsplit(gsub("[][]", "", p), ",")[[1]], names(orf_of))]))))
-paralog_sets <- paralog_sets[lengths(paralog_sets) >= 2]
+# rev 2 (review m3): one UniProt accession that maps to two or more ORFs is the same protein encoded by duplicated
+# genes (identical sequence: TEF1/2, TIF1/2, HHF1/2, HHT1/2 in this release); the same cross-hybridisation logic
+# applies, so these ORFs also form a paralog set (label-free; decided before any score).
+multi_acc <- unique(unlist(acc)); multi_acc <- multi_acc[multi_acc %in% names(orf_of) & lengths(orf_of[multi_acc]) >= 2]
+paralog_sets <- c(paralog_sets, unname(lapply(multi_acc, function(a) sort(orf_of[[a]]))))
+paralog_sets <- unique(paralog_sets[lengths(paralog_sets) >= 2])
+cat("single accessions mapping to >= 2 ORFs:", paste(multi_acc, vapply(multi_acc, function(a) paste(orf_of[[a]], collapse = "/"), ""), collapse = "; "), "\n")
 log_src <- c(paralog_sets = length(paralog_sets), complexes_in_file = length(parts), proteins_flattened_total = length(unlist(acc)),
              proteins_without_orf = sum(!unlist(acc) %in% names(orf_of)),
              complexes_with_ge3_orfs_any_universe = sum(lengths(gen) >= 3))
@@ -96,13 +102,14 @@ merge_sets <- function(s) {
 ## ---- structure counts (no scores) ----
 # positive pairs with fractional assignment to the merged complexes that contain them;
 # n_eff = 1 / sum(w_k^2) (inverse Herfindahl of positive-pair shares); components of the gene-sharing graph.
-structure_of <- function(s) {
+structure_of <- function(s, xgroups = list()) {
   if (!length(s)) return(list(w = numeric(0), n_pos = 0, n_pairs = 0, n_genes = 0, comp = 0))
   g <- sort(unique(unlist(s))); n <- length(g)
   cnt <- matrix(0L, n, n)
   for (k in seq_along(s)) { m <- match(s[[k]], g); cnt[m, m] <- cnt[m, m] + 1L }
   excl <- matrix(FALSE, n, n)
   for (ps in paralog_sets) { m <- stats::na.omit(match(ps, g)); if (length(m) >= 2) excl[m, m] <- TRUE }
+  for (xg in xgroups) { a <- match(xg[[1]], g); b <- match(xg[[2]], g); excl[a, b] <- TRUE; excl[b, a] <- TRUE }  # cross-subunit
   diag(excl) <- FALSE; cnt[excl] <- 0L
   ut <- upper.tri(cnt); pos <- cnt > 0 & ut
   w <- vapply(seq_along(s), function(k) { m <- match(s[[k]], g); sub <- cnt[m, m]; x <- sub[upper.tri(sub)]; sum(1 / x[x > 0]) }, 0)
@@ -117,23 +124,41 @@ for (ds in names(universe)) {
   u <- universe[[ds]]
   s3 <- filt(gen, u); main <- merge_sets(s3)
   isrp <- vapply(main, function(g) ribo_frac(g) >= 0.3, TRUE)
-  variants <- list(main = main, noribo = main[!isrp], ribo_list = main[isrp], nomerge = s3,
+  # rev 2 (review M2): ribosome subunits are separate complexes in the source (no shared gene), so cross-subunit
+  # pairs are negatives in main. Two descriptive variants: cross-subunit pairs excluded from the universe
+  # (main_xsub_excl), and subunits joined (main_ribo_joined: 40S + 60S, 37S + 54S).
+  sub_pairs <- list(cyto = c("CPX-1599", "CPX-1601"), mito = c("CPX-1603", "CPX-1602"))
+  stopifnot(all(unlist(sub_pairs) %in% names(main)))
+  xgroups <- lapply(sub_pairs, function(p) list(main[[p[1]]], main[[p[2]]]))
+  joined <- main[setdiff(names(main), unlist(sub_pairs))]
+  for (p in sub_pairs) joined[[paste(p, collapse = "+")]] <- sort(unique(c(main[[p[1]]], main[[p[2]]])))
+  joined <- joined[order(names(joined))]
+  variants <- list(main = main, main_xsub_excl = main, main_ribo_joined = joined, noribo = main[!isrp], ribo_list = main[isrp], nomerge = s3,
                    size2 = merge_sets(filt(gen, u, lo = 2L)),
                    small_3to6 = main[lengths(main) <= 6], large_ge20 = main[lengths(main) >= 20],
                    rp_module = list(rp_module = intersect(rp, u)))
   for (v in names(variants)) {
     s <- variants[[v]]
     for (k in names(s)) rows[[length(rows) + 1]] <- data.frame(variant = v, dataset = ds, complex = k, orf = s[[k]])
-    st <- structure_of(s); w <- st$w / max(st$n_pos, 1)
+    st <- structure_of(s, if (v == "main_xsub_excl") xgroups else list()); w <- st$w / max(st$n_pos, 1)
+    np_ov <- vapply(s, function(x) { m <- length(x); e <- sum(vapply(paralog_sets, function(ps) choose(sum(x %in% ps), 2), 0)); choose(m, 2) - e }, 0)
+    w_ov <- np_ov / max(sum(np_ov), 1)
     counts[[length(counts) + 1]] <- data.frame(dataset = ds, variant = v, n_universe = length(u), n_complexes = length(s),
       n_genes = st$n_genes, n_pairs = st$n_pairs, n_paralog_pairs_excluded = st$n_excl, n_pos = st$n_pos, base_rate = st$n_pos / max(st$n_pairs, 1),
       n_complexes_pos = sum(lengths(s) >= 2), n_components = st$comp, n_eff = if (length(w)) 1 / sum(w^2) else 0,
-      largest_share = if (length(w)) max(w) else 0,
+      n_eff_overlap_counted = if (length(w_ov)) 1 / sum(w_ov^2) else 0, largest_share = if (length(w)) max(w) else 0,
       ribo_dominated_share = if (v == "main") sum(w[isrp]) else NA_real_)
     if (v == "main") sizes[[ds]] <- data.frame(dataset = ds, complex = names(s), n_genes = lengths(s),
       pos_weight = st$w, share = w, rp_frac = vapply(s, ribo_frac, 0), ribo_dominated = isrp, row.names = NULL)
   }
 }
+## ---- excluded pairs (frozen with the member list): paralog pairs (every variant) and cross-subunit pairs ----
+pp <- do.call(rbind, lapply(paralog_sets, function(ps) if (length(ps) >= 2) { cb <- utils::combn(sort(ps), 2); data.frame(scope = "all", orf_a = cb[1, ], orf_b = cb[2, ], reason = "paralog_set") }))
+xs <- do.call(rbind, lapply(names(sub_pairs), function(nm) { a <- main[[sub_pairs[[nm]][1]]]; b <- main[[sub_pairs[[nm]][2]]]
+  e <- expand.grid(orf_a = a, orf_b = b, stringsAsFactors = FALSE); data.frame(scope = "main_xsub_excl", orf_a = pmin(e$orf_a, e$orf_b), orf_b = pmax(e$orf_a, e$orf_b), reason = paste0("cross_subunit_", nm)) }))
+ex <- rbind(pp, xs); ex <- ex[order(ex$scope, ex$reason, ex$orf_a, ex$orf_b), ]
+xf <- file.path(OUT, "yeast_complexes_excluded_pairs.tsv")
+utils::write.table(ex, xf, sep = "\t", quote = FALSE, row.names = FALSE)
 mem <- do.call(rbind, rows); mem <- mem[order(mem$variant, mem$dataset, mem$complex, mem$orf), ]
 mf <- file.path(OUT, "yeast_complexes_members.tsv")
 utils::write.table(mem, mf, sep = "\t", quote = FALSE, row.names = FALSE)
@@ -141,12 +166,13 @@ cnt <- do.call(rbind, counts); utils::write.csv(cnt, file.path(OUT, "yeast_compl
 sz <- do.call(rbind, sizes); sz <- sz[order(sz$dataset, -sz$share), ]
 utils::write.csv(sz, file.path(OUT, "yeast_complexes_sizes.csv"), row.names = FALSE)
 h <- digest::digest(file = mf, algo = "sha256")
-writeLines(paste(h, "yeast_complexes_members.tsv"), file.path(OUT, "yeast_complexes.sha256"))
+hx <- digest::digest(file = xf, algo = "sha256")
+writeLines(c(paste(h, "yeast_complexes_members.tsv"), paste(hx, "yeast_complexes_excluded_pairs.tsv")), file.path(OUT, "yeast_complexes.sha256"))
 allorf <- unique(unlist(gen[lengths(gen) >= 3]))
 cov <- vapply(universe, function(u) mean(allorf %in% u), 0)
 utils::write.csv(data.frame(dataset = names(universe), n_universe = lengths(universe), complex_orfs_size_ge3 = length(allorf),
   coverage = cov, t(log_src)[rep(1, length(universe)), , drop = FALSE], row.names = NULL), file.path(OUT, "yeast_complexes_source_log.csv"), row.names = FALSE)
 cat("coverage of complex ORFs (complexes with >= 3 ORFs) by universe:", round(cov, 4), "\n")
 cat("source log:\n"); print(log_src); cat("universe sizes:", lengths(universe), "\n"); cat("r-protein ORFs:", length(rp), "\n")
-print(cnt, row.names = FALSE); cat("SHA-256", h, "\n")
+print(cnt, row.names = FALSE); cat("SHA-256 members", h, " excluded pairs", hx, "\n")
 cat("largest merged complexes (net4):\n"); print(utils::head(sz[sz$dataset == "dream5_net4", ], 12), row.names = FALSE)

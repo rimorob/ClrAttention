@@ -1,3 +1,2 @@
 "dataset","n_universe","complex_orfs_size_ge3","coverage","paralog_sets","complexes_in_file","proteins_flattened_total","proteins_without_orf","complexes_with_ge3_orfs_any_universe"
-"dream5_net4",5667,1623,0.987060998151571,53,649,2936,1,378
-"kemmeren_700",6169,1623,0.985828712261245,53,649,2936,1,378
+"dream5_net4",5667,1623,0.987060998151571,57,649,2936,1,378
