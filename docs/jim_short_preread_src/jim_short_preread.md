@@ -177,7 +177,7 @@ Reference code: the attention operator is `R/clr_attention.R` (`.softmax_rows`, 
 
 # Appendix B. Hub-controlled scoreboard
 
-Hub control: the walk converges toward well-connected genes (hubs), so each method's scores are converted to percentiles within 10 strata of the attention walk's stationary distribution (the hub score of a gene pair, pi_i + pi_j), and methods are compared within strata. A method is therefore not rewarded merely for favouring hubs.
+Hub control: the walk converges toward well-connected genes (hubs), so each method's scores are converted to percentiles within 10 strata of the attention walk's stationary distribution (the hub score of a gene pair, pi_i + pi_j), and methods are compared within strata. This asks whether a method's advantage survives accounting for hub-ness. The strata come from the attention walk itself, so the control is not neutral between methods; a stratifier that does not depend on the walk is still to be built.
 
 **How to read the scoreboard.** Cells are pooled AUPR divided by the base rate (1.00 = random). Bars start at random and are scaled within each row, so compare the printed values across a row, not bar lengths across rows. The best value in each row is marked with a dot; ties and intervals are not shown.
 
