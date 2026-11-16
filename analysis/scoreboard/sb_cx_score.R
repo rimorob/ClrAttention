@@ -78,6 +78,29 @@ if ("rpe1" %in% parts) {
   r <- absr(X); a_r <- score(r, cx$pairs); rm(r); gate("rpe1", "c", "|r| CORUM_merged AUPR vs clr_logpt_test metrics.csv", a_r, mx(lp, "CORUM_merged", "abs_r")$aupr)
   gate("rpe1", "c", "|r| CORUM_merged enrichment vs the scoreboard |r| cell", a_r / mean(cx$pairs$label), sd_cell("rpe1", "CORUM_merged", "abs_r"), 1e-9)
   cell("rpe1", "CORUM_merged", "CLR", a_clr, cx$pairs, "clr_logpt_test fit.rds (gate b)", "gate"); cell("rpe1", "CORUM_merged", "abs_r", a_r, cx$pairs, "recomputed (gate c)", "gate")
+  # competitors (plan addendum 2, section 8): runs on the 8,745 genes left after dropping the duplicated symbols; every score is embedded in the
+  # 8,747-gene universe of the CLR cell, pairs of a dropped row get no score (NA, ranked last by ap_fast)
+  ww <- "results/scoreboard/complex_competitors/rpe1_work"
+  if (file.exists(file.path(ww, "expression.tsv"))) {
+    gu <- system2("cut", c("-f1", file.path(ww, "expression.tsv")), stdout = TRUE)[-1]; Gu <- length(gu); pos <- match(gu, genes); G <- length(genes)
+    gate("rpe1", "universe", "competitor genes are unique, all in the CLR universe, and 2 rows (the duplicated symbol) are dropped", as.numeric(!anyDuplicated(gu) && !anyNA(pos) && G - Gu == 2L), 1, 0)
+    dropped <- setdiff(seq_len(G), pos); npd <- sum(cx$pairs$label == 1 & (cx$pairs$i %in% dropped | cx$pairs$j %in% dropped))
+    sb_say("positive CORUM pairs involving a dropped row: ", npd, " (of ", sum(cx$pairs$label), ")")
+    gate("rpe1", "universe", "positive truth pairs involving the dropped duplicated-symbol rows (0 = identical to scoring the 8,745-gene truth)", npd, 0, 0)
+    embed <- function(M) { E <- matrix(NA_real_, G, G); E[pos, pos] <- M; E }
+    rc <- function(nm, M, src) { a <- score(embed(M), cx$pairs); cell("rpe1", "CORUM_merged", nm, a, cx$pairs, src); sb_say("RPE1 ", nm, ": enrichment ", round(a / mean(cx$pairs$label), 4)) }
+    f <- file.path(ww, "genie3_W.rds")
+    if (file.exists(f)) { W <- readRDS(f); gate("rpe1", "universe", "GENIE3 matrix dimnames equal the competitor gene list (1 = yes)", as.numeric(identical(rownames(W), gu) && identical(colnames(W), gu)), 1, 0)
+      rc("GENIE3", sb_sym_max(W), "RPE1 GENIE3 (baselines.R settings), symmetrised by max"); rm(W); invisible(gc()) }
+    f <- file.path(ww, "grnboost2_edges.tsv")
+    if (file.exists(f)) { e <- utils::read.delim(f, stringsAsFactors = FALSE); M <- matrix(0, Gu, Gu); ia <- match(e$TF, gu); ib <- match(e$target, gu); ok <- !is.na(ia) & !is.na(ib)
+      gate("rpe1", "universe", "every GRNBoost2 edge endpoint is in the gene list (1 = yes)", as.numeric(all(ok)), 1, 0); M[cbind(ia[ok], ib[ok])] <- e$importance[ok]; rm(e)
+      rc("GRNBoost2", sb_sym_max(M), "RPE1 GRNBoost2 (tools/grnboost2.py, legacy early stopping), symmetrised by max"); rm(M); invisible(gc()) }
+    f <- file.path(ww, "pidc.f64")
+    if (file.exists(f)) { v <- readBin(f, "double", Gu * (Gu - 1) / 2, size = 8); gate("rpe1", "universe", "PIDC packed file has G(G-1)/2 finite weights (1 = yes)", as.numeric(length(v) == Gu * (Gu - 1) / 2 && all(is.finite(v))), 1, 0)
+      M <- matrix(0, Gu, Gu); M[lower.tri(M)] <- v; rm(v); M <- M + t(M)      # row-major upper triangle = column-major lower triangle
+      rc("PIDC", M, "RPE1 PIDC (tools/pidc_chunked.jl, bit-identical to the package, gates in pidc_gate/)"); rm(M); invisible(gc()) }
+  }
   rm(X, ld); invisible(gc()); sb_say("peak RSS so far ", round(hwm(), 2), " GB")
 }
 
