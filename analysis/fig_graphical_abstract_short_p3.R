@@ -12,7 +12,7 @@
 
 suppressPackageStartupMessages(library(grid))
 source("analysis/plot_theme.R")
-out_dir <- "docs/whitepapers/figures"
+out_dir <- Sys.getenv("SB_OUT", "docs/whitepapers/figures")           # SB_OUT / SB_CSV / SB_VERBOSE: only for re-running on another copy of the data (checks)
 FONT <- "Liberation Sans"
 LEAD_NAME <- "tcaCLR"                     # DEFINED HERE ONLY (temporary name; internal name a3r)
 ACLR_NAME <- "aCLR"                       # DEFINED HERE ONLY (temporary name)
@@ -20,7 +20,7 @@ NAMES_NOTE <- "Method names are temporary."
 LEAD_KEY <- "a3r"
 LEAD_STATUS <- "lead candidate"
 GREEN <- pal[["green"]]
-D <- utils::read.csv(file.path(out_dir, "scoreboard_data.csv"), stringsAsFactors = FALSE)
+D <- utils::read.csv(Sys.getenv("SB_CSV", file.path(out_dir, "scoreboard_data.csv")), stringsAsFactors = FALSE)
 
 txt <- function(label, x, y, size = 10, col = ink[["primary"]], face = "plain", just = "centre", lineheight = 1.0)
   grid.text(label, x, y, default.units = "native", just = just,
@@ -135,6 +135,7 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
     # first or shared first: highest value, or tied with it at the printed precision
     best <- if (all(is.na(v))) integer(0) else which(!is.na(v) & vapply(v, function(z) !is.na(z) && fmt(z, r$digits) == fmt(max(v, na.rm = TRUE), r$digits), NA))
     firsts[best] <- firsts[best] + 1L
+    if (nzchar(Sys.getenv("SB_VERBOSE")) && tally) cat(sprintf("ROW %-62s | %s\n", paste(r$ds, r$truth, r$metric), paste(names(v)[best], collapse = ",")))
     span <- max(v - r$base, na.rm = TRUE); if (!is.finite(span) || span <= 0) span <- 1
     txt(r$label, X_LAB + 0.12, y, 10, just = "left")
     for (j in seq_along(meths)) {
@@ -157,6 +158,7 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
     y <- y - pitch / 2
     txt(paste0("Rows with the highest value or tied for it (of ", nrows, ")"), X_LAB + 0.12, y, 10, face = "bold", just = "left")
     win <- firsts == max(firsts)
+    if (nzchar(Sys.getenv("SB_VERBOSE"))) cat("TALLY", paste(names(firsts), firsts, sep = "=", collapse = " "), "of", nrows, "\n")
     for (j in seq_along(meths)) {
       x0 <- cx0(j)
       if (win[j]) grid.roundrect(x0 + NUM_X - 0.1, y, 1.0, pitch * 0.8, default.units = "native", just = c("left", "centre"),
@@ -177,12 +179,13 @@ foot_common <- list(
   fl(paste0("Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; ", LEAD_NAME, " was picked among about 20 read-outs by its K562 scores (selected, not fitted); K562 and M3D are tuning sets;")),
   fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the preregistered threshold.")))
 foot_raw <- c(foot_common, list(
-  fl(paste0("Yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; competitors were not run on it; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
-  fl(paste0(paste0("BEELINE: median over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases); ", ACLR_NAME, " and "), LEAD_NAME, paste0(" use the CLR-NS operator (", ACLR_NAME, " at its held-out depth, "), LEAD_NAME, " at t = 9, not tuned); CLR is plain CLR.")),
-  fl("The hub-controlled scores for these rows are in the appendix.")))
+  fl(paste0("Yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; all methods scored on it, competitors from saved score matrices; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
+  fl("RPE1 row: GENIE3, PIDC and GRNBoost2 were not run (each estimated at more than 2 hours on its 8,745 genes; grey dashes). E. coli complex rows: competitors re-scored from the saved score matrices of the earlier comparison."),
+  fl(paste0(paste0("BEELINE: median over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases); ", ACLR_NAME, " and "), LEAD_NAME, paste0(" use the CLR-NS operator (", ACLR_NAME, " at its held-out depth, "), LEAD_NAME, " at t = 9, not tuned); CLR is plain CLR."))))
 foot_hub <- c(foot_common, list(
   fl("The yeast complex row of the raw scoreboard is left out here: the study stored its hub-controlled scores only with the MI row-mean stratifier, not the stratifier used on this page, so they are not comparable."),
-  fl(paste0("Hub-controlled: each method's scores are converted to percentiles within 10 strata of pi_i + pi_j (pi = stationary distribution of the ", ACLR_NAME, " walk). Not run for direct edges, per-regulon AP and BEELINE."))))
+  fl(paste0("Hub-controlled: each method's scores are converted to percentiles within 10 strata of pi_i + pi_j (pi = stationary distribution of the ", ACLR_NAME, " walk). Not run for direct edges, per-regulon AP and BEELINE.")),
+  fl("The competitors were scored on the complex rows (raw scores only) and not hub-controlled, so those cells are dashes here.")))
 
 SUB_RAW <- paste0("Raw scores. CLR (historical), ", ACLR_NAME, " (adopted) and the lead method (dashed), then competitors.")
 SUB_HUB <- "Appendix. Hub control: each method's scores are compared only among gene pairs of similar hub degree (how strongly connected the genes are). Raw scores are in the main body."
