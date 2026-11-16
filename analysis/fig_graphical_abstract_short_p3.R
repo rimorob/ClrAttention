@@ -99,12 +99,14 @@ cell_vals <- function(r) { x <- D[D$dataset == r$ds & D$truth == r$truth & D$met
 fmt <- function(v, digits) if (digits == 2 && v >= 10) sprintf("%.1f", v) else sprintf(paste0("%.", digits, "f"), v)
 
 # ---- one page ----------------------------------------------------------------------------------------------------------
-draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE) {
+draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tally = FALSE) {
   grid.newpage(); grid.rect(gp = gpar(fill = "white", col = NA))
   pushViewport(viewport(xscale = c(0, 16), yscale = c(0, 9)))
   txt(title, 0.3, 8.65, 21, face = "bold", just = "left")
   txt(sub, 0.3, 8.28, 11, ink[["secondary"]], just = "left")
   nr <- sum(vapply(rows, function(r) is.null(r$group), NA)); ng <- length(rows) - nr
+  nrows <- nr; if (tally) nr <- nr + 1          # the tally row takes one row pitch
+  firsts <- stats::setNames(integer(length(meths)), meths)
   GH <- 0.74                                   # group-header height relative to a row
   pitch <- (y_top - y_bot) / (nr + ng * GH)
   # column bands (adopted and exploratory columns) and headers
@@ -129,7 +131,10 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE) {
       seg(X_LAB, y - GH * pitch / 2 + 0.005, 15.75, y - GH * pitch / 2 + 0.005, ink[["grid"]], 0.9)
       y <- y - GH * pitch / 2; next }
     y <- y - pitch / 2
-    v <- cell_vals(r); best <- if (all(is.na(v))) NA else which.max(v)
+    v <- cell_vals(r)
+    # first or shared first: highest value, or tied with it at the printed precision
+    best <- if (all(is.na(v))) integer(0) else which(!is.na(v) & vapply(v, function(z) !is.na(z) && fmt(z, r$digits) == fmt(max(v, na.rm = TRUE), r$digits), NA))
+    firsts[best] <- firsts[best] + 1L
     span <- max(v - r$base, na.rm = TRUE); if (!is.finite(span) || span <= 0) span <- 1
     txt(r$label, X_LAB + 0.12, y, 10, just = "left")
     for (j in seq_along(meths)) {
@@ -141,9 +146,22 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE) {
       bh <- pitch * 0.5
       grid.rect(x0 + ORG_X, y, abs(len), bh, default.units = "native", just = c(if (len >= 0) "left" else "right", "centre"),
                 gp = gpar(fill = fillc[[meths[j]]], col = if (expl) pal[["aqua"]] else NA, lwd = 1.1, lty = if (expl) 2 else 1))
-      isb <- !is.na(best) && j == best
+      isb <- j %in% best
       if (isb) grid.circle(x0 + 0.07, y, 0.035, default.units = "native", gp = gpar(fill = ink[["primary"]], col = NA))
       txt(fmt(v[j], r$digits), x0 + NUM_X + 0.02, y, 10, face = if (isb) "bold" else "plain", just = "left")
+    }
+    y <- y - pitch / 2
+  }
+  if (tally) {
+    seg(X_LAB, y, 15.75, y, ink[["secondary"]], 1.2)
+    y <- y - pitch / 2
+    txt(paste0("Rows with the highest value or tied for it (of ", nrows, ")"), X_LAB + 0.12, y, 10, face = "bold", just = "left")
+    win <- firsts == max(firsts)
+    for (j in seq_along(meths)) {
+      x0 <- cx0(j)
+      if (win[j]) grid.roundrect(x0 + NUM_X - 0.1, y, 1.0, pitch * 0.8, default.units = "native", just = c("left", "centre"),
+                                 r = unit(0.05, "inches"), gp = gpar(fill = NA, col = ink[["primary"]], lwd = 1.4))
+      txt(sprintf("%d/%d", firsts[[j]], nrows), x0 + NUM_X + 0.02, y, 11, face = if (win[j]) "bold" else "plain", just = "left")
     }
     y <- y - pitch / 2
   }
@@ -155,7 +173,7 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE) {
 fl <- function(t) list(text = t, size = 9, col = ink[["secondary"]], face = "plain")
 foot_common <- list(
   fl("Bars start at random (tick; 1.00, or 0.50 for the AUROC row) and are scaled within each row; the value, not the bar, carries the comparison across rows. Bold with a dot: highest value in the row."),
-  fl("No intervals, no tests, no statistical ties marked. A grey dash is a cell that was not run. Dotted green outline = human-data groups, new in this work."),
+  fl("No intervals, no tests, no statistical ties marked (a tie in the tally means equal at the printed precision). A grey dash is a cell that was not run, which cannot win. Dotted green outline = human-data groups, new in this work."),
   fl(paste0("Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; ", LEAD_NAME, " was picked among about 20 read-outs by its K562 scores (selected, not fitted); K562 and M3D are tuning sets;")),
   fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the preregistered threshold.")))
 foot_raw <- c(foot_common, list(
@@ -174,8 +192,8 @@ for (nm in c("", "b")) {
   sub <- paste(if (nm == "") SUB_RAW else SUB_HUB, NAMES_NOTE)
   ft <- if (nm == "") foot_raw else foot_hub
   png(file.path(out_dir, paste0("graphical_abstract_short_p3", nm, ".png")), width = 2400, height = 1350, res = 150, type = "cairo", bg = "white")
-  draw_page(rows, sub, 7.3, ft, title = if (nm == "") TITLE else "Hub-controlled scoreboard"); invisible(dev.off())
+  draw_page(rows, sub, 7.3, ft, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
   cairo_pdf(file.path(out_dir, paste0("graphical_abstract_short_p3", nm, ".pdf")), width = 16, height = 9, bg = "white")
-  draw_page(rows, sub, 7.3, ft, title = if (nm == "") TITLE else "Hub-controlled scoreboard"); invisible(dev.off())
+  draw_page(rows, sub, 7.3, ft, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
 }
 cat("wrote", file.path(out_dir, "graphical_abstract_short_p3{,b}.{png,pdf}"), "\n")
