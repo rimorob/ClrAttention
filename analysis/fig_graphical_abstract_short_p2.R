@@ -22,7 +22,7 @@ out_dir <- "docs/whitepapers/figures"
 LEAD_NAME <- "tcaCLR"                     # DEFINED HERE ONLY (temporary name; internal name a3r)
 ACLR_NAME <- "aCLR"                       # DEFINED HERE ONLY (temporary name)
 NAMES_NOTE <- "Method names are temporary."
-LEAD_STATUS <- "main lead, not yet adopted"
+LEAD_STATUS <- "lead candidate"
 GREEN <- pal[["green"]]
 DOT <- gpar(col = GREEN, lty = "11", lwd = 2.4, fill = NA)
 FONT <- "Liberation Sans"
@@ -61,7 +61,7 @@ v <- data.frame(
           "softmax + walk, no CLR normalization",
           "softmax + walk, no CLR normalization",
           "MI, CLR normalization, softmax + walk (adopted)",
-          paste0(ACLR_NAME, ", then log + second CLR (main lead)")),
+          paste0(ACLR_NAME, ", then log + second CLR (lead candidate)")),
   dep = c("MI", "r", "MI", "MI", "MI"),
   cn  = c(TRUE, FALSE, FALSE, TRUE, TRUE),
   sm  = c(FALSE, TRUE, TRUE, TRUE, TRUE),
@@ -77,7 +77,7 @@ draw_p2 <- function() {
   grid.rect(gp = gpar(fill = "white", col = NA))
   pushViewport(viewport(xscale = c(0, 16), yscale = c(0, 9)))
 
-  txt(paste0(paste0("The versions compared: CLR, ", ACLR_NAME, " and "), LEAD_NAME),
+  txt(paste0(paste0("The methods compared: CLR, ", ACLR_NAME, " and "), LEAD_NAME),
       0.5, 8.55, 22, face = "bold", just = "left")
   txt("E. coli: strong-evidence regulons, 466 experiments (RegulonDB).  K562: CORUM complexes.  Single cells: BEELINE, median over 44 case-truth cells (14 dataset-and-gene-set cases).",
       0.5, 8.1, 11.5, ink[["secondary"]], just = "left")
@@ -87,7 +87,7 @@ draw_p2 <- function() {
   txt(NAMES_NOTE, 15.7, 7.78, 10.5, ink[["secondary"]], "italic", just = "right")
   xn <- 0.4; xd <- 4.95; xc <- 6.75; xs <- 8.0; xw <- 9.1; xl <- 10.6; xe0 <- 11.3; xe1 <- 12.9; xk <- 13.25; xb <- 14.5
   hy <- 7.2
-  for (h in list(list("Version", xn, "left"), list("Dependence", xd, "centre"),
+  for (h in list(list("Method", xn, "left"), list("Dependence", xd, "centre"),
                  list("Context\nnormalization", xc, "centre"), list("Softmax", xs, "centre"),
                  list("Walk", xw, "centre"), list("Log +\nsecond CLR", xl, "centre"),
                  list("E. coli\nAUPR (SC)", (xe0 + xe1) / 2, "centre"),
@@ -126,9 +126,9 @@ draw_p2 <- function() {
     if (nzchar(v$beeline[k])) txt(v$beeline[k], xb, y, 12, just = "left", face = if (adopted || lead) "bold" else "plain")
   }
   fy0 <- ys[length(ys)] - 0.95
-  txt("t* = held-out depth, chosen per version; the method comparison itself fixes t = 9. The E. coli column is the component ablation (each operator at its own t*), except for the lead method (t = 9).",
+  txt("t* = held-out depth, chosen per method; the method comparison itself fixes t = 9. The E. coli column is the component ablation (each operator at its own t*), except for the lead method (t = 9).",
       0.4, fy0, 9, ink[["secondary"]], just = "left")
-  txt(paste0(LEAD_NAME, " was picked among about 20 read-outs by its K562 scores (a selection, not a fit: it has no fitted parameters). It is not yet adopted under the preregistered rule."),
+  txt(paste0(LEAD_NAME, " was picked among about 20 read-outs by its K562 scores (a selection, not a fit: it has no fitted parameters). Its preregistered E. coli test did not reach the preregistered threshold."),
       0.4, fy0 - 0.25, 9, ink[["secondary"]], just = "left")
   txt(paste0("BEELINE: CLR is plain CLR; ", ACLR_NAME, " and the lead method use the CLR-NS operator (CLR on |r| of normal scores), the lead at t = 9, not tuned (exploratory)."),
       0.4, fy0 - 0.5, 9, ink[["secondary"]], just = "left")

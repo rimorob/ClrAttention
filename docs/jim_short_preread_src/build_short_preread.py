@@ -11,23 +11,33 @@ from lxml import etree
 # ---- NAMES: DEFINED HERE ONLY (temporary) ------------------------------------------------------------------------------
 ACLR_NAME = "aCLR"                                   # CLR + attention (earlier-adopted method)
 LEAD_NAME = "tcaCLR"                                 # lead method ("twice cooked aCLR")
-LEAD_INTERNAL = "a3r"                                # internal name, mentioned once in the text
 LEAD_DESC = f"{ACLR_NAME} followed by a second CLR on the log of the walk"
-LEAD_STATUS = "main lead, not yet adopted under the preregistered rule"
 # -------------------------------------------------------------------------------------------------------------------------
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "jim_short_preread.md")
 OUT = sys.argv[2] if len(sys.argv) > 2 else "/home/boris/Projects/ClrAttention/docs/jim_short_preread.docx"
 REF = "/tmp/claude-1000/-home-boris-Projects-ClrAttention/4451c478-b0bc-4b2f-84d1-11ecf74c2d08/scratchpad/export/ref/landscape.docx"
-PAGEBREAK = '```{=openxml}\n<w:p><w:r><w:br w:type="page"/></w:r></w:p>\n```'
+PAGEBREAK = "PAGEBREAKMARKER"
 
 md = open(SRC, encoding="utf-8").read()
-for k, v in {"ACLR_NAME": ACLR_NAME, "LEAD_NAME": LEAD_NAME, "LEAD_INTERNAL": LEAD_INTERNAL,
-             "LEAD_DESC": LEAD_DESC, "LEAD_STATUS": LEAD_STATUS, "PAGEBREAK": PAGEBREAK}.items():
+for k, v in {"ACLR_NAME": ACLR_NAME, "LEAD_NAME": LEAD_NAME, "LEAD_DESC": LEAD_DESC, "PAGEBREAK": PAGEBREAK}.items():
     md = md.replace("{{%s}}" % k, v)
 assert "{{" not in md, re.findall(r"\{\{[A-Z_]+\}\}", md)
 tmp = tempfile.mkdtemp()
+from PIL import Image, ImageChops
+def crop_figs(text):
+    def sub(m):
+        p = m.group(1)
+        if "graphical_abstract_short" not in p: return m.group(0)
+        im = Image.open(p).convert("RGB")
+        bbox = ImageChops.difference(im, Image.new("RGB", im.size, (255, 255, 255))).getbbox()
+        pad = 10
+        bbox = (max(bbox[0]-pad, 0), max(bbox[1]-pad, 0), min(bbox[2]+pad, im.size[0]), min(bbox[3]+pad, im.size[1]))
+        q_ = os.path.join(tmp, os.path.basename(p)); im.crop(bbox).save(q_)
+        return "](" + q_ + ")"
+    return re.sub(r"\]\((/[^)]*\.png)\)", sub, text)
+md = crop_figs(md)
 rendered = os.path.join(tmp, "doc.md"); open(rendered, "w", encoding="utf-8").write(md)
 raw = os.path.join(tmp, "raw.docx")
 subprocess.run(["pandoc", rendered, "-f", "markdown+pipe_tables+raw_attribute+footnotes", "-o", raw,
@@ -55,7 +65,7 @@ def sp(before, after): return lambda x: re.sub(r'<w:spacing [^>]*/>', '<w:spacin
 for sid, b, a, sz in [("Heading1", 240, 80, 30), ("Heading2", 160, 60, 25), ("Heading3", 120, 40, 22)]:
     style_edit(sid, lambda x, b=b, a=a, sz=sz: re.sub(r'<w:sz w:val="\d+"\s*/>', '<w:sz w:val="%d"/>' % sz,
                sp(b, a)(fonts(x))) if '<w:sz ' in x else sp(b, a)(fonts(x)).replace('</w:rPr>', '<w:sz w:val="%d"/></w:rPr>' % sz))
-style_edit("Title", lambda x: sp(120, 40)(fonts(x)))
+style_edit("Title", lambda x: re.sub(r'<w:jc [^>]*/>', '<w:jc w:val="left"/>', re.sub(r'<w:sz w:val="\d+"\s*/>', '', sp(0, 60)(fonts(x))).replace("</w:rPr>", '<w:sz w:val="36"/></w:rPr>')))
 style_edit("Subtitle", lambda x: sp(0, 40)(fonts(x)))
 style_edit("BodyText", sp(60, 80)); style_edit("FirstParagraph", sp(60, 80)); style_edit("Compact", sp(20, 20))
 style_edit("Caption", lambda x: x.replace('<w:rPr>', '<w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/>', 1) if '<w:rPr>' in x else x)
@@ -116,6 +126,23 @@ for tbl in doc.iter(q("tbl")):
                 if rpr.find("w:sz", ns) is None:
                     rpr.append(etree.fromstring('<w:sz xmlns:w="%s" w:val="18"/>' % W)); rpr.append(etree.fromstring('<w:szCs xmlns:w="%s" w:val="18"/>' % W))
                 if ri == 0 and rpr.find("w:b", ns) is None: rpr.insert(0, etree.Element(q("b")))
+# page breaks: drop the marker paragraph, put pageBreakBefore on the next block's first paragraph
+for p in list(body.findall("w:p", ns)):
+    if "PAGEBREAKMARKER" in "".join(p.itertext()):
+        nxt = p.getnext(); body.remove(p)
+        while nxt.tag not in (q("p"), q("tbl")): nxt = nxt.getnext()
+        tgt = nxt if nxt.tag == q("p") else nxt.find(".//" + q("p"))
+        ppr = tgt.find("w:pPr", ns)
+        if ppr is None: ppr = etree.Element(q("pPr")); tgt.insert(0, ppr)
+        ppr.insert(0, etree.Element(q("pageBreakBefore")))
+# bold-only short paragraphs (run-in headings such as "A.1 ...") stay with the next block
+for p in body.findall("w:p", ns):
+    runs = p.findall("w:r", ns)
+    txt_ = "".join(p.itertext()).strip()
+    if runs and txt_ and len(txt_) < 120 and all(r.find("w:rPr/w:b", ns) is not None for r in runs):
+        ppr = p.find("w:pPr", ns)
+        if ppr is None: ppr = etree.Element(q("pPr")); p.insert(0, ppr)
+        if ppr.find("w:keepNext", ns) is None: ppr.insert(0, etree.Element(q("keepNext")))
 # keep figure + caption together: drawing paragraphs keepNext
 for p in doc.iter(q("p")):
     if p.find(".//" + q("drawing"), ) is not None:

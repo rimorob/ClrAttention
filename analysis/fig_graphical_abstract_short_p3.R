@@ -18,7 +18,7 @@ LEAD_NAME <- "tcaCLR"                     # DEFINED HERE ONLY (temporary name; i
 ACLR_NAME <- "aCLR"                       # DEFINED HERE ONLY (temporary name)
 NAMES_NOTE <- "Method names are temporary."
 LEAD_KEY <- "a3r"
-LEAD_STATUS <- "main lead, not yet adopted"
+LEAD_STATUS <- "lead candidate"
 GREEN <- pal[["green"]]
 D <- utils::read.csv(file.path(out_dir, "scoreboard_data.csv"), stringsAsFactors = FALSE)
 
@@ -31,7 +31,7 @@ seg <- function(x0, y0, x1, y1, col = ink[["muted"]], lwd = 1, lty = 1)
 # ---- columns ----------------------------------------------------------------------------------------------------------
 meths <- c("CLR", "Attention", LEAD_KEY, "GENIE3", "PIDC", "GRNBoost2", "abs_r")
 head1 <- c("CLR", ACLR_NAME, LEAD_NAME, "GENIE3", "PIDC", "GRNBoost2", "|r|")
-head2 <- c("historical", "adopted", "lead, not yet adopted", "", "", "", "")
+head2 <- c("historical", "adopted", "lead candidate", "", "", "", "")
 EXPL <- "#bfe6d8"
 fillc <- c(CLR = pal[["orange"]], Attention = pal[["aqua"]], EXPL, GENIE3 = ink[["muted"]], PIDC = ink[["muted"]],
            GRNBoost2 = ink[["muted"]], abs_r = ink[["muted"]])
@@ -157,11 +157,11 @@ foot_common <- list(
   fl("Bars start at random (tick; 1.00, or 0.50 for the AUROC row) and are scaled within each row; the value, not the bar, carries the comparison across rows. Bold with a dot: highest value in the row."),
   fl("No intervals, no tests, no statistical ties marked. A grey dash is a cell that was not run. Dotted green outline = human-data groups, new in this work."),
   fl(paste0("Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; ", LEAD_NAME, " was picked among about 20 read-outs by its K562 scores (selected, not fitted); K562 and M3D are tuning sets;")),
-  fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the main lead, not yet adopted under the preregistered rule.")))
+  fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the preregistered threshold.")))
 foot_raw <- c(foot_common, list(
-  fl(paste0("Yeast row: one exploratory estimation run (plan fixed 13 Nov), not a confirmatory test; competitors were not run on it; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
+  fl(paste0("Yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; competitors were not run on it; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
   fl(paste0(paste0("BEELINE: median over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases); ", ACLR_NAME, " and "), LEAD_NAME, paste0(" use the CLR-NS operator (", ACLR_NAME, " at its held-out depth, "), LEAD_NAME, " at t = 9, not tuned); CLR is plain CLR.")),
-  fl("The hub-controlled version of these rows is in the appendix.")))
+  fl("The hub-controlled scores for these rows are in the appendix.")))
 foot_hub <- c(foot_common, list(
   fl("The yeast complex row of the raw scoreboard is left out here: the study stored its hub-controlled scores only with the MI row-mean stratifier, not the stratifier used on this page, so they are not comparable."),
   fl(paste0("Hub-controlled: each method's scores are converted to percentiles within 10 strata of pi_i + pi_j (pi = stationary distribution of the ", ACLR_NAME, " walk). Not run for direct edges, per-regulon AP and BEELINE."))))

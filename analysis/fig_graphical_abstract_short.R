@@ -29,7 +29,7 @@ FONT <- "Liberation Sans"   # Arial-metric sans
 LEAD_NAME <- "tcaCLR"                     # DEFINED HERE ONLY (temporary name; internal name a3r)
 ACLR_NAME <- "aCLR"                       # DEFINED HERE ONLY (temporary name)
 NAMES_NOTE <- "Method names are temporary."
-LEAD_STATUS <- "main lead, not yet adopted"      # honest status label used in the legend and panel 5
+LEAD_STATUS <- "lead candidate"      # honest status label used in the legend and panel 5
 GREEN <- pal[["green"]]                           # dotted green = new in this work
 DOT <- gpar(col = GREEN, lty = "11", lwd = 2.6, fill = NA)
 
@@ -37,7 +37,7 @@ DOT <- gpar(col = GREEN, lty = "11", lwd = 2.6, fill = NA)
 EXPL <- "#bfe6d8"
 strip_a <- data.frame(   # M3D, strong-evidence (SC) RegulonDB regulons
   label = c("CLR (historical)", ACLR_NAME, LEAD_NAME, "GENIE3", "PIDC"),
-  sub = c("", "adopted", paste0("lead; not yet adopted"), "", ""),
+  sub = c("", "adopted", "lead candidate", "", ""),
   value = c(1.44, 1.68, 1.72, 1.51, 1.45),
   col = c(pal[["orange"]], pal[["aqua"]], EXPL, ink[["muted"]], ink[["muted"]]),
   new = c(FALSE, TRUE, TRUE, FALSE, FALSE), stringsAsFactors = FALSE)
