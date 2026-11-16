@@ -1,0 +1,55 @@
+"part","gate","item","value","expected","abs_diff","tol","pass"
+"m3d","universe","gene-set md5 identical to the committed selections' fingerprint (1 = yes)",1,1,0,0,TRUE
+"m3d","universe","genie3 saved matrix: dimnames identical to the gene universe (1 = yes)",1,1,0,0,TRUE
+"m3d","universe","pidc saved matrix: dimnames identical to the gene universe (1 = yes)",1,1,0,0,TRUE
+"m3d","universe","grnboost2 saved matrix: dimnames identical to the gene universe (1 = yes)",1,1,0,0,TRUE
+"m3d","a","regulons SC base rate vs baselines metrics.csv",0.0942711031986865,0.0942711031986865,4.16333634234434e-17,1e-09,TRUE
+"m3d","a","GENIE3 regulons SC AUPR vs baselines metrics.csv",0.14190095784571,0.14190095784571,2.77555756156289e-16,1e-09,TRUE
+"m3d","a","PIDC regulons SC AUPR vs baselines metrics.csv",0.136825875342154,0.136825875342154,2.4980018054066e-16,1e-09,TRUE
+"m3d","a","GRNBoost2 regulons SC AUPR vs baselines metrics.csv",0.128537416354432,0.128537416354432,1.11022302462516e-16,1e-09,TRUE
+"m3d","a","regulons all base rate vs baselines metrics.csv",0.120460302626149,0.120460302626149,6.93889390390723e-17,1e-09,TRUE
+"m3d","a","GENIE3 regulons all AUPR vs baselines metrics.csv",0.16867135733,0.16867135733,2.77555756156289e-17,1e-09,TRUE
+"m3d","a","PIDC regulons all AUPR vs baselines metrics.csv",0.168117081109736,0.168117081109736,4.9960036108132e-16,1e-09,TRUE
+"m3d","a","GRNBoost2 regulons all AUPR vs baselines metrics.csv",0.151649358316682,0.151649358316682,4.71844785465692e-16,1e-09,TRUE
+"m3d","b","CLR complexes AUPR vs clr_logpt_test metrics.csv",0.160506780458353,0.160506780458353,3.33066907387547e-16,1e-09,TRUE
+"m3d","b","CLR complexes enrichment vs the scoreboard CLR cell",21.8103591842483,21.8103591842483,3.5527136788005e-14,1e-09,TRUE
+"m3d","c","|r| complexes AUPR vs clr_logpt_test metrics.csv",0.21474850963762,0.21474850963762,3.88578058618805e-16,1e-09,TRUE
+"m3d","c","|r| complexes enrichment vs the scoreboard |r| cell",29.1809611787321,29.1809611787321,1.06581410364015e-14,1e-09,TRUE
+"ecomac","universe","gene-set md5 identical to the committed selections' fingerprint (1 = yes)",1,1,0,0,TRUE
+"ecomac","universe","genie3 saved matrix: dimnames identical to the gene universe (1 = yes)",1,1,0,0,TRUE
+"ecomac","universe","pidc saved matrix: dimnames identical to the gene universe (1 = yes)",1,1,0,0,TRUE
+"ecomac","universe","grnboost2 saved matrix: dimnames identical to the gene universe (1 = yes)",1,1,0,0,TRUE
+"ecomac","a","regulons SC base rate vs baselines metrics.csv",0.0939327631744886,0.0939327631744886,4.16333634234434e-17,1e-09,TRUE
+"ecomac","a","GENIE3 regulons SC AUPR vs baselines metrics.csv",0.141116318744976,0.141116318744976,4.16333634234434e-16,1e-09,TRUE
+"ecomac","a","PIDC regulons SC AUPR vs baselines metrics.csv",0.134604075074748,0.134604075074748,1.66533453693773e-16,1e-09,TRUE
+"ecomac","a","GRNBoost2 regulons SC AUPR vs baselines metrics.csv",0.128079247337727,0.128079247337727,4.71844785465692e-16,1e-09,TRUE
+"ecomac","a","regulons all base rate vs baselines metrics.csv",0.121047887014219,0.121047887014219,8.32667268468867e-17,1e-09,TRUE
+"ecomac","a","GENIE3 regulons all AUPR vs baselines metrics.csv",0.167577262261233,0.167577262261233,1.94289029309402e-16,1e-09,TRUE
+"ecomac","a","PIDC regulons all AUPR vs baselines metrics.csv",0.16808541229761,0.16808541229761,1.11022302462516e-16,1e-09,TRUE
+"ecomac","a","GRNBoost2 regulons all AUPR vs baselines metrics.csv",0.151964774788725,0.151964774788725,2.4980018054066e-16,1e-09,TRUE
+"ecomac","b","CLR complexes AUPR vs clr_logpt_test metrics.csv",0.179366469009017,0.179366469009017,5.55111512312578e-17,1e-09,TRUE
+"ecomac","b","CLR complexes enrichment vs the scoreboard CLR cell",22.9523458452636,22.9523458452636,1.06581410364015e-14,1e-09,TRUE
+"ecomac","c","|r| complexes AUPR vs clr_logpt_test metrics.csv",0.203094925694485,0.203094925694485,3.88578058618805e-16,1e-09,TRUE
+"ecomac","c","|r| complexes enrichment vs the scoreboard |r| cell",25.9887201867345,25.9887201867345,2.48689957516035e-14,1e-09,TRUE
+"k562","a","CORUM base rate vs baselines metrics.csv",0.0132567076825442,0.0132567076825442,3.98986399474666e-17,1e-09,TRUE
+"k562","a","genie3 K562 CORUM AUPR vs baselines metrics.csv",0.0837896729471238,0.0837896729471238,4.16333634234434e-17,1e-09,TRUE
+"k562","a","pidc K562 CORUM AUPR vs baselines metrics.csv",0.0838495609236986,0.0838495609236986,5.55111512312578e-17,1e-09,TRUE
+"k562","a","grnboost2 K562 CORUM AUPR vs baselines metrics.csv",0.0485196738700417,0.0485196738700417,1.38777878078145e-17,1e-09,TRUE
+"rpe1","universe","gene-set md5 identical to the committed selections' fingerprint (1 = yes)",1,1,0,0,TRUE
+"rpe1","b","CLR CORUM_merged AUPR vs clr_logpt_test metrics.csv",0.0872489294660092,0.0872489294660092,5.55111512312578e-17,1e-09,TRUE
+"rpe1","b","CLR CORUM_merged enrichment vs the scoreboard CLR cell",6.76895041513554,6.76895041513556,2.22044604925031e-14,1e-09,TRUE
+"rpe1","c","|r| CORUM_merged AUPR vs clr_logpt_test metrics.csv",0.0366609239181286,0.0366609239181286,0,1e-09,TRUE
+"rpe1","c","|r| CORUM_merged enrichment vs the scoreboard |r| cell",2.84422946726867,2.84422946726868,1.06581410364015e-14,1e-09,TRUE
+"yeast","b","truth structure md5 (i, j, label) equals truth_counts.csv (1 = yes)",1,1,0,0,TRUE
+"yeast","b","truth positive pairs vs truth_counts.csv",13438,13438,0,0,TRUE
+"yeast","b","truth pairs vs truth_counts.csv",1282352,1282352,0,0,TRUE
+"yeast","universe","genie3_all cache: SHA-256 equals its sidecar (1 = yes)",1,1,0,0,TRUE
+"yeast","universe","grnboost2_all cache: SHA-256 equals its sidecar (1 = yes)",1,1,0,0,TRUE
+"yeast","universe","pidc cache: SHA-256 equals its sidecar (1 = yes)",1,1,0,0,TRUE
+"yeast","universe","abs_pearson cache: SHA-256 equals its sidecar (1 = yes)",1,1,0,0,TRUE
+"yeast","universe","clr cache: SHA-256 equals its sidecar (1 = yes)",1,1,0,0,TRUE
+"yeast","b","CLR (cc_clr.scores) AUPR through cc_score_truth vs study metrics.csv",0.189283945035597,0.189283945035597,3.33066907387547e-16,1e-09,TRUE
+"yeast","b","CLR enrichment vs the scoreboard CLR cell",18.0628549995749,18.0628549995749,3.5527136788005e-15,1e-09,TRUE
+"yeast","b","cc_clr.scores equals results/dream5/net4/clr__replicate.scores (max abs diff)",0,0,0,1e-12,TRUE
+"yeast","b","pair-extraction path (score()) equals cc_score_truth on CLR",0.189283945035597,0.189283945035597,0,1e-15,TRUE
+"yeast","c","|r| recomputed by d5_m_abs_pearson equals results/dream5/net4/abs_pearson__replicate.scores (max abs diff)",0,0,0,1e-12,TRUE

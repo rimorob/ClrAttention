@@ -106,15 +106,28 @@ for (sc in c("raw", "hub_mi")) { cell("dream5_yeast", "complexes_main", PM, sc)
         paste0("DREAM5 net4 yeast expression (536 chips), Complex Portal main truth (262 merged complexes, 13,438 positive pairs); one exploratory estimation run, not a confirmatory test (see estimate_final.csv in the same folder)",
                if (sc == "hub_mi") "; within-stratum percentile in 10 strata of the raw-MI row mean (hub_mi); no hub_att run exists" else "")) } }
 
+## ---- competitor cells on the complex-truth rows (docs/plans/scoreboard_competitors_plan.md): saved matrices re-scored, gates all passed (job 5700_sb_cx_score) -----------
+cxf <- "results/scoreboard/complex_competitors/pooled.csv"
+if (file.exists(cxf)) { cxp <- rd(cxf); cxp <- cxp[cxp$role == "new", ]; stopifnot(all(rd("results/scoreboard/complex_competitors/gates.csv")$pass))
+  gnote <- "; gates passed: saved matrices reproduce the existing baselines values, CLR and |r| through the same code reproduce their existing cells (results/scoreboard/complex_competitors/gates.csv)"
+  for (k in seq_len(nrow(cxp))) { z <- cxp[k, ]; ds <- if (z$dataset == "yeast") "dream5_yeast" else z$dataset
+    note <- if (z$dataset == "yeast") paste0("re-scored from the saved DREAM5 net4 cache (", z$source, "), same replicate-level input as the CLR cell; GRNBoost2 legacy early stopping; directed GENIE3 and GRNBoost2 symmetrised by max; Complex Portal main truth of the complex_confirm study (frozen, read only); descriptive, not a test", gnote)
+            else paste0("re-scored from the saved symmetrised matrix (", z$source, "); complexes truth of clr_logpt_test.R; GRNBoost2 legacy early stopping; descriptive, not a test", gnote)
+    add(ds, z$truth, PM, "raw", z$method, z$enrichment, z$base_rate, z$source, "computed_now", note) } }
+
 D <- do.call(rbind, L); C <- unique(do.call(rbind, cells))
 # complete: every cell x 9 methods; missing -> not_run
 grid <- merge(C, data.frame(method = M9), by = NULL)
 key <- function(x) paste(x$dataset, x$truth, x$metric, x$scope, x$method, sep = "|")
 miss <- grid[!key(grid) %in% key(D), ]
 if (nrow(miss)) {
-  nr <- function(r) if (r$truth == "complexes_main") "not run (the yeast complex estimation scored CLR, attention and a3r only)" else if (r$dataset == "dream5_yeast") "held-out test truth (run once); not scored for any method here" else if (r$dataset == "beeline") "not run" else
+  comp3 <- c("GENIE3", "PIDC", "GRNBoost2", "abs_r")
+  nr <- function(r) if (r$truth == "complexes_main") (if (r$scope == "hub_mi" && r$method %in% comp3) "not run (the hub_mi stratified scores of the yeast complex estimation exist only for CLR, attention and a3r)" else "not run (the yeast complex estimation scored CLR, attention and a3r only)") else
+    if (r$dataset == "rpe1" && r$truth == "CORUM_merged" && r$method %in% c("GENIE3", "PIDC", "GRNBoost2")) "not run: full-universe run estimated at more than 2 h per method (about 210 core-hours GENIE3, 130 GRNBoost2, 90-140 h serial PIDC; docs/plans/scoreboard_competitors_plan.md section 5), awaiting the PI" else
+    if (r$truth %in% c("complexes", "CORUM_merged") && r$method %in% c("a3r2", "a3r3")) "not run (the stacked a3r variants were run only on the truths listed in docs/plans/scoreboard_plan.md)" else if (r$dataset == "dream5_yeast") "held-out test truth (run once); not scored for any method here" else if (r$dataset == "beeline") "not run" else
     if (r$scope %in% c("hub_att", "hub_mi") && r$metric != PM) "no hub-stratified run exists for this metric" else
     if (r$metric %in% c("tf_aupr_ratio", "tf_auroc_median", "per_regulon_mean_ap_over_base", "per_regulon_mean_ap", "per_regulon_mean_ap_norm")) "not run" else
+    if (r$truth %in% c("complexes", "CORUM_merged") && r$scope == "hub_att" && r$method %in% c("GENIE3", "PIDC", "GRNBoost2")) "no hub-controlled competitor scores on this truth (the complex-truth competitor cells were re-scored raw only)" else
     if (r$truth %in% c("complexes", "CORUM_merged") || r$dataset == "k562" && grepl("^CORUM_", r$truth)) "no competitor run on this truth (GENIE3, PIDC, GRNBoost2 were not run on complex truths)" else
     if (r$scope == "hub_mi") "no competitor hub_mi run (the sota_table stratifier is hub_att)" else "not run"
   D <- rbind(D, data.frame(miss, enrichment_over_random = NA_real_, base_rate = NA_real_, source_file = "", status = "not_run",

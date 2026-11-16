@@ -1,0 +1,76 @@
+[10:41:40] == m3d 
+[10:41:45]   gate universe | m3d | gene-set md5 identical to the committed selections' fingerprint (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:41:53]   gate universe | m3d | genie3 saved matrix: dimnames identical to the gene universe (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:41:54]   gate universe | m3d | pidc saved matrix: dimnames identical to the gene universe (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:41:55]   gate universe | m3d | grnboost2 saved matrix: dimnames identical to the gene universe (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:41:55]   gate a | m3d | regulons SC base rate vs baselines metrics.csv: 0.0942711031987 vs 0.0942711031987 (diff 4.16e-17) PASS 
+[10:41:55]   gate a | m3d | GENIE3 regulons SC AUPR vs baselines metrics.csv: 0.141900957846 vs 0.141900957846 (diff 2.78e-16) PASS 
+[10:41:56]   gate a | m3d | PIDC regulons SC AUPR vs baselines metrics.csv: 0.136825875342 vs 0.136825875342 (diff 2.50e-16) PASS 
+[10:41:56]   gate a | m3d | GRNBoost2 regulons SC AUPR vs baselines metrics.csv: 0.128537416354 vs 0.128537416354 (diff 1.11e-16) PASS 
+[10:41:56]   gate a | m3d | regulons all base rate vs baselines metrics.csv: 0.120460302626 vs 0.120460302626 (diff 6.94e-17) PASS 
+[10:41:56]   gate a | m3d | GENIE3 regulons all AUPR vs baselines metrics.csv: 0.16867135733 vs 0.16867135733 (diff 2.78e-17) PASS 
+[10:41:57]   gate a | m3d | PIDC regulons all AUPR vs baselines metrics.csv: 0.16811708111 vs 0.16811708111 (diff 5.00e-16) PASS 
+[10:41:57]   gate a | m3d | GRNBoost2 regulons all AUPR vs baselines metrics.csv: 0.151649358317 vs 0.151649358317 (diff 4.72e-16) PASS 
+[10:41:58]   gate b | m3d | CLR complexes AUPR vs clr_logpt_test metrics.csv: 0.160506780458 vs 0.160506780458 (diff 3.33e-16) PASS 
+[10:41:58]   gate b | m3d | CLR complexes enrichment vs the scoreboard CLR cell: 21.8103591842 vs 21.8103591842 (diff 3.55e-14) PASS 
+[10:42:04]   gate c | m3d | |r| complexes AUPR vs clr_logpt_test metrics.csv: 0.214748509638 vs 0.214748509638 (diff 3.89e-16) PASS 
+[10:42:04]   gate c | m3d | |r| complexes enrichment vs the scoreboard |r| cell: 29.1809611787 vs 29.1809611787 (diff 1.07e-14) PASS 
+[10:42:04] peak RSS so far 1.52 GB 
+[10:42:04] == ecomac 
+[10:42:17]   gate universe | ecomac | gene-set md5 identical to the committed selections' fingerprint (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:42:24]   gate universe | ecomac | genie3 saved matrix: dimnames identical to the gene universe (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:42:24]   gate universe | ecomac | pidc saved matrix: dimnames identical to the gene universe (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:42:25]   gate universe | ecomac | grnboost2 saved matrix: dimnames identical to the gene universe (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:42:25]   gate a | ecomac | regulons SC base rate vs baselines metrics.csv: 0.0939327631745 vs 0.0939327631745 (diff 4.16e-17) PASS 
+[10:42:26]   gate a | ecomac | GENIE3 regulons SC AUPR vs baselines metrics.csv: 0.141116318745 vs 0.141116318745 (diff 4.16e-16) PASS 
+[10:42:26]   gate a | ecomac | PIDC regulons SC AUPR vs baselines metrics.csv: 0.134604075075 vs 0.134604075075 (diff 1.67e-16) PASS 
+[10:42:26]   gate a | ecomac | GRNBoost2 regulons SC AUPR vs baselines metrics.csv: 0.128079247338 vs 0.128079247338 (diff 4.72e-16) PASS 
+[10:42:26]   gate a | ecomac | regulons all base rate vs baselines metrics.csv: 0.121047887014 vs 0.121047887014 (diff 8.33e-17) PASS 
+[10:42:27]   gate a | ecomac | GENIE3 regulons all AUPR vs baselines metrics.csv: 0.167577262261 vs 0.167577262261 (diff 1.94e-16) PASS 
+[10:42:27]   gate a | ecomac | PIDC regulons all AUPR vs baselines metrics.csv: 0.168085412298 vs 0.168085412298 (diff 1.11e-16) PASS 
+[10:42:28]   gate a | ecomac | GRNBoost2 regulons all AUPR vs baselines metrics.csv: 0.151964774789 vs 0.151964774789 (diff 2.50e-16) PASS 
+[10:42:28]   gate b | ecomac | CLR complexes AUPR vs clr_logpt_test metrics.csv: 0.179366469009 vs 0.179366469009 (diff 5.55e-17) PASS 
+[10:42:28]   gate b | ecomac | CLR complexes enrichment vs the scoreboard CLR cell: 22.9523458453 vs 22.9523458453 (diff 1.07e-14) PASS 
+[10:42:55]   gate c | ecomac | |r| complexes AUPR vs clr_logpt_test metrics.csv: 0.203094925694 vs 0.203094925694 (diff 3.89e-16) PASS 
+[10:42:55]   gate c | ecomac | |r| complexes enrichment vs the scoreboard |r| cell: 25.9887201867 vs 25.9887201867 (diff 2.49e-14) PASS 
+[10:42:55] peak RSS so far 2.21 GB 
+[10:42:55] == k562 (gate a only) 
+[10:42:57]   gate a | k562 | CORUM base rate vs baselines metrics.csv: 0.0132567076825 vs 0.0132567076825 (diff 3.99e-17) PASS 
+[10:42:59]   gate a | k562 | genie3 K562 CORUM AUPR vs baselines metrics.csv: 0.0837896729471 vs 0.0837896729471 (diff 4.16e-17) PASS 
+[10:43:01]   gate a | k562 | pidc K562 CORUM AUPR vs baselines metrics.csv: 0.0838495609237 vs 0.0838495609237 (diff 5.55e-17) PASS 
+[10:43:02]   gate a | k562 | grnboost2 K562 CORUM AUPR vs baselines metrics.csv: 0.04851967387 vs 0.04851967387 (diff 1.39e-17) PASS 
+[10:43:02] == rpe1 (gates b, c) 
+[10:43:04]   gate universe | rpe1 | gene-set md5 identical to the committed selections' fingerprint (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:43:27]   gate b | rpe1 | CLR CORUM_merged AUPR vs clr_logpt_test metrics.csv: 0.087248929466 vs 0.087248929466 (diff 5.55e-17) PASS 
+[10:43:27]   gate b | rpe1 | CLR CORUM_merged enrichment vs the scoreboard CLR cell: 6.76895041514 vs 6.76895041514 (diff 2.22e-14) PASS 
+[10:44:23]   gate c | rpe1 | |r| CORUM_merged AUPR vs clr_logpt_test metrics.csv: 0.0366609239181 vs 0.0366609239181 (diff 0.00e+00) PASS 
+[10:44:23]   gate c | rpe1 | |r| CORUM_merged enrichment vs the scoreboard |r| cell: 2.84422946727 vs 2.84422946727 (diff 1.07e-14) PASS 
+[10:44:24] peak RSS so far 3.4 GB 
+[10:44:24] == yeast (DREAM5 net4) 
+[10:44:30]   gate b | yeast | truth structure md5 (i, j, label) equals truth_counts.csv (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:44:30]   gate b | yeast | truth positive pairs vs truth_counts.csv: 13438 vs 13438 (diff 0.00e+00) PASS 
+[10:44:30]   gate b | yeast | truth pairs vs truth_counts.csv: 1282352 vs 1282352 (diff 0.00e+00) PASS 
+[10:44:32]   gate universe | yeast | genie3_all cache: SHA-256 equals its sidecar (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:44:34]   gate universe | yeast | grnboost2_all cache: SHA-256 equals its sidecar (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:44:36]   gate universe | yeast | pidc cache: SHA-256 equals its sidecar (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:44:37]   gate universe | yeast | abs_pearson cache: SHA-256 equals its sidecar (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:44:38]   gate universe | yeast | clr cache: SHA-256 equals its sidecar (1 = yes): 1 vs 1 (diff 0.00e+00) PASS 
+[10:44:40]   gate b | yeast | CLR (cc_clr.scores) AUPR through cc_score_truth vs study metrics.csv: 0.189283945036 vs 0.189283945036 (diff 3.33e-16) PASS 
+[10:44:40]   gate b | yeast | CLR enrichment vs the scoreboard CLR cell: 18.0628549996 vs 18.0628549996 (diff 3.55e-15) PASS 
+[10:44:40]   gate b | yeast | cc_clr.scores equals results/dream5/net4/clr__replicate.scores (max abs diff): 0 vs 0 (diff 0.00e+00) PASS 
+[10:44:41]   gate b | yeast | pair-extraction path (score()) equals cc_score_truth on CLR: 0.189283945036 vs 0.189283945036 (diff 0.00e+00) PASS 
+[10:44:55]   gate c | yeast | |r| recomputed by d5_m_abs_pearson equals results/dream5/net4/abs_pearson__replicate.scores (max abs diff): 0 vs 0 (diff 0.00e+00) PASS 
+[10:45:03] peak RSS so far 4.46 GB 
+[10:45:03] 54 gates, 0 failed 
+ dataset          truth    method enrichment  base_rate n_pos
+     m3d      complexes    GENIE3   23.38267 0.00735920  1150
+     m3d      complexes      PIDC   20.96240 0.00735920  1150
+     m3d      complexes GRNBoost2   14.99526 0.00735920  1150
+  ecomac      complexes    GENIE3   22.60356 0.00781473  1148
+  ecomac      complexes      PIDC   26.11890 0.00781473  1148
+  ecomac      complexes GRNBoost2   14.73588 0.00781473  1148
+   yeast complexes_main     abs_r   19.48410 0.01047918 13438
+   yeast complexes_main      PIDC   16.44764 0.01047918 13438
+   yeast complexes_main    GENIE3   15.07446 0.01047918 13438
+   yeast complexes_main GRNBoost2    8.14533 0.01047918 13438
+[10:45:03] done in 3.4 min; peak RSS 4.46 GB 
