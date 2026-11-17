@@ -161,10 +161,11 @@ draw_abstract <- function() {
                          bolditalic("E. coli") * bold(" regulons better")),
             0.3, 8.62, default.units = "native", just = "left",
             gp = gpar(fontfamily = FONT, fontsize = 18, col = ink[["primary"]]))
-  txt("(16% over CLR), but loses resolution on tight protein complexes",
+  txt("(16% over CLR), but does poorly on tight correlation blocks",
       0.3, 8.26, 18, face = "bold", just = "left")
 
-  txt(NAMES_NOTE, 0.3, 7.97, 10.5, ink[["secondary"]], "italic", just = "left")
+  txt(paste0(LEAD_NAME, " tentatively overcomes this problem. ", NAMES_NOTE), 0.3, 7.97, 12,
+      ink[["secondary"]], "bold.italic", just = "left")
   # legend (signage convention)
   lx <- 11.84
   grid.roundrect(lx, 8.2, 0.42, 0.2, default.units = "native", just = c("left", "centre"),
