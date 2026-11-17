@@ -80,3 +80,6 @@ Step 3.10 (E17, E18), 3 Nov 2026. The fine-tuned state dicts (14 scPRINT at 74 M
 
 | `results/scoreboard/complex_competitors` (16 Nov 2026) | 0.03 MB measured (gates.csv, pooled.csv, job log; the saved competitor matrices of earlier runs were reused in place, nothing copied) | competitor cells on the complex-truth scoreboard rows (`docs/plans/scoreboard_competitors_plan.md`) | No (tiny; the record of the gates) |
 | session scratchpad RPE1 timing files (expression export 0.17 GB, PIDC subsamples) | 0.25 GB at the peak, deleted after the timing | RPE1 runtime estimates for the 2-hour rule | already deleted |
+| `data/cyc2008_raw` (16 Nov 2026) | 0.1 MB (CYC2008 complexes, Internet Archive capture of 16 Feb 2020; licence not verified) | tcaCLR confirmatory plan, Arm B truth (`docs/plans/tcaclr_prereg_candidates.md`); do not commit until the licence is checked |
+| `data/complex_portal_human_raw` (16 Nov 2026) | 5.7 MB (Complex Portal 9606 complextab) | tcaCLR confirmatory plan, Arm A truth; never scored |
+| `results/prereg_candidates/` (16 Nov 2026) | under 0.1 MB (counts-only CSVs) | tcaCLR confirmatory plan, structure counts |
