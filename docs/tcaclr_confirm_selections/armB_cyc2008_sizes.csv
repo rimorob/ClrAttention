@@ -1,0 +1,214 @@
+"dataset","complex","n_genes","pos_weight","share","rp_frac","ribo_dominated"
+"kemmeren_cyc2008","CYC:cytoplasmic ribosomal large subunit",73,2605,0.252716336825766,0.931506849315068,TRUE
+"kemmeren_cyc2008","CYC:cytoplasmic ribosomal small subunit",55,1465,0.142122623205277,0.981818181818182,TRUE
+"kemmeren_cyc2008","CYC:mitochondrial ribosomal large subunit",44,946,0.0917733798991075,0,FALSE
+"kemmeren_cyc2008","CYC:mitochondrial ribosomal small subunit",32,496,0.0481179666278619,0,FALSE
+"kemmeren_cyc2008","CYC:U4/U6 x U5 tri-snRNP complex",28,334.75,0.0324747768723322,0,FALSE
+"kemmeren_cyc2008","CYC:Kornberg's mediator (SRB) complex",25,300,0.0291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:19/22S regulator",22,231,0.0224097788125728,0,FALSE
+"kemmeren_cyc2008","CYC:commitment complex",21,194.25,0.0188445867287544,0,FALSE
+"kemmeren_cyc2008","CYC:SAGA complex+CYC:SLIK (SAGA-like) complex",20,182,0.0176561893674816,0,FALSE
+"kemmeren_cyc2008","CYC:F0/F1 ATP synthase (complex V)",18,153,0.0148428405122235,0,FALSE
+"kemmeren_cyc2008","CYC:U2 snRNP complex",18,134.25,0.0130238649592549,0,FALSE
+"kemmeren_cyc2008","CYC:DNA-directed RNA polymerase III complex",17,123.833333333333,0.0120133229853835,0,FALSE
+"kemmeren_cyc2008","CYC:RSC complex",16,118.5,0.0114959254947614,0,FALSE
+"kemmeren_cyc2008","CYC:anaphase-promoting complex",15,105,0.010186263096624,0,FALSE
+"kemmeren_cyc2008","CYC:mRNA cleavage and polyadenylation specificity factor complex",15,105,0.010186263096624,0,FALSE
+"kemmeren_cyc2008","CYC:transcription factor TFIID complex",15,100,0.0097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:""H+-transporting ATPase, Golgi""+CYC:""H+-transporting ATPase, vacuolar""",14,91,0.00882809468374078,0,FALSE
+"kemmeren_cyc2008","CYC:20S proteasome",14,91,0.00882809468374078,0,FALSE
+"kemmeren_cyc2008","CYC:DNA-directed RNA polymerase I complex",14,78.8333333333333,0.00764778165825896,0,FALSE
+"kemmeren_cyc2008","CYC:NuA4 histone acetyltransferase complex",13,74.8333333333333,0.00725973354029233,0,FALSE
+"kemmeren_cyc2008","CYC:Swr1p complex",13,72.3333333333333,0.00701720346656319,0,FALSE
+"kemmeren_cyc2008","CYC:Nuclear exosome complex",12,66,0.00640279394644936,0,FALSE
+"kemmeren_cyc2008","CYC:Rpd3L complex",12,64.5,0.00625727590221187,0,FALSE
+"kemmeren_cyc2008","CYC:SWI/SNF complex",12,64.5,0.00625727590221187,0,FALSE
+"kemmeren_cyc2008","CYC:Ino80p complex",12,62.8333333333333,0.00609558918639245,0,FALSE
+"kemmeren_cyc2008","CYC:DNA-directed RNA polymerase II complex",12,59.3333333333333,0.00575604708317165,0,FALSE
+"kemmeren_cyc2008","CYC:U5 snRNP complex",14,58.25,0.00565095071788902,0,FALSE
+"kemmeren_cyc2008","CYC:COPII",11,55,0.00533566162204113,0,FALSE
+"kemmeren_cyc2008","CYC:Cytochrome c oxidase (complex IV)",11,55,0.00533566162204113,0,FALSE
+"kemmeren_cyc2008","CYC:nucleolar ribonuclease P complex+CYC:ribonuclease MRP complex",11,55,0.00533566162204113,0,FALSE
+"kemmeren_cyc2008","CYC:nucleotide-excision repair factor 3 complex+CYC:transcription factor TFIIH complex",11,55,0.00533566162204113,0,FALSE
+"kemmeren_cyc2008","CYC:""Cytochrome bc1 complex (Ubiquinol-cytochrome c reductase complex, complex III)""",10,45,0.00436554132712456,0,FALSE
+"kemmeren_cyc2008","CYC:DASH complex",10,45,0.00436554132712456,0,FALSE
+"kemmeren_cyc2008","CYC:DNA replication factor C complex (Ctf18p/Ctf8p/dcc1p)+CYC:DNA replication factor C complex (Elg1p)+CYC:DNA replication factor C complex (Rad24p)+CYC:DNA replication factor C complex (Rcf1p)",10,45,0.00436554132712456,0,FALSE
+"kemmeren_cyc2008","CYC:TRAPP complex",10,45,0.00436554132712456,0,FALSE
+"kemmeren_cyc2008","CYC:CCR4-NOT core complex",9,36,0.00349243306169965,0,FALSE
+"kemmeren_cyc2008","CYC:oligosaccharyl transferase complex",9,36,0.00349243306169965,0,FALSE
+"kemmeren_cyc2008","CYC:COMPASS complex",8,28,0.0027163368257664,0,FALSE
+"kemmeren_cyc2008","CYC:COPI",8,28,0.0027163368257664,0,FALSE
+"kemmeren_cyc2008","CYC:CORVET complex+CYC:HOPS complex",8,28,0.0027163368257664,0,FALSE
+"kemmeren_cyc2008","CYC:Exocyst complex",8,28,0.0027163368257664,0,FALSE
+"kemmeren_cyc2008","CYC:FBP degradation complex",8,28,0.0027163368257664,0,FALSE
+"kemmeren_cyc2008","CYC:Golgi transport complex",8,28,0.0027163368257664,0,FALSE
+"kemmeren_cyc2008","CYC:Prp19-associated complex",8,28,0.0027163368257664,0,FALSE
+"kemmeren_cyc2008","CYC:TORC 2 complex",8,28,0.0027163368257664,0,FALSE
+"kemmeren_cyc2008","CYC:chaperonin-containing T-complex",8,28,0.0027163368257664,0,FALSE
+"kemmeren_cyc2008","CYC:smc5p-Smc6p complex",8,28,0.0027163368257664,0,FALSE
+"kemmeren_cyc2008","CYC:multi-eIF complex",8,26.5,0.00257081878152891,0,FALSE
+"kemmeren_cyc2008","CYC:Nucleosomal protein complex",8,25.5,0.00247380675203725,0,FALSE
+"kemmeren_cyc2008","CYC:Arp2/3 protein complex",7,21,0.0020372526193248,0,FALSE
+"kemmeren_cyc2008","CYC:Cdc73p/Paf1p complex",7,21,0.0020372526193248,0,FALSE
+"kemmeren_cyc2008","CYC:SPB components",7,21,0.0020372526193248,0,FALSE
+"kemmeren_cyc2008","CYC:Set3p complex",7,21,0.0020372526193248,0,FALSE
+"kemmeren_cyc2008","CYC:UTP A complex",7,21,0.0020372526193248,0,FALSE
+"kemmeren_cyc2008","CYC:mitochondrial outer membrane translocase complex",7,21,0.0020372526193248,0,FALSE
+"kemmeren_cyc2008","CYC:mitochondrial pyruvate dehydrogenase complex",7,21,0.0020372526193248,0,FALSE
+"kemmeren_cyc2008","CYC:eIF3",7,19.5,0.00189173457508731,0,FALSE
+"kemmeren_cyc2008","CYC:U6 snRNP complex",8,17.5,0.001697710516104,0,FALSE
+"kemmeren_cyc2008","CYC:Chs5p/Arf-1binding proteins (ChAPs)",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:Cul3p-RING ubiquitin ligase complex+CYC:nucleotide-excision repair factor 4 complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:Dsl1p complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:Elongator complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:Far3p/Far7p/Far8p/Far9p/Far10p/Far11p complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:Mcm2-7 complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:Nup84p complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:OCA complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:Origin recognition complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:Signal recognition particle (SRP)",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:UTP B complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:glycosylphosphatidylinositol-N-acetylglucosaminyltransferase (GPI-GnT) complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:prefoldin complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:signalosome complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:transcription factor TFIIIC complex",6,15,0.00145518044237485,0,FALSE
+"kemmeren_cyc2008","CYC:PAM complex",6,14.5,0.00140667442762903,0,FALSE
+"kemmeren_cyc2008","CYC:RNA polymerase I upstream activating factor complex",6,14.5,0.00140667442762903,0,FALSE
+"kemmeren_cyc2008","CYC:mitochondrial inner membrane presequence translocase complex",6,14.5,0.00140667442762903,0,FALSE
+"kemmeren_cyc2008","CYC:UTP C complex",6,13.5,0.00130966239813737,0,FALSE
+"kemmeren_cyc2008","CYC:""alpha-1,6-mannosyltransferase complex(Anp1p/Mnn9p)""",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:AP-1 adaptor complex",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:Cbf1p/Met4p/Met28p complex+CYC:Met4p/Met28p/Met31p complex+CYC:Met4p/Met28p/Met32p complex",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:GPI-anchor transamidase complex",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:GSE Complex",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:Npa2p-containing subcomplex",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:NuA3 histone acetyltransferase complex",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:Snf1p/Snf4p/Gal83p complex+CYC:Snf1p/Snf4p/Sip1p complex+CYC:Snf1p/Snf4p/Sip2p complex",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:eIF2B",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:mRNA cleavage factor complex (CFI)",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:nuclear cohesin complex",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:nuclear condensin complex",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:phosphatidylinositol (PtdIns) 3-kinase complex (functions in CPY sorting)+CYC:phosphatidylinositol (PtdIns) 3-kinase complex (functions in autophagy)",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:retromer complex",5,10,0.00097012029491657,0,FALSE
+"kemmeren_cyc2008","CYC:SCF-CDC4 complex",5,9.5,0.000921614280170741,0,FALSE
+"kemmeren_cyc2008","CYC:ubiquitin ligase ERAD-L complex",5,9.5,0.000921614280170741,0,FALSE
+"kemmeren_cyc2008","CYC:Rpd3S complex",5,8.5,0.000824602250679084,0,FALSE
+"kemmeren_cyc2008","CYC:Ada2p/Gcn5p/Ada3 transcription activator complex",5,7,0.000679084206441599,0,FALSE
+"kemmeren_cyc2008","CYC:SF3b complex",5,7,0.000679084206441599,0,FALSE
+"kemmeren_cyc2008","CYC:""alpha,alpha-trehalose-phosphate synthase complex (UDP-forming)""",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:AP-2 adaptor complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:AP-3 adaptor complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:ARGR complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:CBF3 complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:CCAAT-binding factor complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:COMA complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:DNA polymerase epsilon complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:EKC/KEOPS protein complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:ESCRT I complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:ESCRT III complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:GARP complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:GINS complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:HIR complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:HMC Complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:MIND complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:Ndc80p complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:Nsp1p complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:STE5-MAPK complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:Sec62p/Sec63p complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:Succinate dehydrogenase complex (complex II)",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:Synaptonemal complex (SC)",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:THO complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:TORC 1 complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:TRAMP complex (Air1p)+CYC:TRAMP complex (Air2p)",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:VTC heterotetrameric complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:alpha DNA polymerase:primase complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:box C/D snoRNP complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:cAMP-dependent protein kinase",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:chromatin accessibility complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:cytoplasmic dynein complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:dynactin complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:eEF1",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:glycine cleavage complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:mitochondrial inner membrane protein insertion complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:mitochondrial sorting and assembly machinery complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:mitotic checkpoint complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:monopolin complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:protein phosphatase type 2A complex (Cdc55p)+CYC:protein phosphatase type 2A complex (Rts1p)",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:signal peptidase complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:tRNA-intron endonuclease complex",4,6,0.000582072176949942,0,FALSE
+"kemmeren_cyc2008","CYC:Cdc24p/Far1p/Gbetagamma protein complex",4,5.5,0.000533566162204113,0,FALSE
+"kemmeren_cyc2008","CYC:nuclear ubiquitin ligase complex",4,5.5,0.000533566162204113,0,FALSE
+"kemmeren_cyc2008","CYC:CURI complex",4,4.5,0.000436554132712456,0,FALSE
+"kemmeren_cyc2008","CYC:""actin cytoskeleton-regulatory complex, Pan1p/Sla1p/End3p complex""",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Apg12p/Apg5p/Apg16 multimeric complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Atg20p/Snx4p/Snx41p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Cdc48p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Chz1p/Htz1p/Htb1p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Cox14p/Cox1p/Mss51p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Ctf3p protein complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:DNA polymerase delta complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:DNA replication factor A complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Dig1p/Ste12p/Dig2p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:ESCRT II complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Fatty Acid Import Complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:GET complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:GSH degradosomal complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:HAT-B complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Hym1p/Kic1p/Sog2p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:ISW1b complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Kel1p/Kel2p/Lte1p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:MRX complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Mdm12p/Mmm1p/Mdm10p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Mgm1p/Ugo1p/Fzo1p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Mps2p/Bbp1p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:NatA complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:NatC complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Nonsense-mediated mRNA decay pathway complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Ntr1p/Ntr2p/Prp43p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Nup82 nuclear pore subcomplex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Polzeta-Rev1p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:RAVE complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:RENT complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:RES complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:RING finger peroxin complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:RNA Degradation Complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:RNA polymerase I transcription factor complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Rad17p/Ddc1p/Mec3p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:RecQ helicase-Topo III complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Rix1p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:SAS Complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:SNARE complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Sec61p translocon complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Ski Complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Sko1p/Cyc8p/Tup1 repressor complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Sro1p/Sec4p/Sec9p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Ssh1p translocon complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Sum1p/Rfm1p/Hst1p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Tap42p/Pph21p/Rrd2p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Tap42p/Sit4p/Rrd1p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Telomerase",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:Tof1p/Mrc1p/Csm3p complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:calcineurin complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:carboxy-terminal domain protein kinase complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:chromatin assembly complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:chromatin silencing complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:gamma-tubulin complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:histone H2A phosphatase complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:histone deacetylase complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:karyopherin docking subcomplex of the Nuclear Pore Complex (NPC)",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:meiotic recombination initiation complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:methionyl glutamyl tRNA synthetase complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:mitochondrial ATPase inhibitor complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:mitochondrial inner membrane peptidase complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:mitochondrial oxoglutarate dehydrogenase complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:nascent polypeptide-associated complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:nucleotide-excision repair factor 1 complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:peroxin docking complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:polarisome complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:ribonuclease H2 complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:ribonucleoside-diphosphate reductase complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:transcription export complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:transcription factor TFIIF complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:transcription factor TFIIIB complex",3,3,0.000291036088474971,0,FALSE
+"kemmeren_cyc2008","CYC:heterotrimeric G-protein complex",3,2.5,0.000242530073729142,0,FALSE
+"kemmeren_cyc2008","CYC:luminal surveillance complex",3,2.5,0.000242530073729142,0,FALSE

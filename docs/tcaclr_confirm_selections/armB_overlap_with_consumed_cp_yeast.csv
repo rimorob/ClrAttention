@@ -1,0 +1,2 @@
+"truth","n_complexes","genes","genes_in_CP_ref","gene_jaccard","n_pos","n_pos_shared_with_CP","share_of_truth_pos_in_CP","share_of_CP_pos_in_truth","pair_jaccard","n_pos_not_in_CP","complexes_best_jaccard_ge_0.5","complexes_best_jaccard_lt_0.5","neff_of_novel_pairs_complexwise","cp_consumed_complexes","cp_consumed_pos","cp_consumed_n_eff"
+"CYC2008",213,1324,1237,0.733,10308,9229,0.895,0.698,0.645,1079,172,41,7.29,260,13223,15.61

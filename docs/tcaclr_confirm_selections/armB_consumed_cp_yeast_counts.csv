@@ -1,0 +1,2 @@
+"dataset","variant","n_universe","n_complexes","n_genes","n_genes_perturbed","n_pairs","n_paralog_or_xsub_pairs_excluded","n_pos","base_rate","n_complexes_pos","n_components","n_eff","largest_share","ribo_dominated_share"
+"kemmeren_cp_consumed","main",6169,260,1600,401,1279155,45,13223,0.0103372929785679,260,181,15.6080700855438,0.170536186946986,0.273236028132799
