@@ -1,0 +1,5 @@
+nodes 4297, bins min/mean/max 2/6.21/10, threads 28, read 27.6 s
+node pairs done 43.3 s; peak RSS GB 2.98
+puc scores done 136.6 s; peak RSS GB 2.98
+gamma fits: 0 genes without a Gamma fit; weights: 0 pairs through the normal-CLR fallback; 138.0 s
+wrote results/scoreboard/complex_competitors/pidc_gate/m3d_pidc.f64: 9229956 pair weights; total 138.2 s; peak RSS GB 2.98

@@ -1,0 +1,5 @@
+nodes 600, bins min/mean/max 4/8.43/12, threads 28, read 14.9 s
+node pairs done 18.3 s; peak RSS GB 0.68
+puc scores done 18.9 s; peak RSS GB 0.68
+gamma fits: 0 genes without a Gamma fit; weights: 0 pairs through the normal-CLR fallback; 19.6 s
+wrote results/scoreboard/complex_competitors/rpe1_work/sub600.new.f64: 179700 pair weights; total 19.6 s; peak RSS GB 0.68

@@ -1,0 +1,8 @@
+RPE1 subset 300 genes vs tools/pidc.jl: genes 300, pairs in the original file 44850, pairs in the new file 44850, identical 44850, differing 0, max abs diff 0.0, PASS=True
+RPE1 subset 600 genes vs tools/pidc.jl: genes 600, pairs in the original file 179700, pairs in the new file 179700, identical 179700, differing 0, max abs diff 0.0, PASS=True
+nodes 4297, bins min/mean/max 2/6.21/10, threads 28, read 27.3 s
+node pairs done 42.4 s; peak RSS GB 13.34
+puc scores done 131.0 s; peak RSS GB 13.48
+gamma fits: 0 genes without a Gamma fit; weights: 0 pairs through the normal-CLR fallback; 134.7 s
+wrote results/scoreboard/complex_competitors/pidc_gate/m3d_pidc.f64: 9229956 pair weights; total 134.8 s; peak RSS GB 13.48
+M3D full 4,297 genes vs saved baselines_m3d/pidc_edges.tsv: genes 4297, pairs in the original file 9229956, pairs in the new file 9229956, identical 9229956, differing 0, max abs diff 0.0, PASS=True

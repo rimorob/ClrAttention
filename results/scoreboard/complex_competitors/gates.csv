@@ -40,6 +40,11 @@
 "rpe1","b","CLR CORUM_merged enrichment vs the scoreboard CLR cell",6.76895041513554,6.76895041513556,2.22044604925031e-14,1e-09,TRUE
 "rpe1","c","|r| CORUM_merged AUPR vs clr_logpt_test metrics.csv",0.0366609239181286,0.0366609239181286,0,1e-09,TRUE
 "rpe1","c","|r| CORUM_merged enrichment vs the scoreboard |r| cell",2.84422946726867,2.84422946726868,1.06581410364015e-14,1e-09,TRUE
+"rpe1","universe","competitor genes are unique, all in the CLR universe, and 2 rows (the duplicated symbol) are dropped",1,1,0,0,TRUE
+"rpe1","universe","positive truth pairs involving the dropped duplicated-symbol rows (0 = identical to scoring the 8,745-gene truth)",0,0,0,0,TRUE
+"rpe1","universe","GENIE3 matrix dimnames equal the competitor gene list (1 = yes)",1,1,0,0,TRUE
+"rpe1","universe","every GRNBoost2 edge endpoint is in the gene list (1 = yes)",1,1,0,0,TRUE
+"rpe1","universe","PIDC packed file has G(G-1)/2 finite weights (1 = yes)",1,1,0,0,TRUE
 "yeast","b","truth structure md5 (i, j, label) equals truth_counts.csv (1 = yes)",1,1,0,0,TRUE
 "yeast","b","truth positive pairs vs truth_counts.csv",13438,13438,0,0,TRUE
 "yeast","b","truth pairs vs truth_counts.csv",1282352,1282352,0,0,TRUE

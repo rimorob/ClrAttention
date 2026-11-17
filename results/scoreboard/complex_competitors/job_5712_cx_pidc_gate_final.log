@@ -1,0 +1,18 @@
+nodes 300, bins min/mean/max 4/8.44/12, threads 28, read 8.9 s
+node pairs done 11.1 s; peak RSS GB 0.54
+puc scores done 11.3 s; peak RSS GB 0.54
+gamma fits: 0 genes without a Gamma fit; weights: 0 pairs through the normal-CLR fallback; 11.8 s
+wrote results/scoreboard/complex_competitors/rpe1_work/sub300.new.f64: 44850 pair weights; total 11.9 s; peak RSS GB 0.54
+RPE1 subset 300 genes vs tools/pidc.jl: genes 300, pairs in the original file 44850, pairs in the new file 44850, identical 44850, differing 0, max abs diff 0.0, PASS=True
+nodes 600, bins min/mean/max 4/8.43/12, threads 28, read 14.9 s
+node pairs done 18.3 s; peak RSS GB 0.68
+puc scores done 18.9 s; peak RSS GB 0.68
+gamma fits: 0 genes without a Gamma fit; weights: 0 pairs through the normal-CLR fallback; 19.6 s
+wrote results/scoreboard/complex_competitors/rpe1_work/sub600.new.f64: 179700 pair weights; total 19.6 s; peak RSS GB 0.68
+RPE1 subset 600 genes vs tools/pidc.jl: genes 600, pairs in the original file 179700, pairs in the new file 179700, identical 179700, differing 0, max abs diff 0.0, PASS=True
+nodes 4297, bins min/mean/max 2/6.21/10, threads 28, read 27.6 s
+node pairs done 43.3 s; peak RSS GB 2.98
+puc scores done 136.6 s; peak RSS GB 2.98
+gamma fits: 0 genes without a Gamma fit; weights: 0 pairs through the normal-CLR fallback; 138.0 s
+wrote results/scoreboard/complex_competitors/pidc_gate/m3d_pidc.f64: 9229956 pair weights; total 138.2 s; peak RSS GB 2.98
+M3D full 4,297 genes vs saved baselines_m3d/pidc_edges.tsv: genes 4297, pairs in the original file 9229956, pairs in the new file 9229956, identical 9229956, differing 0, max abs diff 0.0, PASS=True

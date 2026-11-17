@@ -1,0 +1,1 @@
+grnboost2[early_stop=legacy, scikit-learn 1.9.1] seed 20261016: 8745 genes x 1023 samples -> 8657484 edges, 13303.6 s; trees per target median 237 (IQR 157-320)
