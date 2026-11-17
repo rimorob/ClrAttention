@@ -30,7 +30,9 @@ Code commit used for everything below: `1e9178c` (branch accuracy-review). Small
 | Content | 145,473 cells by 9,624 genes, raw integer counts, 56 gem groups; 4,976 non-targeting cells (130 labels, 3 gem groups with fewer than 30 of them); 2,549 targeted labels (median 43 cells, minimum 1); one duplicated gene symbol (HSPA14) |
 | Pseudobulk or energy-test p-values | **none exist for HepG2** (the K562 and RPE1 recipe starts from the authors' normalized-bulk h5ad with `obs/energy_test_p_value`; GEO has only the single-cell h5ad). The Jurkat fallback is not needed: the file is usable. |
 
-## 2. Arm A pseudobulk: forced deviations, decided on label-free criteria, PROPOSED (need the PI's decision)
+## 2. Arm A pseudobulk: forced deviations, decided on label-free criteria (D1 to D5 approved by the lead on 17 Nov 2026; the PI may overrule, in which case every Arm A hash, count and gate is redone)
+
+**Lead's decision, 17 Nov:** D1 to D5 are approved. All five are label-free (no truth file was used in choosing them), D1 and D2 were validated against the authors' shipped K562 file (correlation 0.99999; 97.3% agreement of the energy-test call, selected-set Jaccard 0.959), and D3 is the single rule invented for HepG2 (3 of 56 gem groups). The stated limitation is that the HepG2 profile set is a rebuild and not the authors' own.
 
 The K562 recipe (`analysis/perturbseq_bulk.R`, lines 1 to 71: significant-phenotype filter p < 1e-3, seeded half split, missing-value and constant-gene filters) is run **byte-identically**: `analysis/tcaclr_confirm/hepg2_expression_export.R` is those 71 lines unchanged (checked by `diff`, empty) followed by the duplicate-symbol rule and the export; only the command-line `--h5` and `--out` differ. The full diff is `docs/tcaclr_confirm_selections/armA_recipe_diff.txt` (the original's truth and scoring lines are not run; an export block is appended). What cannot be identical is its input file, which does not exist for HepG2. It is rebuilt from the single-cell file by `analysis/tcaclr_confirm/build_pseudobulk_from_sc.R`:
 
