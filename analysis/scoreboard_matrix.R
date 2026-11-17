@@ -112,8 +112,9 @@ if (file.exists(cxf)) { cxp <- rd(cxf); cxp <- cxp[cxp$role == "new", ]; stopifn
   gnote <- "; gates passed: saved matrices reproduce the existing baselines values, CLR and |r| through the same code reproduce their existing cells (results/scoreboard/complex_competitors/gates.csv)"
   for (k in seq_len(nrow(cxp))) { z <- cxp[k, ]; ds <- if (z$dataset == "yeast") "dream5_yeast" else z$dataset
     note <- if (z$dataset == "yeast") paste0("re-scored from the saved DREAM5 net4 cache (", z$source, "), same replicate-level input as the CLR cell; GRNBoost2 legacy early stopping; directed GENIE3 and GRNBoost2 symmetrised by max; Complex Portal main truth of the complex_confirm study (frozen, read only); descriptive, not a test", gnote)
+            else if (z$dataset == "rpe1") paste0("new run on the 8,745 RPE1 genes left after dropping the two duplicated-symbol rows (", z$source, "), scored on the CORUM merged truth of clr_logpt_test.R embedded in the 8,747-gene universe of the CLR cell (no positive pair involves a dropped row); GENIE3 and PIDC symmetrised by max as in baselines.R; PIDC by the memory-bounded implementation tools/pidc_chunked.jl, bit-identical to the package on 300 and 600 genes and on the full M3D matrix; scores deleted after scoring; descriptive, not a test", gnote)
             else paste0("re-scored from the saved symmetrised matrix (", z$source, "); complexes truth of clr_logpt_test.R; GRNBoost2 legacy early stopping; descriptive, not a test", gnote)
-    add(ds, z$truth, PM, "raw", z$method, z$enrichment, z$base_rate, z$source, "computed_now", note) } }
+    add(ds, z$truth, PM, "raw", z$method, z$enrichment, z$base_rate, if (z$dataset == "rpe1") "results/scoreboard/complex_competitors/pooled.csv" else z$source, "computed_now", note) } }
 
 D <- do.call(rbind, L); C <- unique(do.call(rbind, cells))
 # complete: every cell x 9 methods; missing -> not_run

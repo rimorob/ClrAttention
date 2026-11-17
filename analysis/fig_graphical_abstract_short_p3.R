@@ -180,7 +180,7 @@ foot_common <- list(
   fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the preregistered threshold.")))
 foot_raw <- c(foot_common, list(
   fl(paste0("Yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; all methods scored on it, competitors from saved score matrices; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
-  fl("RPE1 row: GENIE3, PIDC and GRNBoost2 were not run (each estimated at more than 2 hours on its 8,745 genes; grey dashes). E. coli complex rows: competitors re-scored from the saved score matrices of the earlier comparison."),
+  fl("RPE1 row: GENIE3, PIDC and GRNBoost2 were run on its 8,745 genes (two duplicated-symbol rows dropped) and scored on the same truth. E. coli complex rows: competitors re-scored from the saved score matrices of the earlier comparison."),
   fl(paste0(paste0("BEELINE: median over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases); ", ACLR_NAME, " and "), LEAD_NAME, paste0(" use the CLR-NS operator (", ACLR_NAME, " at its held-out depth, "), LEAD_NAME, " at t = 9, not tuned); CLR is plain CLR."))))
 foot_hub <- c(foot_common, list(
   fl("The yeast complex row of the raw scoreboard is left out here: the study stored its hub-controlled scores only with the MI row-mean stratifier, not the stratifier used on this page, so they are not comparable."),
