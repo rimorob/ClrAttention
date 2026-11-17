@@ -10,7 +10,7 @@
 #   3. perturbation profile = mean z over the cells carrying that gene_transcript label (all labels, non-targeting groups included, as shipped);
 #   4. energy-distance permutation test of each non-targeting-free perturbation against a fixed random sample of --nctrl control cells
 #      in the first --npc principal components of the z-normalised cells (PCA on a --pca_cells random cell sample), --nperm permutations,
-#      p = (1 + #{perm >= observed}) / (1 + nperm).
+#      p = (1 + #{perm >= observed}) / (1 + nperm); a perturbation carried by a single cell cannot be tested and gets p = 1.
 # No truth is read; nothing is scored. Output: an h5ad-like file readable by the unchanged loader of perturbseq_bulk.R
 # (/X genes x perturbations, /obs/gene_transcript, /obs/energy_test_p_value, /obs/num_cells, /var/gene_name).
 # Usage: Rscript build_pseudobulk_from_sc.R --h5 <raw sc h5ad> --out <bulk h5ad> [--threads 8] [--limit_cells 0]
@@ -89,6 +89,7 @@ one <- function(k) { idx <- which(li == k & seq_len(Ncell) %in% keep_cells); set
   r <- energy_perm(Ycoord[, c(idx, cs), drop = FALSE], length(idx), opt$nperm, opt$seed + k); c(r$E, r$p) }
 ord <- tst[order(-CNT[tst])]; res <- mclapply(ord, one, mc.cores = opt$threads, mc.preschedule = TRUE)
 for (j in seq_along(ord)) { pv[ord[j]] <- res[[j]][2]; En[ord[j]] <- res[[j]][1] }
+nt_lab <- grepl("non-targeting", labs); pv[!nt_lab & is.na(pv)] <- 1   # perturbations with a single cell cannot be tested: p = 1 (never selected); non-targeting labels keep NA
 say(sprintf("energy test: %d perturbations tested, %d with p < 1e-3; %.0f s; VmHWM %.1f GB", length(tst), sum(pv < 1e-3, na.rm = TRUE), as.numeric(difftime(Sys.time(), t0, units = "secs")), vmhwm()))
 ## ---- write h5ad-like output ----------------------------------------------------------------------------------------------------
 if (file.exists(opt$out)) file.remove(opt$out)

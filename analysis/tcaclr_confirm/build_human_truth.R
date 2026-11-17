@@ -45,11 +45,22 @@ H <- make_variants(gen, u, ribo_frac, sub_pairs, pert, "human_complex_portal")
 cat("subunit complexes (merged names):\n"); print(H$sub_pairs)
 cat("universe case collisions:", length(readLines(args[1])) - length(unique(toupper(readLines(args[1])))), "\n")
 ex <- excluded_pairs(paralog_sets, H$sub_pairs, H$main)
+# write gene names in the spelling of the expression matrix (matching is upper-case; the universe has no case collisions)
+u_orig <- unique(readLines(args[1])); to_orig <- function(x) { m <- match(x, toupper(u_orig)); ifelse(is.na(m), x, u_orig[m]) }
+ex$orf_a <- to_orig(ex$orf_a); ex$orf_b <- to_orig(ex$orf_b); ex <- ex[order(ex$scope, ex$reason, ex$orf_a, ex$orf_b), ]
+H$members$orf <- to_orig(H$members$orf)
 xf <- file.path(OUT, paste0(PFX, "_excluded_pairs.tsv")); utils::write.table(ex, xf, sep = "\t", quote = FALSE, row.names = FALSE)
-mem <- H$members; mem <- mem[order(mem$variant, mem$complex, mem$gene), ]
+mem <- H$members; mem <- mem[order(mem$variant, mem$complex, mem$orf), ]
 mf <- file.path(OUT, paste0(PFX, "_members.tsv")); utils::write.table(mem, mf, sep = "\t", quote = FALSE, row.names = FALSE)
 utils::write.csv(H$counts, file.path(OUT, paste0(PFX, "_counts.csv")), row.names = FALSE)
 utils::write.csv(H$sizes, file.path(OUT, paste0(PFX, "_sizes.csv")), row.names = FALSE)
 utils::write.csv(data.frame(dataset = "human_complex_portal", t(log_src)), file.path(OUT, paste0(PFX, "_source_log.csv")), row.names = FALSE)
+# data-truth link (counts only): truth genes of every variant that are themselves perturbed, under three definitions of "the panel"
+pdir <- dirname(args[2]); defs <- c(network_half_A = args[2], significant_knockdowns = file.path(pdir, "perturbed_genes_significant.txt"), whole_screen_panel = file.path(pdir, "perturbed_genes_panel.txt"))
+defs <- defs[file.exists(defs)]
+pl <- do.call(rbind, lapply(names(H$variants), function(v) { tg <- sort(unique(unlist(H$variants[[v]])))
+  do.call(rbind, lapply(names(defs), function(d) data.frame(variant = v, panel_definition = d, truth_genes = length(tg), truth_genes_perturbed = sum(tg %in% sort(unique(toupper(readLines(defs[[d]])))))))) }))
+utils::write.csv(pl, file.path(OUT, paste0(PFX, "_perturbed_in_panel.csv")), row.names = FALSE)
+cat("truth genes perturbed in the panel (main):\n"); print(pl[pl$variant == "main", ], row.names = FALSE)
 cat("source log:\n"); print(log_src); print(H$counts, row.names = FALSE)
 cat("largest merged complexes:\n"); print(utils::head(H$sizes, 12), row.names = FALSE)

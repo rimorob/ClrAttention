@@ -1,0 +1,6 @@
+[15:05:21] arm A: 9622 genes x 739 profiles, non-finite 0, duplicated names 0 
+[15:07:06] MI + CLR + operator done in 135 s; max|rz_operator(CLR) - package operator| = 0; VmHWM 5.1 GB 
+[15:07:28] P1: rows 9622, rows with <= 10 candidates 0 (min 50, median 50); max|diff| all entries 2.66e-15; rows > 10 candidates 2.66e-15 
+[15:09:33] reachability: unreachable share 0.00821; rows with < 2 reachable entries 0; median row SD of log P^9 2.959 nats (IQR 2.481-3.429; CV 0.202); median row skewness log -0.419, linear 31.025; VmHWM 7.8 GB 
+[15:09:33] GATES PASSED (P1 implementation, reachability) 
+[15:09:33] peak memory (VmHWM) 7.8 GB; wall 282 s 

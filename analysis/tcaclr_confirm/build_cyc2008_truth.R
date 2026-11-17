@@ -73,7 +73,7 @@ ov <- data.frame(truth = "CYC2008", n_complexes = length(B$main), genes = length
 ## outputs
 ex <- excluded_pairs(paralog_sets, B$sub_pairs, B$main)
 xf <- file.path(OUT, "armB_cyc2008_excluded_pairs.tsv"); utils::write.table(ex, xf, sep = "\t", quote = FALSE, row.names = FALSE)
-mem <- B$members; mem <- mem[order(mem$variant, mem$complex, mem$gene), ]
+mem <- B$members; mem <- mem[order(mem$variant, mem$complex, mem$orf), ]
 mf <- file.path(OUT, "armB_cyc2008_members.tsv"); utils::write.table(mem, mf, sep = "\t", quote = FALSE, row.names = FALSE)
 utils::write.csv(B$counts, file.path(OUT, "armB_cyc2008_counts.csv"), row.names = FALSE)
 utils::write.csv(B$sizes, file.path(OUT, "armB_cyc2008_sizes.csv"), row.names = FALSE)

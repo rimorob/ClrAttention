@@ -15,7 +15,7 @@ gb <- function(G, n, a) (G / a[["G"]])^2 * (n / a[["n"]])
 pidc <- function(G, n) { r <- c(read = 178 * (G * n) / (8745 * 1023), nodes = 133 * (G / 8745)^2 * (n / 1023), puc = 534 * (G / 8745)^3, tail = 315 * (G / 8745)^2); sum(r) }
 rows <- list()
 for (arm in c("A", "B")) { G <- if (arm == "A") GA else GB; n <- if (arm == "A") nA else nB; g <- if (arm == "A") gA else gB
-  t3r <- 435.6 * g3(G, n, anch$rpe1); t3n <- 12435 / 60 / 2 * g3(G, n, anch$net4) * 0 + (12435 / 60 / 2) * g3(G, n, anch$net4)
+  t3r <- 435.6 * g3(G, n, anch$rpe1); t3n <- (12435 / 60 / 2) * g3(G, n, anch$net4)
   tbr <- 221.7 * gb(G, n, anch$rpe1); tbn <- (11764 / 60 / 2) * gb(G, n, anch$net4); tp <- pidc(G, n) / 60
   m3 <- 34.6 * (G * n) / (8745 * 1023); mb <- 4.3 * (G / 8745); mp <- 10.48 * (G / 8745)^2
   mk <- function(method, lo, hi, mem, note) data.frame(arm = arm, genes = G, profiles = n, method = method, minutes_low = round(lo, 1), minutes_high = round(hi, 1),
@@ -24,7 +24,7 @@ for (arm in c("A", "B")) { G <- if (arm == "A") GA else GB; n <- if (arm == "A")
   rows[[length(rows) + 1]] <- mk("GRNBoost2 (32 workers)", min(tbr, tbn), max(tbr, tbn), mb, "RPE1 and net4 anchors; tree-count noise not included (net4 ran 1.8x the formula)")
   rows[[length(rows) + 1]] <- mk("PIDC (tools/pidc_chunked.jl, 32 threads)", tp * 0.9, tp * 1.2, mp, "RPE1 component scaling")
   # cheap block: measured gate job (MI + CLR + operator + P^9, 8 threads) scaled by G^2 n (MI) from Arm B's measured run when arm A
-  rows[[length(rows) + 1]] <- mk("CLR+aCLR+tcaCLR+|r| fit incl. P^9 (8 threads), measured/scaled", g[["sec"]] / 60 * (if (arm == "A") 1 else 1), g[["sec"]] / 60 * 1.5, g[["gb"]], "gate job wall and VmHWM (arm's own measurement)")
+  rows[[length(rows) + 1]] <- mk("CLR+aCLR+tcaCLR+|r| fit incl. P^9 (8 threads), measured/scaled", g[["sec"]] / 60 * (if (arm == "A") 1 else 1), g[["sec"]] / 60 * 1.5, g[["gb"]], "gate job wall and VmHWM (arm's own measurement: MI, CLR, operator, P^9, P1 and reachability checks); exploratory read-outs, rescoring and the jackknife replicates come on top")
   rows[[length(rows) + 1]] <- mk("one experiment refit of the cheap block (half the profiles)", g[["sec"]] / 60 * 0.4, g[["sec"]] / 60 * 0.7, g[["gb"]], "x100 replicates for SE_exp")
-  rows[[length(rows) + 1]] <- mk("one experiment refit of PIDC (half the profiles)", tp * 0.5, tp * 0.8, mp, "x100 replicates: this is about 15 to 35 h per arm, not 'seconds to minutes'") }
+  rows[[length(rows) + 1]] <- mk("one experiment refit of PIDC (half the profiles)", tp * 0.5, tp * 0.8, mp, sprintf("x100 replicates = %.0f to %.0f h of 32-thread wall time (the plan text says 'seconds to minutes each')", tp * 0.5 * 100 / 60, tp * 0.8 * 100 / 60)) }
 res <- do.call(rbind, rows); utils::write.csv(res, file.path(out, "schedule_estimates.csv"), row.names = FALSE); print(res, row.names = FALSE)

@@ -1,0 +1,7 @@
+"arm","n_eff","rho","se","mde_80","power_at_0.03","power_at_0.05","gate"
+"A",31.69,0,0.0074,0.021,0.98,1,"n_eff >= 27: test at +0.03"
+"A",31.69,0.893,0.0099,0.028,0.86,1,"n_eff >= 27: test at +0.03"
+"A",31.69,1.78,0.0151,0.042,0.51,0.91,"n_eff >= 27: test at +0.03"
+"B",10.02,0,0.0132,0.037,0.62,0.97,"secondary estimate, no p-value"
+"B",10.02,0.893,0.0177,0.049,0.4,0.81,"secondary estimate, no p-value"
+"B",10.02,1.78,0.0269,0.075,0.2,0.46,"secondary estimate, no p-value"

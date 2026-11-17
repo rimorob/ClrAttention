@@ -1,4 +1,4 @@
-scope	gene_a	gene_b	reason
+scope	orf_a	orf_b	reason
 all	YBL027W	YBR084C-A	paralog_set
 all	YBL072C	YER102W	paralog_set
 all	YBL087C	YER117W	paralog_set

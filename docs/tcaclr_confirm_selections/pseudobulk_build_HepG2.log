@@ -1,0 +1,6 @@
+[14:59:32] 145473 cells x 9624 genes; 4976 non-targeting cells; 56 gem groups; UMI median 15641 
+[14:59:36] control cells per gem group: min 5, median 91.5, max 123; groups using pooled statistics (< 30 controls): 3 
+[15:00:01] PCA on 25000 cells, 50 components; singular values 2629.3 ... 472.4; 29 s 
+[15:02:25] 2679 labels (130 non-targeting), cells per label: median 43; 173 s; VmHWM 4.8 GB 
+[15:04:28] energy test: 2548 perturbations tested, 1479 with p < 1e-3; 296 s; VmHWM 4.8 GB 
+[15:04:37] wrote results/tcaclr_confirm/pseudobulk/HepG2_rebuilt_bulk.h5ad; wall 305 s; VmHWM 4.8 GB 

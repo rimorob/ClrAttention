@@ -1,4 +1,4 @@
-variant	dataset	complex	gene
+variant	dataset	complex	orf
 large_ge20	kemmeren_cyc2008	CYC:19/22S regulator	YDL007W
 large_ge20	kemmeren_cyc2008	CYC:19/22S regulator	YDL097C
 large_ge20	kemmeren_cyc2008	CYC:19/22S regulator	YDL147W

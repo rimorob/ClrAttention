@@ -1,0 +1,108 @@
+72,83d71
+< ## ---- truths -----------------------------------------------------------------------------
+< truths <- list(DoRothEA_AB = dorothea_sets(genes), DoRothEA_ABC = dorothea_sets(genes, c("A", "B", "C")),
+<                CollecTRI = collectri_sets(genes), CORUM = corum_sets(genes),
+<                KD_response = response_sets(genes, path = opt$h5, use = B))
+< no_operon <- stats::setNames(character(0), character(0))
+< bench <- lapply(truths, function(r) list(reg = r, pairs = comembership_pairs(r, no_operon, genes),
+<                                          co = comember_matrix(r, G)))
+< for (nm in names(bench)) say(sprintf("truth %-12s %4d sets; %d scored pairs, base rate %.4f", nm,
+<   length(bench[[nm]]$reg$members), length(bench[[nm]]$pairs$label), mean(bench[[nm]]$pairs$label)))
+< halves <- lapply(bench, function(b) lapply(seq_len(opt$jack), function(r) {
+<   keep <- sample(b$pairs$genes_in, floor(length(b$pairs$genes_in) / 2))
+<   inh <- logical(G); inh[keep] <- TRUE; which(inh[b$pairs$i] & inh[b$pairs$j]) }))
+85,157c73,92
+< ## ---- methods ------------------------------------------------------------------------------
+< OMP_THREADS <- NULL
+< nthr <- function() if (is.null(opt$threads)) OMP_THREADS else opt$threads
+< blom <- function(M) { n <- ncol(M)
+<   t(apply(M, 1, function(x) stats::qnorm((rank(x, ties.method = "average") - 3 / 8) / (n + 1 / 4)))) }
+< abs_r <- function(M) { r <- abs(stats::cor(t(M))); r[is.na(r)] <- 0; diag(r) <- 0; r }
+< calib <- function(M) { diag(M) <- 0; clr_calibrate(M, method = "normal", combine = "stouffer") }
+< mi_of <- function(M) { m <- ClrAttention$new(M)$estimate_mi(bins = "hg", transform = "none", threads = nthr())$mi
+<                        diag(m) <- 0; m }
+< base_of <- function(M, kind) switch(kind, absr = abs_r(M), clr_absr = calib(abs_r(M)), mi = mi_of(M),
+<                                     clr_mi = calib(mi_of(M)), ns_absr = abs_r(blom(M)),
+<                                     clr_ns = calib(abs_r(blom(M))))
+< soft <- function(S) { A <- clr:::.softmax_rows(S, keff = 10, cap = 50L); e <- which(rowSums(A) == 0)
+<                       A[cbind(e, e)] <- 1; A }
+< walk <- function(Am, ts, fn) {
+<   P <- Matrix::Diagonal(nrow(Am), 1 - opt$alpha) + opt$alpha * Matrix::Matrix(Am, sparse = TRUE); Pt <- NULL
+<   for (t in seq_len(max(ts))) { Pt <- if (is.null(Pt)) as.matrix(P) else as.matrix(Pt %*% P)
+<     if (t %in% ts) { S <- (Pt + t(Pt)) / 2; diag(S) <- 0; fn(S, t) } }
+< }
+< heldout_t <- function(M, kind) {
+<   h <- sample(rep(1:2, length.out = ncol(M))); ut <- which(upper.tri(matrix(0, G, G))); best <- integer(0)
+<   for (d in 1:2) {
+<     sv <- base_of(M[, h != d], kind)[ut]; target <- as.integer(sv >= stats::quantile(sv, 0.99)); rm(sv)
+<     crit <- numeric(opt$tmax)
+<     walk(soft(base_of(M[, h == d], kind)), seq_len(opt$tmax), function(S, t) crit[t] <<- ap_fast(S[ut], target))
+<     best <- c(best, which.max(crit))
+<   }
+<   as.integer(round(exp(mean(log(best)))))
+< }
+< evalS <- function(S) lapply(stats::setNames(names(bench), names(bench)), function(nm) {
+<   b <- bench[[nm]]; sc <- S[cbind(b$pairs$i, b$pairs$j)]
+<   list(aupr = ap_fast(sc, b$pairs$label),
+<        jack = vapply(halves[[nm]], function(ix) ap_fast(sc[ix], b$pairs$label[ix]), 0),
+<        coherence = stats::median(regulon_coherence(S, b$reg, b$co, no_operon, genes), na.rm = TRUE)) })
+< kinds <- c("absr", "mi", "ns_absr", "clr_absr", "clr_mi", "clr_ns")
+< source("analysis/parallel.R")
+< pc <- par_start(mem_gb = opt$mem_gb, workers = opt$workers, say = say)
+< ev <- foreach(kind = kinds, j = seq_along(kinds), .errorhandling = "pass") %dopar% {
+<   set.seed(opt$seed + j)
+<   S <- base_of(X, kind); out <- list(); out[[kind]] <- evalS(S); tstar <- NA_integer_
+<   if (startsWith(kind, "clr")) {
+<     tstar <- heldout_t(X, kind)
+<     walk(soft(S), tstar, function(St, t) out[[paste0("att_", kind)]] <<- evalS(St))
+<   }
+<   par_release(); list(out = out, tstar = tstar, kind = kind)
+< }
+< par_stop(pc)
+< bad <- vapply(ev, function(x) inherits(x, "error"), NA)
+< if (any(bad)) say("failed: ", paste(unique(vapply(ev[bad], conditionMessage, "")), collapse = " | "))
+< ev <- ev[!bad]
+< tst <- stats::setNames(vapply(ev, `[[`, 0L, "tstar"), vapply(ev, `[[`, "", "kind"))
+< E <- do.call(c, lapply(ev, `[[`, "out"))
+< rows <- list()
+< for (m in names(E)) for (nm in names(bench)) {
+<   ref <- if (startsWith(m, "att_")) sub("^att_", "", m) else if (startsWith(m, "clr_")) {
+<     c(clr_absr = "absr", clr_mi = "mi", clr_ns = "ns_absr")[[m]] } else NA
+<   d <- if (!is.na(ref) && !is.null(E[[ref]])) E[[m]][[nm]]$jack - E[[ref]][[nm]]$jack else NA
+<   d0 <- if (!is.na(ref) && !is.null(E[[ref]])) E[[m]][[nm]]$aupr - E[[ref]][[nm]]$aupr else NA
+<   rows[[length(rows) + 1L]] <- data.frame(method = m, truth = nm, aupr = E[[m]][[nm]]$aupr,
+<     base_rate = mean(bench[[nm]]$pairs$label), coherence = E[[m]][[nm]]$coherence,
+<     vs = ref, d_aupr = d0, d_lo = d0 - 1.96 * stats::sd(d), d_hi = d0 + 1.96 * stats::sd(d),
+<     t = if (startsWith(m, "att_")) tst[[sub("^att_", "", m)]] else NA)
+< }
+< res <- do.call(rbind, rows); res$aupr_ratio <- res$aupr / res$base_rate
+< utils::write.csv(res, file.path(opt$out, "metrics.csv"), row.names = FALSE)
+< for (nm in names(bench)) {
+<   x <- res[res$truth == nm, ]; x <- x[order(-x$aupr), ]
+<   say(sprintf("== %s (base rate %.4f)", nm, x$base_rate[1]))
+<   for (k in seq_len(nrow(x))) say(sprintf("   %-14s %s AUPR %.4f (x%.2f) coherence %.3f%s", x$method[k],
+<     if (is.na(x$t[k])) "    " else sprintf("t=%2d", x$t[k]), x$aupr[k], x$aupr_ratio[k], x$coherence[k],
+<     if (is.na(x$vs[k])) "" else sprintf("  | vs %-8s %+.4f [%+.4f, %+.4f]", x$vs[k], x$d_aupr[k], x$d_lo[k], x$d_hi[k])))
+< }
+< say("done")
+---
+> ## ======================================================================================================================
+> ## Appended for docs/plans/tcaclr_confirm_plan.md (Arm A, HepG2): everything ABOVE this line is analysis/perturbseq_bulk.R lines 1-71,
+> ## byte-identical (the K562 recipe: significant-phenotype filter, seeded half split, missing and constant-gene filters); run with
+> ## --h5 <HepG2 bulk h5ad> --out <dir>. Below: the duplicate-symbol rule of analysis/baselines.R (drop every row of a duplicated symbol, as for RPE1
+> ## HSPA14) and the export of the network half A. Nothing below reads a truth; nothing is scored.
+> dup <- rownames(X) %in% rownames(X)[duplicated(rownames(X))]
+> say(sprintf("duplicated gene names: %d rows (%s); constant genes already removed above", sum(dup), paste(unique(rownames(X)[dup]), collapse = ", ")))
+> writeLines(rownames(X)[dup], file.path(opt$out, "genes_dropped.txt")); X <- X[!dup, , drop = FALSE]
+> expr_f <- file.path(opt$out, "expression.tsv")
+> utils::write.table(data.frame(gene = rownames(X), X, check.names = FALSE), expr_f, sep = "\t", quote = FALSE, row.names = FALSE)
+> sym_of <- function(p) sub("^[0-9]+_(.+)_P[0-9P]+_ENSG[0-9]+$", "\\1", p)
+> writeLines(rownames(X), file.path(opt$out, "universe_genes.txt"))
+> writeLines(sort(unique(sym_of(A))), file.path(opt$out, "perturbed_genes_networkhalf.txt"))
+> writeLines(sort(unique(sym_of(c(A, B)))), file.path(opt$out, "perturbed_genes_significant.txt"))
+> writeLines(sort(unique(sym_of(pert[!grepl("non-targeting", pert)]))), file.path(opt$out, "perturbed_genes_panel.txt"))
+> utils::write.csv(data.frame(profiles_in_file = length(pert), nontargeting_labels = sum(grepl("non-targeting", pert)), significant = length(K), half_A_network = length(A),
+>   half_B = length(B), genes_in_file = length(rd("/var/gene_name")), genes_after_filters = G, duplicated_rows_dropped = sum(dup), universe = nrow(X),
+>   profiles_in_matrix = ncol(X), expression_sha256 = digest::digest(file = expr_f, algo = "sha256"),
+>   perturbed_in_A_unique_genes = length(unique(sym_of(A)))), file.path(opt$out, "export_counts.csv"), row.names = FALSE)
+> say(sprintf("wrote %s: %d genes x %d profiles", expr_f, nrow(X), ncol(X)))

@@ -4,6 +4,8 @@
 # make_variants() reproduces the variant list of that builder plus the plan's size classes (mid split 7-10 / 11-19);
 # the only new arguments are the dataset-specific ribosome predicate and the ribosome-subunit complex finders.
 # Builds and counts structure only; no expression value or score is read.
+# File formats are those of docs/complex_confirm_selections (members: variant, dataset, complex, orf; excluded pairs: scope, orf_a, orf_b, reason);
+# for the human arm the 'orf' columns hold gene symbols in the spelling of the expression matrix.
 
 filt <- function(sets, u, lo = 3L, hi = 200L) { s <- lapply(sets, function(g) intersect(g, u)); s[lengths(s) >= lo & lengths(s) <= hi] }
 merge_sets <- function(s) {
@@ -60,7 +62,7 @@ make_variants <- function(gen, u, ribo_frac, sub_pairs, perturbed, dataset, ribo
   rows <- list(); counts <- list(); sizes <- NULL
   for (v in names(variants)) {
     s <- variants[[v]]
-    for (k in names(s)) rows[[length(rows) + 1]] <- data.frame(variant = v, dataset = dataset, complex = k, gene = s[[k]])
+    for (k in names(s)) rows[[length(rows) + 1]] <- data.frame(variant = v, dataset = dataset, complex = k, orf = s[[k]])
     st <- structure_of(s, if (v == "main_xsub_excl") xgroups else list()); w <- st$w / max(st$n_pos, 1)
     tg <- sort(unique(unlist(s)))
     counts[[length(counts) + 1]] <- data.frame(dataset = dataset, variant = v, n_universe = length(u), n_complexes = length(s),
@@ -76,9 +78,9 @@ make_variants <- function(gen, u, ribo_frac, sub_pairs, perturbed, dataset, ribo
 }
 excluded_pairs <- function(paralog_sets, sp, main) {
   pp <- do.call(rbind, lapply(paralog_sets, function(ps) if (length(ps) >= 2) { cb <- utils::combn(sort(ps), 2)
-    data.frame(scope = "all", gene_a = cb[1, ], gene_b = cb[2, ], reason = "paralog_set") }))
+    data.frame(scope = "all", orf_a = cb[1, ], orf_b = cb[2, ], reason = "paralog_set") }))
   xs <- do.call(rbind, lapply(names(sp), function(nm) { a <- main[[sp[[nm]][1]]]; b <- main[[sp[[nm]][2]]]
-    e <- expand.grid(gene_a = a, gene_b = b, stringsAsFactors = FALSE); e <- e[e$gene_a != e$gene_b, ]
-    data.frame(scope = "main_xsub_excl", gene_a = pmin(e$gene_a, e$gene_b), gene_b = pmax(e$gene_a, e$gene_b), reason = paste0("cross_subunit_", nm)) }))
-  ex <- rbind(pp, xs); ex[order(ex$scope, ex$reason, ex$gene_a, ex$gene_b), ]
+    e <- expand.grid(orf_a = a, orf_b = b, stringsAsFactors = FALSE); e <- e[e$orf_a != e$orf_b, ]
+    data.frame(scope = "main_xsub_excl", orf_a = pmin(e$orf_a, e$orf_b), orf_b = pmax(e$orf_a, e$orf_b), reason = paste0("cross_subunit_", nm)) }))
+  ex <- rbind(pp, xs); ex[order(ex$scope, ex$reason, ex$orf_a, ex$orf_b), ]
 }
