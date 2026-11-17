@@ -228,6 +228,8 @@ test_that("end to end: gates, score, expjack, collect, report; Arm B has no p-va
   h3 <- utils::read.csv(file.path(outA, "h3.csv")); expect_true(all(h3$note[h3$method_b %in% c("GENIE3", "GRNBoost2")] == TC$note_ge)); expect_true(all(is.na(h3$se_exp[h3$method_b %in% c("GENIE3", "GRNBoost2")])))
   expect_true(all(!is.na(h3$se_exp[h3$method_b %in% c("aCLR", "CLR", "absr")])))
   sent <- readLines(file.path(outA, "sentences.txt")); expect_true(any(grepl(TC$note_ge, sent, fixed = TRUE))); expect_true(any(grepl("Trap:", sent))); expect_true(any(grepl("Perturbed-gene split", sent)))
+  expect_true(any(grepl("Built-in data-truth link: 16 of the 57 truth genes", sent))); expect_true(any(grepl("Power gate: n_eff = 30.0", sent)))
+  pw <- utils::read.csv(file.path(outA, "pairwise.csv")); expect_true(all(pw$note[pw$method_a %in% c("GENIE3", "GRNBoost2") | pw$method_b %in% c("GENIE3", "GRNBoost2")] == TC$note_ge)); expect_true(all(pw$note[!(pw$method_a %in% c("GENIE3", "GRNBoost2") | pw$method_b %in% c("GENIE3", "GRNBoost2"))] == ""))
   expect_true(file.exists(file.path(outA, "readouts.csv"))); ro <- utils::read.csv(file.path(outA, "readouts.csv")); expect_true(any(grepl("^rewire_mean_of_2", ro$readout))); expect_true(any(grepl("^hub_stratified", ro$readout)))
   # a refittable comparator without experiment replicates gets no p-value and blocks the best-of statement
   outE <- file.path(tmp, "outE"); dir.create(outE, showWarnings = FALSE); file.copy(file.path(outA, "score"), outE, recursive = TRUE); dir.create(file.path(outE, "expjack"), showWarnings = FALSE)

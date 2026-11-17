@@ -133,7 +133,8 @@ if (opt$stage == "score") {
   cjl <- do.call(rbind, lapply(cjm, function(m) data.frame(rep = seq_len(nrow(cj)), method = m, aupr = cj[, m], n_pairs = cj[, "n_pairs"], n_pos = cj[, "n_pos"])))
   ## write (staging, then rename)
   outs <- list(truth_counts.csv = cnt, metrics.csv = met, jack_gene_replicates.csv = repdf, jack_complex_replicates.csv = cjl, per_complex_ap.csv = pcdf, complex_scores.csv = csdf,
-               complex_contrib.csv = contrib, descriptors.csv = desc, h2_slopes.csv = sl, neff.csv = data.frame(truth = "main", n_eff = neff, n_eff_fractional = neff_frac, n_pos = sum(T$main$label), n_complexes = nC))
+               complex_contrib.csv = contrib, descriptors.csv = desc, h2_slopes.csv = sl, neff.csv = data.frame(truth = "main", n_eff = neff, n_eff_fractional = neff_frac, n_pos = sum(T$main$label), n_complexes = nC, n_truth_genes = length(genes_main),
+                                   n_truth_genes_perturbed = if (is.null(perturbed)) NA_integer_ else length(intersect(genes_main, perturbed))))
   for (f in names(outs)) tc_wcsv(outs[[f]], file.path(SC, f))
   if (nzchar(opt$smoke_ref)) { ref <- utils::read.csv(opt$smoke_ref, stringsAsFactors = FALSE); mm <- merge(met[met$scope == "raw", ], ref, by = c("truth", "method"), suffixes = c("", "_ref"))
     dd <- max(abs(mm$aupr - mm$aupr_ref)); tc_wcsv(data.frame(gate = "5 score: AUPR against the registered reference (tolerance 1e-12)", n = nrow(mm), max_abs_diff = dd, pass = dd <= 1e-12), file.path(SC, "smoke_gate.csv"))
@@ -220,6 +221,7 @@ if (opt$stage == "report") {
   h1 <- contrast("main", "raw", "tcaCLR", "aCLR")
   h3rows <- do.call(rbind, lapply(comps, function(cm) contrast("main", "raw", "tcaCLR", cm)))
   pair_m <- core; prs <- utils::combn(pair_m, 2); pairwise <- do.call(rbind, lapply(seq_len(ncol(prs)), function(k) contrast("main", "raw", prs[1, k], prs[2, k])))
+  pairwise$note <- ifelse(pairwise$method_a %in% TC$no_refit | pairwise$method_b %in% TC$no_refit, TC$note_ge, "")
   ## every truth and scope: tcaCLR - aCLR (P), tcaCLR - CLR (C1), aCLR - CLR (C2), gene interval and, where refitted, the experiment component
   ctr <- do.call(rbind, lapply(unique(met$scope), function(sc_) do.call(rbind, lapply(all_truths, function(v) do.call(rbind, lapply(list(c("P", "tcaCLR", "aCLR"), c("C1", "tcaCLR", "CLR"), c("C2", "aCLR", "CLR")), function(ab)
     if (all(ab[2:3] %in% met$method[met$scope == sc_ & met$truth == v])) cbind(row = ab[1], contrast(v, sc_, ab[2], ab[3])) ))))))
@@ -316,6 +318,10 @@ if (opt$stage == "report") {
       if (any(h3$method_b %in% TC$no_refit)) paste0("- Note: ", TC$note_ge), ""),
     "## Secondaries (intervals and script-chosen sentences; no p-values)", paste0("- ", sec$sentence), if (!is.na(pert_sent)) paste0("- ", pert_sent), "",
     "## Read-outs of the same operator", "- Exploratory, one table (readouts.csv), intervals only; none may be cited in place of H1; nothing is selected among them.")
+  sens <- switch(cls, test_0.03 = sprintf("Power gate: n_eff = %.1f (overlap-counted); the registered sensitivity is +0.03.", neff), test_0.04 = sprintf("Power gate: n_eff = %.1f (overlap-counted), between 15 and 27; the test runs with its sensitivity stated as +0.04.", neff),
+                 estimate_only = sprintf("Power gate: n_eff = %.1f (overlap-counted), below 15; estimate only, the arm is not a test.", neff), sprintf("Arm B: n_eff = %.1f (overlap-counted); estimate only by registration.", neff))
+  link <- if (is.null(neffd$n_truth_genes_perturbed) || is.na(neffd$n_truth_genes_perturbed[1])) NULL else sprintf("Built-in data-truth link: %d of the %d truth genes are themselves perturbed in the panel.", neffd$n_truth_genes_perturbed[1], neffd$n_truth_genes[1])
+  sl_txt <- append(sl_txt, c("", "## Gates and disclosure", paste0("- ", sens), if (!is.null(link)) paste0("- ", link)))
   writeLines(sl_txt, file.path(opt$out, "sentences.txt"))
   print(h1row[, c("row", "d", "se_gene", "se_exp", "total_lo", "total_hi", "p_one_sided", "complex_lo", "complex_hi", "share_top3", "n_improved", "n_complexes_ge10pos")], row.names = FALSE)
   cat(sl_txt, sep = "\n"); say("REPORT STAGE done"); quit(save = "no")
