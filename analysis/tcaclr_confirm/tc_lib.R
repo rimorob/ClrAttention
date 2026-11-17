@@ -45,6 +45,7 @@ TC$trap <- paste0("tcaCLR minus CLR has a smaller standard error than tcaCLR min
                   "and may exclude 0 where tcaCLR minus aCLR does not; this is never a basis for 'tcaCLR beats CLR' (E. coli S3).")
 TC$none_map <- stats::setNames(character(0), character(0))
 
+tc_fmt_p <- function(p) if (is.na(p)) "= NA" else if (p < 1e-4) "< 0.0001" else sprintf("= %.4f", p)
 tc_name <- function(m) ifelse(m %in% names(TC$display), TC$display[m], m)
 
 tc_say <- function(log, ...) {
@@ -275,6 +276,9 @@ tc_complex_contrib <- function(score_a, score_b, p, sets, G, pc = NULL) {
 }
 # n_eff: inverse Herfindahl index of the shares of the positive pairs by complex (multiply-shared pairs split equally)
 tc_neff <- function(pc, n_pos) { s <- tapply(pc$w, pc$cx, sum) / n_pos; 1 / sum(s^2) }
+# overlap-counted n_eff: a pair that lies in m complexes counts fully in each (the definition of the anchors' k rule and of the plan's power numbers,
+# yeast_complexes_counts.csv column n_eff_overlap_counted; net4 main 15.07). The power gate (section 6) uses this one; the plan does not say which.
+tc_neff_overlap <- function(pc) { s <- as.numeric(table(pc$cx)); s <- s / sum(s); 1 / sum(s^2) }
 # mandatory descriptors from the per-complex contributions
 tc_descriptors <- function(d_c, size_c, d) {
   o <- order(d_c, decreasing = TRUE); cs <- cumsum(d_c[o])
@@ -343,7 +347,7 @@ tc_claim_sentence <- function(p, d, neff_class, large_share, claim = TC$claim_a)
     return(paste0("The registered test is not run (n_eff below 15: estimate only; the arm is not a test); ", TC$ecoli_fail, ". Estimate: d = ", sprintf("%+.4f", d), "."))
   pass <- is.finite(p) && p < TC$alpha_test && d >= TC$min_effect
   if (pass) paste0(claim, if (is.finite(large_share) && large_share > TC$share_large) paste0("; ", TC$large_clause) else "", "; ", TC$ecoli_fail, ".")
-  else paste0("The claim is not made: tcaCLR does not exceed aCLR at one-sided p < 0.025 with d at least +0.005 (d = ", sprintf("%+.4f", d), ", one-sided p = ", sprintf("%.4f", p), "); ", TC$ecoli_fail, ".")
+  else paste0("The claim is not made: tcaCLR does not exceed aCLR at one-sided p < 0.025 with d at least +0.005 (d = ", sprintf("%+.4f", d), ", one-sided p ", tc_fmt_p(p), "); ", TC$ecoli_fail, ".")
 }
 tc_breadth_sentence <- function(br, k_carry, d) {
   if (!is.finite(br$p_sign_one_sided)) return("Breadth test not evaluable (no complex with 10 or more positives and a decided difference).")

@@ -67,6 +67,8 @@ test_that("pair credit adds up to AP, contributions add up to d, n_eff is the in
   expect_equal(tc_neff(pc, sum(p$label)), 1 / sum((tapply(pc$w, pc$cx, sum) / sum(p$label))^2))
   two <- data.frame(pair = 1:8, cx = rep(1:2, 4), w = 1); expect_equal(tc_neff(two, 8), 2)
   sh <- data.frame(pair = 1:4, cx = c(1, 1, 1, 2), w = 1); expect_equal(tc_neff(sh, 4), 1 / (0.75^2 + 0.25^2))
+  mult <- data.frame(pair = c(1, 1, 2), cx = c(1, 2, 1), w = c(0.5, 0.5, 1)); expect_equal(tc_neff(mult, 2), 1.6); expect_equal(tc_neff_overlap(mult), 1.8)   # fractional vs overlap-counted
+  expect_equal(tc_neff_overlap(two), 2)
 })
 
 test_that("contributions with a known answer: gain carried by one complex", {
@@ -156,6 +158,17 @@ test_that("score files: packed index, directory reader, length validation", {
   expect_equal(tc_unpack(v, G), S)
 })
 
+test_that("p formatting for sentences", { expect_identical(tc_fmt_p(0.00001), "< 0.0001"); expect_identical(tc_fmt_p(0.0047), "= 0.0047"); expect_identical(tc_fmt_p(NA_real_), "= NA") })
+
+test_that("PIDC refit through tools/pidc_chunked.jl equals the NetworkInference package output (tools/pidc.jl) on a small matrix", {
+  jl <- path.expand("~/.juliaup/bin/julia"); skip_if_not(file.exists(jl))
+  set.seed(4); G <- 60; X <- matrix(rnorm(G * 50), G, 50, dimnames = list(sprintf("G%03d", 1:G), NULL)); X[1:15, ] <- X[1:15, ] + rep(rnorm(50), each = 15)
+  f <- tc_pidc_refit(X, threads = 1L, tmpdir = tmp); fin <- file.path(tmp, "ref.tsv"); fout <- file.path(tmp, "ref_edges.tsv")
+  utils::write.table(cbind(gene = rownames(X), as.data.frame(X)), fin, sep = "\t", quote = FALSE, row.names = FALSE, col.names = c("gene", paste0("c", 1:50)))
+  rc <- system2("env", c("-i", paste0("HOME=", Sys.getenv("HOME")), "PATH=/usr/bin:/bin", jl, "+1.6", "-t", "1", "tools/pidc.jl", fin, fout), stdout = FALSE, stderr = FALSE); expect_equal(rc, 0L)
+  e <- utils::read.delim(fout, header = FALSE, stringsAsFactors = FALSE); w <- f(match(e[[1]], rownames(X)), match(e[[2]], rownames(X))); expect_true(max(abs(w - e[[3]])) < 1e-12)
+})
+
 test_that("tc_fit_three equals the net4 cc_fit_three on a small matrix (bit-identical)", {
   skip_if_not(file.exists("analysis/complex_confirm/cc_lib.R"))
   set.seed(8); X <- matrix(rnorm(60 * 30), 60, 30); X[1:10, ] <- X[1:10, ] + rep(rnorm(30), each = 10)
@@ -216,6 +229,12 @@ test_that("end to end: gates, score, expjack, collect, report; Arm B has no p-va
   expect_true(all(!is.na(h3$se_exp[h3$method_b %in% c("aCLR", "CLR", "absr")])))
   sent <- readLines(file.path(outA, "sentences.txt")); expect_true(any(grepl(TC$note_ge, sent, fixed = TRUE))); expect_true(any(grepl("Trap:", sent))); expect_true(any(grepl("Perturbed-gene split", sent)))
   expect_true(file.exists(file.path(outA, "readouts.csv"))); ro <- utils::read.csv(file.path(outA, "readouts.csv")); expect_true(any(grepl("^rewire_mean_of_2", ro$readout))); expect_true(any(grepl("^hub_stratified", ro$readout)))
+  # a refittable comparator without experiment replicates gets no p-value and blocks the best-of statement
+  outE <- file.path(tmp, "outE"); dir.create(outE, showWarnings = FALSE); file.copy(file.path(outA, "score"), outE, recursive = TRUE); dir.create(file.path(outE, "expjack"), showWarnings = FALSE)
+  utils::write.csv(er[er$method != "absr", ], file.path(outE, "expjack", "replicates_plan.csv"), row.names = FALSE)
+  x <- run("A", "report", outE, c("--allow_missing", "1", "--validation", "1", "--neff_override", "30")); expect_equal(rcof(x), 0L, info = paste(tail(x, 8), collapse = "\n"))
+  hE <- utils::read.csv(file.path(outE, "h3.csv")); expect_true(is.na(hE$p_one_sided[hE$method_b == "absr"])); expect_true(hE$exp_missing[hE$method_b == "absr"]); expect_false(is.na(hE$p_one_sided[hE$method_b == "GENIE3"]))
+  expect_true(any(grepl("cannot be declared the best", readLines(file.path(outE, "sentences.txt")))))
   # Arm B: same estimand and descriptors, no p-value, no claim, no best-of statement
   outB <- file.path(tmp, "outB"); dir.create(outB, showWarnings = FALSE); file.copy(file.path(outA, "score"), outB, recursive = TRUE); file.copy(file.path(outA, "expjack"), outB, recursive = TRUE)
   x <- run("B", "report", outB, c("--allow_missing", "1", "--validation", "1", "--neff_override", "30")); expect_equal(rcof(x), 0L, info = paste(tail(x, 8), collapse = "\n"))

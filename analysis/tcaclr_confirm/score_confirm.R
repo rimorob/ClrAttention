@@ -61,11 +61,12 @@ if (opt$stage == "gates") {
   tc <- do.call(rbind, lapply(names(T), function(v) { p <- T[[v]]; data.frame(truth = v, role = p$role, n_complexes = length(p$sets), n_genes_in = length(p$genes_in), n_pairs = length(p$label), n_pos = sum(p$label),
     base_rate = mean(p$label), n_pairs_removed = p$n_removed, structure_md5 = tc_truth_struct_hash(p), note = p$note, stringsAsFactors = FALSE) }))
   if (nzchar(opt$counts)) { cn <- utils::read.csv(opt$counts, stringsAsFactors = FALSE)
-    for (v in intersect(tc$truth, cn$variant)) { r <- cn[cn$variant == v, ]; ok <- tc$n_pairs[tc$truth == v] == r$n_pairs[1] && tc$n_pos[tc$truth == v] == r$n_pos[1]
+    for (v in intersect(tc$truth, cn$variant)) { r <- cn[cn$variant == v, ]   # size strata: the freeze counts pairs inside the stratum's own genes, the scored stratum keeps the main universe; positives only
+      ok <- (v %in% c("small_3to6", "mid_7to19", "large_ge20", "mid_7to10", "mid_11to19") || tc$n_pairs[tc$truth == v] == r$n_pairs[1]) && tc$n_pos[tc$truth == v] == r$n_pos[1]
       add("2 truth", paste0("counts match the freeze: ", v), ok, sprintf("%d/%d pairs, %d/%d pos", tc$n_pairs[tc$truth == v], r$n_pairs[1], tc$n_pos[tc$truth == v], r$n_pos[1])) } }
-  pc <- tc_pair_complex(T$main$sets, T$main, G); neff <- tc_neff(pc, sum(T$main$label)); if (VAL && opt$neff_override > 0) neff <- opt$neff_override
+  pc <- tc_pair_complex(T$main$sets, T$main, G); neff_frac <- tc_neff(pc, sum(T$main$label)); neff <- tc_neff_overlap(pc); if (VAL && opt$neff_override > 0) neff <- opt$neff_override
   cls <- if (ARM == "B") "arm_B_estimate" else if (neff >= TC$neff_test) "test_0.03" else if (neff >= TC$neff_degraded) "test_0.04" else "estimate_only"
-  add("2 truth", "n_eff of the main truth", TRUE, sprintf("%.3f", neff)); add("2 truth", "power class", TRUE, cls)
+  add("2 truth", "n_eff of the main truth, overlap-counted (the gate's definition)", TRUE, sprintf("%.3f", neff)); add("2 truth", "n_eff of the main truth, fractional assignment (descriptive)", TRUE, sprintf("%.3f", neff_frac)); add("2 truth", "power class", TRUE, cls)
   # score files: present, right length, finite
   for (m in score_methods) { v <- tc_scores_packed(st, m); add("5 score", paste0(m, ": length and finiteness"), all(is.finite(v)) || m %in% c("GENIE3", "GRNBoost2", "PIDC"), sprintf("nonfinite %d", sum(!is.finite(v)))); rm(v) }
   # the sort-once replicate AP equals ap_fast on the subset (bit-identical)
@@ -86,7 +87,7 @@ if (opt$stage == "score") {
   halves <- tc_draw_halves(T, opt$jack, opt$jack_seed)
   say("truths: ", paste(sprintf("%s (%d pairs, %d pos)", tn, vapply(T, function(p) length(p$label), 0L), vapply(T, function(p) sum(p$label), 0L)), collapse = "; "))
   idx <- lapply(T, function(p) tc_pair_index(p$i, p$j))
-  pc <- tc_pair_complex(T$main$sets, T$main, G); neff <- tc_neff(pc, sum(T$main$label)); say(sprintf("main truth: n_eff %.3f", neff))
+  pc <- tc_pair_complex(T$main$sets, T$main, G); neff_frac <- tc_neff(pc, sum(T$main$label)); neff <- tc_neff_overlap(pc); say(sprintf("main truth: n_eff %.3f overlap-counted (gate definition), %.3f fractional", neff, neff_frac))
   cnt <- do.call(rbind, lapply(tn, function(v) { p <- T[[v]]; data.frame(truth = v, role = p$role, n_complexes = length(p$sets), n_genes_in = length(p$genes_in), n_pairs = length(p$label), n_pos = sum(p$label),
     base_rate = mean(p$label), n_pairs_removed = p$n_removed, structure_md5 = tc_truth_struct_hash(p), note = p$note, stringsAsFactors = FALSE) }))
   opm <- tc_paralog_map(tr$excl); cmain <- T$main$sets; nC <- length(cmain); size_c <- lengths(cmain)
@@ -132,7 +133,7 @@ if (opt$stage == "score") {
   cjl <- do.call(rbind, lapply(cjm, function(m) data.frame(rep = seq_len(nrow(cj)), method = m, aupr = cj[, m], n_pairs = cj[, "n_pairs"], n_pos = cj[, "n_pos"])))
   ## write (staging, then rename)
   outs <- list(truth_counts.csv = cnt, metrics.csv = met, jack_gene_replicates.csv = repdf, jack_complex_replicates.csv = cjl, per_complex_ap.csv = pcdf, complex_scores.csv = csdf,
-               complex_contrib.csv = contrib, descriptors.csv = desc, h2_slopes.csv = sl, neff.csv = data.frame(truth = "main", n_eff = neff, n_pos = sum(T$main$label), n_complexes = nC))
+               complex_contrib.csv = contrib, descriptors.csv = desc, h2_slopes.csv = sl, neff.csv = data.frame(truth = "main", n_eff = neff, n_eff_fractional = neff_frac, n_pos = sum(T$main$label), n_complexes = nC))
   for (f in names(outs)) tc_wcsv(outs[[f]], file.path(SC, f))
   if (nzchar(opt$smoke_ref)) { ref <- utils::read.csv(opt$smoke_ref, stringsAsFactors = FALSE); mm <- merge(met[met$scope == "raw", ], ref, by = c("truth", "method"), suffixes = c("", "_ref"))
     dd <- max(abs(mm$aupr - mm$aupr_ref)); tc_wcsv(data.frame(gate = "5 score: AUPR against the registered reference (tolerance 1e-12)", n = nrow(mm), max_abs_diff = dd, pass = dd <= 1e-12), file.path(SC, "smoke_gate.csv"))
@@ -207,9 +208,11 @@ if (opt$stage == "report") {
     se_e <- NA_real_; ne <- 0L
     if (sc_ == "raw" && nzchar(src) && !(a %in% TC$no_refit) && !(b %in% TC$no_refit)) { ea <- ereps(src, tr_, a); eb <- ereps(src, tr_, b); if (length(ea) > 1L && length(ea) == length(eb)) { se_e <- stats::sd(ea - eb); ne <- length(ea) } }
     tt <- tc_total(d, gi$se_gene, se_e)
+    needs_exp <- !(a %in% TC$no_refit) && !(b %in% TC$no_refit)     # CLR, aCLR, tcaCLR, |r|, PIDC are refitted; GENIE3 and GRNBoost2 are gene-only by registration
+    p_ok <- p_allowed && sc_ == "raw" && (tt$exp_included || !needs_exp)
     data.frame(truth = tr_, scope = sc_, method_a = a, method_b = b, contrast = paste(tc_name(a), "-", tc_name(b)), d = d, se_gene = gi$se_gene, se_exp = se_e, n_exp_reps = ne, se_total = tt$se_total,
                exp_included = tt$exp_included, total_lo = tt$total_lo, total_hi = tt$total_hi, gene_lo = gi$gene_lo, gene_hi = gi$gene_hi, gene_pct_lo = gi$pct_lo, gene_pct_hi = gi$pct_hi,
-               gene_skew = gi$skew, n_gene_reps = gi$n_rep, z = tt$z, p_one_sided = if (p_allowed) tt$p_one_sided else NA_real_, stringsAsFactors = FALSE)
+               gene_skew = gi$skew, n_gene_reps = gi$n_rep, z = tt$z, p_one_sided = if (p_ok) tt$p_one_sided else NA_real_, exp_missing = needs_exp && !tt$exp_included, stringsAsFactors = FALSE)
   }
   have_m <- unique(met$method[met$scope == "raw"]); core <- intersect(TC$methods, have_m); comps <- intersect(TC$comparators, core)
   all_truths <- unique(met$truth)
@@ -217,8 +220,12 @@ if (opt$stage == "report") {
   h1 <- contrast("main", "raw", "tcaCLR", "aCLR")
   h3rows <- do.call(rbind, lapply(comps, function(cm) contrast("main", "raw", "tcaCLR", cm)))
   pair_m <- core; prs <- utils::combn(pair_m, 2); pairwise <- do.call(rbind, lapply(seq_len(ncol(prs)), function(k) contrast("main", "raw", prs[1, k], prs[2, k])))
+  ## every truth and scope: tcaCLR - aCLR (P), tcaCLR - CLR (C1), aCLR - CLR (C2), gene interval and, where refitted, the experiment component
+  ctr <- do.call(rbind, lapply(unique(met$scope), function(sc_) do.call(rbind, lapply(all_truths, function(v) do.call(rbind, lapply(list(c("P", "tcaCLR", "aCLR"), c("C1", "tcaCLR", "CLR"), c("C2", "aCLR", "CLR")), function(ab)
+    if (all(ab[2:3] %in% met$method[met$scope == sc_ & met$truth == v])) cbind(row = ab[1], contrast(v, sc_, ab[2], ab[3])) ))))))
   ## alternative experiment sources for the primary contrast (reported side by side)
-  alt <- if (length(srcs)) do.call(rbind, lapply(names(srcs), function(s) { x <- contrast("main", "raw", "tcaCLR", "aCLR", s); x$exp_source <- s; x$is_primary <- s == prim; x })) else NULL
+  alt <- if (length(srcs)) do.call(rbind, lapply(names(srcs), function(s) do.call(rbind, lapply(list(c("P", "tcaCLR", "aCLR"), c("C1", "tcaCLR", "CLR"), c("C2", "aCLR", "CLR")), function(ab)
+    if (all(ab[2:3] %in% unique(srcs[[s]]$method))) { x <- cbind(row = ab[1], contrast("main", "raw", ab[2], ab[3], s)); x$exp_source <- s; x$is_primary <- s == prim; x })))) else NULL
   ## complex-level sensitivity (labelled; never decides)
   pa <- stats::setNames(met$aupr[met$truth == "main" & met$scope == "raw"], met$method[met$truth == "main" & met$scope == "raw"])
   cjrow <- function(a, b) { ra <- cj$aupr[cj$method == a][order(cj$rep[cj$method == a])]; rb <- cj$aupr[cj$method == b][order(cj$rep[cj$method == b])]; i <- tc_interval(pa[[a]] - pa[[b]], ra - rb)
@@ -249,11 +256,13 @@ if (opt$stage == "report") {
     if (p_allowed) { hh <- tc_h3(data.frame(comparator = h3rows$method_b, d = h3rows$d, p = h3rows$p_one_sided, stringsAsFactors = FALSE))
       h3rows$won_iut <- hh$tab$won_iut; h3rows$holm_p <- hh$tab$holm_p; h3rows$won_holm <- hh$tab$won_holm
       lost <- tc_name(hh$tab$comparator[!hh$tab$won_iut])
-      h3_sent <- if (hh$best) sprintf("tcaCLR is the best of the %d methods run (every one of the %d comparisons won at one-sided 0.025; intersection-union, no correction).", hh$k, nrow(hh$tab))
+      miss <- h3rows$method_b[h3rows$exp_missing]
+      h3_sent <- if (length(miss)) sprintf("tcaCLR cannot be declared the best of the %d methods run: the experiment component is missing for %s, so those comparisons have no p-value.", hh$k, paste(tc_name(miss), collapse = ", "))
+                 else if (hh$best) sprintf("tcaCLR is the best of the %d methods run (every one of the %d comparisons won at one-sided 0.025; intersection-union, no correction).", hh$k, nrow(hh$tab))
                  else sprintf("tcaCLR is not shown to be the best of the %d methods run: it does not exceed %s at one-sided 0.025 (intersection-union).", hh$k, paste(lost, collapse = ", "))
       if (any(h3rows$method_b %in% TC$no_refit)) h3_sent <- c(h3_sent, paste0("Note: ", TC$note_ge))
-      ind_sent <- vapply(seq_len(nrow(h3rows)), function(k) if (h3rows$won_holm[k]) sprintf("tcaCLR exceeds %s (Holm-adjusted one-sided p = %.4f, %d comparisons).", tc_name(h3rows$method_b[k]), h3rows$holm_p[k], nrow(h3rows)) else
-                         sprintf("tcaCLR is not shown to exceed %s (Holm-adjusted one-sided p = %.4f, %d comparisons).", tc_name(h3rows$method_b[k]), h3rows$holm_p[k], nrow(h3rows)), "")
+      ind_sent <- vapply(seq_len(nrow(h3rows)), function(k) if (h3rows$exp_missing[k]) sprintf("tcaCLR versus %s: no statement (experiment component missing).", tc_name(h3rows$method_b[k])) else if (h3rows$won_holm[k]) sprintf("tcaCLR exceeds %s (Holm-adjusted one-sided p %s, %d comparisons).", tc_name(h3rows$method_b[k]), tc_fmt_p(h3rows$holm_p[k]), nrow(h3rows)) else
+                         sprintf("tcaCLR is not shown to exceed %s (Holm-adjusted one-sided p %s, %d comparisons).", tc_name(h3rows$method_b[k]), tc_fmt_p(h3rows$holm_p[k]), nrow(h3rows)), "")
       ind_sent <- c(ind_sent, if (any(h3rows$method_b %in% TC$no_refit)) paste0("Note: ", TC$note_ge))
     } else { h3rows$won_iut <- NA; h3rows$holm_p <- NA_real_; h3rows$won_holm <- NA }
     h3 <- h3rows }
@@ -295,7 +304,7 @@ if (opt$stage == "report") {
     data.frame(S_zero = isent[["S_zero"]], S_min = isent[["S_min"]], S_ecoli = isent[["S_ecoli"]], S_fixed = isent[["S_fixed"]], claim = claim, breadth_sentence = br_sent, h2_sentence = h2_sent, git_head = G_HEAD, stringsAsFactors = FALSE))
   tc_wcsv(h1row, est_f)
   if (!is.null(h3)) tc_wcsv(h3, file.path(opt$out, "h3.csv"))
-  tc_wcsv(pairwise, file.path(opt$out, "pairwise.csv")); tc_wcsv(sec, file.path(opt$out, "secondaries.csv")); tc_wcsv(h2tab, file.path(opt$out, "h2.csv"))
+  tc_wcsv(pairwise, file.path(opt$out, "pairwise.csv")); tc_wcsv(ctr, file.path(opt$out, "contrasts.csv")); tc_wcsv(sec, file.path(opt$out, "secondaries.csv")); tc_wcsv(h2tab, file.path(opt$out, "h2.csv"))
   tc_wcsv(cjt, file.path(opt$out, "complex_level_sensitivity.csv")); if (!is.null(alt)) tc_wcsv(alt, file.path(opt$out, "estimate_by_experiment_source.csv"))
   if (!is.null(ro)) tc_wcsv(ro, file.path(opt$out, "readouts.csv")); tc_wcsv(br, file.path(opt$out, "breadth.csv"))
   ## the fixed sentences, in one file
