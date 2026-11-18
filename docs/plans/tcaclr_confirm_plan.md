@@ -71,6 +71,18 @@ The human truth is built by `analysis/complex_confirm/build_yeast_complex_truth.
 - Arm B: the same estimand and descriptors with SE_exp over mutants (100 delete-half replicates; the experiment-to-gene ratio is unknown, so power is shown for 0, 0.89 and 1.78), no p-value.
 - Pairwise differences among all methods run are reported as estimates with total intervals; no unadjusted p-values other than H1 and the families in H3.
 
+### 5a. Definitions fixed by the scoring code (written 17 Nov, before any score; the code reproduces the stored net4 estimate in 519 comparisons, largest difference 2.4e-14)
+
+1. **Experiment unit.** Profiles (Arm A: the 739 perturbation profiles; Arm B: the mutant profiles), seeds `20261118 + b - 1`. The net4 series and group schemes exist in the code only to reproduce the stored net4 study; they are not used here.
+2. **n_eff** is the overlap-counted version that anchors the power gate (net4: 15.07). The fractional version (net4: 14.48) is printed but does not gate. Arm A 31.69 and Arm B 10.02 are overlap-counted.
+3. **Descriptor definitions.** The per-pair AP decomposition is additive, so each complex's contribution to d is its share of the summed pair terms. "Top-3 share" is the share of d carried by the three complexes with the largest contribution; "[k] complexes" is the fewest complexes whose contributions reach 80% of d; "share in complexes of 20+ genes" is the share of d contributed by complexes of 20 or more genes. On net4 these are 0.756, 4 and 0.947.
+4. **Truth table order** is the order of the truth table written by the code (main first, then the variants in the order of section 4). It fixes which halves each truth receives, so it is frozen with the seeds.
+5. **Gene order** in `genes.txt` is frozen (the delete-half halves depend on it) and covered by the hash.
+6. **Per-complex AP negatives** use the whole measured gene universe of the score files, as on net4.
+7. **Strata counts** in the freeze file are compared on positives only (the freeze counts file lists `n_pairs` for a different universe from the one scored).
+8. **p-value** (Arm A only): normal approximation, one-sided, from the total SE of section 5.
+9. **Perturbed-gene split** maps Perturb-seq ids to gene symbols before splitting.
+
 ## 6. Gates (in order; each writes a CSV; any failure stops the job before any truth is read)
 
 1. Data gates, label-free: gene universe and profile counts match the frozen build; matrix hash matches; no duplicated gene names (as for RPE1, where HSPA14 was dropped by a rule fixed beforehand); the HepG2 recipe is byte-identical to K562's or each deviation is logged.
@@ -82,6 +94,8 @@ The human truth is built by `analysis/complex_confirm/build_yeast_complex_truth.
 ## 7. Compute and scheduling
 
 Everything runs through the resource-aware scheduler at 70 to 80% utilisation, one run, no retries beyond the automatic out-of-memory retry. Long runs are approved by the PI (16 Nov) and listed with their estimates before submission. Arm B (6,169 genes by 1,283 profiles, 32 threads): |r|, CLR, aCLR, tcaCLR and the exploratory read-outs under 15 minutes in total (6 to 8 GB); PIDC 10 to 15 minutes (5 to 6 GB); **GENIE3 about 5 hours and GRNBoost2 about 2.5 to 4.2 hours** (range 3 to 10; basis: `docs/plans/tcaclr_prereg_candidates.md`; the RPE1 measurements of 7.3 and 3.7 hours at 32 workers bracket them; declare about 35 to 46 GB for GENIE3). Arm A (real dimensions, build stage): the same cheap methods; PIDC about 20 minutes (RPE1: 1,160 s, 10.5 GB); **GENIE3 about 5.1 to 5.8 hours (declare 48 GB) and GRNBoost2 about 3.2 to 5.9 hours** (Arm B: GENIE3 5.0 to 5.6 hours, GRNBoost2 2.3 to 4.2); the next sentences were written before these estimates: **GENIE3 about 7 hours and GRNBoost2 about 4 hours** (RPE1 GENIE3 took 7.3 hours wall at 32 workers with a peak of 34.6 GB for 8,745 genes by 1,023 profiles, so declare at least 46 GB for a comparable HepG2 matrix; the earlier 6.6-hour estimate and the 5.3-hour figure at 40 cores in STATUS are superseded by this measurement). Optional like-for-like fallback if the full runs are not run: GENIE3 and GRNBoost2 on the truth-gene subset with the cheap methods rescored on the same subset (about 0.5 hour). The optional planted-module simulation (theory memo, section 5.4; label-free; about 6 to 10 hours at 8 threads) runs before freezing (PI, 17 Nov), in parallel with the label-free build stage, to set H2's lower bin edge from theory (rule: the smallest module size at which tcaCLR minus aCLR is positive in 9 of 10 seeds becomes the lower edge of the "positive" bin); it must not adjust any method setting.
+
+Measured with the scoring code (synthetic matrices at the real dimensions; the real Arm A truth is a third of the synthetic truth in pairs): one half-refit of CLR, aCLR, tcaCLR and |r| at 16 threads takes 82 s and 3.5 GB on Arm B and 194 s and 7.7 GB on Arm A, so the 100 refits take about 2.3 h (Arm B) and 5.4 h (Arm A). The score stage for about 23 methods and read-outs is estimated at 1 to 1.6 h at 8 to 16 workers on Arm A; declare 45 GB at 16 workers or 20 to 25 GB at 8 (a per-replicate garbage collection removed an out-of-memory failure in forked workers).
 
 ## 8. Disclosure and what is not claimed
 
@@ -98,6 +112,7 @@ Everything runs through the resource-aware scheduler at 70 to 80% utilisation, o
 
 ## Change log
 
+- Draft 3f (17 Nov): scoring code written and tested (net4 reproduced; 71 synthetic checks); section 5a adds the definitions the code needed (experiment unit, n_eff convention, descriptor definitions, table and gene order, p-value form); measured refit and score-stage costs added to section 7.
 - Draft 1 (16 Nov): first draft, committed 44128fb.
 - Draft 3e (17 Nov): reachability-confinement diagnostic confirmed on one simulated compendium (closed modules reach the module plus 2 to 3 genes, in-module share 0.96 to 0.97, score 0.58 to 0.59 against 5 to 7 for open modules; all-entries statistics restore it); added the per-size-class reachable-count and in-module-share descriptor and the all-entries exploratory read-out.
 - Draft 3d (17 Nov): H2 reworded after the independent reading of the simulation (`docs/plans/fable_sim_reading.md`): positive at 20 or more genes pooled, not positive below 20 (possibly markedly negative), no monotone-in-size or beats-CLR claim for the largest complexes.
