@@ -1,0 +1,23 @@
+[2026-11-17 17:27:18] stage score; arm A; mode VALIDATION (consumed data); git c89181e; hash guard passed for 2 files 
+[2026-11-17 17:27:26] truths: main (6109259 pairs, 22750 pos); small_3to6 (6088539 pairs, 2030 pos); mid_7to19 (6094001 pairs, 7492 pos); large_ge20 (6099737 pairs, 13228 pos); mid_7to10 (6089067 pairs, 2558 pos); mid_11to19 (6091443 pairs, 4934 pos) 
+[2026-11-17 17:27:28] main truth: n_eff 23.472 overlap-counted (gate definition), 23.472 fractional 
+[2026-11-17 17:28:49] method tcaCLR       scored on 6 truths with 500 jackknife replicates (77 s); RSS peak 3.32 GB 
+[2026-11-17 17:30:09] method aCLR         scored on 6 truths with 500 jackknife replicates (79 s); RSS peak 3.99 GB 
+[2026-11-17 17:31:29] method CLR          scored on 6 truths with 500 jackknife replicates (80 s); RSS peak 4.70 GB 
+[2026-11-17 17:32:51] method absr         scored on 6 truths with 500 jackknife replicates (82 s); RSS peak 5.40 GB 
+[2026-11-17 18:21:49] stage score; arm A; mode VALIDATION (consumed data); git efef5d6; hash guard passed for 2 files 
+[2026-11-17 18:21:57] truths: main (6109259 pairs, 22750 pos); small_3to6 (6088539 pairs, 2030 pos); mid_7to19 (6094001 pairs, 7492 pos); large_ge20 (6099737 pairs, 13228 pos); mid_7to10 (6089067 pairs, 2558 pos); mid_11to19 (6091443 pairs, 4934 pos) 
+[2026-11-17 18:21:58] main truth: n_eff 23.472 overlap-counted (gate definition), 23.472 fractional 
+[2026-11-17 18:23:17] method tcaCLR       scored on 6 truths with 500 jackknife replicates (74 s); RSS peak 3.32 GB 
+[2026-11-17 18:24:37] method aCLR         scored on 6 truths with 500 jackknife replicates (81 s); RSS peak 3.96 GB 
+[2026-11-17 18:26:00] method CLR          scored on 6 truths with 500 jackknife replicates (82 s); RSS peak 4.62 GB 
+[2026-11-17 18:27:22] method absr         scored on 6 truths with 500 jackknife replicates (82 s); RSS peak 5.41 GB 
+[2026-11-17 18:28:45] method GENIE3       scored on 6 truths with 500 jackknife replicates (83 s); RSS peak 6.14 GB 
+[2026-11-17 18:30:09] method PIDC         scored on 6 truths with 500 jackknife replicates (84 s); RSS peak 6.61 GB 
+[2026-11-17 18:31:36] method GRNBoost2    scored on 6 truths with 500 jackknife replicates (87 s); RSS peak 6.61 GB 
+[2026-11-17 18:32:40] method rewire_01    scored on 6 truths with 500 jackknife replicates (64 s); RSS peak 6.61 GB 
+[2026-11-17 18:33:45] method rewire_02    scored on 6 truths with 500 jackknife replicates (64 s); RSS peak 6.61 GB 
+[2026-11-17 18:34:49] method rewire_03    scored on 6 truths with 500 jackknife replicates (64 s); RSS peak 6.61 GB 
+[2026-11-17 18:35:53] method rewire_04    scored on 6 truths with 500 jackknife replicates (64 s); RSS peak 6.61 GB 
+[2026-11-17 18:36:56] complex-level jackknife: 500 replicates (47 s) 
+[2026-11-17 18:36:56] SCORE STAGE done; peak RSS 6.61 GB 

@@ -1,0 +1,12 @@
+[2026-11-17 14:35:55] stage report; arm A; mode VALIDATION (consumed data); git d8b3901; hash guard passed for 2 files 
+[2026-11-17 14:35:56] experiment sources: series, group; primary: series 
+[2026-11-17 14:35:57] REPORT STAGE done 
+[2026-11-17 16:38:53] stage report; arm A; mode VALIDATION (consumed data); git c89181e; hash guard passed for 2 files 
+[2026-11-17 16:38:54] experiment sources: chip_plan, series_refit, series, group; primary: series 
+[2026-11-17 16:38:55] REPORT STAGE done 
+[2026-11-17 18:50:02] stage report; arm A; mode VALIDATION (consumed data); git efef5d6; hash guard passed for 2 files 
+[2026-11-17 18:50:03] experiment sources: chip_seq_reading, series_refit, series, group; primary: series 
+[2026-11-17 18:50:04] REPORT STAGE done 
+[2026-11-17 20:33:32] stage report; arm A; mode VALIDATION (consumed data); git efef5d6; hash guard passed for 2 files 
+[2026-11-17 20:33:33] experiment sources: chip_plan, chip_seq_reading, series_refit, series, group; primary: series 
+[2026-11-17 20:33:34] REPORT STAGE done 

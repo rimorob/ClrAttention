@@ -1,0 +1,4 @@
+"size_class","registered_in_prediction","d","se_gene","se_exp","lo","hi","basis","label_positive","label_near_zero","label_not_positive","labels"
+"small_3to6",TRUE,-0.00373487832175738,0.00386124553553118,0.00120369731519903,-0.0116621283825315,0.0041923717390167,"gene + experiment",FALSE,TRUE,TRUE,"near_zero; not_positive"
+"mid_7to19",TRUE,-0.00340373681317113,0.00285390840187557,0.00124846089034068,-0.00950920689488323,0.00270173326854097,"gene + experiment",FALSE,TRUE,TRUE,"near_zero; not_positive"
+"large_ge20",TRUE,0.137366232460097,0.0157803179322602,0.0143934958750195,0.0955033138944481,0.179229151025746,"gene + experiment",TRUE,FALSE,FALSE,"positive"

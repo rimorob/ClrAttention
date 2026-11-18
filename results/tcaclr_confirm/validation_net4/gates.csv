@@ -1,0 +1,25 @@
+"gate","check","value","pass"
+"1 hash","yeast_complexes_members.tsv","667cd567226a33acadf592a8790c68bb8b5add2ee220b2d249bc3863af3d44c2",TRUE
+"1 hash","yeast_complexes_excluded_pairs.tsv","b234b94d667e6a2ce053188a87d079ef7e8ad66b851b676fcea88dc7bef2b492",TRUE
+"1 universe","genes in score directory","5950",TRUE
+"1 universe","no duplicated gene names","",TRUE
+"2 truth","all member genes inside the score universe (tc_sets stops otherwise)","10",TRUE
+"2 truth","counts match the freeze: main","1282352/1282352 pairs, 13438/13438 pos",TRUE
+"2 truth","counts match the freeze: main_xsub_excl","1277018/1277018 pairs, 13438/13438 pos",TRUE
+"2 truth","counts match the freeze: main_ribo_joined","1282352/1282352 pairs, 18772/18772 pos",TRUE
+"2 truth","counts match the freeze: noribo","1090025/1090025 pairs, 9552/9552 pos",TRUE
+"2 truth","counts match the freeze: nomerge","1282352/1282352 pairs, 13297/13297 pos",TRUE
+"2 truth","counts match the freeze: size2","1913897/1913897 pairs, 13656/13656 pos",TRUE
+"2 truth","counts match the freeze: small_3to6","1270166/257402 pairs, 1252/1252 pos",TRUE
+"2 truth","counts match the freeze: large_ge20","1278445/95655 pairs, 9531/9531 pos",TRUE
+"2 truth","n_eff of the main truth, overlap-counted (the gate's definition)","15.074",TRUE
+"2 truth","n_eff of the main truth, fractional assignment (descriptive)","14.482",TRUE
+"2 truth","power class","test_0.04",TRUE
+"5 score","tcaCLR: length and finiteness","nonfinite 0",TRUE
+"5 score","aCLR: length and finiteness","nonfinite 0",TRUE
+"5 score","CLR: length and finiteness","nonfinite 0",TRUE
+"5 score","absr: length and finiteness","nonfinite 0",TRUE
+"5 score","GENIE3: length and finiteness","nonfinite 0",TRUE
+"5 score","PIDC: length and finiteness","nonfinite 0",TRUE
+"5 score","GRNBoost2: length and finiteness","nonfinite 0",TRUE
+"5 score","sort-once replicate AP equals ap_fast (max abs difference, tolerance 1e-15)","0",TRUE

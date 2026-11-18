@@ -1,0 +1,22 @@
+[2026-11-17 14:27:35] stage score; arm A; mode VALIDATION (consumed data); git d8b3901; hash guard passed for 2 files 
+[2026-11-17 14:27:41] truths: main (1282352 pairs, 13438 pos); main_xsub_excl (1277018 pairs, 13438 pos); main_ribo_joined (1282352 pairs, 18772 pos); noribo (1090025 pairs, 9552 pos); nomerge (1282352 pairs, 13297 pos); size2 (1913897 pairs, 13656 pos); main_paralog_incl (1282401 pairs, 13487 pos); small_3to6 (1270166 pairs, 1252 pos); mid_7to19 (1271695 pairs, 2781 pos); large_ge20 (1278445 pairs, 9531 pos) 
+[2026-11-17 14:27:42] main truth: n_eff 15.074 overlap-counted (gate definition), 14.482 fractional 
+[2026-11-17 14:29:43] method tcaCLR       scored on 10 truths with 500 jackknife replicates (119 s); RSS peak 3.03 GB 
+[2026-11-17 14:31:41] method aCLR         scored on 10 truths with 500 jackknife replicates (118 s); RSS peak 3.64 GB 
+[2026-11-17 14:33:48] method CLR          scored on 10 truths with 500 jackknife replicates (127 s); RSS peak 3.64 GB 
+[2026-11-17 14:34:40] method absr         scored on 10 truths with 500 jackknife replicates (52 s); RSS peak 3.64 GB 
+[2026-11-17 14:35:31] method PIDC         scored on 10 truths with 500 jackknife replicates (52 s); RSS peak 3.64 GB 
+[2026-11-17 14:35:53] complex-level jackknife: 500 replicates (20 s) 
+[2026-11-17 14:35:53] SCORE STAGE done; peak RSS 3.64 GB 
+[2026-11-17 18:42:21] stage score; arm A; mode VALIDATION (consumed data); git efef5d6; hash guard passed for 2 files 
+[2026-11-17 18:42:27] truths: main (1282352 pairs, 13438 pos); main_xsub_excl (1277018 pairs, 13438 pos); main_ribo_joined (1282352 pairs, 18772 pos); noribo (1090025 pairs, 9552 pos); nomerge (1282352 pairs, 13297 pos); size2 (1913897 pairs, 13656 pos); main_paralog_incl (1282401 pairs, 13487 pos); small_3to6 (1270166 pairs, 1252 pos); mid_7to19 (1271695 pairs, 2781 pos); large_ge20 (1278445 pairs, 9531 pos) 
+[2026-11-17 18:42:28] main truth: n_eff 15.074 overlap-counted (gate definition), 14.482 fractional 
+[2026-11-17 18:43:57] method tcaCLR       scored on 10 truths with 500 jackknife replicates (88 s); RSS peak 3.03 GB 
+[2026-11-17 18:45:30] method aCLR         scored on 10 truths with 500 jackknife replicates (92 s); RSS peak 3.72 GB 
+[2026-11-17 18:46:52] method CLR          scored on 10 truths with 500 jackknife replicates (83 s); RSS peak 3.72 GB 
+[2026-11-17 18:47:36] method absr         scored on 10 truths with 500 jackknife replicates (43 s); RSS peak 3.72 GB 
+[2026-11-17 18:48:21] method GENIE3       scored on 10 truths with 500 jackknife replicates (45 s); RSS peak 3.72 GB 
+[2026-11-17 18:49:04] method PIDC         scored on 10 truths with 500 jackknife replicates (43 s); RSS peak 3.72 GB 
+[2026-11-17 18:49:41] method GRNBoost2    scored on 10 truths with 500 jackknife replicates (38 s); RSS peak 3.72 GB 
+[2026-11-17 18:50:00] complex-level jackknife: 500 replicates (16 s) 
+[2026-11-17 18:50:01] SCORE STAGE done; peak RSS 3.72 GB 

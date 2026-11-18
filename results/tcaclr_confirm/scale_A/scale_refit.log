@@ -1,0 +1,2 @@
+[2026-11-17 18:38:32] refit test: 9000 genes x 750 profiles (one half of 1500) 
+[2026-11-17 18:41:46] tc_fit_three 147 s, absr + gather 47 s; peak RSS 7.70 GB 
