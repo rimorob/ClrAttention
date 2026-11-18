@@ -1,0 +1,10 @@
+. jobs_pc/common.sh
+# mem: 16
+# cpus: 8
+# after: 7371_tc_pack_armB,7361_tc_expjack_armB
+# Arm B: final gates (all seven methods), the one-time score stage (pooled AUPR, 500 gene delete-half replicates, 500 complex-level replicates, per-complex AP, strata, perturbed-gene split), then the report (estimates, H1, H2, H3, descriptors, fixed sentences).
+set -e
+export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+Rscript analysis/tcaclr_confirm/score_confirm.R --stage gates --arm B --scores results/tcaclr_confirm/armB/scores --truth_dir docs/tcaclr_confirm_selections --members docs/tcaclr_confirm_selections/armB_cyc2008_members.tsv --excluded docs/tcaclr_confirm_selections/armB_cyc2008_excluded_pairs.tsv --sha docs/tcaclr_confirm_selections/armB.sha256 --counts docs/tcaclr_confirm_selections/armB_cyc2008_counts.csv --perturbed results/tcaclr_confirm/armB/perturbed_deleted_orfs.txt --out results/tcaclr_confirm/result_B
+Rscript analysis/tcaclr_confirm/score_confirm.R --stage score --arm B --scores results/tcaclr_confirm/armB/scores --truth_dir docs/tcaclr_confirm_selections --members docs/tcaclr_confirm_selections/armB_cyc2008_members.tsv --excluded docs/tcaclr_confirm_selections/armB_cyc2008_excluded_pairs.tsv --sha docs/tcaclr_confirm_selections/armB.sha256 --counts docs/tcaclr_confirm_selections/armB_cyc2008_counts.csv --perturbed results/tcaclr_confirm/armB/perturbed_deleted_orfs.txt --out results/tcaclr_confirm/result_B --upstream_gates results/tcaclr_confirm/result_B/gates.csv --workers 8
+Rscript analysis/tcaclr_confirm/score_confirm.R --stage report --arm B --scores results/tcaclr_confirm/armB/scores --truth_dir docs/tcaclr_confirm_selections --members docs/tcaclr_confirm_selections/armB_cyc2008_members.tsv --excluded docs/tcaclr_confirm_selections/armB_cyc2008_excluded_pairs.tsv --sha docs/tcaclr_confirm_selections/armB.sha256 --counts docs/tcaclr_confirm_selections/armB_cyc2008_counts.csv --perturbed results/tcaclr_confirm/armB/perturbed_deleted_orfs.txt --out results/tcaclr_confirm/result_B --upstream_gates results/tcaclr_confirm/result_B/gates.csv
