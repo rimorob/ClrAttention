@@ -710,3 +710,17 @@ Diagnostic of `docs/plans/fable_sim_reading.md` section 2, run as written on one
 **Outcome: hypothesis confirmed.** In the closed modules the reachable set of a member row is the module plus 2 to 3 genes (72 and 102 entries, in-module share 0.96 to 0.97), the registered row statistics are taken over the module itself, members sit at about 0.4 sd above their own row mean, and the score falls to 0.6 with module AP 0.35. Rows of open modules reach all 2,999 genes (in-module share 0.02 to 0.03) and score 5 to 7. The collapse here appears at lambda 0.85 for n = 70 and at lambda 0.70 for n = 100 (not at lambda 0.55 and not at lambda 0.70 for n = 70), so closure depends on both strength and size, not on lambda alone. Recomputing with row statistics over all entries and the floor of log(1e-300) restores the closed modules (score 9.0 and 7.5, AP 0.968 and 0.983) and leaves the open modules unchanged (identical to the registered form, since all their entries are reachable).
 
 Limits: one compendium, so no seed variability; the all-entries form's z in a closed row is dominated by the floor (row SD 105 to 124 nats, row mean about -670), that is, it ranks by reachability rather than by log P, and it was not scored on the other truths here (T1 to T4, hub strata), so the result says why the registered form collapses, not that the floor form is preferable. The memo's real-data counterpart is untested: the same two numbers (reachable count and in-module share) for ribosomal rows of K562 (retention 0.88, 0.28% unreachable overall) would show whether closed rows occur outside the simulation.
+## Addendum 2 (17 Nov 2026): real K562 reachability check (structure only)
+
+Approved by the PI on 17 Nov 2026 (spent data; no method scored against any truth). Script `analysis/sim_planted/real_reach_k562.R`, job 7201 (107 s, 2.8 GB). Matrix: the scoreboard K562 truth-gene matrix (5,671 genes by 707 profiles); operator at the registered settings (aCLR walk, t = 9); complexes from `corum_sets` (CORUM source, size 3 to 200). For member rows of each complex: reachable off-diagonal entries of P^9, and the share of those that lie inside the complex.
+
+Overall: unreachable share of all pairs 0.28%; no row has fewer than 2 reachable entries; median reachable entries per row 5,654 of 5,670.
+
+| Class | Complexes | Median size | Median reachable per member row | Median in-module share | Smallest in-module share | Closed (reachable < 1.5 x size) |
+|---|---|---|---|---|---|---|
+| ribosomal (30% or more r-protein genes) | 8 | 31.5 | 5,654 | 0.0054 | 0.00035 | 0 |
+| 20 or more genes | 22 | 28.5 | 5,654 | 0.0048 | 0.0032 | 0 |
+| 7 to 19 | 285 | 10 | 5,654 | 0.0016 | 0.00091 | 0 |
+| 3 to 6 | 870 | 3 | 5,654 | 0.00035 | 0.00024 | 0 |
+
+Reading: in real K562 data no complex row is closed. Every member row reaches almost the whole gene universe and the in-module share is about the module's share of the universe, so the reachable-only row statistic has a full background for ribosomal and other large complexes. The reachability-confinement collapse of the simulation (module plus 2 to 3 genes, in-module share 0.96 to 0.97) does not operate on this matrix and operator. Limits: one matrix (K562, 5,671 genes), one operator setting, a structure-only measurement; it says nothing about HepG2 or Kemmeren, where the same descriptor is reported with the registered results, and it does not explain the K562 ribosome gain.
