@@ -694,3 +694,19 @@ T2 per-bin AUPR in the other arms (tcaCLR minus aCLR and CLR minus aCLR, seed me
 
 Compendia 120; wall per compendium  208 (9.04) [ 183,  235] s (R process peak  2.5 (0.163) [2.03, 2.81] GB).
 Sinkhorn balancing of the lazy operator hit the 2,000-iteration cap in 115 of 120 compendia; final max |column sum - 1| 0.000298 (0.000202) [9.91e-10, 0.000563] (tolerance 1e-9 not reached where the cap was hit; the walk used the last iterate).
+
+## Addendum: reachability-confinement diagnostic
+
+Diagnostic of `docs/plans/fable_sim_reading.md` section 2, run as written on one regenerated compendium (seed 1, N = 400, Gaussian noise, identity marginals; the matrices are not saved). Script `analysis/sim_planted/sim_reach_diag.R`, numbers in `results/sim_planted/addendum/reach_diag_N400_s01.csv` (not committed). Synthetic data only; no registered prediction or package code changed. Member rows of the modules of size 70 and 100 in this seed (seed 1 has size 100 at lambda 0.55 and 0.70 only; lambda 0.85 at size 100 is not in it). Means over member rows (z = one-sided row z over the member-member entries; "score" = the Stouffer-combined tcaCLR score averaged over within-module pairs).
+
+| size | lambda | reachable off-diagonal entries (of 2,999) | module size minus 1 | in-module share of reachable | sigma of log P^9, registered | log P^9 of member entries / row mean | member z | member score, registered | member score, all entries with floor 1e-300 | module AP, registered | module AP, all entries |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 70 | 0.55 | 2,999 | 69 | 0.02 | 2.25 | -4.6 / -13.9 | 4.1 | 5.84 | 5.84 | 0.980 | 0.980 |
+| 70 | 0.70 | 2,999 | 69 | 0.02 | 3.07 | -4.7 / -20.0 | 5.0 | 7.01 | 7.01 | 0.989 | 0.989 |
+| 70 | 0.85 | **72** | 69 | **0.96** | 1.20 | -5.0 / -674 (all-entries mean) | 0.37 (all entries 6.4) | **0.59** | 9.02 | **0.358** | 0.968 |
+| 100 | 0.55 | 2,999 | 99 | 0.03 | 2.53 | -5.2 / -14.8 | 3.8 | 5.36 | 5.36 | 0.990 | 0.990 |
+| 100 | 0.70 | **102** | 99 | **0.97** | 1.20 | -5.4 / -668 (all-entries mean) | 0.39 (all entries 5.3) | **0.58** | 7.54 | **0.347** | 0.983 |
+
+**Outcome: hypothesis confirmed.** In the closed modules the reachable set of a member row is the module plus 2 to 3 genes (72 and 102 entries, in-module share 0.96 to 0.97), the registered row statistics are taken over the module itself, members sit at about 0.4 sd above their own row mean, and the score falls to 0.6 with module AP 0.35. Rows of open modules reach all 2,999 genes (in-module share 0.02 to 0.03) and score 5 to 7. The collapse here appears at lambda 0.85 for n = 70 and at lambda 0.70 for n = 100 (not at lambda 0.55 and not at lambda 0.70 for n = 70), so closure depends on both strength and size, not on lambda alone. Recomputing with row statistics over all entries and the floor of log(1e-300) restores the closed modules (score 9.0 and 7.5, AP 0.968 and 0.983) and leaves the open modules unchanged (identical to the registered form, since all their entries are reachable).
+
+Limits: one compendium, so no seed variability; the all-entries form's z in a closed row is dominated by the floor (row SD 105 to 124 nats, row mean about -670), that is, it ranks by reachability rather than by log P, and it was not scored on the other truths here (T1 to T4, hub strata), so the result says why the registered form collapses, not that the floor form is preferable. The memo's real-data counterpart is untested: the same two numbers (reachable count and in-module share) for ribosomal rows of K562 (retention 0.88, 0.28% unreachable overall) would show whether closed rows occur outside the simulation.
