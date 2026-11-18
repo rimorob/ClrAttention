@@ -74,7 +74,7 @@ The human truth is built by `analysis/complex_confirm/build_yeast_complex_truth.
 ### 5a. Definitions fixed by the scoring code (written 17 Nov, before any score; the code reproduces the stored net4 estimate in 519 comparisons, largest difference 2.4e-14)
 
 1. **Experiment unit.** Profiles (Arm A: the 739 perturbation profiles; Arm B: the mutant profiles), seeds `20261118 + b - 1`. The net4 series and group schemes exist in the code only to reproduce the stored net4 study; they are not used here.
-2. **n_eff** is the overlap-counted version that anchors the power gate (net4: 15.07). The fractional version (net4: 14.48) is printed but does not gate. Arm A 31.69 and Arm B 10.02 are overlap-counted.
+2. **n_eff** is the overlap-counted version that anchors the power gate (net4: 15.07). The fractional version (net4: 14.48) is printed but does not gate. **Correction, 18 Nov (before any score):** the values quoted throughout this plan and the freeze record, Arm A 31.69 and Arm B 10.02, are the fractional version; the overlap-counted values that the gate uses are Arm A 33.965 and Arm B 10.354 (interim gates, 18 Nov, label-free). The power class is unchanged (Arm A at least 27 on either definition: `test_0.03`; Arm B is an estimate whatever the value). This corrects a statement of this section; no rule, gate threshold or number used in a decision changed.
 3. **Descriptor definitions.** The per-pair AP decomposition is additive, so each complex's contribution to d is its share of the summed pair terms. "Top-3 share" is the share of d carried by the three complexes with the largest contribution; "[k] complexes" is the fewest complexes whose contributions reach 80% of d; "share in complexes of 20+ genes" is the share of d contributed by complexes of 20 or more genes. On net4 these are 0.756, 4 and 0.947.
 4. **Truth table order** is the order of the truth table written by the code (main first, then the variants in the order of section 4). It fixes which halves each truth receives, so it is frozen with the seeds.
 5. **Gene order** in `genes.txt` is frozen (the delete-half halves depend on it) and covered by the hash.
@@ -113,6 +113,7 @@ Measured with the scoring code (synthetic matrices at the real dimensions; the r
 
 ## Change log
 
+- Run log, 18 Nov (no plan change): production runs started under the freeze (commit `a3009a1`); the experiment-jackknife stage was submitted with `--allow_missing 1` because the stage refused to start before the PIDC, GENIE3 and GRNBoost2 files existed (it refits only CLR, aCLR, tcaCLR and |r|); Arm B's first attempt stopped on this before reading anything; section 5a item 2 corrected (n_eff definitions).
 - FROZEN (17 Nov): PI sign-off given; draft 3f is the registered plan. Real runs follow through the scheduler, with each long run's estimate listed before submission. The K562 real-data reachability check (structure only, spent data, approved by the PI 17 Nov) is a descriptive addendum to the simulation and does not alter this plan.
 - Draft 3f (17 Nov): scoring code written and tested (net4 reproduced; 71 synthetic checks); section 5a adds the definitions the code needed (experiment unit, n_eff convention, descriptor definitions, table and gene order, p-value form); measured refit and score-stage costs added to section 7.
 - Draft 1 (16 Nov): first draft, committed 44128fb.

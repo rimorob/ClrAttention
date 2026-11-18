@@ -1,0 +1,23 @@
+"gate","check","value","pass"
+"1 hash","armB_cyc2008_members.tsv","70af5c2063a6e57f26cd5a6bada9167cfcb4953c21267b62c1053684d1649d1e",TRUE
+"1 hash","armB_cyc2008_excluded_pairs.tsv","111e599096aee35ef978923a7e40b8a6417c3172a5300024826088fefabf0f0c",TRUE
+"1 universe","genes in score directory","6169",TRUE
+"1 universe","no duplicated gene names","",TRUE
+"2 truth","all member genes inside the score universe (tc_sets stops otherwise)","11",TRUE
+"2 truth","counts match the freeze: main","875781/875781 pairs, 10308/10308 pos",TRUE
+"2 truth","counts match the freeze: main_xsub_excl","870358/870358 pairs, 10308/10308 pos",TRUE
+"2 truth","counts match the freeze: main_ribo_joined","875781/875781 pairs, 15731/15731 pos",TRUE
+"2 truth","counts match the freeze: noribo","714608/714608 pairs, 6238/6238 pos",TRUE
+"2 truth","counts match the freeze: small_3to6","866424/169071 pairs, 951/951 pos",TRUE
+"2 truth","counts match the freeze: mid_7to19","868132/115438 pairs, 2659/2659 pos",TRUE
+"2 truth","counts match the freeze: large_ge20","872273/48785 pairs, 6800/6800 pos",TRUE
+"2 truth","counts match the freeze: mid_7to10","866252/22789 pairs, 779/779 pos",TRUE
+"2 truth","counts match the freeze: mid_11to19","867353/35778 pairs, 1880/1880 pos",TRUE
+"2 truth","n_eff of the main truth, overlap-counted (the gate's definition)","10.354",TRUE
+"2 truth","n_eff of the main truth, fractional assignment (descriptive)","10.021",TRUE
+"2 truth","power class","arm_B_estimate",TRUE
+"5 score","tcaCLR: length and finiteness","nonfinite 0",TRUE
+"5 score","aCLR: length and finiteness","nonfinite 0",TRUE
+"5 score","CLR: length and finiteness","nonfinite 0",TRUE
+"5 score","absr: length and finiteness","nonfinite 0",TRUE
+"5 score","sort-once replicate AP equals ap_fast (max abs difference, tolerance 1e-15)","0",TRUE

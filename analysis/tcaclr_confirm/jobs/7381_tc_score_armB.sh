@@ -1,7 +1,7 @@
 . jobs_pc/common.sh
 # mem: 16
 # cpus: 8
-# after: 7371_tc_pack_armB,7361_tc_expjack_armB
+# after: 7371_tc_pack_armB,7362_tc_expjack_armB_v2
 # Arm B: final gates (all seven methods), the one-time score stage (pooled AUPR, 500 gene delete-half replicates, 500 complex-level replicates, per-complex AP, strata, perturbed-gene split), then the report (estimates, H1, H2, H3, descriptors, fixed sentences).
 set -e
 export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
