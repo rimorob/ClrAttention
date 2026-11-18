@@ -1,6 +1,6 @@
-# Preregistration DRAFT 2 (pending the PI's decision in section 0): does tcaCLR exceed aCLR in pooled complex co-membership AUPR in HepG2 Perturb-seq pseudobulk with the Complex Portal human complexes, and how does it compare with CLR, |r| and the established methods?
+# Preregistration FROZEN 17 Nov 2026 (PI sign-off; draft 3f): does tcaCLR exceed aCLR in pooled complex co-membership AUPR in HepG2 Perturb-seq pseudobulk with the Complex Portal human complexes, and how does it compare with CLR, |r| and the established methods?
 
-**Status: draft for the PI. Nothing in this plan has been scored. No tcaCLR, aCLR, CLR, |r|, GENIE3, PIDC or GRNBoost2 value exists on any dataset named here.** Items marked OPEN are decided before the plan is frozen. Names are temporary: aCLR = CLR with attention (internal: CLR attention), tcaCLR = twice cooked aCLR (internal: a3r). Revision 2 incorporates the independent review `docs/plans/tcaclr_confirm_review.md`; the changes are listed in the change log at the end.
+**Status: frozen on the PI's sign-off of 17 Nov 2026 (draft 3f, committed as the freeze commit). From this commit no hypothesis, method setting, seed, truth rule or decision rule changes; any later change is a dated deviation entry in the change log, made before the affected score exists. Nothing in this plan has been scored. No tcaCLR, aCLR, CLR, |r|, GENIE3, PIDC or GRNBoost2 value exists on any dataset named here.** Items marked OPEN are decided before the plan is frozen. Names are temporary: aCLR = CLR with attention (internal: CLR attention), tcaCLR = twice cooked aCLR (internal: a3r). Revision 2 incorporates the independent review `docs/plans/tcaclr_confirm_review.md`; the changes are listed in the change log at the end.
 
 ## 0. Standing declaration, prior looks, and the PI's decision (decided 17 Nov 2026: withdrawal, option W)
 
@@ -108,10 +108,12 @@ Measured with the scoring code (synthetic matrices at the real dimensions; the r
 1. (Closed 17 Nov: section 0, withdrawal, verbatim wording recorded.)
 2. The CYC2008 licence (resolve or accept that Arm B may be unpublishable).
 3. (Closed 17 Nov: the simulation runs before freezing, in parallel with the build stage.)
-4. The seeds and replicate counts in section 5 are written into the freeze file; the HepG2 universe, [N] and [M], and the real n_eff are filled from counts-only steps before any score.
+4. (Closed 17 Nov: seeds, replicate counts, the per-replicate seed rule `20261118 + b - 1`, the HepG2 universe, N = 2,040, M = 418 and the real n_eff are in `docs/plans/tcaclr_confirm_freeze.md`.)
+5. (Closed 17 Nov: PI sign-off for the freeze. Pseudobulk deviations D1 to D5 stand as recorded; the PI did not overrule them.) Still open and not blocking: the CYC2008 licence (assumed permitted for academic use, unverified; Arm B may be unpublishable if it is not).
 
 ## Change log
 
+- FROZEN (17 Nov): PI sign-off given; draft 3f is the registered plan. Real runs follow through the scheduler, with each long run's estimate listed before submission. The K562 real-data reachability check (structure only, spent data, approved by the PI 17 Nov) is a descriptive addendum to the simulation and does not alter this plan.
 - Draft 3f (17 Nov): scoring code written and tested (net4 reproduced; 71 synthetic checks); section 5a adds the definitions the code needed (experiment unit, n_eff convention, descriptor definitions, table and gene order, p-value form); measured refit and score-stage costs added to section 7.
 - Draft 1 (16 Nov): first draft, committed 44128fb.
 - Draft 3e (17 Nov): reachability-confinement diagnostic confirmed on one simulated compendium (closed modules reach the module plus 2 to 3 genes, in-module share 0.96 to 0.97, score 0.58 to 0.59 against 5 to 7 for open modules; all-entries statistics restore it); added the per-size-class reachable-count and in-module-share descriptor and the all-entries exploratory read-out.

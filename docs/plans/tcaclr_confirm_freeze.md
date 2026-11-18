@@ -18,7 +18,7 @@ Code commit used for everything below: `1e9178c` (branch accuracy-review). Small
 | CYC2008 licence | OPEN (plan open item 2) |
 | Planted-module simulation and H2's lower bin edge | OPEN (separate job, not part of this stage) |
 | Method equivalence gates (plan gate 4), score gates (gate 5), GENIE3, GRNBoost2 and PIDC runs | OPEN (after freezing, by design) |
-| Statement of the final freeze (PI sign-off, commit of this file) | OPEN |
+| Statement of the final freeze (PI sign-off, commit of this file) | **FROZEN 17 Nov 2026 on the PI's sign-off** (plan draft 3f). D1 to D5 stand as recorded; the per-replicate seed for SE_exp is `20261118 + b - 1`; the planted-module simulation is done (H2 lower edge 20); scoring code is tested (net4 reproduced to 2.4e-14). Still open and not blocking: the CYC2008 licence. |
 
 ## 1. Arm A data (GEO GSE264667, HepG2)
 
