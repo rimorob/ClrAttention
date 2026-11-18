@@ -25,8 +25,8 @@ TC <- list(
   neff_test = 27, neff_degraded = 15,          # gate 2 (section 6)
   methods = c("tcaCLR", "aCLR", "CLR", "absr", "GENIE3", "PIDC", "GRNBoost2"),
   comparators = c("aCLR", "CLR", "absr", "GENIE3", "PIDC", "GRNBoost2"),
-  refit = c("CLR", "aCLR", "tcaCLR", "absr", "PIDC"),      # methods refitted per experiment replicate (section 5)
-  no_refit = c("GENIE3", "GRNBoost2"),                     # gene resampling only; required note below
+  refit = c("CLR", "aCLR", "tcaCLR", "absr"),               # methods refitted per experiment replicate (section 5, draft 3b)
+  no_refit = c("GENIE3", "GRNBoost2", "PIDC"),             # gene resampling only (cost); required note below
   readouts = c("aCLR_rank", "tcaCLR_t1", "CLR_P9lin", "infl_r1.5", "infl_r2", "sinkhorn"),   # section 3 (plus rewire_NN, hub_*)
   plan_order = c("main", "main_xsub_excl", "main_ribo_joined", "noribo", "small_3to6", "mid_7to19", "large_ge20",
                  "mid_7to10", "mid_11to19", "pert_neither", "pert_rest"),
@@ -36,7 +36,7 @@ TC <- list(
 TC$display <- c(absr = "|r|")
 
 # fixed text (verbatim from the plan)
-TC$note_ge <- "error bars for GENIE3 and GRNBoost2 comparisons include gene resampling only and are narrower than they should be."
+TC$note_ge <- "error bars for GENIE3, GRNBoost2 and PIDC comparisons include gene resampling only and are narrower than they should be."
 TC$claim_a <- paste0("tcaCLR exceeds aCLR in pooled co-membership AUPR on the Complex Portal human complexes in HepG2 Perturb-seq pseudobulk ",
                      "(same laboratory and screen family as the discovery data; cross-cell-type and cross-truth transfer, not cross-technology)")
 TC$ecoli_fail <- "the E. coli preregistered test of the same readout did not meet the one-sided 0.025 threshold (M3D p = 0.079, EcoMAC p = 0.051)"
@@ -160,6 +160,9 @@ tc_stratum <- function(main_sets, main_pairs, lo, hi, genes, excl_k) {
   keep <- !(main_pairs$label == 1L & lab == 0L)
   list(i = main_pairs$i[keep], j = main_pairs$j[keep], label = lab[keep], genes_in = main_pairs$genes_in, n_removed = 0L, sets = sets_in)
 }
+# perturbed-gene list -> gene symbols: Perturb-seq target ids look like "10266_ZNF284_ENST...._ENSG..." (index, symbol, transcripts, gene id);
+# lines without that shape are taken as gene names already
+tc_perturbed_symbols <- function(x) unique(ifelse(grepl("^[0-9]+_[^_]+_", x), sub("^[0-9]+_([^_]+)_.*$", "\\1", x), x))
 # split of the main pair universe by whether either gene is perturbed in the panel (plan section 5, secondaries)
 tc_pert_split <- function(main_pairs, perturbed_idx) {
   pert <- logical(max(c(main_pairs$i, main_pairs$j, perturbed_idx))); pert[perturbed_idx] <- TRUE
@@ -215,7 +218,9 @@ tc_ap_sub <- function(pr, ix) {
 # paired delete-half gene jackknife of one method on one truth. halves: list of gene-index vectors. Returns the replicate APs.
 tc_jack_method <- function(score, p, halves, G, nc = 1L) {
   pr <- tc_ap_prep(score, p$label); is_ <- p$i[pr$o]; js_ <- p$j[pr$o]
-  one <- function(keep) { inh <- logical(G); inh[keep] <- TRUE; tc_ap_sub(pr, which(inh[is_] & inh[js_])) }
+  # young-generation gc after every replicate: a forked worker otherwise piles up about 40% of the parent heap in garbage before its first collection
+  # (the 9,000-gene scale test was OOM-killed at 31 GB with 16 workers without it)
+  one <- function(keep) { inh <- logical(G); inh[keep] <- TRUE; r <- tc_ap_sub(pr, which(inh[is_] & inh[js_])); invisible(gc(FALSE, full = FALSE)); r }
   r <- if (nc > 1L) parallel::mclapply(halves, one, mc.cores = nc) else lapply(halves, one)
   if (any(vapply(r, function(x) inherits(x, "try-error") || length(x) != 1L, NA))) stop("a jackknife worker failed")
   unlist(r)
@@ -229,11 +234,13 @@ tc_with_seed <- function(seed, expr) {
   on.exit(if (had) assign(".Random.seed", old, envir = globalenv()) else if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) rm(".Random.seed", envir = globalenv()))
   set.seed(seed); force(expr)
 }
-# Experiment halves. n_units units (sorted), 'seq': ONE seed, replicates drawn in sequence (the plan: 100 replicates, seed 20261118);
+# Experiment halves. n_units units (sorted). 'plan' (registered, draft 3b): replicate b uses seed + b - 1 (seed 20261118 for replicate 1), as net4 derived
+# its per-replicate seeds; 'seq': ONE seed, replicates drawn in sequence (the earlier reading of the plan, kept for comparison);
 # 'perrep': seed base + b for replicate b (the net4 convention: 20263000 + b groups, 20264000 + b series). Returns indices into the units.
-tc_exp_halves <- function(n_units, n, seed, scheme = c("seq", "perrep")) {
+tc_exp_halves <- function(n_units, n, seed, scheme = c("plan", "seq", "perrep")) {
   scheme <- match.arg(scheme)
-  if (scheme == "seq") tc_with_seed(seed, lapply(seq_len(n), function(b) sort(sample.int(n_units, floor(n_units / 2)))))
+  if (scheme == "plan") lapply(seq_len(n), function(b) tc_with_seed(seed + b - 1L, sort(sample.int(n_units, floor(n_units / 2)))))
+  else if (scheme == "seq") tc_with_seed(seed, lapply(seq_len(n), function(b) sort(sample.int(n_units, floor(n_units / 2)))))
   else lapply(seq_len(n), function(b) tc_with_seed(seed + b, sort(sample.int(n_units, floor(n_units / 2)))))
 }
 

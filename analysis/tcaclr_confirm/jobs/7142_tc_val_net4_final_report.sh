@@ -1,7 +1,7 @@
 . jobs_pc/common.sh
 # mem: 6
 # cpus: 2
-# after: 7111_tc_val_net4_refit_series,7121_tc_val_net4_refit_chip
+# after: 7122_tc_val_net4_refit_chip_plan,7102_tc_val_net4_score_final
 # tcaCLR code validation, consumed net4: final report stage with every experiment source side by side (stored series and group replicates, fresh series refits, fresh profile-level refits under the plan's convention), then the comparison with the stored study including the fresh refits and their hashes.
 set -e
 export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1

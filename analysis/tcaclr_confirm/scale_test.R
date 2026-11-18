@@ -20,9 +20,8 @@ td <- file.path(opt$out, "truth"); dir.create(td, showWarnings = FALSE); utils::
 utils::write.table(data.frame(scope = "all", orf_a = cx[[1]][1], orf_b = cx[[1]][2], reason = "paralog_set"), file.path(td, "excluded.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
 writeLines(c(paste(tc_sha256(file.path(td, "members.tsv")), "members.tsv"), paste(tc_sha256(file.path(td, "excluded.tsv")), "excluded.tsv")), file.path(td, "t.sha256"))
 sd_ <- file.path(opt$out, "scores"); dir.create(sd_, showWarnings = FALSE); writeLines(gn, file.path(sd_, "genes.txt")); np <- G * (G - 1) / 2
-for (m in c(TC$methods, paste0("rewire_", sprintf("%02d", seq_len(opt$n_readouts))))) { v <- rnorm(np)
-  for (k in seq_along(cx)) { mi <- sort(match(cx[[k]], gn)); a <- rep(mi, times = length(mi)); b <- rep(mi, each = length(mi)); s <- a < b; v[tc_pair_index(a[s], b[s])] <- v[tc_pair_index(a[s], b[s])] + 0.5 }
-  tc_write_bin(v, file.path(sd_, paste0(m, ".scores"))); rm(v) }
+idx_all <- unlist(lapply(cx, function(m) { mi <- sort(match(m, gn)); a <- rep(mi, times = length(mi)); b <- rep(mi, each = length(mi)); s <- a < b; tc_pair_index(a[s], b[s]) }))   # within-complex pairs, once
+for (m in c(TC$methods, paste0("rewire_", sprintf("%02d", seq_len(opt$n_readouts))))) { v <- rnorm(np); v[idx_all] <- v[idx_all] + 0.5; tc_write_bin(v, file.path(sd_, paste0(m, ".scores"))); rm(v) }
 say(sprintf("synthetic score directory: %d genes, %d methods/read-outs, truth %d genes in %d complexes", G, length(TC$methods) + opt$n_readouts, length(unique(unlist(cx))), length(cx)))
 for (stage in c("gates", "score", "report")) { t0 <- Sys.time()
   rc <- system2("Rscript", c("analysis/tcaclr_confirm/score_confirm.R", "--stage", stage, "--arm", "A", "--scores", sd_, "--truth_dir", td, "--members", file.path(td, "members.tsv"), "--excluded", file.path(td, "excluded.tsv"),

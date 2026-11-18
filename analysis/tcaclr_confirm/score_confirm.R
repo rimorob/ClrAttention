@@ -8,8 +8,8 @@
 #   gates    SHA-256 guard, gene universe, score files, truth counts and n_eff, power class, AP-implementation identity
 #   score    pooled AUPR (ap_fast), paired delete-half gene jackknife (500, seed 20261117), complex-level sensitivity (500, seed 20261119),
 #            per-complex AP, contributions, slopes, hub-stratified read-outs; every method and read-out present in --scores
-#   expjack  experiment jackknife (100 replicates, seed 20261118): CLR, aCLR, tcaCLR, |r| (and PIDC with --pidc_refit 1) refitted on
-#            each half of the profiles in --expr; --lane/--nlanes split the replicates; resumable (one file per replicate)
+#   expjack  experiment jackknife (100 replicates, seed 20261118): CLR, aCLR, tcaCLR, |r| (PIDC is not refitted under draft 3b; --pidc_refit 1 is kept for experiments) refitted on
+#            each half of the profiles in --expr (replicate b: seed 20261118 + b - 1, draft 3b); --lane/--nlanes split the replicates; resumable (one file per replicate)
 #   collect  gathers the replicate files into expjack/replicates_<name>.csv
 #   report   estimate.csv, h3.csv, pairwise.csv, h2.csv, secondaries.csv, readouts.csv, descriptors, fixed sentences (sentences.txt)
 # Arm B: same estimand, intervals and descriptors; no p-value, no intersection-union / Holm statement, no claim sentence.
@@ -17,7 +17,7 @@
 # then labelled as a validation). Registered values are TC in tc_lib.R.
 suppressPackageStartupMessages(source("analysis/tcaclr_confirm/tc_lib.R"))
 opt <- tc_options(commandArgs(TRUE), list(stage = "", arm = "A", scores = "", truth_dir = "", members = "", excluded = "", sha = "", counts = "", perturbed = "",
-  out = "", expr = "", exp_units = "", exp_name = "plan", exp_scheme = "seq", exp_primary = "", exp_import = "", exp_seed = TC$exp_seed, exp_n = TC$exp_n,
+  out = "", expr = "", exp_units = "", exp_name = "plan", exp_scheme = "plan", exp_primary = "", exp_import = "", exp_seed = TC$exp_seed, exp_n = TC$exp_n,
   jack = TC$jack_n, jack_seed = TC$jack_seed, cjack = TC$cjack_n, cjack_seed = TC$cjack_seed, order = "plan", validation = 0L, allow_missing = 0L,
   workers = 8L, threads = 8L, lane = 0L, nlanes = 1L, pidc_refit = 0L, hash_refit = 0L, upstream_gates = "", smoke_ref = "", claim_label = "",
   context = "", kind = "", fixed_sentence = "", overwrite = 0L, names_new = "tcaCLR", names_ref = "aCLR", quick = 0L, neff_override = -1))
@@ -32,7 +32,7 @@ SC <- file.path(opt$out, "score"); EJ <- file.path(opt$out, "expjack"); dir.crea
 # ---- registered constants: refuse anything else unless --validation 1 -------------------------------------------------------------
 if (!VAL) {
   bad <- c(opt$jack != TC$jack_n, opt$jack_seed != TC$jack_seed, opt$cjack != TC$cjack_n, opt$cjack_seed != TC$cjack_seed, opt$exp_n != TC$exp_n,
-           opt$exp_seed != TC$exp_seed, opt$order != "plan", opt$exp_scheme != "seq", opt$quick != 0L, opt$neff_override != -1)
+           opt$exp_seed != TC$exp_seed, opt$order != "plan", opt$exp_scheme != "plan", opt$quick != 0L, opt$neff_override != -1)
   if (any(bad)) stop("production mode refuses non-registered settings (--jack, --jack_seed, --cjack, --cjack_seed, --exp_n, --exp_seed, --order, --exp_scheme, --quick, --neff_override); use --validation 1 on consumed data")
 }
 # ---- the guard, in front of everything --------------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ if (nzchar(opt$upstream_gates)) { ug <- utils::read.csv(opt$upstream_gates); if 
 say("stage ", opt$stage, "; arm ", ARM, "; mode ", if (VAL) "VALIDATION (consumed data)" else "production", "; git ", G_HEAD, "; hash guard passed for ", nrow(guard), " files")
 st <- tc_scores_open(opt$scores); genes <- st$genes; G <- st$G
 tr <- tc_read_truth(opt$members, opt$excluded)
-perturbed <- NULL; if (nzchar(opt$perturbed)) { pg <- readLines(opt$perturbed); pg <- pg[nzchar(pg)]; perturbed <- stats::na.omit(match(pg, genes)); say("perturbed genes in the universe: ", length(perturbed), " of ", length(pg)) }
+perturbed <- NULL; if (nzchar(opt$perturbed)) { pg <- tc_perturbed_symbols(readLines(opt$perturbed)); pg <- pg[nzchar(pg)]; perturbed <- stats::na.omit(match(pg, genes)); say("perturbed genes (symbols) in the universe: ", length(perturbed), " of ", length(pg)) }
 core_present <- intersect(TC$methods, st$methods)
 if (!all(c("tcaCLR", "aCLR") %in% core_present)) stop("tcaCLR and aCLR score files are required")
 if (!VAL && opt$allow_missing == 0L && length(core_present) < length(TC$methods)) stop("production mode needs all seven methods; missing: ", paste(setdiff(TC$methods, core_present), collapse = ", "))
@@ -125,7 +125,7 @@ if (opt$stage == "score") {
   k_all <- tc_excl_keys(tr$excl, "all", genes); cjm <- intersect(c("tcaCLR", "aCLR", "CLR"), names(pv_cj))
   set.seed(opt$cjack_seed); chalves <- lapply(seq_len(opt$cjack), function(r) sort(sample.int(nC, floor(nC / 2)))); set.seed(NULL)
   cone <- function(keep) { p <- tc_pairs(cmain[keep], genes, k_all); ix <- tc_pair_index(p$i, p$j)
-    c(vapply(cjm, function(m) ap_fast(pv_cj[[m]][ix], p$label), 0), n_pairs = length(p$label), n_pos = sum(p$label)) }
+    r <- c(vapply(cjm, function(m) ap_fast(pv_cj[[m]][ix], p$label), 0), n_pairs = length(p$label), n_pos = sum(p$label)); invisible(gc(FALSE, full = FALSE)); r }
   invisible(gc(verbose = FALSE)); t1 <- Sys.time()
   cj <- if (nc > 1L) parallel::mclapply(chalves, cone, mc.cores = nc) else lapply(chalves, cone)
   if (any(vapply(cj, function(x) inherits(x, "try-error") || length(x) != length(cjm) + 2L, NA))) stop("a complex-jackknife worker failed")

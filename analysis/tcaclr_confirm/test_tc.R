@@ -31,6 +31,7 @@ test_that("experiment halves: sequential seed and the net4 per-replicate convent
   h <- tc_exp_halves(59L, 3L, 20264000L, "perrep")
   for (b in 1:3) { set.seed(20264000L + b); expect_identical(h[[b]], sort(sample.int(59L, 29L))) }
   hs <- tc_exp_halves(100L, 4L, TC$exp_seed, "seq"); set.seed(TC$exp_seed); expect_identical(hs[[1]], sort(sample.int(100L, 50L))); expect_identical(hs[[2]], sort(sample.int(100L, 50L)))
+  hp <- tc_exp_halves(100L, 4L, TC$exp_seed, "plan"); for (b in 1:4) { set.seed(TC$exp_seed + b - 1L); expect_identical(hp[[b]], sort(sample.int(100L, 50L))) }   # replicate b: seed 20261118 + b - 1
   expect_false(exists(".Random.seed", envir = globalenv()) && FALSE)   # RNG restored without error
   if (file.exists("analysis/dream5_lib.R")) { suppressPackageStartupMessages(source("analysis/dream5_lib.R"))
     for (b in c(1, 17, 100)) { expect_identical(tc_exp_halves(59L, 100L, 20264000L, "perrep")[[b]], d5_series_half(59L, b)); expect_identical(tc_exp_halves(321L, 100L, 20263000L, "perrep")[[b]], d5_group_half(321L, b)) } }
@@ -158,6 +159,8 @@ test_that("score files: packed index, directory reader, length validation", {
   expect_equal(tc_unpack(v, G), S)
 })
 
+test_that("perturbed-gene ids map to symbols", { expect_identical(tc_perturbed_symbols(c("10266_ZNF284_ENST00000421176.3_ENSG00000186026", "8184_SMN2_ENST1_ENSG2", "TP53", "10266_ZNF284_X_Y")), c("ZNF284", "SMN2", "TP53")) })
+
 test_that("p formatting for sentences", { expect_identical(tc_fmt_p(0.00001), "< 0.0001"); expect_identical(tc_fmt_p(0.0047), "= 0.0047"); expect_identical(tc_fmt_p(NA_real_), "= NA") })
 
 test_that("PIDC refit through tools/pidc_chunked.jl equals the NetworkInference package output (tools/pidc.jl) on a small matrix", {
@@ -216,7 +219,7 @@ test_that("end to end: gates, score, expjack, collect, report; Arm B has no p-va
   x <- run("A", "collect", outA, c("--allow_missing", "1")); expect_equal(rcof(x), 0L)
   er <- utils::read.csv(file.path(outA, "expjack/replicates_plan.csv")); expect_equal(length(unique(er$rep)), 100L); expect_true(all(c("CLR", "aCLR", "tcaCLR", "absr") %in% er$method))
   # the replicate AP of replicate 1 equals an independent refit on the registered half
-  half <- tc_exp_halves(n_s, 100L, TC$exp_seed, "seq")[[1]]; Rb <- tc_fit_three(X[, half], 2L)
+  half <- tc_exp_halves(n_s, 100L, TC$exp_seed, "plan")[[1]]; Rb <- tc_fit_three(X[, half], 2L)
   expect_equal(er$aupr[er$rep == 1 & er$truth == "main" & er$method == "tcaCLR"], ap_fast(Rb$tcaCLR[cbind(Tt$main$i, Tt$main$j)], Tt$main$label), tolerance = 1e-14)
   x <- run("A", "report", outA, c("--allow_missing", "1")); expect_equal(rcof(x), 0L, info = paste(tail(x, 8), collapse = "\n"))
   e1 <- utils::read.csv(file.path(outA, "estimate.csv")); expect_equal(e1$power_class, "estimate_only"); expect_true(is.na(e1$p_one_sided)); expect_match(e1$claim, "registered test is not run")   # n_eff of the synthetic truth is far below 15
