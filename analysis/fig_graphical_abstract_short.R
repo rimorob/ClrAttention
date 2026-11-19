@@ -164,7 +164,7 @@ draw_abstract <- function() {
   txt("(16% over CLR), but does poorly on tight correlation blocks",
       0.3, 8.26, 18, face = "bold", just = "left")
 
-  txt(paste0(LEAD_NAME, " tentatively overcomes this problem. ", NAMES_NOTE), 0.3, 7.97, 12,
+  txt(paste0(LEAD_NAME, " recovers the K562 complex loss (a selected result; see text). ", NAMES_NOTE), 0.3, 7.97, 12,
       ink[["secondary"]], "bold.italic", just = "left")
   # legend (signage convention)
   lx <- 11.84

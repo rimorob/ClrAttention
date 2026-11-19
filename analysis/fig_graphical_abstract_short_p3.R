@@ -21,6 +21,18 @@ LEAD_KEY <- "a3r"
 LEAD_STATUS <- "lead candidate"
 GREEN <- pal[["green"]]
 D <- utils::read.csv(Sys.getenv("SB_CSV", file.path(out_dir, "scoreboard_data.csv")), stringsAsFactors = FALSE)
+# Two rows added after the tcaCLR confirmatory runs (docs/tcaclr_confirm_results/{armA,armB}/metrics.csv: pooled AUPR and
+# base rate of the primary truth, raw scores). Scaled like the other complex rows: pooled AUPR / base rate. Not in scoreboard_data.csv.
+CONF_DIR <- Sys.getenv("SB_CONF", "docs/tcaclr_confirm_results")
+conf_rows <- function(arm, ds) {
+  m <- utils::read.csv(file.path(CONF_DIR, arm, "metrics.csv"), stringsAsFactors = FALSE)
+  m <- m[m$truth == "main" & m$scope == "raw", ]
+  key <- c(tcaCLR = "a3r", aCLR = "Attention", CLR = "CLR", GENIE3 = "GENIE3", PIDC = "PIDC", GRNBoost2 = "GRNBoost2", absr = "abs_r")
+  data.frame(dataset = ds, truth = "complexes_main", metric = "pooled_aupr_over_base", scope = "raw", method = unname(key[m$method]),
+             enrichment_over_random = m$aupr / m$base_rate, base_rate = m$base_rate,
+             source_file = file.path(CONF_DIR, arm, "metrics.csv"), status = "from_existing", note = "tcaCLR confirmatory run", stringsAsFactors = FALSE)
+}
+D <- rbind(D, conf_rows("armA", "hepg2"), conf_rows("armB", "kemmeren"))
 
 txt <- function(label, x, y, size = 10, col = ink[["primary"]], face = "plain", just = "centre", lineheight = 1.0)
   grid.text(label, x, y, default.units = "native", just = just,
@@ -73,7 +85,11 @@ raw_rows <- list(
   R("Median AUPRC ratio, primary truths", "beeline", "all_14_cases", "beeline_median_auprc_ratio_primary"),
   R("Median AUPRC ratio, cell-type ChIP truth", "beeline", "all_14_cases", "beeline_median_auprc_ratio_celltypeChIP"),
   list(group = "Yeast, DREAM5 net4 expression (536 chips)"),
-  R("Protein complexes (Complex Portal, exploratory estimation)", "dream5_yeast", "complexes_main", PM))
+  R("Protein complexes (Complex Portal, exploratory estimation)", "dream5_yeast", "complexes_main", PM),
+  list(group = "Human HepG2 Perturb-seq pseudobulk (later preregistered run)"),
+  R("Complex Portal human complexes", "hepg2", "complexes_main", PM),
+  list(group = "Yeast, Kemmeren deletion compendium (1,283 profiles; estimate only)"),
+  R("CYC2008 complexes", "kemmeren", "complexes_main", PM))
 hub_rows <- list(
   list(group = "E. coli, M3D compendium"),
   R("Regulons, strong evidence", "m3d", "SC", PM, "hub_att"),
@@ -168,7 +184,7 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
     y <- y - pitch / 2
   }
   # footer
-  for (k in seq_along(footer)) txt(footer[[k]]$text, 0.3, y_bot - 0.22 - (k - 1) * 0.185, footer[[k]]$size, footer[[k]]$col, footer[[k]]$face, just = "left")
+  for (k in seq_along(footer)) txt(footer[[k]]$text, 0.3, y_bot - 0.22 - (k - 1) * (if (length(footer) > 7) 0.178 else 0.185), footer[[k]]$size, footer[[k]]$col, footer[[k]]$face, just = "left")
   popViewport()
 }
 
@@ -177,15 +193,16 @@ foot_common <- list(
   fl("Bars start at random (tick; 1.00, or 0.50 for the AUROC row) and are scaled within each row; the value, not the bar, carries the comparison across rows. Bold with a dot: highest value in the row."),
   fl("No intervals, no tests, no statistical ties marked (a tie in the tally means equal at the printed precision). A grey dash is a cell that was not run, which cannot win. Dotted green outline = human-data groups, new in this work."),
   fl(paste0("Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; ", LEAD_NAME, " was picked among about 20 read-outs by its K562 scores (selected, not fitted); K562 and M3D are tuning sets;")),
-  fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the preregistered threshold.")))
+  fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the threshold; its HepG2 test did.")))
 foot_raw <- c(foot_common, list(
-  fl(paste0("Yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; all methods scored on it, competitors from saved score matrices; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
+  fl(paste0("DREAM5 yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; competitors from saved score matrices; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
+  fl(paste0("HepG2 and Kemmeren rows: later preregistered runs, one pass each; ", ACLR_NAME, " and ", LEAD_NAME, " were not tuned on them (Kemmeren is estimate only). HepG2 shares its laboratory and screen family with K562; there ", LEAD_NAME, " is not shown better than CLR, |r|, GENIE3 or PIDC.")),
   fl("RPE1 row: GENIE3, PIDC and GRNBoost2 were run on its 8,745 genes (two duplicated-symbol rows dropped) and scored on the same truth. E. coli complex rows: competitors re-scored from the saved score matrices of the earlier comparison."),
   fl(paste0(paste0("BEELINE: median over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases); ", ACLR_NAME, " and "), LEAD_NAME, paste0(" use the CLR-NS operator (", ACLR_NAME, " at its held-out depth, "), LEAD_NAME, " at t = 9, not tuned); CLR is plain CLR."))))
 foot_hub <- c(foot_common, list(
   fl("The yeast complex row of the raw scoreboard is left out here: the study stored its hub-controlled scores only with the MI row-mean stratifier, not the stratifier used on this page, so they are not comparable."),
   fl(paste0("Hub-controlled: each method's scores are converted to percentiles within 10 strata of pi_i + pi_j (pi = stationary distribution of the ", ACLR_NAME, " walk). Not run for direct edges, per-regulon AP and BEELINE.")),
-  fl("The competitors were scored on the complex rows (raw scores only) and not hub-controlled, so those cells are dashes here.")))
+  fl("The competitors were scored on the complex rows (raw scores only) and not hub-controlled, so those cells are dashes here. The HepG2 and Kemmeren rows of the raw scoreboard (later runs) have no hub-controlled version and are not shown.")))
 
 SUB_RAW <- paste0("Raw scores. CLR (historical), ", ACLR_NAME, " (adopted) and the lead method (dashed), then competitors.")
 SUB_HUB <- "Appendix. Hub control: each method's scores are compared only among gene pairs of similar hub degree (how strongly connected the genes are). Raw scores are in the main body."
@@ -195,8 +212,8 @@ for (nm in c("", "b")) {
   sub <- paste(if (nm == "") SUB_RAW else SUB_HUB, NAMES_NOTE)
   ft <- if (nm == "") foot_raw else foot_hub
   png(file.path(out_dir, paste0("graphical_abstract_short_p3", nm, ".png")), width = 2400, height = 1350, res = 150, type = "cairo", bg = "white")
-  draw_page(rows, sub, 7.3, ft, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
+  draw_page(rows, sub, 7.3, ft, y_bot = if (nm == "") 1.58 else 1.43, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
   cairo_pdf(file.path(out_dir, paste0("graphical_abstract_short_p3", nm, ".pdf")), width = 16, height = 9, bg = "white")
-  draw_page(rows, sub, 7.3, ft, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
+  draw_page(rows, sub, 7.3, ft, y_bot = if (nm == "") 1.58 else 1.43, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
 }
 cat("wrote", file.path(out_dir, "graphical_abstract_short_p3{,b}.{png,pdf}"), "\n")
