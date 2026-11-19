@@ -1,9 +1,16 @@
 #!/bin/bash
-# Build the Collins checkpoint Word copy from the page source (same method as v20: pandoc HTML -> docx with the landscape reference doc, tables widened).
+# Build the Collins checkpoint Word copy from the page source (pandoc HTML -> docx with the landscape reference doc, tables widened).
+# Self-contained: reads checkpoint_collins_v21.html and figures/ in this folder, and landscape.docx (shared with
+# docs/jim_short_preread_src/build_short_preread.py); writes docs/checkpoint_collins_v21_editable.docx (v20 is never touched).
+# Run: nice -n 19 bash docs/checkpoint_collins_src/build_v21.sh
 set -e
-SP=/tmp/claude-1000/-home-boris-Projects-ClrAttention/4451c478-b0bc-4b2f-84d1-11ecf74c2d08/scratchpad
-cd $SP/v21build; rm -rf d base.docx v21.docx
-nice -n 19 pandoc ../v21/index.html -f html -t docx --resource-path=../v21 --reference-doc=../export/ref/landscape.docx -o base.docx
+HERE="$(cd "$(dirname "$0")" && pwd)"
+OUT="$HERE/../checkpoint_collins_v21_editable.docx"
+W="$(mktemp -d)"; trap 'rm -rf "$W"' EXIT
+cd "$W"
+# pandoc reads the HTML and the PNGs from one folder: stage them together
+mkdir src; cp "$HERE/checkpoint_collins_v21.html" src/index.html; cp "$HERE"/figures/*.png src/
+nice -n 19 pandoc src/index.html -f html -t docx --resource-path=src --reference-doc="$HERE/landscape.docx" -o base.docx
 mkdir d && cd d && unzip -q ../base.docx
 python3 - <<'PY'
 import re
@@ -18,5 +25,6 @@ s=re.sub(r'<w:tblGrid>.*?</w:tblGrid>',fix,s,flags=re.S)
 s=s.replace('<w:tblW w:type="auto" w:w="0" />','<w:tblW w:type="pct" w:w="5000" />')
 open('word/document.xml','w',encoding='utf8').write(s)
 PY
-zip -q -r ../v21.docx .
-ls -la ../v21.docx
+rm -f ../v21.docx; zip -q -r ../v21.docx .
+cp ../v21.docx "$OUT"
+ls -la "$OUT"

@@ -10,6 +10,10 @@
 #     results/explore_stack/m3d/pooled_levels.csv (a3r 0.1622, a3r2 0.1629, a3r3 0.1566); K562 CORUM enrichment
 #     from results/explore_stack/k562/pooled_levels.csv (7.95, 8.19, 8.15); K562 CORUM for CLR 6.39, |r| 7.00,
 #     CLR attention 3.51 from docs/whitepapers/sota_table.md. a3r was picked among ~20 readouts on K562 truths.
+# Names (19 Nov): aCLR = the adopted CLR attention (earlier text "attention"), tcaCLR = the log + second CLR read-out
+# (earlier text "a3r"); the stacked versions are "tcaCLR stacked, 2 layers" and "3 layers" (earlier a3r2, a3r3). Defined below.
+# BEELINE for the adopted method and the tcaCLR family: median AUPRC ratio over the 44 case-truth cells of the primary truths,
+#   from docs/whitepapers/figures/scoreboard_data.csv (CLR-NS operator; the tcaCLR family at t = 9, not tuned): 1.54, 1.73, 1.65, 1.65.
 # Versions without a number in those files show a dash; nothing is interpolated.
 #
 # Output: docs/whitepapers/figures/graphical_abstract_p2.{png,pdf}
@@ -20,6 +24,8 @@ source("analysis/plot_theme.R")
 
 out_dir <- "docs/whitepapers/figures"
 FONT <- "Liberation Sans"
+ACLR_NAME <- "aCLR"       # DEFINED HERE ONLY (temporary name; earlier text "attention")
+LEAD_NAME <- "tcaCLR"     # DEFINED HERE ONLY (temporary name; earlier text "a3r")
 
 txt <- function(label, x, y, size = 12, col = ink[["primary"]], face = "plain",
                 just = "centre", lineheight = 1.05)
@@ -50,8 +56,9 @@ chip <- function(present, x, y, w, label, col, tcol = "white") {
 v <- data.frame(
   name = c("CLR", "CLR-NS", "|r| (correlation)",
            "Attention on |r|", "Attention on mutual information",
-           "Attention on CLR of |r|", "Attention on CLR-NS", "CLR attention (adopted)",
-           "a3r (exploratory)", "a3r2: two layers (exploratory)", "a3r3: three layers (exploratory)"),
+           "Attention on CLR of |r|", "Attention on CLR-NS", paste0(ACLR_NAME, " (adopted)"),
+           paste0(LEAD_NAME, " (lead candidate)"), paste0(LEAD_NAME, " stacked, 2 layers (exploratory)"),
+           paste0(LEAD_NAME, " stacked, 3 layers (exploratory)")),
   sub = c("context normalization, scores ranked directly",
           "CLR on |r| of normal scores (Blom)",
           "no normalization, scores ranked directly",
@@ -60,9 +67,9 @@ v <- data.frame(
           "CLR normalization, then softmax + walk",
           "CLR-NS scores, then softmax + walk",
           "MI, CLR normalization, softmax + walk",
-          "attention, then log of the walk + a second CLR",
-          "a3r fed back as the score of a second layer",
-          "a3r fed back twice"),
+          paste0(ACLR_NAME, ", then log of the walk + a second CLR"),
+          paste0(LEAD_NAME, " fed back as the score of a second layer; not adopted"),
+          paste0(LEAD_NAME, " fed back twice; not adopted")),
   dep = c("MI", "NS", "r", "r", "MI", "r", "NS", "MI", "MI", "MI", "MI"),
   cn  = c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
   sm  = c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
@@ -70,7 +77,7 @@ v <- data.frame(
   walklab = c(NA, NA, NA, "t* = 8", "t* = 6", "t* = 7", "t* = 5", "t* = 9", "t = 9", "t = 9 ×2", "t = 9 ×3"),
   ecoli = c(0.136, NA, NA, 0.143, 0.143, 0.153, 0.151, 0.158, 0.1622, 0.1629, 0.1566),
   corum = c("6.39", "", "7.00", "", "", "", "", "3.51", "7.95", "8.19", "8.15"),
-  beeline = c("1.48", "1.60", "1.20", "", "", "", "no gain over CLR-NS", "", "", "", ""),
+  beeline = c("1.48", "1.60", "1.20", "", "", "", "no gain over CLR-NS", "1.54", "1.73", "1.65", "1.65"),
   stringsAsFactors = FALSE)
 
 draw_p2 <- function() {
@@ -102,7 +109,7 @@ draw_p2 <- function() {
     seg(ax(a), ys[1] + 0.3, ax(a), ys[length(ys)] - 0.3, ink[["grid"]], 0.9)
     txt(sprintf("%.2f", a), ax(a), ys[length(ys)] - 0.34, 9, ink[["secondary"]])
   }
-  txt("axis starts at 0.13", (xe0 + xe1) / 2, ys[length(ys)] - 0.5, 9, ink[["secondary"]], "italic")
+  txt("(axis starts at 0.13)", xe1 + 0.45, ys[length(ys)] - 0.34, 9, ink[["secondary"]], "italic", just = "left")
 
   for (k in seq_len(nrow(v))) {
     y <- ys[k]; last <- k == 8; expl <- k > 8
@@ -128,13 +135,16 @@ draw_p2 <- function() {
     if (nzchar(v$beeline[k])) txt(v$beeline[k], xb, y, if (k == 7) 9 else 11, just = "left",
                                   face = if (k == 2) "bold" else "plain")
   }
-  txt("t* = held-out depth, chosen per version; the method comparison itself fixes t = 9. Exploratory rows: t = 9 in every layer, not re-selected; none was adopted (26 Oct preregistered test, 12 Nov stacked-layer run).",
-      0.4, ys[length(ys)] - 0.5, 9, ink[["secondary"]], just = "left")
-  txt("a3r was picked among about 20 read-outs by its K562 scores (a selection, not a fit: it has no fitted parameters). Gaps between a3r, a3r2 and a3r3 are inside the noise. BEELINE: not run for a3r.",
-      0.4, ys[length(ys)] - 0.75, 9, ink[["secondary"]], just = "left")
+  fy0 <- ys[length(ys)] - 0.53
+  txt("t* = held-out depth, chosen per version; the method comparison itself fixes t = 9. Stacked rows: t = 9 in every layer, not re-selected; stacking was not adopted (12 Nov stacked-layer run).",
+      0.4, fy0, 9, ink[["secondary"]], just = "left")
+  txt(paste0(LEAD_NAME, ": lead candidate; its 26 Oct preregistered E. coli test did not reach the threshold. It was picked among about 20 read-outs by its K562 scores (a selection, not a fit: it has no fitted parameters)."),
+      0.4, fy0 - 0.19, 9, ink[["secondary"]], just = "left")
+  txt(paste0("Gaps between ", LEAD_NAME, " and its stacked versions are inside the noise. BEELINE: CLR is plain CLR; the ", ACLR_NAME, " and ", LEAD_NAME, " rows use the CLR-NS operator (", LEAD_NAME, " family at t = 9, not tuned)."),
+      0.4, fy0 - 0.38, 9, ink[["secondary"]], just = "left")
 
   # footer strip: what CLR was compared with
-  fy <- 0.4
+  fy <- 0.33
   grid.roundrect(0.3, fy, 15.5, 0.5, default.units = "native", just = c("left", "centre"),
                  r = unit(0.08, "inches"), gp = gpar(fill = "#f1f0ec", col = NA))
   txt("Compared with (BEELINE median ratio):", 0.55, fy, 11, face = "bold", just = "left")

@@ -190,10 +190,10 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
 
 fl <- function(t) list(text = t, size = 9, col = ink[["secondary"]], face = "plain")
 foot_common <- list(
-  fl("Bars start at random (tick; 1.00, or 0.50 for the AUROC row) and are scaled within each row; the value, not the bar, carries the comparison across rows. Bold with a dot: highest value in the row."),
-  fl("No intervals, no tests, no statistical ties marked (a tie in the tally means equal at the printed precision). A grey dash is a cell that was not run, which cannot win. Dotted green outline = human-data groups, new in this work."),
+  fl("Bars start at random (tick; 1.00, or 0.50 for the AUROC row) and are scaled within each row; the value, not the bar, carries the comparison across rows."),
+  fl("A bold value with a dot is the highest printed value in its row (equal printed values share the mark and the tally), not a statistical winner; no intervals or tests are shown. A grey dash is a cell that was not run. Dotted green outline = human-data groups, new in this work."),
   fl(paste0("Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; ", LEAD_NAME, " was picked among about 20 read-outs by its K562 scores (selected, not fitted); K562 and M3D are tuning sets;")),
-  fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the threshold; its HepG2 test did.")))
+  fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the threshold; its preregistered HepG2 test (a separate result on a new truth) did.")))
 foot_raw <- c(foot_common, list(
   fl(paste0("DREAM5 yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; competitors from saved score matrices; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
   fl(paste0("HepG2 and Kemmeren rows: later preregistered runs, one pass each; ", ACLR_NAME, " and ", LEAD_NAME, " were not tuned on them (Kemmeren is estimate only). HepG2 shares its laboratory and screen family with K562; there ", LEAD_NAME, " is not shown better than CLR, |r|, GENIE3 or PIDC.")),

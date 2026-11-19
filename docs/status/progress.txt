@@ -1,0 +1,9 @@
+ClrAttention jobs  Thu 2026-11-19 11:26   load 1.10   mem 19 used / 106 avail GB
+
+== jobs_pc (clr-jobs: inactive, -)
+   (nothing running)
+   queue empty
+
+== jobs_pc2 (clr-jobs2: inactive, -)
+   (nothing running)
+   queue empty

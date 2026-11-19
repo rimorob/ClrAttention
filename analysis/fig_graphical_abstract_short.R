@@ -3,9 +3,9 @@
 #  - signage: a DOTTED GREEN outline marks every element that is new in this work, including every
 #    element using human data (the original CLR paper evaluated no human data); historical CLR parts are
 #    labelled "Faith et al. 2007". Legend entry: "dotted green = new in this work".
-#  - panel 2: the 2007 packages we found combine the clipped row z-scores as sqrt(zi^2 + zj^2) (Euclidean);
-#    the version used here combines them as (zi + zj)/sqrt(2) (Stouffer). NO statement about where the
-#    Stouffer combination came from, and it is not marked as new (project memory clr-2007-history).
+#  - panel 2 (PI wording, 19 Nov): the 2007 paper (Faith et al.) describes only the Euclidean combination sqrt(zi^2 + zj^2);
+#    the released 2007 software offered both the Euclidean and the Stouffer combination (zi + zj)/sqrt(2); the Stouffer
+#    combination is the one used here. NO statement about who introduced Stouffer or when, and it is not marked as new.
 #  - panels 3 and 4: how partners are chosen (top 50 positive CLR scores, ranked), the effective number of
 #    partners (~10, per-gene temperature) and what one walk step does (rows of A; A is not symmetric).
 #  - panel 5: CLR (historical), CLR attention, and the lead method; the stacked variants are dropped.
@@ -274,18 +274,18 @@ draw_abstract <- function() {
              arrow = ar, gp = gpar(col = ink[["muted"]], lwd = 1.2, lty = 3, fill = ink[["muted"]]))
   seg(colx, my0 - 0.05, rc, cb + chh + 0.08, ink[["muted"]], 1.2, lty = 3, arrow = ar)
   txt("z-scores clipped at 0, then combined:", x0 + W2 / 2, 3.2, 9, ink[["secondary"]], face = "italic")
-  # the two combinations (no statement about where the Stouffer combination came from)
+  # the two combinations (no statement about who introduced the Stouffer combination or when)
   bxw <- W2 - 0.3; bxx <- x0 + 0.15
   grid.roundrect(bxx, 2.62, bxw, 0.46, default.units = "native", just = c("left", "bottom"),
                  r = unit(0.06, "inches"), gp = gpar(fill = "#f1f0ec", col = ink[["muted"]], lwd = 1.1))
   txt("Euclidean combination", bxx + 0.1, 2.93, 10, face = "bold", just = "left")
-  txt("(2007 packages we found)", bxx + 0.1, 2.74, 9, ink[["secondary"]], just = "left")
+  txt("(2007 paper and 2007 software)", bxx + 0.1, 2.74, 8.5, ink[["secondary"]], just = "left")
   grid.text(expression(sqrt(z[i]^2 + z[j]^2)), bxx + bxw - 0.1, 2.85, default.units = "native", just = "right",
             gp = gpar(fontfamily = FONT, fontsize = 12, col = ink[["primary"]]))
   grid.roundrect(bxx, 2.07, bxw, 0.46, default.units = "native", just = c("left", "bottom"),
                  r = unit(0.06, "inches"), gp = gpar(fill = "#fbe3d9", col = pal[["orange"]], lwd = 1.4))
   txt("Stouffer combination", bxx + 0.1, 2.38, 10, face = "bold", just = "left")
-  txt("(used here)", bxx + 0.1, 2.19, 9, ink[["secondary"]], just = "left")
+  txt("(2007 software; used here)", bxx + 0.1, 2.19, 8.5, ink[["secondary"]], just = "left")
   grid.text(expression((z[i] + z[j]) / sqrt(2)), bxx + bxw - 0.1, 2.3, default.units = "native", just = "right",
             gp = gpar(fontfamily = FONT, fontsize = 12, col = ink[["primary"]]))
   txt("= the CLR score for the pair i-j", x0 + W2 / 2, 1.88, 9.5, ink[["secondary"]], face = "italic")

@@ -17,7 +17,7 @@ LEAD_DESC = f"{ACLR_NAME} followed by a second CLR on the log of the walk"
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "jim_short_preread.md")
 OUT = sys.argv[2] if len(sys.argv) > 2 else "/home/boris/Projects/ClrAttention/docs/jim_short_preread.docx"
-REF = "/tmp/claude-1000/-home-boris-Projects-ClrAttention/4451c478-b0bc-4b2f-84d1-11ecf74c2d08/scratchpad/export/ref/landscape.docx"
+REF = os.path.join(HERE, "..", "checkpoint_collins_src", "landscape.docx")   # Word reference template (landscape, margins), shared with build_v21.sh
 PAGEBREAK = "PAGEBREAKMARKER"
 
 md = open(SRC, encoding="utf-8").read()

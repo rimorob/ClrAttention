@@ -1,9 +1,12 @@
 # Graphical abstract (16:9), drawn entirely in code with grid (no generative imagery).
 # Brief: docs/whitepapers/graphical_abstract_prompt.md, revised after PI review:
 # published CLR (Faith et al. 2007) is ONLY the per-gene context normalization;
-# the softmax and the multi-step walk are this paper's additions. The 2007 code (CLR 1.1, 2006-12-08)
-# combines the clipped row z-scores as sqrt(zi^2 + zj^2); the Stouffer combination: no statement about who introduced it (PI, 3 Nov)
-# (the B-spline MI estimator is the same family in both, Daub et al. 2004).
+# the softmax and the multi-step walk are this paper's additions. Panel 2 (PI wording, 19 Nov): the 2007 paper (Faith et al.)
+# describes only the Euclidean combination sqrt(zi^2 + zj^2); the released 2007 software offered both the Euclidean and the
+# Stouffer combination (zi + zj)/sqrt(2); the Stouffer combination is the one used here. No statement about who introduced
+# Stouffer or when. (The B-spline MI estimator is the same family in both, Daub et al. 2004.)
+# Names (19 Nov): aCLR = the adopted method (earlier text and file names: "attention"), tcaCLR = the log + second CLR read-out
+# (earlier: "a3r"); its stacked versions (earlier a3r2, a3r3) are "tcaCLR stacked, 2 layers" and "3 layers".
 # Palette: analysis/plot_theme.R (blue = MI, orange = CLR normalization, violet = softmax,
 # magenta = depth/walk, aqua = the full method of this work, grey = competitors,
 # red = loss marker only). Network drawings and the heat map are schematic (seeded
@@ -20,21 +23,21 @@ out_dir <- "docs/whitepapers/figures"
 FONT <- "Liberation Sans"   # Arial-metric sans
 
 # ---- numbers (docs/whitepapers/sota_table.md, raw scores) -------------------
-this_lab <- "CLR + softmax + walk (adopted)"
+this_lab <- "aCLR (adopted)"
 # The two exploratory rows (a3r, a3r2) are values of results/explore_stack/{m3d,k562}/pooled_levels.csv
 # (raw scope; same base rate as the other bars). Neither was adopted: 26 Oct preregistered test and
 # 12 Nov stacked-layer run (docs/explore_stack_results.md); K562 is in-sample for a3r.
-a3r_lab <- "a3r: + log, 2nd CLR (exploratory)"
-a3r2_lab <- "a3r2: two layers (exploratory)"
-a3r3_lab <- "a3r3: three layers (exploratory)"
+a3r_lab <- "tcaCLR (lead candidate)"
+a3r2_lab <- "tcaCLR stacked, 2 layers"
+a3r3_lab <- "tcaCLR stacked, 3 layers"
 strip_a <- data.frame(   # M3D, strong-evidence (SC) RegulonDB regulons
   label = c(this_lab, a3r_lab, a3r2_lab, a3r3_lab, "GENIE3", "PIDC", "CLR"),
   value = c(1.68, 1.72, 1.73, 1.66, 1.51, 1.45, 1.44),
   col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", "#bfe6d8", ink[["muted"]], ink[["muted"]], pal[["orange"]]),
   stringsAsFactors = FALSE)
 strip_b <- data.frame(   # K562, CORUM complexes
-  label = c(this_lab, "a3r: + log, 2nd CLR (picked on K562)", "a3r2: two layers (picked on K562)",
-            "a3r3: three layers (picked on K562)", "CLR", "GENIE3", "|r| (correlation)"),
+  label = c("aCLR", "tcaCLR (picked on K562)", "tcaCLR stacked, 2 layers",
+            "tcaCLR stacked, 3 layers", "CLR", "GENIE3", "|r| (correlation)"),
   value = c(3.51, 7.95, 8.19, 8.15, 6.39, 6.32, 7.00),
   col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", "#bfe6d8", pal[["orange"]], ink[["muted"]], ink[["muted"]]),
   stringsAsFactors = FALSE)
@@ -150,7 +153,7 @@ draw_abstract <- function() {
   X <- 0.3 + c(0, cumsum(Wv[1:3] + gap))
   xr <- X[4] + W                      # right edge of the method panels (10.5)
   band(X[1], X[2] + Wv[2], 7.38, "#ecebe7", "CLR (Faith et al. 2007)")
-  band(X[3], xr, 7.38, "#e6e3fa", "This work: steps taken from attention")
+  band(X[3], xr, 7.38, "#e6e3fa", "aCLR (this work): steps taken from attention")
 
   card(X[1], Y, Wv[1], H, 1, "Expression\ncompendium")
   card(X[2], Y, Wv[2], H, 2, "Mutual information,\nz-scored against each\ngene's own background")
@@ -249,14 +252,14 @@ draw_abstract <- function() {
   fx <- x0 + W2 / 2
   seg(lc, cb - 0.42, fx - 0.3, 2.6, ink[["secondary"]], 1.2, arrow = ar)
   seg(rc, cb - 0.42, fx + 0.3, 2.6, ink[["secondary"]], 1.2, arrow = ar)
-  grid.text(expression((z[i] + z[j]) / sqrt(2)), fx, 2.38, default.units = "native",
+  grid.text(expression((z[i] + z[j]) / sqrt(2)), fx, 2.43, default.units = "native",
             gp = gpar(fontfamily = FONT, fontsize = 14, col = ink[["primary"]]))
-  txt("Stouffer combination; z-scores clipped at 0", fx, 2.17, 9, ink[["secondary"]])
-  grid.text(expression("Euclidean " * sqrt(z[i]^2 + z[j]^2) * " ranks the same"), fx, 2.01, default.units = "native",
-            gp = gpar(fontfamily = FONT, fontsize = 9, col = ink[["secondary"]]))
-  grid.roundrect(fx, 1.75, 2.35, 0.32, default.units = "native", r = unit(0.06, "inches"),
+  txt("Stouffer combination (used here); z clipped at 0", fx, 2.2, 8.5, ink[["secondary"]])
+  grid.text(expression("2007 paper: Euclidean " * sqrt(z[i]^2 + z[j]^2) * "; 2007 software: both"), fx, 2.02, default.units = "native",
+            gp = gpar(fontfamily = FONT, fontsize = 8.5, col = ink[["secondary"]]))
+  grid.roundrect(fx, 1.68, 2.35, 0.3, default.units = "native", r = unit(0.06, "inches"),
                  gp = gpar(fill = "#fbe3d9", col = pal[["orange"]], lwd = 1.4))
-  txt("CLR score for the pair i–j", fx, 1.75, 11, face = "bold")
+  txt("CLR score for the pair i–j", fx, 1.68, 11, face = "bold")
 
   # ---------------- panel 3: softmax ------------------------------------------
   x0 <- X[3]; cx <- x0 + W / 2; cy <- 4.35

@@ -1,0 +1,33 @@
+2026-10-22 12:31:36 thermal watch started, until 16:00
+2026-10-22 12:31:36 CPU pkg 71/89C | fans 2813/2991/604 rpm | GPU0 45C fan 0% 14W util 3%; GPU1 37C fan 0% 6W util 0%; load 25.16
+2026-10-22 12:36:36 CPU pkg 64/87C | fans 2793/3036/1824 rpm | GPU0 44C fan 0% 9W util 5%; GPU1 38C fan 0% 7W util 0%; load 27.56
+2026-10-22 12:41:36 CPU pkg 64/85C | fans 2410/2572/1955 rpm | GPU0 42C fan 0% 9W util 0%; GPU1 38C fan 0% 6W util 0%; load 26.76
+2026-10-22 12:46:36 CPU pkg 64/86C | fans 2396/2581/1967 rpm | GPU0 42C fan 0% 8W util 0%; GPU1 37C fan 0% 6W util 0%; load 29.63
+2026-10-22 12:51:37 CPU pkg 64/86C | fans 2613/2799/1803 rpm | GPU0 41C fan 0% 9W util 3%; GPU1 37C fan 0% 6W util 0%; load 30.02
+2026-10-22 12:56:37 CPU pkg 64/86C | fans 2612/2801/1954 rpm | GPU0 41C fan 0% 8W util 0%; GPU1 37C fan 0% 6W util 0%; load 28.64
+2026-10-22 13:01:37 CPU pkg 63/86C | fans 2392/2573/1969 rpm | GPU0 41C fan 0% 12W util 0%; GPU1 36C fan 0% 6W util 0%; load 37.56
+2026-10-22 13:06:37 CPU pkg 65/86C | fans 2452/2634/2086 rpm | GPU0 40C fan 0% 8W util 3%; GPU1 36C fan 0% 6W util 0%; load 34.80
+2026-10-22 13:11:38 CPU pkg 65/86C | fans 2609/2769/2087 rpm | GPU0 40C fan 0% 8W util 0%; GPU1 36C fan 0% 6W util 0%; load 38.02
+2026-10-22 13:16:38 CPU pkg 63/86C | fans 2541/2741/2089 rpm | GPU0 40C fan 0% 8W util 2%; GPU1 36C fan 0% 6W util 0%; load 33.88
+2026-10-22 13:21:38 CPU pkg 64/85C | fans 2660/2879/2098 rpm | GPU0 40C fan 0% 9W util 0%; GPU1 36C fan 0% 6W util 0%; load 39.44
+2026-10-22 13:26:38 CPU pkg 64/86C | fans 2481/2660/2086 rpm | GPU0 40C fan 0% 8W util 4%; GPU1 35C fan 0% 6W util 0%; load 34.82
+2026-10-22 13:31:39 CPU pkg 65/85C | fans 2538/2706/2102 rpm | GPU0 41C fan 0% 13W util 13%; GPU1 35C fan 0% 6W util 0%; load 33.43
+2026-10-22 13:51:39 CPU pkg 64/86C | fans 2591/2802/2087 rpm | GPU0 55C fan 10% 18W util 21%; GPU1 37C fan 0% 6W util 0%; load 33.44
+2026-10-22 14:11:39 CPU pkg 64/82C | fans 1771/1864/1280 rpm | GPU0 53C fan 13% 17W util 16%; GPU1 40C fan 0% 7W util 0%; load 17.96
+2026-10-22 14:31:39 CPU pkg 65/87C | fans 2600/2804/2105 rpm | GPU0 54C fan 14% 22W util 30%; GPU1 40C fan 0% 7W util 0%; load 33.24
+2026-10-22 14:51:40 CPU pkg 64/87C | fans 2618/2813/2240 rpm | GPU0 56C fan 19% 26W util 26%; GPU1 40C fan 0% 7W util 0%; load 34.14
+2026-10-22 15:11:40 CPU pkg 65/86C | fans 2635/2834/2105 rpm | GPU0 49C fan 10% 14W util 36%; GPU1 39C fan 0% 6W util 0%; load 35.37
+2026-10-22 15:31:40 CPU pkg 64/87C | fans 2663/2874/1962 rpm | GPU0 53C fan 12% 17W util 24%; GPU1 39C fan 0% 6W util 0%; load 29.29
+2026-10-22 15:51:40 CPU pkg 65/85C | fans 2799/3033/2175 rpm | GPU0 50C fan 0% 17W util 22%; GPU1 38C fan 0% 6W util 0%; load 32.06
+2026-10-22 16:11:40 thermal watch ended normally
+2026-10-22 16:33:18 thermal watch started, until 23:59
+2026-10-22 16:33:18 CPU pkg 64/86C | fans 2627/2842/2093 rpm | GPU0 47C fan 0% 14W util 21%; GPU1 37C fan 0% 6W util 0%; load 33.91
+2026-10-22 16:38:18 CPU pkg 64/86C | fans 2673/2921/2091 rpm | GPU0 46C fan 0% 8W util 0%; GPU1 37C fan 0% 6W util 0%; load 34.46
+2026-10-22 16:43:18 CPU pkg 65/87C | fans 2730/2960/2081 rpm | GPU0 45C fan 0% 14W util 17%; GPU1 36C fan 0% 7W util 0%; load 33.89
+2026-10-22 16:48:19 CPU pkg 63/86C | fans 2470/2593/1965 rpm | GPU0 42C fan 0% 8W util 0%; GPU1 36C fan 0% 6W util 0%; load 33.87
+2026-10-22 16:53:19 CPU pkg 62/86C | fans 2603/2810/1948 rpm | GPU0 41C fan 0% 8W util 0%; GPU1 36C fan 0% 6W util 0%; load 32.66
+2026-10-22 16:58:19 CPU pkg 63/87C | fans 2604/2809/1946 rpm | GPU0 41C fan 0% 13W util 1%; GPU1 35C fan 0% 6W util 0%; load 34.34
+2026-10-22 17:03:19 CPU pkg 63/86C | fans 2503/2761/1945 rpm | GPU0 41C fan 0% 13W util 1%; GPU1 35C fan 0% 6W util 0%; load 32.06
+2026-10-22 17:08:20 CPU pkg 62/85C | fans 2402/2602/1976 rpm | GPU0 41C fan 0% 10W util 1%; GPU1 35C fan 0% 7W util 0%; load 32.71
+2026-10-22 17:13:20 CPU pkg 66/91C | fans 2784/3085/1960 rpm | GPU0 41C fan 0% 13W util 1%; GPU1 34C fan 0% 7W util 0%; load 33.67
+2026-10-22 17:13:20 WARN: CPU package 91C;
