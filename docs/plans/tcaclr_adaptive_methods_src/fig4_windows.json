@@ -1,0 +1,26 @@
+[
+ {
+  "size": 5,
+  "phi": 0.048,
+  "gap_within": 0.625,
+  "t_low": 1.6,
+  "t_high_nonlazy": 21.0,
+  "t_high_lazy": 42.0
+ },
+ {
+  "size": 20,
+  "phi": 0.029,
+  "gap_within": 0.307,
+  "t_low": 3.3,
+  "t_high_nonlazy": 34.2,
+  "t_high_lazy": 68.4
+ },
+ {
+  "size": 80,
+  "phi": 0.126,
+  "gap_within": 0.235,
+  "t_low": 4.3,
+  "t_high_nonlazy": 7.9,
+  "t_high_lazy": 15.9
+ }
+]

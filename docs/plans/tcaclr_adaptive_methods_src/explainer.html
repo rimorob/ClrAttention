@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Adaptive breadth and depth for aCLR and tcaCLR: an illustrated explainer</title>
+<style>
+  @page { size: A4; margin: 12mm 15mm 14mm 15mm;
+          @bottom-center { content: "Illustrated explainer of proposed methods (all toy, simulated figures)   |   page " counter(page) " of " counter(pages);
+                           font-family: "Liberation Sans", Arial, sans-serif; font-size: 8pt; color: #666; } }
+  :root { --blue:#0072B2; --orange:#E69F00; --green:#009E73; --verm:#D55E00; --sky:#56B4E9; --grey:#666; }
+  html { font-family: "Liberation Sans", Arial, sans-serif; font-size: 9.5pt; line-height: 1.32; color: #1a1a1a; }
+  body { margin: 0; }
+  h1 { font-size: 19pt; margin: 0 0 2mm 0; line-height: 1.15; color: #111; }
+  .sub { color: var(--grey); font-size: 10pt; margin-bottom: 4mm; }
+  h2 { font-size: 13pt; margin: 0 0 2mm 0; padding-bottom: 1mm; border-bottom: 2px solid var(--blue); color: #111; break-after: avoid; }
+  h3 { font-size: 10.8pt; margin: 3.5mm 0 1mm 0; color: var(--blue); break-after: avoid; }
+  p { margin: 0 0 2mm 0; }
+  ul, ol { margin: 0 0 2mm 0; padding-left: 5mm; }
+  li { margin-bottom: 0.8mm; }
+  section { margin-top: 5mm; }
+  section.first { margin-top: 0; }
+  section.newpage { break-before: page; margin-top: 0; }
+  figure { margin: 1.5mm 0 2.5mm 0; break-inside: avoid; }
+  figure img { width: 100%; display: block; }
+  figcaption { font-size: 8.8pt; color: #333; margin-top: 1mm; line-height: 1.3; }
+  figcaption b { color: #000; }
+  .narrow img { width: 70%; margin: 0 auto; }
+  .w90 img { width: 90%; margin: 0 auto; }
+  .w80 img { width: 80%; margin: 0 auto; }
+  .w62 img { width: 62%; margin: 0 auto; }
+  .w54 img { width: 54%; margin: 0 auto; }
+  .box { border: 1.5px solid var(--blue); background: #EEF5FA; border-radius: 3px; padding: 2.5mm 3.5mm; margin: 2.5mm 0 3mm 0; break-inside: avoid; }
+  .box.answer { border-color: var(--verm); background: #FCEFE6; }
+  .box.warn { border-color: var(--orange); background: #FDF5E3; }
+  .box h4 { margin: 0 0 1mm 0; font-size: 10.3pt; }
+  .eq { font-family: "DejaVu Sans Mono", monospace; font-size: 9.2pt; background: #F3F3F3; padding: 0.6mm 2mm; border-radius: 2px; display: inline-block; margin: 0.5mm 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 8pt; margin: 1.5mm 0 3mm 0; table-layout: fixed; }
+  tr { break-inside: avoid; }
+  th, td { border: 1px solid #bbb; padding: 0.8mm 1.4mm; vertical-align: top; text-align: left; }
+  th { background: #E4EDF3; }
+  td.st { color: var(--verm); font-weight: bold; white-space: nowrap; }
+  .small { font-size: 8.8pt; color: #333; }
+  .tag { color: var(--verm); font-weight: bold; }
+  dl { margin: 0; columns: 2; column-gap: 7mm; font-size: 8.3pt; line-height: 1.25; }
+  dt { font-weight: bold; break-after: avoid; }
+  dd { margin: 0 0 1mm 0; break-inside: avoid; }
+  ol.refs { font-size: 8.3pt; padding-left: 5mm; }
+  ol.refs li { margin-bottom: 1mm; }
+</style>
+</head>
+<body>
+
+<!-- ============================ 0. SUMMARY ============================ -->
+<section class="first">
+<h1>Setting the breadth and depth of aCLR and tcaCLR from the data: the proposed methods, explained</h1>
+<div class="sub">Illustrated explainer for the PI. Every figure is built from a small simulated toy network or toy expression data. Nothing here has been run on real project data. Every number marked "toy" is from those simulations and is not a result about biology.</div>
+
+<h2>0. One-page summary</h2>
+
+<h3>The two dials</h3>
+<p>aCLR and tcaCLR turn a CLR score matrix into a walk on a gene network. Two settings control the walk.</p>
+<ul>
+<li><b>Breadth, keff.</b> This is how many partners each gene effectively attends to in one hop. It is set per gene by a softmax over the gene's top scores, so that the "effective number of partners" equals keff. It works like the perplexity in t-SNE.</li>
+<li><b>Depth, t.</b> This is how many lazy steps the walk takes. A lazy step stays put with probability one half, so about half the steps are real moves.</li>
+<li>Two settings are secondary. <b>Laziness</b> (0.5) only rescales time. The <b>cap</b> is the largest number of candidate partners the softmax may see (the review suggests 4 times keff). It is a computing truncation.</li>
+</ul>
+
+<h3>What we want</h3>
+<p>We want to set keff and t from each dataset's own data, without using any truth. The spirit is the same as BIC (a likelihood score with a penalty for the number of parameters) or empirical Bayes (estimating a prior from the data themselves): let the data say how complex a description they support. No truth set is left unused in this project, so any claim about a changed setting needs a new truth later.</p>
+
+<h3>The proposed tools</h3>
+<table>
+<colgroup><col style="width:17%"><col style="width:17%"><col style="width:17%"><col style="width:19%"><col style="width:20%"><col style="width:10%"></colgroup>
+<tr><th>Tool</th><th>What it estimates</th><th>Input</th><th>Penalty or regulariser</th><th>Cost (estimates, not measured)</th><th>Status</th></tr>
+<tr><td>Spectral-edge depth (PA on the operator)</td><td>depth t for a given keff</td><td>operator rebuilt on 10 to 20 permuted datasets</td><td>edge of the permuted band; &epsilon; is a free choice</td><td>10 to 30 min per dense eigendecomposition (review), times 10 to 20; minutes if truncated</td><td class="st">untested</td></tr>
+<tr><td>Plain PA, Marchenko-Pastur, Minka</td><td>data dimension k</td><td>gene correlation matrix</td><td>permuted band, analytic edge, or Laplace evidence</td><td>seconds to minutes (mine)</td><td class="st">untested</td></tr>
+<tr><td>Graph-signal likelihood</td><td>keff and t as a ridge; a noise floor</td><td>graph from one half, experiments from the other, blocked by laboratory</td><td>held-out scoring only; 1-SE rule; BIC as a second reading</td><td>1 to 2 h dense, minutes truncated (review)</td><td class="st">untested</td></tr>
+<tr><td>Instability curve (StARS-style)</td><td>keff</td><td>subsampled experiments</td><td>smallest keff with instability at most 0.05</td><td>hours (review)</td><td class="st">untested</td></tr>
+<tr><td>Islands and conductance</td><td>a depth window; a multi-scale warning; a check on keff</td><td>sparsified graph; walks from all genes</td><td>rewired-graph null</td><td>minutes (review)</td><td class="st">untested</td></tr>
+<tr><td>Diffusion-PMI second CLR</td><td>replaces the reachable-only row z</td><td>P<sup>t</sup> and its stationary distribution</td><td>degree-corrected null</td><td>same as the walk</td><td class="st">untested</td></tr>
+<tr><td>Planted simulation and permuted controls</td><td>whether any rule above works</td><td>simulated data</td><td>pre-written decision rule</td><td>1 to 2 h (review)</td><td class="st">not yet run</td></tr>
+</table>
+
+<div class="box answer">
+<h4>Short answer to the Horn question</h4>
+<p><b>Yes for depth, no for breadth.</b> A parallel analysis (PA) gives the data's dimension k, the number of modes that beat chance. Applied to the walk operator instead of the correlation matrix, it also gives a depth t. It does not by itself give keff, because the permuted-data null itself depends on keff. Section 2 explains why and what else to add.</p>
+</div>
+
+</section>
+
+<!-- ============================ 1. FILTER ============================ -->
+<section class="newpage">
+<h2>1. The walk as a filter, in pictures</h2>
+<div class="box"><h4>The exact operator, in five lines</h4>
+<p class="small" style="margin:0">(1) Start from the symmetric CLR score matrix S (the two directions combined as a Stouffer sum, (Z + Z<sup>T</sup>)/&radic;2, negatives set to 0). (2) For each gene, keep its top <i>cap</i> positive partners and take a softmax over their scores (weights proportional to exp(score / temperature)). The softmax temperature is chosen so that exp(entropy) = keff. The row is that gene's attention. (3) Normalise the rows. A gene with no candidate gets a self-loop. Call the result A. It is directed. (4) The lazy walk is P = 0.5 I + 0.5 A, and P<sup>t</sup> is found by repeated multiplication. (5) The tcaCLR readout takes log P<sup>t</sup> (zero entries count as unreachable), standardises each row over its reachable off-diagonal entries, sets negatives to 0, and combines the two directions as (Z + Z<sup>T</sup>)/&radic;2. This is <code>sk_a3r</code> in <code>analysis/explore_stack/stack_lib.R</code>. The pictures below use an undirected, symmetrised version of A, because eigenvalues are simplest there. Section 6 comes back to this point.</p></div>
+<p><b>A pattern of values over the genes.</b> Take any list of numbers, one per gene. For example, the expression of all genes in one experiment. We call this a <i>signal on the network</i>.</p>
+<p><b>Modes.</b> Any signal can be split into a sum of building blocks called <i>modes</i>. The modes are the eigenvectors of the network's walk matrix. Each mode comes with a number, its <i>eigenvalue</i>, between 0 and 1 for our lazy walk. The next figure shows three modes of a toy network of 60 genes in 3 modules.</p>
+<ul>
+<li>A mode with eigenvalue near 1 is <b>smooth</b>: genes that are linked share similar values. In the toy, whole modules share a value. Engineers call this <i>low frequency</i>.</li>
+<li>A mode with eigenvalue near 0 is <b>rough</b>: neighbouring genes get unrelated or opposite values. This is <i>high frequency</i>. Pure noise looks like this.</li>
+</ul>
+
+<figure class="w90">
+<img src="figures/fig1a_modes.png" alt="three eigenvectors on the toy network">
+<figcaption><b>Figure 1a.</b> The same toy network coloured by three modes. <b>Look at:</b> in the left panel (eigenvalue 0.92) each module has its own colour. In the middle panel (0.71) colours vary inside modules. In the right panel (0.20) colours alternate gene by gene, with no module pattern.</figcaption>
+</figure>
+
+<p><b>One step of the walk multiplies each mode by its eigenvalue.</b> After t steps each mode is multiplied by (eigenvalue)<sup>t</sup>. We call this the <i>gain</i>.</p>
+<p><span class="eq">gain of mode k after t steps = (&lambda;<sub>k</sub>)<sup>t</sup></span></p>
+<p>In words: a mode with eigenvalue 0.95 keeps 77% of its size after 5 steps. A mode with eigenvalue 0.5 keeps 3%. Smooth modes survive. The rest fade. That is a <b>low-pass filter</b>: it lets the low frequencies pass and blocks the high ones.</p>
+
+<figure class="w62">
+<img src="figures/fig1b_gain.png" alt="gain curves">
+<figcaption><b>Figure 1b.</b> Gain against mode number for t = 1, 3, 9 and 27. The triangle on each curve marks the <i>cutoff mode</i>, the first mode whose gain falls below 1/4. <b>Look at:</b> the cutoff moves from mode 54 (t = 1) to 17 (t = 3), 4 (t = 9) and 2 (t = 27). More steps means fewer modes pass. (The 1/4 level is an arbitrary choice for the picture.)</figcaption>
+</figure>
+
+<p><b>The same thing seen on the network.</b> The filter picture is the same as the "attention spreads" picture. Start the walk at one gene and look at where its probability mass sits after t steps.</p>
+
+<figure class="w90">
+<img src="figures/fig1c_spread.png" alt="mass spreading from one gene">
+<figcaption><b>Figure 1c.</b> Walk mass from the circled gene after 1, 3, 9 and 27 steps. <b>Look at:</b> at t = 1 almost all the mass is on the gene's own neighbours inside its module (89%). By t = 27 it has leaked to the other modules and only 40% remains in the home module. For this toy the long-run value is 33% (each module holds a third of the genes). Smooth modes survive, but the walk forgets which module it started in.</figcaption>
+</figure>
+
+<div class="box">
+<h4>What sets what</h4>
+<p><b>Depth t sets the filter's cutoff</b>: how many modes pass. <b>Breadth keff and the cap shape the graph that is filtered</b>: which genes are linked and how strongly. Changing keff changes the eigenvectors and eigenvalues themselves. Changing t only changes how the same eigenvalues are raised to a power. Because wide graphs have smoother modes, keff and t partly trade off (Section 3 shows this).</p>
+</div>
+</section>
+
+<!-- ============================ 2. HORN ============================ -->
+<section>
+<h2>2. Horn's parallel analysis, and whether it answers the question</h2>
+<h3>What parallel analysis does</h3>
+<p>The question is how many dimensions the data really has. Take the gene-by-gene correlation matrix and its eigenvalues. Some are large because of real structure. Others are large by chance alone, because a finite sample always shows some correlation.</p>
+<p><b>Horn's parallel analysis (PA)</b> measures what chance looks like. Permute each gene's values across experiments, independently for every gene. This keeps every gene's own distribution and destroys all relationships between genes. Recompute the eigenvalues. Repeat 20 times. The result is a <i>permuted band</i>. The <i>edge</i> of the band is a high percentile of the largest permuted eigenvalue (for example the 95th). Eigenvalues above the edge count as signal. Their number is the data's dimension k. With only 20 permutations the 95th percentile is almost the maximum, so the edge is noisy. Use more permutations if the edge matters.</p>
+
+<figure class="w90">
+<img src="figures/fig2a_pa.png" alt="parallel analysis scree plot and recovered modules">
+<figcaption><b>Figure 2a.</b> Left: eigenvalues of the correlation matrix of toy expression (300 genes, 120 experiments, 8 planted modules) against the permuted band. Right: planted signal strength (genes &times; load squared) and whether the module was recovered (at least half of the module's gene pattern lies in the space of the kept eigenvectors). <b>Look at:</b> 6 eigenvalues stand above the edge (6.7). Six modules are recovered. The two weak small modules (6 and 5 genes) fall below the edge and are missed. For comparison, the analytic Marchenko-Pastur edge for 300 genes and 120 experiments is (1 + &radic;(300/120))<sup>2</sup> = 6.66, close to the permutation edge 6.71.</figcaption>
+</figure>
+
+<h3>The reviewer's "spectral-edge rule": the same idea on the operator</h3>
+<p>The reviewer's rule applies PA to the walk operator rather than to the correlation matrix. Rebuild the whole operator (CLR, softmax, lazy walk) on each permuted dataset. Take the edge eigenvalue &lambda;<sub>edge</sub>, the median over permutations of the largest eigenvalue after the trivial one (which is always 1). Then choose the depth so that a mode sitting exactly at the edge is faded below a small number &epsilon;.</p>
+<p><span class="eq">t* = ln(&epsilon;) / ln(&lambda;<sub>edge</sub>)</span></p>
+<p>In words: find the number of steps t for which &lambda;<sub>edge</sub><sup>t</sup> = &epsilon;. This converts an edge in eigenvalue units into a depth in steps. Modes below the edge are faded below &epsilon;. Modes above the edge keep more.</p>
+
+<figure class="w90">
+<img src="figures/fig2b_edge.png" alt="operator spectrum and conversion of edge to depth">
+<figcaption><b>Figure 2b.</b> Left: eigenvalues of the walk operator built from the toy data, against the band from 20 permuted versions (keff 10). Right: gain curves &lambda;<sup>t</sup>. The chosen depth t* is the curve that passes through (&lambda;<sub>edge</sub>, &epsilon;). <b>Look at:</b> &lambda;<sub>edge</sub> = 0.84, so with &epsilon; = 0.05 the rule gives t* = 17.6. Seven non-trivial modes stand above the edge. That is one more than the 6 found from the correlation matrix, so the two counts need not agree.</figcaption>
+</figure>
+
+<p class="small"><b>Sensitivity in the toy (prediction for real data: untested).</b> &epsilon; = 0.1, 0.05 and 0.01 give t* = 13.6, 17.6 and 27.1, so &epsilon; is a convention and moves t* by a factor of two. The edge also moves with breadth: keff 6, 10 and 20 gave &lambda;<sub>edge</sub> 0.89, 0.85 and 0.79, so t* = 26, 18 and 12 (5 permutations each). The reason is that the softmax gives every gene about keff partners even when the data are pure noise, so the permuted operator is a random graph whose fan-out is set by keff. The review's expectation of an edge near 0.72 (which would give t = 9) is a guess. This toy has a higher edge.</p>
+
+<div class="box answer">
+<h4>Answer to "can we just do a Horn's parallel analysis to get the regularization dimension?"</h4>
+<p><b>Yes, partly.</b> PA gives the dimension k: how many modes exceed chance. Through the edge eigenvalue it also gives a depth t, given a keff and an &epsilon;.</p>
+<p><b>No, it does not by itself give keff</b> (breadth per hop). The permuted operator depends on keff, so PA answers "what depth goes with this breadth?" and not "which breadth?". Keff needs a criterion that looks at prediction (the graph-signal likelihood, Section 3) or at stability (the instability curve).</p>
+<p><b>Caveats.</b></p>
+<ul>
+<li>PA is a significance-style threshold, not a prediction criterion. Weak real modules, such as complexes of 3 to 6 genes, fall below the edge by construction (Figure 2a).</li>
+<li>Permuting each gene destroys all structure, so the null is easier than real nuisance structure such as batch or growth rate. Real nuisance structure can pass the edge, so PA can over-count.</li>
+<li>The operator is nonlinear (top-cap softmax). The null must be rebuilt for each permutation (10 to 20), and cannot be got from a formula.</li>
+<li>A strongly correlated block such as the ribosome can dominate the first modes.</li>
+</ul>
+</div>
+
+<h3>Neighbouring dimension estimators</h3>
+<p><b>Marchenko-Pastur edge.</b> A formula for the upper edge of the eigenvalues of a sample correlation matrix when all variables are independent with equal variance. It needs no permutations, but it assumes independent, similarly behaved genes. PA by permutation keeps each gene's real distribution (skew, ties, zeros), so it is closer to the data. They agree when the assumptions hold (Figure 2a).</p>
+<p><b>Minka's Laplace evidence for probabilistic PCA.</b> It scores each number of components k by an approximation to the Bayesian evidence of a Gaussian model with equal noise on every variable. It is BIC-like and needs no permutations. It tends to differ from PA when the noise is not equal across genes or when there are many weak components.</p>
+<p><b>Bai and Ng information criteria.</b> Criteria for the number of factors when both the number of variables and of observations are large: the residual variance after k factors plus a penalty that grows with k. They assume a factor model with weakly correlated noise. (Not in the reference list; unverified here.)</p>
+<p>I make no claim about which of these agrees with PA on real expression data. That is not known.</p>
+</section>
+
+<!-- ============================ 3. GRAPH-SIGNAL ============================ -->
+<section>
+<h2>3. Graph-signal likelihood: does the graph explain held-out experiments?</h2>
+<p><b>The idea.</b> Treat each experiment's expression across genes as a signal on the graph (Section 1). If the graph is right, signals are smooth: most of their energy sits in low-frequency modes. Build the graph from one set of experiments. Then ask how well it describes other experiments.</p>
+<p><b>The energy profile.</b> For each mode k, take the mean squared projection of the held-out experiments onto that mode. Call it e<sub>k</sub>. Plot e<sub>k</sub> against the mode's eigenvalue. Low-frequency modes should carry a lot of energy. High-frequency modes should carry only noise.</p>
+<p><b>The model.</b> The review writes the covariance of an experiment as the walk's low-pass filter plus noise. This gives three parameters: the overall size c, the depth t, and the noise floor &sigma;<sup>2</sup>.</p>
+<p><span class="eq">expected e<sub>k</sub> = c &middot; (&lambda;<sub>k</sub>)<sup>t</sup> + &sigma;<sup>2</sup></span></p>
+<p>In words: the energy of a mode is a low-pass shape that falls with eigenvalue, plus a flat floor of noise that every mode has. The Gaussian likelihood of held-out experiments depends on the data only through the profile e<sub>k</sub>.</p>
+
+<figure class="w54">
+<img src="figures/fig3a_energy.png" alt="energy profile">
+<figcaption><b>Figure 3a.</b> Toy energy profile of held-out experiments for a graph built with keff 28. Dots: measured energy per mode. Solid line: the fitted low-pass shape plus noise floor for the best depth (t = 13). Dashed lines: too little smoothing (t = 1) and too much (t = 64). <b>Look at:</b> a few modes near eigenvalue 1 carry 5 to 18 times the noise floor. All other modes sit on the floor. A shallow filter spreads energy too evenly. A very deep one over-states the top modes.</figcaption>
+</figure>
+
+<p><b>Choosing the scale.</b> For each candidate graph (a value of keff) and each depth t, fit c and &sigma;<sup>2</sup> on some held-out laboratories and score the log-likelihood on the remaining ones. Take the depth with the highest held-out score. No extra penalty is used, because scoring on data that were not used to fit already penalises over-fitting. In the toy, the graph is built from the first 5 of 10 laboratories, and the held-out half is 5 laboratories, each scored in turn.</p>
+<p>A second reading is BIC with n set to the <i>effective</i> number of independent experiments (not the number of experiments, which overstates it when laboratories correlate) and k set to the number of hyperparameters (3). The review says the two readings should rank depths the same way. If they do not, say so.</p>
+
+<figure class="w90">
+<img src="figures/fig3bc_heldout.png" alt="held-out likelihood against depth and breadth">
+<figcaption><b>Figure 3b (left).</b> Held-out log-likelihood against depth at keff 28, as a difference from the maximum. Bars are the standard error of the paired difference over the 5 held-out laboratories. <b>Figure 3c (right).</b> The same quantity over breadth (keff) and depth. White dots mark the best depth for each keff. <b>Look at:</b> (b) too little depth is noisy and too much is blurred, with one peak at t = 13. (c) the best depth falls as keff rises: t = 40, 27, 27, 18, 13, 13, 13 for keff 5, 7, 10, 14, 20, 28, 40. This is a ridge: wide-and-shallow and narrow-and-deep graphs are close in score.</figcaption>
+</figure>
+
+<p><b>How strongly is it determined? (Toy numbers, not a prediction for real data.)</b> Along the ridge the best score per keff differs from the overall maximum by only 0.1 to 0.8 log-likelihood units per experiment, out of about &minus;115. Those gaps are larger than their paired standard errors (0.04 to 0.12), so they are visible, but they are small. The standard errors are small because the 5 toy laboratories are similar. Real laboratories will differ more. The one-standard-error rule, which picks the smallest depth within one standard error of the best, simply picks the maximum here. The main lesson: keff is weakly identified once depth is free. Reporting the ridge is more honest than reporting one point.</p>
+<p class="small"><b>What the review does not say, and I did here.</b> The review fits c, t and &sigma;<sup>2</sup> on the same held-out half that it scores. A strict held-out score fits on some held-out blocks and scores on others, as in this toy. The toy also uses correlation as a stand-in for the CLR score. Whether the likelihood tracks complex recovery on real data is untested.</p>
+</section>
+
+<!-- ============================ 4. ISLANDS ============================ -->
+<section>
+<h2>4. Islands and conductance (the PI's idea)</h2>
+<p><b>Definitions.</b> From a <i>start gene</i> run a <i>personalised random walk</i>: at each step the walker moves along an edge, or with a small probability jumps back to the start gene (this is personalised PageRank). Genes the walker visits often are close to the start gene. Sort the genes by walk mass <i>per unit of degree</i>, so that hubs do not win just for having many edges. Then grow a set one gene at a time in that order. This is the <i>sweep</i>.</p>
+<p>For each set S in the sweep compute its <b>conductance</b>: the share of the set's edge weight that points outside it.</p>
+<p><span class="eq">conductance(S) = weight of edges leaving S / total edge weight touching S</span></p>
+<p>In words: a low value means the set is a cohesive island that is hard to leave. The <b>island</b> of the start gene is the set where conductance is lowest (Andersen, Chung and Lang, 2006). Call that lowest value &phi;, the <i>leak rate per step</i>. A plain walk stays inside the island for about 1/&phi; steps. A lazy walk, which moves only half the time, stays about 2/&phi; steps.</p>
+<p><b>Depth window.</b> To use the island to set depth, a walk needs enough steps to mix inside the island, about 1 divided by the island's internal spectral gap (the gap between its top two eigenvalues). It needs few enough steps that it does not leak out, about 2/&phi;. So the depth window is [1/gap, 2/&phi;]. A wide window means a clearly separated module.</p>
+
+<figure class="w90">
+<img src="figures/fig4a_islands.png" alt="toy islands and conductance sweep">
+<figcaption><b>Figure 4a.</b> Left: toy network with islands of 5, 20 and 80 genes and a hub gene linked to 30 genes (106 genes). Right: sweep curves from one start gene in each island. <b>Look at:</b> each curve falls to a deep minimum (triangle) at its island: 5 genes (leak 0.048), 20 genes (0.029), and 86 genes (0.029). The 86-gene set is the 80-gene island plus the hub and the 5-gene island, which is attached to the hub by one edge. The dashed gate is the level reached by chance in a rewired network (1% quantile).</figcaption>
+</figure>
+
+<p class="small"><b>Depth windows in the toy (planted sets; 2/&phi; is the lazy leak time).</b> 5-gene island: &phi; = 0.048, window 1.6 to 42 steps. 20-gene island: &phi; = 0.029, window 3.3 to 68. 80-gene island alone: &phi; = 0.126 because of the hub's edges, window 4.3 to 16. The hub narrows the window of the module it attaches to.</p>
+
+<figure class="w90">
+<img src="figures/fig4b_ncp_sizes.png" alt="community profile and island size distribution">
+<figcaption><b>Figure 4b.</b> Left: the lowest conductance found from any start gene for each set size (the <i>network community profile</i>), for the toy graph and for a degree-preserving rewired copy. Right: island sizes when every gene is a start gene, and the distinct islands left after merging near-duplicates. <b>Look at:</b> the profile dips at the three planted sizes, while the rewired graph has no dips. Every gene is a start gene, so 5 genes give a 5-gene island, 20 give a 20-gene island, and 81 give an island of 81 to 89 genes.</figcaption>
+</figure>
+
+<p><b>Tight blocks and the Jaccard merge.</b> Many start genes in one module return nearly the same island. Counting every start gene would count that module many times. Merge islands greedily in order of increasing conductance: an island joins an earlier one if their <i>Jaccard</i> overlap (size of the intersection divided by size of the union) is at least 0.5. Report both the seed-weighted sizes (what a typical gene experiences) and the distinct islands (module sizes). Nested sub-complexes have low Jaccard but high containment, and they signal several scales, so they should be kept and recorded.</p>
+
+<h3>Which start genes? The PI's sampling scheme</h3>
+<p>The PI's scheme draws pairs with equal chance per decade of tail rank (log-uniform), takes their endpoints, and removes duplicates. This puts many draws on the very strongest pairs. It samples the strongly connected part of the network, not genes in general. The review warns about a size bias: a module with n genes has about n(n&minus;1)/2 strong pairs, so its members are more likely to be drawn. The fix is a Horvitz-Thompson weight: weight each start gene by the inverse of its chance of being drawn.</p>
+
+<figure class="w90">
+<img src="figures/fig4c_seeds.png" alt="sampling of start genes">
+<figcaption><b>Figure 4c.</b> Left: chance that a member gene becomes a start gene in one sample of 25 pairs. Right: shares of start genes by island, for the truth (each gene once), the unweighted sample, and the weighted sample. <b>Look at:</b> unweighted shares are wrong (the 20-gene island is over-represented, 29% against 19%; the 5-gene island is under-represented, 2% against 5%). The weights recover the truth (19% and 5%). In this toy the strength of the planted pairs also matters, so the size bias does not simply favour the biggest module. The weights here use the exact inclusion probability, which is known only because the toy sampling is exactly specified. On real data they must be estimated. The review's cruder weight, 1 over the number of pairs in the sampled tail, is an approximation.</figcaption>
+</figure>
+
+<div class="box warn">
+<h4>Honest limits of the island idea</h4>
+<ul>
+<li>The dense CLR graph has background weight everywhere, so every conductance is near 1. It needs a sparsifier, which is the top-cap softmax graph, and that already carries keff. So island size depends on keff. It is not a stand-alone keff setter.</li>
+<li>The map equation (Rosvall and Bergstrom, 2008) and Markov-time stability (Delvenne, Yaliraki and Barahona, 2010) choose partitions or depth on a fixed graph. Their code lengths are not comparable across graphs with different keff, so they cannot choose keff.</li>
+<li>Choosing the single lowest-conductance set per gene prefers big sets. In the toy, the 86-gene set (leak 0.029) beats the 5-gene island (0.048) for a seed in the small island. I used the smallest significant local minimum within a factor of two in size. That is my choice, not the review's. The review's general advice, to read several scales, agrees with it.</li>
+<li>Modularity methods suffer the opposite problem, merging small modules (Fortunato and Barthelemy, 2007).</li>
+<li>The toy has no loner genes with no partners. Real graphs do, and a null gate decides which start genes have an island at all.</li>
+</ul>
+</div>
+</section>
+
+<!-- ============================ 5. CLOSED MODULE ============================ -->
+<section>
+<h2>5. Why a closed module breaks tcaCLR, and what the diffusion-PMI version changes</h2>
+<p><b>What tcaCLR does.</b> It takes the log of the walk probability, log P<sup>t</sup><sub>ij</sub>, for each gene pair, and applies a second CLR: for each row it subtracts the row mean and divides by the row standard deviation. The mean and standard deviation are taken over <i>reachable</i> entries only, that is, entries where P<sup>t</sup><sub>ij</sub> is above zero. Negatives are set to 0 and the two directions are combined.</p>
+<p><b>The problem.</b> Suppose a module has almost no edges to the rest of the graph. The walk from a gene in it can reach only the module (plus perhaps a few genes). Its row then has no background. The row's mean and standard deviation describe the module itself, so every member looks ordinary relative to the other members. The z-score no longer says "this partner stands out from the genome". The project's earlier simulation called this <i>reachability confinement</i>.</p>
+<p><b>What the proposal changes.</b> The review proposes a <i>diffusion pointwise mutual information (PMI)</i>. For a pair (i, j) compare the walk probability with what the walk would give if it forgot where it started: the stationary probability &pi;<sub>j</sub> of landing on j, which is proportional to the gene's weighted degree.</p>
+<p><span class="eq">W<sub>ij</sub> = log( P<sup>t</sup><sub>ij</sub> / &pi;<sub>j</sub> )</span></p>
+<p>In words: how many times more often than a degree-matched random landing does the walk from i land on j? Unreachable pairs get a floor instead of being dropped. W is then standardised with one robust scale taken over all pairs, not row by row. The null (&quot;landing independent of the start&quot;) is degree-corrected, so hubs get no free credit.</p>
+
+<figure>
+<img src="figures/fig5_closed.png" alt="closed and open module, reachable-only z versus stationary-null version">
+<figcaption><b>Figure 5.</b> Toy graph of 120 genes: a 20-gene closed module (no edges out), a 20-gene open module (a few edges into the background) and 80 background genes. Top (C = closed module, O = open module, bg = background): log P<sup>t</sup> at t = 9 (grey = unreachable), the current reachable-only score, and the stationary-null version (version A, one global scale). Bottom: the share of each module's gene pairs found among the top-ranked pairs overall (as many pairs as the two modules contain). <b>Look at:</b> a closed gene reaches only its own module (19 genes). The current score ranks the closed module's pairs near the bottom (3%) while it finds most of the open module's pairs (83%). Version A finds all the closed module's pairs (100%) but only 8% of the open module's, because pairs of low-degree background genes also get high scores. Version B, which standardises each row, gives 100% and 37%.</figcaption>
+</figure>
+
+<div class="box warn">
+<h4>Reading this honestly</h4>
+<p>This is a proposal. In the project it is to be tested only inside the planted simulation. The figure is a toy illustration, not that test. It shows the closed-module failure is real in a toy and the proposal can rescue it. It also shows the proposal has its own failure: it favours rare partners, so the choice of scale matters a great deal (8% against 37% for the open module). I did not tune the toy to remove this.</p>
+<p>One more point. The stationary distribution is not unique for a graph with a closed module, because the closed module is a separate component. The toy uses the degree-proportional distribution over the whole graph, as in a configuration-model null. The review writes &pi; without addressing this.</p>
+</div>
+</section>
+
+<!-- ============================ 6. FIT ============================ -->
+<section>
+<h2>6. How the pieces fit</h2>
+<figure class="w90">
+<img src="figures/fig6_flow.png" alt="flow diagram of the plan">
+<figcaption><b>Figure 6.</b> The order of work in the revised plan. Stage 0 comes first and decides whether any rule is worth using. <b>Look at:</b> the island diagnostics are used as a diagnostic and a depth window, not as a selector. Stage 2 is descriptive only.</figcaption>
+</figure>
+
+<h3>Which method sets which parameter</h3>
+<table style="font-size:7.8pt">
+<colgroup><col style="width:11%"><col style="width:42%"><col style="width:47%"></colgroup>
+<tr><th>Parameter</th><th>Set by</th><th>What could go wrong</th></tr>
+<tr><td><b>keff</b> (breadth)</td><td>graph-signal likelihood (blocked by lab, 1-SE rule); instability curve as a second reading</td><td>weakly identified once depth is free (a ridge); batch counted as biology; instability over-selects; one keff cannot suit all module sizes</td></tr>
+<tr><td><b>cap</b></td><td>a rule, not a search: the smallest cap leaving under 1% of softmax mass outside it in 95% of rows (about 3 to 5 times keff)</td><td>at large keff the cap may be costly; the tail mass must be reported</td></tr>
+<tr><td><b>t</b> (depth)</td><td>spectral-edge rule; graph-signal likelihood; island leak window</td><td>&epsilon; is arbitrary; the edge depends on keff; weak modules fall below it; no spectral gap means a flat likelihood; the second CLR can collapse (closed modules) before the spectral rule says stop</td></tr>
+<tr><td><b>laziness</b></td><td>fixed at 0.5 (smallest value keeping the symmetrised kernel positive semidefinite; it only rescales time)</td><td>that argument holds for the symmetrised, undirected picture; the real operator is directed and can have complex eigenvalues</td></tr>
+<tr><td><b>MI bins</b></td><td>fix at 10 unless blocked split-half reproducibility of row ranks disagrees by more than one standard error</td><td>weakly identified; the review's formulas are for histogram estimators under independence</td></tr>
+<tr><td><b>clip</b></td><td>a diagnostic (left tail of the pooled z histogram against a fitted null), not a search axis; both clips come before the Stouffer combination</td><td>if the left tail is heavier than the null, negative z carries information and the clip hurts</td></tr>
+</table>
+
+<div class="box warn">
+<h4>What nothing here shows</h4>
+<p><b>Nothing here has been run on real data.</b> Every truth set in the project is used up, so any claim about a changed setting needs a truth that has not been used. Matching keff 10 and t 9 on E. coli (M3D) and K562 would be necessary but not sufficient, because those values were chosen after many looks. The decision rule in the figure is the review's suggestion and the plan's revision 2 adopted it. If the rule fails, no label-free setting is declared.</p>
+</div>
+
+<h3>Things in the review that I judged unclear or wrong while explaining it</h3>
+<ol class="small">
+<li><b>Directed against symmetrised operator.</b> The review's spectral statements (positive semidefinite kernel at laziness 0.5, all depths from one eigendecomposition) hold for a symmetrised, undirected operator. The real attention operator is directed. The shortcut gives the likelihood side only. The tcaCLR readout needs log P<sup>t</sup> of the actual directed matrix, which still needs repeated multiplication.</li>
+<li><b>The edge near 0.72 is a guess.</b> The self-check &lambda;<sup>9</sup> = 0.5 at &lambda; = 0.926 is correct arithmetic. But the expectation that the edge is near 0.72 (so t* = 9) is unmeasured. In this toy the edge was 0.84 at keff 10 and moved from 0.79 to 0.89 over keff 20 to 6. Agreement with t = 9 is not guaranteed, and &epsilon; is free.</li>
+<li><b>Depth window factor.</b> The review's summary gives the window as 1/gap to 1/&phi;. Its body gives a lazy leak time of about 2/&phi;. I used 2/&phi;.</li>
+<li><b>Held-out fit.</b> The review fits and scores on the same held-out half. I used nested blocked folds.</li>
+<li><b>Size bias.</b> Chance of being drawn grows with module size at equal strength only. In the toy, strength changed the picture. The review's weight (1 over the pairs in the tail) is a proxy, not exact.</li>
+<li><b>PMI fix.</b> The toy supports the stationary null for the closed module but also shows a new failure (low-degree pairs) and a scale dependence.</li>
+<li><b>PA edge.</b> A 95th percentile from 20 permutations is nearly the maximum. Plan for more permutations.</li>
+</ol>
+</section>
+
+<!-- ============================ 7. GLOSSARY / REFS ============================ -->
+<section>
+<h2>7. Glossary and references</h2>
+<dl>
+<dt>AUPR</dt><dd>Area under the precision-recall curve: how well a score ranks true pairs first.</dd>
+<dt>BIC</dt><dd>A likelihood score with a penalty for the number of parameters.</dd>
+<dt>aCLR, tcaCLR</dt><dd>CLR scores passed through a softmax attention walk (aCLR); a second CLR applied to the log of the walk probabilities (tcaCLR).</dd>
+<dt>keff</dt><dd>Effective number of partners per gene, exp(entropy) of the attention row. Like perplexity.</dd>
+<dt>cap</dt><dd>The most candidate partners the softmax may consider.</dd>
+<dt>Depth t</dt><dd>Number of lazy steps of the walk. A lazy step stays put with probability one half.</dd>
+<dt>Eigenvector, mode</dt><dd>A pattern over genes that a step of the walk only rescales.</dd>
+<dt>Eigenvalue</dt><dd>The factor by which a step rescales a mode (0 to 1 for our lazy walk).</dd>
+<dt>Low-pass filter</dt><dd>Something that keeps low-frequency (smooth) modes and removes high-frequency (rough) ones.</dd>
+<dt>N<sub>eff</sub></dt><dd>Effective number of independent experiments, smaller than the count when experiments correlate.</dd>
+<dt>One-standard-error rule</dt><dd>Take the simplest setting whose score is within one standard error of the best.</dd>
+<dt>Ridge</dt><dd>A line of near-equal scores in a two-setting plane.</dd>
+<dt>Conductance</dt><dd>Share of a set's edge weight that points outside it. Low means cohesive.</dd>
+<dt>Regret</dt><dd>Accuracy lost by a chosen setting relative to the best setting.</dd>
+<dt>Stationary distribution</dt><dd>Where a long walk spends its time; proportional to weighted degree on an undirected graph.</dd>
+<dt>PMI</dt><dd>Pointwise mutual information: log of how much more often two things occur together than by chance.</dd>
+</dl>
+
+<h3 style="margin-top:2mm">References (only those used; Bai and Ng, StARS and t-SNE are named in the text but not cited or checked)</h3>
+<ol class="refs">
+<li>Horn JL (1965). A rationale and test for the number of factors in factor analysis. <i>Psychometrika</i> 30:179-185. [Confirmed in PubMed, PMID 14306381, doi:10.1007/BF02289447.]</li>
+<li>Minka TP (2000). Automatic choice of dimensionality for PCA. <i>Advances in Neural Information Processing Systems</i> (NIPS) 13. [<span class="tag">Unverified</span>: not indexed in PubMed; citation from memory.]</li>
+<li>Andersen R, Chung F, Lang K (2006). Local graph partitioning using PageRank vectors. <i>IEEE Symposium on Foundations of Computer Science</i> (FOCS). [<span class="tag">Unverified</span>: not indexed in PubMed; citation from memory.]</li>
+<li>Delvenne J-C, Yaliraki SN, Barahona M (2010). Stability of graph communities across time scales. <i>Proc Natl Acad Sci USA</i> 107:12755-12760. [Confirmed in PubMed, PMID 20615936, doi:10.1073/pnas.0903215107.]</li>
+<li>Rosvall M, Bergstrom CT (2008). Maps of random walks on complex networks reveal community structure. <i>Proc Natl Acad Sci USA</i> 105:1118-1123. [Confirmed in PubMed, PMID 18216267, doi:10.1073/pnas.0706851105.]</li>
+<li>Marchenko VA, Pastur LA (1967). Distribution of eigenvalues for some sets of random matrices. <i>Mat Sb</i> 72(114):507-536 (English: <i>Math USSR-Sb</i> 1:457-483). [<span class="tag">Unverified</span>: not in PubMed; details from memory.]</li>
+<li>Fortunato S, Barthelemy M (2007). Resolution limit in community detection. <i>Proc Natl Acad Sci USA</i> 104:36-41. [Confirmed in PubMed, PMID 17190818, doi:10.1073/pnas.0605965104.]</li>
+<li>Faith JJ, Hayete B, Thaden JT, Mogno I, Wierzbowski J, Cottarel G, Kasif S, Collins JJ, Gardner TS (2007). Large-scale mapping and validation of <i>Escherichia coli</i> transcriptional regulation from a compendium of expression profiles. <i>PLoS Biol</i> 5:e8. [Confirmed in PubMed, PMID 17214507, doi:10.1371/journal.pbio.0050008.]</li>
+</ol>
+</section>
+
+</body>
+</html>
