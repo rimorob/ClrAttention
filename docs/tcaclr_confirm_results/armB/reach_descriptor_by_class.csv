@@ -1,0 +1,5 @@
+"class","complexes","median_size","median_reachable","median_inmodule_share","min_inmodule_share","flagged_under_1.5x_size","complexes_closed"
+"20+",7,25,6150,0.00390243902439024,0.00308943089430894,FALSE,0
+"3-6",155,4,6150,0.00048780487804878,0.00032520325203252,FALSE,0
+"7-19",49,10,6150,0.00146341463414634,0.000975609756097561,FALSE,0
+"ribosomal",2,64,6150,0.0102439024390244,0.00878048780487805,FALSE,0

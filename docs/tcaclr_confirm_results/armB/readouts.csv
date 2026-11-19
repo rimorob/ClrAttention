@@ -1,0 +1,7 @@
+"readout","scope","aupr","versus","d","se_gene","lo","hi","basis"
+"hub_stratified_tcaCLR","hub_mi",0.203219608729834,"tcaCLR",-0.004366766189491,0.00229985720463324,-0.00887448631057215,0.000140953931590145,"gene resampling only (read-outs are not refitted); intervals only, none may be cited in place of H1"
+"hub_stratified_tcaCLR","hub_mi",0.203219608729834,"aCLR",0.052267071724412,0.00770309047350627,0.0371690143963397,0.0673651290524843,"gene resampling only (read-outs are not refitted); intervals only, none may be cited in place of H1"
+"hub_stratified_aCLR","hub_mi",0.151006974622425,"tcaCLR",-0.0565794002969,0.00744813564913446,-0.0711777461692036,-0.0419810544245965,"gene resampling only (read-outs are not refitted); intervals only, none may be cited in place of H1"
+"hub_stratified_aCLR","hub_mi",0.151006974622425,"aCLR",5.44376170029948e-05,0.0014296498490666,-0.00274767608716755,0.00285655132117354,"gene resampling only (read-outs are not refitted); intervals only, none may be cited in place of H1"
+"hub_stratified_CLR","hub_mi",0.124873869837811,"tcaCLR",-0.082712505081514,0.0123239534850916,-0.106867453912294,-0.0585575562507344,"gene resampling only (read-outs are not refitted); intervals only, none may be cited in place of H1"
+"hub_stratified_CLR","hub_mi",0.124873869837811,"aCLR",-0.026078667167611,0.00935271581216831,-0.0444099901594609,-0.00774734417576111,"gene resampling only (read-outs are not refitted); intervals only, none may be cited in place of H1"

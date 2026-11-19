@@ -1,0 +1,7 @@
+"comparator","d","share_top3","top3","share_large","k_carry"
+"aCLR",0.056633837913903,0.820775008354256,"CYC:cytoplasmic ribosomal large subunit;CYC:cytoplasmic ribosomal small subunit;CYC:mitochondrial ribosomal large subunit",0.954515503072536,3
+"CLR",0.0865202900020115,0.870238056532639,"CYC:cytoplasmic ribosomal large subunit;CYC:cytoplasmic ribosomal small subunit;CYC:mitochondrial ribosomal large subunit",0.973962666075051,3
+"absr",0.132171644642616,0.810817037654707,"CYC:cytoplasmic ribosomal large subunit;CYC:cytoplasmic ribosomal small subunit;CYC:mitochondrial ribosomal large subunit",0.934030813267638,3
+"GENIE3",0.0983782602230054,0.849962322910656,"CYC:cytoplasmic ribosomal large subunit;CYC:cytoplasmic ribosomal small subunit;CYC:mitochondrial ribosomal large subunit",0.973707384253181,3
+"PIDC",0.0654166320913521,0.898581912073759,"CYC:cytoplasmic ribosomal large subunit;CYC:cytoplasmic ribosomal small subunit;CYC:mitochondrial ribosomal small subunit",0.967989520513015,2
+"GRNBoost2",0.129567145180848,0.796383337466269,"CYC:cytoplasmic ribosomal large subunit;CYC:cytoplasmic ribosomal small subunit;CYC:mitochondrial ribosomal large subunit",0.930473547866448,4
