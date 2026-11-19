@@ -1,0 +1,527 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>CLR Attention Checkpoint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* Layout: one readable column, a results table that scrolls on its own; orange = context normalization, as in the paper's figures */
+:root {
+  --bg: #fbfaf8; --fg: #1d1b19; --muted: #5f5a54; --rule: #e6e1da; --panel: #f3efe9;
+  --accent: #c4501f; --good: #1a8a62; --bad: #b23a3a;
+  --display: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #171513; --fg: #ece7e1; --muted: #a8a097; --rule: #34302b; --panel: #211e1b;
+  --accent: #f08257; --good: #4cc79a; --bad: #ef7d7d; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #171513; --fg: #ece7e1; --muted: #a8a097; --rule: #34302b; --panel: #211e1b;
+  --accent: #f08257; --good: #4cc79a; --bad: #ef7d7d; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 16px/1.6 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 64px; }
+main { max-width: 46rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1.6rem; }
+header { display: flex; flex-direction: column; gap: .4rem; border-bottom: 1px solid var(--rule); padding-bottom: 1.2rem; }
+.eyebrow { font: 500 .78rem/1 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 600 2rem/1.15 var(--display); margin: 0; text-wrap: balance; }
+.meta { color: var(--muted); font-size: .92rem; margin: 0; }
+h2 { font: 600 1.3rem/1.25 var(--display); margin: .6rem 0 0; text-wrap: balance; }
+h3 { font: 600 1rem/1.3 var(--body); margin: .4rem 0 0; }
+p, ul, ol { margin: 0; }
+ul, ol { padding-left: 1.2rem; display: flex; flex-direction: column; gap: .45rem; }
+section { display: flex; flex-direction: column; gap: .7rem; }
+.lede { font-size: 1.05rem; background: var(--panel); border-left: 3px solid var(--accent); padding: 1rem 1.1rem; border-radius: 2px; }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; font-variant-numeric: tabular-nums; min-width: 34rem; }
+th, td { padding: .5rem .65rem; text-align: right; border-bottom: 1px solid var(--rule); }
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+thead th { font-weight: 600; color: var(--muted); font-size: .8rem; letter-spacing: .02em; background: var(--panel); }
+tbody tr:last-child td { border-bottom: none; }
+td.best { font-weight: 600; color: var(--accent); }
+.caption { color: var(--muted); font-size: .85rem; }
+code { font: .85em var(--mono); background: var(--panel); padding: .05em .3em; border-radius: 3px; }
+pre { font: .82rem/1.55 var(--mono); background: var(--panel); border: 1px solid var(--rule); border-radius: 4px; padding: 1rem 1.1rem; overflow-x: auto; margin: .6rem 0; white-space: pre; }
+pre .c { color: var(--muted); }
+.neg li::marker { color: var(--bad); }
+.decisions li::marker { color: var(--accent); font-weight: 600; }
+.tag { font: 500 .72rem/1 var(--body); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--rule); border-radius: 99px; padding: .25rem .55rem; align-self: flex-start; }
+h4 { font: 600 .92rem/1.3 var(--body); margin: .5rem 0 0; }
+.tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+.exploratory { border: 1px dashed var(--muted); background: var(--panel); border-radius: 4px; padding: .8rem 1rem; }
+.fig { width: 100%; border: 1px solid var(--rule); border-radius: 4px; background: #fff; }
+.t2 th:nth-child(2), .t2 td:nth-child(2) { text-align: right; }
+.t2 th:first-child, .t2 td:first-child { position: sticky; left: 0; background: var(--bg); }
+.t2 thead th:first-child { background: var(--panel); }
+.t2 th.grp { text-align: center; border-left: 1px solid var(--rule); }
+.t2 .sep { border-left: 1px solid var(--rule); }
+.wide { min-width: 58rem; }
+.mid { min-width: 42rem; }
+.t3 th:nth-child(2), .t3 td:nth-child(2) { text-align: left; }
+.t4 { min-width: 40rem; }
+.t4 th, .t4 td { text-align: left; vertical-align: top; }
+.t4 td:first-child { white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<main>
+  <header>
+    <span class="eyebrow">Checkpoint for Jim Collins</span>
+    <h1>CLR as attention</h1>
+    <p class="meta">Boris · 21 October 2026, GRNBoost2 rows updated 31 October, yeast test (section 8) added 11 November, exploratory follow-ups added and statistical-review corrections applied 12 November 2026 · status, results in hand, what did not work, and the decisions ahead. The key results in items 1 to 7 were checked by an independent statistical review; numbers come from the reviewed outputs. Item 8 (DREAM5, run 11 November) and the exploratory follow-ups have had a separate statistical review (12 November, <code>docs/plans/stats_review_2026-11-12.md</code>), and its corrections are applied in this version.</p>
+    <p class="meta"><b>Update, 31 October.</b> GRNBoost2 was first reported on 16–21 October. On 22 October we found that its early stopping was broken under recent scikit-learn, so we reran it with the legacy early stopping (every other method reproduced exactly) and re-reviewed the claims. GRNBoost2 rises from last to fifth of seven in the raw table, attention's per-regulon lead over it now holds in 1 of 4 cells instead of 4 of 4, and on K562 complexes the two are level. The headline comparison with CLR, GENIE3 and PIDC is unchanged.</p>
+    <p class="meta"><b>Update, 11 November.</b> New: section 8, the fixed-in-advance yeast test on DREAM5 network 4, run once. On the module readout attention is slightly ahead of CLR, but under our 10% margin, so the preregistered verdict is "equivalent within 10%", not "superior"; the edge readout is inconclusive. The abstract below is unchanged and stays scoped to <i>E. coli</i>. Section 8 is from the script's own verdict tables; it then had a separate statistical review on 12 November (see below).</p>
+    <p class="meta"><b>Update, 12 November.</b> New: a section of exploratory follow-ups. (A) The log-scale depth re-test, preregistered before any compute: the pre-specified reading is (b) "not resolution-like", i.e. the fine-to-coarse ordering was not observed; with 3 and 5 truths and flat depth curves the test could neither establish nor exclude it. (B) The PI's idea of robust row-standardisation (median/IQR instead of mean/SD) in the CLR step: exploratory, no variant is better across the board, and nothing from it goes to the paper. Also updated: the attention-width test (finished 27 October, headline unchanged) and the status lines for depth and robust standardisation, which were out of date.</p>
+    <p class="meta"><b>Update, 12 November (later).</b> New: follow-up C describes the log-then-CLR read-out (a3r, not adopted on 26 October) and a stacked version of it (a3r2, a3r3), run today. Stacking did not help: neither two nor three layers meets the pre-written rule on K562 or <i>E. coli</i>. Panel 5 of the graphical abstract now carries a3r, a3r2 and a3r3 as dashed bars.</p>
+    <p class="meta"><b>Update, 13 November.</b> New: follow-up D, an exploratory estimate of a3r (the log-then-CLR read-out) against attention on yeast protein complexes, run once on a dataset and truth a3r had never been scored on, under a plan fixed before compute. The total 95% interval for the pooled AUPR difference is +0.067 to +0.125 (estimate +0.096), about 3.5 times the <i>E. coli</i> estimate; the gain is carried by large complexes, and the interval that treats complexes as the sampling unit includes 0. It is an estimate, not a confirmatory test, and a3r stays not adopted. Also new: pages 3 and 3b of the graphical abstract, a scoreboard of every metric (wins and losses), and a3r rows in the page 2 table. BEELINE medians are over 44 case-truth cells (14 dataset-and-gene-set cases), not 14 cases, and the captions are corrected.</p>
+    <p class="meta"><b>Update, 12 November (statistical review).</b> A separate statistical review of section 8 and the follow-ups found five points that needed correcting. All five are applied here. (1) The Y-M verdict "Equivalent within 10%" sits on the boundary and is not a finding; the series-level interval is now given. (2) The yeast official-score sentence that singled out attention's AUROC significance is replaced by the full ranking, which supports no method ordering on yeast. (3) The statement that best depth scales with module size is no longer made: across the 7 truths the slope is not distinguishable from 0. (4) "Not resolution-like" is glossed with the limits of a test on 3 and 5 truths. (5) The summary of hub drift in follow-up B now matches its own table. Smaller points: a ledger of every preregistered test, including the CLR(log P<sup>t</sup>) test of 26 October that failed to confirm, a note on the number of looks, and caveats on the intervals and the hub controls.</p>
+  </header>
+
+  <section>
+    <h2>Draft abstract and graphical abstract</h2>
+    <p class="caption">For your review. Nature Machine Intelligence format (150 words, unreferenced). The comparison with learned attention (scPRINT, scGPT) is deliberately left out of the abstract for now; its result is under Human data below.</p>
+    <p class="lede">Attention normalizes each query's compatibilities within its own context, an idea older than the transformer (kernel regression, fast weights). Its first widely adopted form in computational biology, context likelihood of relatedness (CLR), remains standard for de novo, unsupervised network inference but stops at the scores. We bring back from language modelling a temperature-controlled softmax, iterated attention and depth chosen on held-out data without labels. On strong-evidence <i>Escherichia coli</i> regulons, attention raises pooled recovery 16% over CLR, in all 1,000 resamplings, and, controlling for hub genes, leads GENIE3 and PIDC; the gain depends on CLR's normalization. Per regulon, it ties CLR and GENIE3. The gain concentrates in large, loose regulons; on tight co-expression cliques such as ribosomal complexes, attention loses to CLR. Gains are small in human K562 cells, and on single cells attention adds nothing to rank-based CLR.</p>
+    <img src="graphical_abstract.png" alt="Graphical abstract: CLR (Faith et al. 2007) z-scores each gene pair's mutual information against both genes' backgrounds; this work adds a softmax with per-gene temperature and a multi-step walk with no learned parameters. Results: on E. coli regulons the extended method scores 1.68 times random against 1.51 for GENIE3, 1.45 for PIDC and 1.44 for CLR; on K562 protein complexes it scores 3.51 against 6.39 for CLR, 1.8 times lower." style="width:100%;border:1px solid var(--rule);border-radius:4px;background:#fff">
+    <p class="caption">Drawn in code from the paper's results (no generative imagery, per Nature Portfolio policy). Numbers are pooled precision–recall area as a multiple of random. The three dashed bars in panel 5 (added 12 November) are exploratory read-outs that were not adopted: a3r (a second CLR on the log of the walk, follow-up C), and a3r2 and a3r3 (the same, stacked for two and three layers). a3r was picked among about 20 read-outs by its K562 scores. That is a selection effect, not overfitting: a3r has no fitted parameters.</p>
+    <img src="graphical_abstract_p2.png" alt="Graphical abstract, page 2: the versions of CLR tested (CLR, CLR-NS, |r|, attention on |r|, on mutual information, on CLR of |r|, on CLR-NS, the full method, and the exploratory a3r, a3r2 and a3r3), with the components each contains, E. coli AUPR, K562 CORUM and BEELINE median ratios.">
+    <p class="caption">Page 2: each version tested, the components it contains, and its score. E. coli values are the component ablation (466 experiments); K562 CORUM is pooled AUPR as a multiple of random; BEELINE values are median AUPRC ratios over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases). The three dashed rows (added 13 November) are exploratory and were not adopted; a3r and its stacked versions have not been run on BEELINE.</p>
+    <img src="graphical_abstract_p3.png" alt="Scoreboard, raw scores: every metric for attention (adopted), CLR, a3r, a3r2, a3r3, GENIE3, PIDC, GRNBoost2 and |r|, with bars from random, wins and losses.">
+    <p class="caption">Page 3 (added 13 November): every metric we have, wins and losses, raw scores. Bars start at random and are scaled within each row; the best value in each row is marked, with no statistical ties and no intervals. Dashes are cells that were not run: a3r2 and a3r3 on EcoMAC complexes and RPE1, competitors on complexes, and the DREAM5 regulon and edge truths for every a3r variant (the yeast row is the one exploratory estimation of follow-up D, scored once; a3r2, a3r3 and the competitors were not run on it). The a3r cells for direct edges, per-regulon AP, EcoMAC, DoRothEA A-B-C and BEELINE were computed on 13 November as descriptive numbers (<code>docs/plans/scoreboard_plan.md</code>; every attention, CLR and |r| number was first reproduced from stored results). The BEELINE number is the median over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases); earlier captions said "14 cases". a3r and its stacked versions use the CLR-NS operator at t = 9 on BEELINE, untuned.</p>
+    <img src="graphical_abstract_p3b.png" alt="Scoreboard, hub-controlled scores: the same rows with each method's scores converted to percentiles within strata of hub degree.">
+    <p class="caption">Page 3b: the hub-controlled versions of the same rows (within-stratum percentiles in 10 strata of the attention walk's stationary distribution). Not run for direct edges, per-regulon AP and BEELINE.</p>
+  </section>
+
+  <section>
+    <h2>In one paragraph</h2>
+    <p class="lede">CLR (2007) standardizes each gene's mutual information against that gene's own background. That is a context-normalized attention score, published a decade before transformers. It remains a standard baseline for de novo, unsupervised network inference. We complete it as an attention mechanism, with no learned parameters: a softmax over each gene's top CLR partners, then a short multi-step walk (depth <i>t</i>, chosen without labels on held-out experiments). On <i>E. coli</i> data (M3D, with the partly overlapping EcoMAC) this recovers strong-evidence transcriptional regulons better than CLR and better than GENIE3, PIDC and GRNBoost2 in pooled ranking. The gain requires context normalization, it survives controls for batch structure and, on strong-evidence regulons, for hub genes, and it concentrates in large regulatory programs. Per regulon, attention ties CLR and GENIE3. It loses on tight co-expression cliques such as ribosomal complexes. In the one independent, preregistered test (DREAM5 yeast, item 8), the co-membership gain was 5.8% (interval +1.8% to +10.0% with group-level resampling, including zero with series-level resampling), below the pre-specified 10% margin, and every method was near chance. A mechanism consistent with the <i>E. coli</i> results, though not isolated by them: the walk trades pair-level resolution for module-level recovery. That trade is not seen in the yeast or in silico networks (item 8).</p>
+  </section>
+
+  <section id="pseudocode">
+    <h2>The method in pseudocode</h2>
+    <p>CLR attention has no learned parameters. Given an expression compendium X (G genes by E experiments), the operator is:</p>
+<pre>
+<span class="c"># 1. dependence between every pair of genes</span>
+D[i,j] = MI(X[i], X[j])            <span class="c"># B-spline MI; single cells: |r| of Blom normal scores (CLR-NS)</span>
+
+<span class="c"># 2. CLR: z-score each gene's row against its own background</span>
+for each gene i:
+    z[i,j] = max(0, (D[i,j] - mean(D[i,:])) / sd(D[i,:]))
+S[i,j] = (z[i,j] + z[j,i]) / sqrt(2)           <span class="c"># pair score; S[i,i] = 0</span>
+
+<span class="c"># 3. attention: per-gene-temperature softmax over each gene's strongest partners</span>
+for each gene i:
+    C = the (at most 50) j with largest S[i,j] and S[i,j] &gt; 0
+    if |C| &lt;= 10:  A[i,j] = 1/|C| for j in C
+    else:  find temperature T_i by bisection so that
+              exp( entropy( softmax(S[i,C] / T_i) ) ) = 10      <span class="c"># ~10 effective partners</span>
+           A[i,j] = softmax(S[i,C] / T_i)[j]
+    (a gene with no candidates keeps its own mass)
+
+<span class="c"># 4. lazy multi-step walk</span>
+P = 0.5 * I + 0.5 * A               <span class="c"># rows sum to 1: half the mass stays, half attends</span>
+M = P^t, with t = 9                  <span class="c"># depth chosen without labels (below)</span>
+
+<span class="c"># 5. read-out</span>
+score[i,j] = 0.5 * (M[i,j] + M[j,i])   <span class="c"># attention mass from i to j, symmetrised</span>
+
+<span class="c"># depth t* (label-free)</span>
+split experiments into two halves by laboratory; for each depth t:
+    agreement(t) = AUPR of half-1's M_t for the top 1% of half-2's S scores
+t* = geometric mean of the two directions' best t; median over 50 splits = 9
+</pre>
+    <p class="caption">Defaults are fixed in advance and never tuned on a truth set: 10 effective partners per gene, 50 candidates at most, lazy weight 0.5, depth 9. Step 2 alone is CLR; steps 3 to 5 are what this work adds. Transformer analogy: MI is the query-key score, the CLR z-score is the scaled logit, the softmax is the softmax, and the walk is repeated attention with a residual connection.</p>
+    <img src="jim_diffusion.png" alt="Schematic of attention diffusing over a gene network from a query gene i at steps 0, 1, 3 and 9, with insets contrasting a loose regulon, which keeps most of the mass, with a tight clique, which leaks mass into the wider program.">
+    <p class="caption">Illustration for this readout only (not for submission). A toy network with a seeded layout, not data; the mass at each step is computed with the method's own rules (per-gene softmax over at most 50 candidates, about 10 effective partners, lazy weight 0.5, symmetrised read-out). Shading is scaled within each panel, so compare where the mass goes, not how much remains. Bottom: a loose regulon keeps most of the mass in its own members, while a tight clique (a protein complex such as the ribosome) leaks mass into the wider program, which is why attention loses to plain CLR on tight complexes. The size of the leak shown is set by the layout and is illustrative.</p>
+  </section>
+
+  <section>
+    <h2>What we have in hand</h2>
+
+    <h3>1. The headline: <i>E. coli</i> M3D, 466 experiments, RegulonDB regulon co-membership</h3>
+    <ul>
+      <li>Attention beats CLR by <span class="num">+0.022</span> AUPR <span class="num">[+0.019, +0.026]</span>. Depth is re-selected without labels in each of 1,000 nested bootstrap draws, and attention is ahead in all 1,000.</li>
+      <li>Consistent across 50 laboratory splits (<span class="num">+0.022 [+0.017, +0.027]</span>) and a replicate-aware bootstrap on the 907 chips (<span class="num">+0.020</span>).</li>
+      <li>The held-out depth is stable: median <i>t</i> = 9, with the criterion flat within 1% for <i>t</i> = 7–11.</li>
+      <li>Scope: items 1 to 3 come from the development organism and lineage (M3D with RegulonDB, and the overlapping EcoMAC), after many looks (see the ledger below). The module-for-edge trade in item 4 is an <i>E. coli</i> pattern; it is not seen in the DREAM5 yeast or in silico networks (item 8).</li>
+    </ul>
+
+    <h3>2. Why it works</h3>
+    <ul>
+      <li>Context normalization is essential. A softmax on uncalibrated |r| or MI gets about a third of the gain and none of the coherence gain.</li>
+      <li>A Shapley decomposition over six components attributes the AUPR gain mainly to depth (<span class="num">+0.018</span>) and CLR normalization (<span class="num">+0.013</span>).</li>
+    </ul>
+
+    <h3>3. Controls</h3>
+    <ul>
+      <li>Removing 0–20 global principal components leaves the gain intact. The top components are biology, not noise: growth rate, motility (σ28) and the σS stationary-phase program.</li>
+      <li>Hub control: the walk converges toward well-connected genes, so every method is also scored within strata of hubness. Attention stays first on strong-evidence truths (ahead of CLR in every hub decile on M3D); on all-evidence truths it ties GENIE3. Under a stratifier that does not use the walk (row mean of raw MI; follow-up B, exploratory) attention stays ahead of CLR on M3D strong evidence (+0.18 enrichment [+0.12, +0.24]). That covers attention against CLR only, not GENIE3 or PIDC.</li>
+    </ul>
+
+    <h3>4. Against established methods</h3>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Data</th><th>Truth</th><th>Attention</th><th>CLR</th><th>GENIE3</th><th>PIDC</th><th>GRNBoost2</th></tr></thead>
+        <tbody>
+          <tr><td>M3D</td><td>RegulonDB, strong evidence</td><td class="best">1.68</td><td>1.44</td><td>1.51</td><td>1.45</td><td>1.36</td></tr>
+          <tr><td>EcoMAC (2,198 arrays; overlaps M3D)</td><td>strong evidence</td><td class="best">1.68</td><td>1.39</td><td>1.50</td><td>1.43</td><td>1.36</td></tr>
+          <tr><td>M3D, hub-controlled</td><td>strong evidence</td><td class="best">1.56</td><td>1.40</td><td>1.47</td><td>1.40</td><td>1.37</td></tr>
+          <tr><td>Human K562 Perturb-seq</td><td>DoRothEA A–B</td><td class="best">1.09</td><td class="best">1.06†</td><td class="best">1.08</td><td class="best">1.07</td><td>1.05</td></tr>
+          <tr><td>Human K562 Perturb-seq</td><td>CORUM complexes</td><td>3.51</td><td class="best">6.39</td><td>6.32</td><td class="best">6.33</td><td>3.66</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Pooled AUPR divided by the base rate (1.00 = random). Highlighted: best in the full row or statistically tied with it (paired gene jackknife, Bonferroni-corrected); † tied only after the correction. On CORUM, |r| is best (7.00). EcoMAC is not an independent replication of M3D: 828 of its 2,198 arrays (37.7%) have a one-to-one M3D counterpart, covering 91% of M3D's chips. On the 1,370 EcoMAC arrays without an M3D counterpart, attention's lead over CLR is unchanged in size (+0.0285 AUPR, against +0.0278 on all arrays; a post hoc sensitivity analysis, not preregistered). Intervals resample genes only. In the DREAM5 yeast test the experiment-resampling component of the standard error was of the same size as the gene component or larger (77% of it at group level, 178% at series level, on Y-M), so these intervals understate the total uncertainty and some differences marked as wins may be ties. GRNBoost2 values are the 29–31 October rerun with legacy early stopping. The full table, with every truth and its footnotes, is <code>docs/whitepapers/sota_table.md</code>.</p>
+    <ul>
+      <li><b>Per regulon</b> (each regulon weighted equally): attention ties CLR and GENIE3. Its mean AP is higher than |r|'s in 3 of 4 comparisons after correction and than PIDC's and GRNBoost2's in 1 of 4 each; medians are about equal. Its win rate is highest in regulons of 25 or more genes.</li>
+      <li><b>Direct TF→target edges:</b> on <i>E. coli</i> (M3D; DREAM5 network 3, same lineage) attention trails CLR. The trade is not seen in DREAM5 yeast (both readouts point up) or in the in silico network (edge ratio 1.15, module ratio 0.98; descriptive).</li>
+    </ul>
+
+    <h3>5. Human data</h3>
+    <ul>
+      <li>K562 Perturb-seq pseudobulk: every method is within 10% of random on TF truths. Attention's small DoRothEA lead over CLR survives the attention-derived hub control (it ties GENIE3 and PIDC); under the MI row-mean stratifier of follow-up B (exploratory) the lead is +0.016 enrichment [−0.010, +0.042]. It loses to CLR, GENIE3 and PIDC on protein complexes, and on knockdown-response modules per module and after hub control; 86% of the complex loss comes from ten ribosomal and pre-rRNA complexes. GRNBoost2, which does not aggregate, does about as poorly as attention on these complexes, so the loss is not specific to the walk.</li>
+      <li>Single cells (BEELINE: human ESC and hepatocytes, plus five mouse datasets): CLR on normal scores (CLR-NS) has the highest per-dataset mean of the methods tested, including GENIE3, PIDC and GRNBoost2, but it was chosen on these truths, it is not significantly ahead of GENIE3 or PIDC, and GENIE3 has the higher median. Attention adds nothing there.</li>
+      <li><b>Against learned attention (preregistered, run once, 2 Nov):</b> on all seven BEELINE datasets, CLR-NS, a formula with no training, is non-inferior and superior to zero-shot attention from scPRINT, a single-cell foundation model trained for this task (Hodges-Lehmann estimate of the log2 AUPRC-ratio difference +1.03, exact interval +0.34 to +1.90, positive in 7 of 7; it holds when scPRINT gets its best readout). Three qualifications: scPRINT's attention scores the same as the same model run on permuted expression, and below a data-free gene-embedding similarity, so the comparator is weak here; the advantage is absent on cell-type-specific ChIP-seq (scPRINT higher in 11 of 14 cases, exploratory); and scGPT (two datasets, descriptive) is behind CLR-NS on attention but ahead on its token embeddings. On K562 control cells the direction is the same but smaller (+0.27, 0.09 to 0.46, descriptive). Fine-tuning each model on its own cells (descriptive) did not help: scPRINT's R0 fell slightly (−0.05 log2) and CLR-NS stayed ahead of it (+1.11, 0.41 to 1.96).</li>
+    </ul>
+
+    <h3>6. Perturbation targets (likely a second paper)</h3>
+    <ul>
+      <li>Attention-based influence ranks a perturbed TF's targets above differential expression in 12 of 15 perturbations (<span class="num">p = 0.015</span>; 9 of 15, <span class="num">p = 0.095</span>, under a laboratory-matched null). Suggestive, not established.</li>
+      <li>It is complementary to SSEM-Lasso, re-implemented from Cosgrove et al. 2008: SSEM pinpoints the regulator itself, attention its regulon.</li>
+      <li>Differential CLR is the natural method here and is next to port.</li>
+    </ul>
+
+    <h3>7. Batch effects (supplement)</h3>
+    <ul>
+      <li>Multi-platform EcoMAC shows platform "Christmas trees" in gene-pair plots.</li>
+      <li>Platform-level ComBat helps more than switching from correlation to MI.</li>
+      <li>One clean platform (735 arrays) beats all 2,198 pooled.</li>
+    </ul>
+
+    <h3>8. Yeast test: DREAM5 network 4 (fixed in advance, run once, 11 November)</h3>
+    <p>The DREAM5 yeast compendium (<i>S. cerevisiae</i>, 536 chips, 5,950 genes; the challenge's own gold standard of 3,940 TF→target interactions) is the one out-of-organism test we fixed before looking: design frozen on 4 November, a 10% relative-AUPR margin, two co-primary readouts always reported together, one look at the truth. Before scoring ours, our implementation of the challenge's official scorer reproduced the organisers' published scores for all 36 published methods (to 1e-3). d is the log2 ratio of AUPRs (attention over CLR); the margin is d = 0.1375 (10%).</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Readout</th><th>Attention</th><th>CLR</th><th>Ratio</th><th>d [95% interval]</th><th>Preregistered verdict</th></tr></thead>
+        <tbody>
+          <tr><td>Y-M: regulon co-membership (the headline construct)</td><td>0.111</td><td>0.105</td><td>1.058</td><td>0.082 [0.026, 0.137]</td><td>Equivalent within 10%</td></tr>
+          <tr><td>Y-E: directed edges, official DREAM5 score</td><td>0.0216</td><td>0.0208</td><td>1.042</td><td>0.060 [−0.093, 0.213]</td><td>Inconclusive</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Prediction recorded in advance: Y-M positive, Y-E not positive (the M3D pattern). Intervals combine the gene-resampling and the 100 group-level refit variances (SE 0.028 and 0.078). "Equivalent" for Y-M sits on the boundary with "Inconclusive" and is not a finding (below).</p>
+    <ul>
+      <li><b>Y-M:</b> attention is ahead of CLR by about 6% (interval +1.8% to +10.0%), which is below the 10% margin we set. Preregistered verdict, as written by the script: "equivalent within 10%". The interval's upper limit is 0.0001 below the margin (0.1374 against 0.1375), which is within the Monte Carlo error of the interval itself (about ±0.002), so the boundary between Equivalent and Inconclusive is not resolved. With the coarser series-level resampling the interval is −0.009 to 0.172 (Inconclusive, includes 0), and with a Bonferroni correction across the two co-primaries it is 0.018 to 0.145 (also Inconclusive). What holds under every version: the estimate is below the 10% margin, so the result is not Superior. Fixed wording: the co-membership headline did not replicate in yeast at the stated margin. The estimate is positive; the interval excludes zero only under group-level resampling.</li>
+      <li><b>Y-E:</b> inconclusive. The design predicted no gain here (d ≤ 0, the M3D pattern). The estimate is a 4% gain (d = +0.060), but the interval runs from a 6% loss to a 16% gain, so the prediction is neither confirmed nor refuted. The interval contains zero and the +10% margin, so it excludes neither no difference nor a 10% gain, and no claim is made.</li>
+      <li><b>Yeast is near chance for every method.</b> Edge AUPRs are about 0.02 against a base rate of 0.017, and AUROC is 0.51 to 0.52 for all seven methods, so small differences are hard to detect, yeast was the hardest of the DREAM5 networks.</li>
+      <li><b>Resampling caveat:</b> resampling whole experimental series, which is the more conservative unit, gives a larger spread (SD 0.040 for Y-M, against 0.017 at the replicate-group level). We report it as one supplementary line: with it, the Y-M interval for d is −0.009 to 0.172 and the Y-E interval is −0.107 to 0.227. The statement that the Y-M interval excludes zero rests on the group-level resampling.</li>
+      <li><b>Networks 3 and 1, descriptive only</b> (no refit variance, so intervals are understated; no verdicts). <i>E. coli</i> network 3 shows the M3D pattern: Y-M +19% (ratio 1.19), Y-E −11% (0.89). It shares its lineage with our headline, so it is not independent. The in silico network 1 gives Y-M 0.98 and Y-E 1.15. The direction is not consistent across the three networks.</li>
+      <li><b>Official challenge score</b> (descriptive; our reimplementations; mean over the three networks of the two &minus;log<sub>10</sub> p scores): GRNBoost2 and GENIE3 lead overall (55.6 and 43.8), attention is third (38.2) and CLR fourth (22.9). On yeast all seven methods lie within AUROC 0.510 to 0.523, so no ranking of methods is supported there.</li>
+      <li><b>One deviation from the design's checks:</b> PIDC has a 2-entry tied block straddling the 100,000-edge cap on networks 1 and 4 (the design expected none); it was dropped by the fixed rule. It affects only PIDC, not the attention-versus-CLR contrasts.</li>
+      <li><b>Review status.</b> This item had a separate statistical review on 12 November, and its corrections are applied above. The design's exploratory list (replicate-averaged input, tree-method module read-outs, hub-stratified scores, other depths, per-TF AUROC) has not been run; anything run now is post-unblinding exploratory.</li>
+    </ul>
+  </section>
+
+  <section id="followups">
+    <h2>Exploratory follow-ups</h2>
+    <p class="caption">Four analyses run on 11 to 13 November. None enters the paper as it stands. They are here so you can see what was tried and what it showed. Section letters A to D are used below so they are not confused with sections 1 to 8.</p>
+
+    <h3>A. Log-scale depth re-test</h3>
+    <div class="tags"><span class="tag">Preregistered before compute (8861ae4, 11 Nov)</span><span class="tag">Not a blind test</span></div>
+    <p><b>Question.</b> Is walk depth a resolution dial, with the best depth rising from fine truths (operons) to coarse ones (regulons, sigmulons)? The first test used a linear grid (t = 1 to 32), and two best depths sat at its edge. The re-test uses a geometric grid, t = 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, plus CLR as t = 0.</p>
+    <p><b>Status of the evidence.</b> The analysis and the three possible readings were committed before any new compute. It is still not blind or confirmatory: the truths and operators were already used in the linear-grid run, and its curves had been seen. Power is small, with 3 truths in <i>E. coli</i> (M3D) and 5 in K562. The results document gives no interpretation beyond the pre-specified readings, and this page gives none either. The statistical review adds that the power limits are severe: reading (a) was nearly unattainable.</p>
+    <p><b>Pre-specified reading: (b) "not resolution-like"</b>, defined as Spearman rho between truth coarseness and log<sub>2</sub> of the best depth being at most 0.5 in at least one organism. <i>E. coli</i> rho = <span class="num">0.500</span> (n = 3); K562 rho = <span class="num">0.700</span> (n = 5). Reading (a), rho of at least 0.9 in both organisms with no edge censoring, was not met. <b>0 of 8 truths</b> were censored at the grid edge t = 256; the within-1% interval of K562 CollecTRI reaches 256. The best depth moved from the edge of the linear grid to 96 (<i>E. coli</i> TF regulons) and 48 (K562 CollecTRI).</p>
+    <p><b>What "not resolution-like" can mean here.</b> It is the literal outcome of the pre-specified rule: the pre-specified ordering was not observed. With 3 and 5 truths and flat depth curves, the test could neither establish nor exclude it. In <i>E. coli</i> the rule fires unless all three truths are perfectly ordered (rho of at least 0.9 occurred in 10% of bootstrap draws, rho of at most 0.5 in 88%); the order is broken by the sigmulons (5 sets; bootstrap interval of best <i>t</i> 0 to 256). In K562, rho is 0.70 with CLR ranked lowest, and 0.20 over attention depths only (the preregistration records that the primary convention was chosen after the linear-grid curves were seen). The coarseness rank is nominal: the K562 KD-response modules (median 100 genes) are ranked finer than DoRothEA (median 13).</p>
+    <p><b>Equivalence gate, passed.</b> At t = 0, 1, 2, 4, 8, 16, 32 the new run reproduces the saved linear-grid curves (AUPR, base rate, regulon coherence) to within <span class="num">5.0e-16</span> (tolerance 1e-9; 21 <i>E. coli</i> rows, 35 K562 rows).</p>
+    <div class="tablewrap">
+      <table class="t3 mid">
+        <thead><tr><th>Organism</th><th>Truth, fine to coarse</th><th>Median size (sets)</th><th>Best t</th><th>Within-1% interval of t</th><th>AUPR gain over CLR</th><th>Bootstrap 95% interval of best t</th></tr></thead>
+        <tbody>
+          <tr><td><i>E. coli</i></td><td>1 operons</td><td class="num">2 (786)</td><td class="num">4</td><td class="num">4 to 4</td><td class="num">+0.208</td><td class="num">4 to 4</td></tr>
+          <tr><td><i>E. coli</i></td><td>2 TF regulons</td><td class="num">11 (158)</td><td class="num">96</td><td class="num">48 to 128</td><td class="num">+0.027</td><td class="num">16 to 128</td></tr>
+          <tr><td><i>E. coli</i></td><td>3 sigmulons</td><td class="num">128 (5)</td><td class="num">12</td><td class="num">6 to 24</td><td class="num">+0.043</td><td class="num">0 to 256</td></tr>
+          <tr><td>K562</td><td>1 CORUM complexes</td><td class="num">4 (1,186)</td><td class="num">CLR (0)</td><td class="num">16 to 16*</td><td class="num">0.000</td><td class="num">0 to 0</td></tr>
+          <tr><td>K562</td><td>2 KD-response modules</td><td class="num">100 (585)</td><td class="num">24</td><td class="num">24 to 32</td><td class="num">+0.017</td><td class="num">24 to 32</td></tr>
+          <tr><td>K562</td><td>3 DoRothEA A–B</td><td class="num">13 (105)</td><td class="num">4</td><td class="num">3 to 12</td><td class="num">+0.008</td><td class="num">3 to 24.2</td></tr>
+          <tr><td>K562</td><td>4 DoRothEA A–C</td><td class="num">28 (269)</td><td class="num">8</td><td class="num">3 to 16</td><td class="num">+0.005</td><td class="num">3 to 32</td></tr>
+          <tr><td>K562</td><td>5 CollecTRI</td><td class="num">16 (490)</td><td class="num">48</td><td class="num">24 to 256</td><td class="num">+0.014</td><td class="num">32 to 256</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Best t is the highest-AUPR point over CLR and the grid. Within-1% interval: the run of grid depths around the best attention depth whose AUPR is at least 99% of the maximum (t of at least 1; widths are limited by the grid spacing of about half an octave). AUPR gain: absolute AUPR at the best depth minus CLR's. Bootstrap: 1,000 resamples of the modules in each truth, with the operators held fixed; a lower end of 0 means CLR was best in some draws. For comparison, the linear-grid run gave best depths of 4, 32 and 13 (<i>E. coli</i>) and CLR, 26, 4, 7 and 32 (K562). *K562 CORUM: CLR beats all 16 attention depths. The best attention depth is t = 16, with an AUPR 0.037 below CLR's (0.0894), so CLR is best at every depth.</p>
+    <ul>
+      <li><b>Power.</b> Exact one-sided permutation P for rho: <i>E. coli</i> 0.500, K562 0.117. The smallest attainable one-sided P is <span class="num">0.167</span> (n = 3) and <span class="num">0.008</span> (n = 5). These values are descriptive and are not part of the reading rule.</li>
+      <li><b>Best depth against module size</b> (secondary, truths with best t of at least 1; slope of log<sub>2</sub> best t on log<sub>2</sub> median module size; bootstrap over modules): pooled slope <span class="num">0.197 [0.078, 0.668]</span> over 7 truths. By organism: <i>E. coli</i> 0.186 [0.054, 1.929] (3 truths; 952 of 1,000 draws usable), K562 0.380 [−0.203, 0.581] (4 truths). The interval resamples modules within fixed truths and operators; it does not reflect variation between truths. Least squares across the 7 truths gives 0.197 with a 95% interval of −0.77 to 1.16 (P = 0.62), and dropping the operon truth changes the slope to −0.22. The slope is descriptive.</li>
+    </ul>
+    <img class="fig" src="depth_log_summary.png" alt="Three panels. Left: best depth t on a log2 axis against truth coarseness rank, E. coli (3 truths) and K562 (5 truths), with the grid edge t = 256 marked; E. coli best depths are 4, 96, 12 and K562 are CLR, 24, 4, 8, 48. Middle: log2 best depth against log2 median module size, pooled slope 0.20 with interval 0.08 to 0.67. Right: width of the within-1% interval in octaves against coarseness rank.">
+    <p class="caption">Summary of the re-test. Left: best depth by truth coarseness (log<sub>2</sub> axis, grid edge dashed). Middle: best depth against median module size, with bootstrap bars. Right: width of the within-1% interval, which is limited by the grid. From <code>results/granularity_log/depth_log_summary.png</code>.</p>
+    <img class="fig" src="depth_log_curves.png" alt="Eight panels, one per truth from fine to coarse: AUPR minus CLR against walk depth t on a log2 axis from 1 to 256, with the best depth marked, the within-1% interval shaded and the grid edge 256 dashed. K562 CORUM complexes: CLR is best and every attention depth is below it.">
+    <p class="caption">AUPR gain over CLR at each depth, one panel per truth (<code>results/granularity_log/depth_log_curves.png</code>). Sources: <code>docs/depth_log_results.md</code>, <code>docs/preregistration_depth_log.md</code>.</p>
+
+    <h3>B. Robust row-standardisation of the CLR step</h3>
+    <div class="tags"><span class="tag">Exploratory</span><span class="tag">PI's idea</span><span class="tag">Not for the paper</span></div>
+    <div class="exploratory"><b>Exploratory.</b> Not preregistered. No variant was selected, no p-values are computed (none should be read into the intervals), K562 CORUM is not held out (it was used in the attention-width test and in earlier CORUM work), M3D RegulonDB is the project's tuning set for depth, and nothing here goes to the paper. Every variant, truth and read-out was fixed before the runs. Intervals are paired delete-half gene jackknife intervals (100 replicates) with the networks held fixed; they do not resample experiments, cells or seeds. The two <code>tables.md</code> files hold about 700 such intervals (711 counted); this page shows 56 of the paired contrasts. With that many, "the interval excludes 0" is not evidence of a real difference, and it is used here only to describe.</div>
+    <p><b>Question.</b> CLR z-scores each gene's MI row with the row mean and SD. A gene in a module with many strong partners inflates its own row SD, which lowers the z-scores of its true partners; this could hurt large complexes such as the ribosome. Does z = (x − median) / (IQR/1.349) change the pairwise score or the attention score? Everything after the row z (truncation at 0, symmetrisation, softmax, lazy walk) is the default path, and the package itself is unchanged.</p>
+    <div class="tablewrap">
+      <table class="t3">
+        <thead><tr><th>Variant</th><th>Row centre and scale</th></tr></thead>
+        <tbody>
+          <tr><td>V0</td><td>mean and SD of the MI row: default CLR (the zeroed diagonal is part of the row, as in the package)</td></tr>
+          <tr><td>V1</td><td>median and IQR/1.349 of the raw MI row (the PI's proposal); diagonal excluded</td></tr>
+          <tr><td>V2</td><td>median and IQR/1.349 of MI<sup>1/3</sup> (cube-root scale); diagonal excluded</td></tr>
+          <tr><td>V3</td><td>the existing rCLR: two-way median polish of MI<sup>1/3</sup>, per-gene MAD; as defined it is not truncated at 0</td></tr>
+          <tr><td>V4</td><td>median and 1.4826 × MAD of the raw MI row; diagnostic; diagonal excluded</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>Checks.</b> V0 as re-implemented equals the package (largest difference in CLR scores <span class="num">7.1e-14</span> on M3D and <span class="num">3.4e-14</span> on K562) and its pooled AUPR equals the project's baselines run to within <span class="num">4e-16</span>. No row had a zero scale under any variant.</p>
+
+    <h4>Pooled enrichment on the method-table truths</h4>
+    <div class="tablewrap">
+      <table class="t2 wide">
+        <thead>
+          <tr><th></th><th></th><th class="grp" colspan="5">Pairwise score (CLR step)</th><th class="grp" colspan="5">Attention, t = 9</th><th class="grp" colspan="4">Reference methods</th></tr>
+          <tr><th>Truth</th><th>Base rate</th><th class="sep">V0 (CLR)</th><th>V1</th><th>V2</th><th>V3</th><th>V4</th><th class="sep">V0</th><th>V1</th><th>V2</th><th>V3</th><th>V4</th><th class="sep">GENIE3</th><th>PIDC</th><th>GRNBoost2</th><th>|r|</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>M3D, RegulonDB strong evidence</td><td>0.094</td><td class="sep">1.44</td><td>1.45</td><td>1.46</td><td>1.52</td><td>1.45</td><td class="sep">1.68</td><td>1.67</td><td>1.66</td><td>1.66</td><td>1.66</td><td class="sep">1.51</td><td>1.45</td><td>1.36</td><td>1.23</td></tr>
+          <tr><td>M3D, all evidence</td><td>0.120</td><td class="sep">1.37</td><td>1.42</td><td>1.41</td><td>1.47</td><td>1.43</td><td class="sep">1.44</td><td>1.44</td><td>1.42</td><td>1.43</td><td>1.45</td><td class="sep">1.40</td><td>1.40</td><td>1.26</td><td>1.23</td></tr>
+          <tr><td>K562, CORUM all</td><td>0.013</td><td class="sep">6.39</td><td>6.94</td><td>6.37</td><td>6.07</td><td>6.44</td><td class="sep">3.51</td><td>3.26</td><td>3.44</td><td>3.78</td><td>2.99</td><td class="sep">6.32</td><td>6.33</td><td>3.66</td><td>7.00</td></tr>
+          <tr><td>K562, CORUM without ribosome</td><td>0.012</td><td class="sep">2.18</td><td>2.28</td><td>2.34</td><td>2.57</td><td>2.17</td><td class="sep">2.05</td><td>1.96</td><td>2.09</td><td>2.27</td><td>1.86</td><td class="sep">-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td>K562, CORUM large (20+ genes)</td><td>0.126</td><td class="sep">2.29</td><td>2.31</td><td>2.30</td><td>2.39</td><td>2.27</td><td class="sep">1.93</td><td>1.80</td><td>1.89</td><td>2.08</td><td>1.75</td><td class="sep">-</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td>K562, KD response</td><td>0.079</td><td class="sep">2.42</td><td>2.61</td><td>2.53</td><td>2.55</td><td>2.60</td><td class="sep">2.38</td><td>2.42</td><td>2.19</td><td>2.07</td><td>2.45</td><td class="sep">2.45</td><td>2.35</td><td>1.84</td><td>2.45</td></tr>
+          <tr><td>K562, DoRothEA A–B</td><td>0.183</td><td class="sep">1.06</td><td>1.06</td><td>1.06</td><td>1.08</td><td>1.05</td><td class="sep">1.09</td><td>1.08</td><td>1.08</td><td>1.08</td><td>1.07</td><td class="sep">1.08</td><td>1.07</td><td>1.05</td><td>1.05</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Pooled AUPR divided by the base rate (1.00 = random), in the format of the method table (<code>docs/whitepapers/sota_table.md</code>). M3D: 466 experiments, 4,297 genes. K562: essential Perturb-seq pseudobulk, network from knockdown half A, 5,671 truth genes; the KD-response truth comes from half B. "Without ribosome" drops the 8 complexes dominated by ribosomal proteins. "Large" is complexes of 20 or more genes. The ribosome-only truth is saturated (base rate 0.75; pairwise enrichment 1.21 for every variant), so it is not shown. V0 columns equal the method-table rows (Attention at t = 9, CLR). Reference columns are taken from the same runs and the same scoring (<code>results/baselines_m3d</code>, <code>results/baselines_k562ess_truthgenes_genie3</code>) and are directly comparable; "-" means the method was scored on the full truth only, not on this subset. Unlike the method table, nothing is bolded: the variants were not part of its Bonferroni-corrected tie family, so no best-or-tied marking is made. GRNBoost2 uses legacy early stopping (rerun 29–31 October). As in the method table, depth t = 9 was chosen on M3D, and intervals resample genes only. The hub-only column of the full table is not repeated.</p>
+
+    <h4>Paired contrasts against V0</h4>
+    <p class="caption">Difference in pooled enrichment, variant minus V0, with the 95% delete-half gene jackknife interval. Descriptive; no p-values.</p>
+    <div class="tablewrap">
+      <table class="t3 mid">
+        <thead><tr><th>Data</th><th>Truth</th><th>V1</th><th>V2</th><th>V3</th><th>V4</th></tr></thead>
+        <tbody>
+          <tr><td colspan="6"><b>Pairwise score (CLR step)</b></td></tr>
+          <tr><td>M3D</td><td>strong evidence</td><td class="num">+0.013 [−0.004, +0.029]</td><td class="num">+0.022 [+0.003, +0.040]</td><td class="num">+0.077 [+0.042, +0.112]</td><td class="num">+0.009 [−0.008, +0.026]</td></tr>
+          <tr><td>M3D</td><td>all evidence</td><td class="num">+0.047 [+0.035, +0.059]</td><td class="num">+0.043 [+0.031, +0.055]</td><td class="num">+0.102 [+0.072, +0.131]</td><td class="num">+0.058 [+0.043, +0.073]</td></tr>
+          <tr><td>K562</td><td>CORUM all</td><td class="num">+0.547 [+0.345, +0.749]</td><td class="num">−0.018 [−0.267, +0.232]</td><td class="num">−0.318 [−0.784, +0.147]</td><td class="num">+0.052 [−0.224, +0.327]</td></tr>
+          <tr><td>K562</td><td>CORUM without ribosome</td><td class="num">+0.100 [+0.019, +0.182]</td><td class="num">+0.158 [+0.050, +0.266]</td><td class="num">+0.381 [+0.182, +0.581]</td><td class="num">−0.019 [−0.155, +0.117]</td></tr>
+          <tr><td>K562</td><td>CORUM large</td><td class="num">+0.023 [−0.000, +0.045]</td><td class="num">+0.010 [−0.010, +0.030]</td><td class="num">+0.097 [+0.046, +0.149]</td><td class="num">−0.021 [−0.056, +0.013]</td></tr>
+          <tr><td>K562</td><td>KD response</td><td class="num">+0.189 [+0.158, +0.220]</td><td class="num">+0.102 [+0.075, +0.128]</td><td class="num">+0.127 [+0.057, +0.198]</td><td class="num">+0.178 [+0.135, +0.221]</td></tr>
+          <tr><td>K562</td><td>DoRothEA A–B</td><td class="num">−0.002 [−0.007, +0.002]</td><td class="num">+0.002 [−0.003, +0.006]</td><td class="num">+0.025 [+0.013, +0.037]</td><td class="num">−0.008 [−0.013, −0.003]</td></tr>
+          <tr><td colspan="6"><b>Attention, t = 9</b></td></tr>
+          <tr><td>M3D</td><td>strong evidence</td><td class="num">−0.009 [−0.037, +0.020]</td><td class="num">−0.014 [−0.047, +0.020]</td><td class="num">−0.020 [−0.070, +0.030]</td><td class="num">−0.011 [−0.038, +0.016]</td></tr>
+          <tr><td>M3D</td><td>all evidence</td><td class="num">+0.000 [−0.018, +0.019]</td><td class="num">−0.023 [−0.046, +0.001]</td><td class="num">−0.010 [−0.037, +0.018]</td><td class="num">+0.011 [−0.009, +0.031]</td></tr>
+          <tr><td>K562</td><td>CORUM all</td><td class="num">−0.250 [−0.539, +0.039]</td><td class="num">−0.067 [−0.447, +0.313]</td><td class="num">+0.272 [−0.351, +0.895]</td><td class="num">−0.519 [−0.980, −0.059]</td></tr>
+          <tr><td>K562</td><td>CORUM without ribosome</td><td class="num">−0.088 [−0.233, +0.057]</td><td class="num">+0.040 [−0.112, +0.193]</td><td class="num">+0.216 [+0.031, +0.401]</td><td class="num">−0.196 [−0.390, −0.001]</td></tr>
+          <tr><td>K562</td><td>CORUM large</td><td class="num">−0.127 [−0.171, −0.082]</td><td class="num">−0.039 [−0.093, +0.015]</td><td class="num">+0.158 [+0.051, +0.265]</td><td class="num">−0.180 [−0.252, −0.108]</td></tr>
+          <tr><td>K562</td><td>KD response</td><td class="num">+0.040 [+0.002, +0.078]</td><td class="num">−0.181 [−0.231, −0.130]</td><td class="num">−0.302 [−0.386, −0.218]</td><td class="num">+0.071 [+0.019, +0.123]</td></tr>
+          <tr><td>K562</td><td>DoRothEA A–B</td><td class="num">−0.017 [−0.027, −0.007]</td><td class="num">−0.011 [−0.023, +0.001]</td><td class="num">−0.013 [−0.040, +0.014]</td><td class="num">−0.025 [−0.039, −0.012]</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Each variant's attention at t = 9 is compared with V0's attention at t = 9. At each variant's own label-free depth (6 to 7 for V1, V2 and V4; 5 to 6 for V3; V0 is 9 in both datasets) several cells are lower still, for example K562 CORUM all, V1: −0.398 [−0.704, −0.093]. The pooled CORUM-all numbers are dominated by the ribosomal complexes, whose own enrichment is saturated, so the without-ribosome and large rows are the split. In the per-complex (macro) tables, M3D mean per-regulon AP is lower than V0's for every robust variant in both truths, pairwise and attention (−0.005 to −0.014).</p>
+    <ul>
+      <li><b>Attention against CLR, within each variant.</b> On K562 CORUM all and large complexes, attention is below V0 CLR for every variant, with intervals entirely below 0 (CORUM all, V0: −2.88 [−4.32, −1.44]; across variants −2.6 to −3.4 enrichment units). On M3D attention is above V0 CLR on both truths for every variant (strong evidence +0.21 to +0.23; all evidence +0.05 to +0.08).</li>
+    </ul>
+
+    <h4>Hub-stratified contrasts: the two stratifiers disagree</h4>
+    <p>Hub control uses within-stratum percentiles in 10 strata of H<sub>i</sub> + H<sub>j</sub>. The primary stratifier is the stationary distribution π of the V0 attention walk (attention-derived, as in the method table). The second is the row mean of the raw MI, which does not depend on any variant. It is not neutral with respect to the treatment, though: the variants differ precisely in how they remove the row location (mean, median, or two-way median polish), so neither stratifier is the hub-controlled answer. On K562 CORUM all, the V1 pairwise gain vanishes under π (<span class="num">+0.014</span>) and persists under the MI row mean (<span class="num">+0.483</span>). The π stratifier is derived from V0's own attention walk, and the two stratifiers disagree on this contrast.</p>
+    <div class="tablewrap">
+      <table class="t3 mid">
+        <thead><tr><th>Variant</th><th>K562 CORUM all, pairwise: variant minus V0</th><th>Unstratified</th><th>Stratified by π (V0 attention)</th><th>Stratified by MI row mean</th></tr></thead>
+        <tbody>
+          <tr><td>V1</td><td>median / IQR</td><td class="num">+0.547 [+0.345, +0.749]</td><td class="num">+0.014 [−0.178, +0.206]</td><td class="num">+0.483 [+0.234, +0.733]</td></tr>
+          <tr><td>V2</td><td>cube-root median / IQR</td><td class="num">−0.018 [−0.267, +0.232]</td><td class="num">−0.210 [−0.478, +0.058]</td><td class="num">+0.139 [−0.115, +0.394]</td></tr>
+          <tr><td>V3</td><td>rCLR</td><td class="num">−0.318 [−0.784, +0.147]</td><td class="num">−0.220 [−0.624, +0.184]</td><td class="num">+0.430 [+0.062, +0.799]</td></tr>
+          <tr><td>V4</td><td>median / MAD</td><td class="num">+0.052 [−0.224, +0.327]</td><td class="num">−0.256 [−0.505, −0.006]</td><td class="num">+0.195 [−0.033, +0.423]</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Difference in pooled enrichment [95% delete-half gene jackknife interval]. Under the MI row mean on M3D the pairwise gains stay close to the unstratified ones (all evidence: +0.044 to +0.073).</p>
+
+    <h4>Hub drift</h4>
+    <p>Share of the 100,000 top-scoring pairs that touch at least one of the 5% most connected genes (chance about 0.098), with connectedness taken from π (V0 attention) and from the MI row mean. Pairwise score and attention at t = 9.</p>
+    <div class="tablewrap">
+      <table class="t2 wide">
+        <thead>
+          <tr><th></th><th class="grp" colspan="4">M3D</th><th class="grp" colspan="4">K562</th></tr>
+          <tr><th>Variant</th><th class="sep">Pairwise, π</th><th>Pairwise, MI</th><th>Attention, π</th><th>Attention, MI</th><th class="sep">Pairwise, π</th><th>Pairwise, MI</th><th>Attention, π</th><th>Attention, MI</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>V0 (CLR)</td><td class="sep">0.211</td><td>0.169</td><td>0.257</td><td>0.116</td><td class="sep">0.336</td><td>0.419</td><td>0.608</td><td>0.413</td></tr>
+          <tr><td>V1 median / IQR</td><td class="sep">0.277</td><td>0.175</td><td>0.348</td><td>0.129</td><td class="sep">0.373</td><td>0.507</td><td>0.711</td><td>0.433</td></tr>
+          <tr><td>V2 cube-root</td><td class="sep">0.279</td><td>0.130</td><td>0.328</td><td>0.112</td><td class="sep">0.368</td><td>0.419</td><td>0.636</td><td>0.331</td></tr>
+          <tr><td>V3 rCLR</td><td class="sep">0.270</td><td>0.034</td><td>0.294</td><td>0.077</td><td class="sep">0.328</td><td>0.259</td><td>0.543</td><td>0.171</td></tr>
+          <tr><td>V4 median / MAD</td><td class="sep">0.276</td><td>0.205</td><td>0.348</td><td>0.133</td><td class="sep">0.347</td><td>0.564</td><td>0.685</td><td>0.455</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">By π, V1, V2, V3 and V4 touch the most connected genes more often than V0 in M3D; in K562 V1, V2 and V4 do and V3 does not. By the MI row mean, V3 is below V0 in both datasets and both read-outs, while V1 and V4 are above V0 in K562 (pairwise 0.507 and 0.564 against 0.419) and close to V0 in M3D (pairwise 0.175 and 0.205 against 0.169). The share of non-zero pairwise scores is higher for V1, V2 and V4 (0.62 to 0.64) than for V0 (0.53 to 0.54).</p>
+    <p class="caption">Caveats. The shares have no intervals, so small differences (for example 0.169 against 0.175) cannot be interpreted. π is the stationary distribution of V0's own walk, so for V0's attention the π share is partly built in, and for the other variants it measures overlap with V0's hubs. The attention columns are at the fixed t = 9, which mixes hub preference with mixing speed: V1, V2 and V4 have denser operators and shallower label-free depths (5 to 7). At each variant's own label-free depth, every variant's K562 attention share by π is below V0's (V1 0.571, V2 0.502, V3 0.382, V4 0.559, against 0.608); in M3D V1, V2 and V4 stay above V0 by π (0.305, 0.270, 0.283 against 0.257) and V3 falls below (0.244).</p>
+
+    <h4>What the row scales track</h4>
+    <div class="tablewrap">
+      <table class="t2 mid">
+        <thead><tr><th>Row scale</th><th>Strong partners, M3D</th><th>Strong partners, K562</th><th>Own module size, M3D</th><th>Own module size, K562</th></tr></thead>
+        <tbody>
+          <tr><td>SD</td><td class="num">0.86</td><td class="num">0.89</td><td class="num">−0.05</td><td class="num">+0.17</td></tr>
+          <tr><td>IQR / 1.349</td><td class="num">0.72</td><td class="num">0.85</td><td class="num">−0.05</td><td class="num">+0.13</td></tr>
+          <tr><td>MAD</td><td class="num">0.71</td><td class="num">0.83</td><td class="num">−0.06</td><td class="num">+0.12</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Spearman correlation across genes (4,297 in M3D, 5,671 in K562). Strong partners: the number of partners whose MI is in the top 1% of all cells. Own module size: the largest RegulonDB strong-evidence regulon (M3D) or CORUM complex (K562) containing the gene (1,879 and 2,260 genes). The SD and both robust scales rise with the number of strong partners (Spearman 0.71 to 0.89), so the robust scales are not independent of it. They are only weakly related to a gene's own module size. SD relative to the IQR scale rises modestly from the lowest to the highest decile of strong partners (median 1.10 to 1.19 in M3D, 1.07 to 1.35 in K562); in the top K562 decile the SD is about 1.35 times the IQR scale and 1.6 times the MAD scale.</p>
+
+    <div class="exploratory"><b>Summary, as far as the tables go.</b> No variant is consistently better than V0 across datasets, truths, read-outs or variants. In the pairwise score, V1 is higher on K562 CORUM all (+0.547) and on KD response (+0.189), and every robust variant is at or above V0 on M3D in pooled enrichment but below V0 in mean per-regulon AP (pairwise −0.007 to −0.014), but the direction does not carry over to attention at t = 9, where V1, V2 and V4 are lower than V0 on large complexes and V3 is higher. By π (from V0's own walk), the pairwise top pairs of V1, V2 and V4 touch V0's hub genes more often than V0's do; for attention this holds at t = 9 but not, in K562, at each variant's own label-free depth (V1 0.571, V2 0.502, V4 0.559, against V0 0.608). The two hub stratifiers disagree on at least one contrast (K562 CORUM all, V1: +0.014 under π, +0.483 under the MI row mean). V3 (rCLR) lowers the hub share by the MI row mean in both datasets and by π in K562; V2 lowers it by the MI row mean in M3D and in K562 attention. Both connectedness rankings are tied to what is being compared (π to V0's walk, the MI row mean to row centring), so neither is a neutral hub measure, and the shares have no intervals. Nothing here is a held-out test, and the order of the variants is not a recommendation. Sources: <code>docs/robust_z_results.md</code>, <code>results/robust_z/{m3d,k562}/tables.md</code> and the CSVs next to it.</div>
+    <h3>C. A second CLR after the walk (a3r), and stacking it</h3>
+    <div class="tags"><span class="tag">a3r: preregistered 26 Oct, not adopted</span><span class="tag">Stacking: exploratory, plan committed before compute (98f3b0d)</span></div>
+    <p><b>The problem it targets.</b> Attention conserves mass: each gene's row sums to 1. Inside a tight complex of n proteins that are copies of one latent factor, every member therefore receives about 1/n of the factor's affinity, however strongly they co-vary. CLR has no such budget, so a ribosomal pair keeps its score regardless of complex size. That is our account of why attention loses to CLR on complexes (follow-up and diagnosis in <code>docs/plans/corum_analysis.md</code>).</p>
+    <p><b>a3r in one paragraph.</b> Keep steps 1 to 4 of the method unchanged. In step 5, replace the raw walk mass M = P<sup>t</sup> by its logarithm, which is the log-probability of reaching j from i in t steps (a multi-hop attention logit). Then z-score each gene's row of the log matrix against its own background, using only pairs the walk reached, and combine the two directions as in CLR (z<sub>ij</sub> + z<sub>ji</sub>)/&radic;2, clipped at 0. The pipeline is CLR, softmax, walk, log, CLR: one normalization layer on each side of the attention operator. The log turns the 1/n dilution into an additive offset that the row z-score removes. No parameter is added and t = 9 is unchanged.</p>
+<pre>
+Pt = P^9;  L = log(Pt)  <span class="c"># unreachable pairs (Pt = 0) are set to missing</span>
+for each gene i:  Z[i,j] = max(0, (L[i,j] - mean_j L[i,:]) / sd_j L[i,:])   <span class="c"># over reachable j only</span>
+score[i,j] = (Z[i,j] + Z[j,i]) / sqrt(2)
+</pre>
+    <p><b>Stacking (a3r2, a3r3, in general a3rN).</b> a3r's output is a symmetric z-scale matrix, the same kind of object CLR hands to the softmax in step 3. So it can be fed back in: layer k + 1 is the same pipeline with the score S<sub>k</sub> in place of the CLR score. The question was whether a second or third layer pools evidence across overlapping modules. Primary setting: t = 9 at every layer. Controls in the same run: a single layer at deeper t = 18 and 27 (the same total reach), a plain repeat of the CLR step on a3r's output, a shorter second layer (t = 2, 4), and hub-stratified scores.</p>
+
+    <div class="tablewrap">
+      <table class="t2 mid">
+        <thead><tr><th>Read-out</th><th>K562 CORUM</th><th><i>E. coli</i> regulons, strong</th><th><i>E. coli</i> regulons, all</th><th><i>E. coli</i> complexes</th></tr></thead>
+        <tbody>
+          <tr><td>Attention (t = 9)</td><td class="num">3.51</td><td class="num">1.68</td><td class="num">1.44</td><td class="num">22.6</td></tr>
+          <tr><td>CLR</td><td class="num">6.39</td><td class="num">1.44</td><td class="num">1.37</td><td class="num">21.8</td></tr>
+          <tr><td>a3r, one layer</td><td class="num">7.95</td><td class="num">1.72</td><td class="num">1.56</td><td class="num">26.1</td></tr>
+          <tr><td>a3r2, two layers</td><td class="num">8.19</td><td class="num">1.73</td><td class="num">1.51</td><td class="num">31.0</td></tr>
+          <tr><td>a3r3, three layers</td><td class="num">8.15</td><td class="num">1.66</td><td class="num">1.46</td><td class="num">32.5</td></tr>
+          <tr><td>a3r at t = 18 (same reach as two layers)</td><td class="num">8.00</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+          <tr><td>a3r at t = 27 (same reach as three layers)</td><td class="num">7.86</td><td class="num"></td><td class="num"></td><td class="num"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Pooled AUPR divided by the base rate (1.00 = random), raw scores, one run each. K562: essential Perturb-seq, all CORUM complexes. <i>E. coli</i>: M3D with RegulonDB regulons (strong evidence, all evidence) and the complex truth of the 26 October test (1,150 positive pairs). Matched-depth rows were scored on K562 CORUM only in this table.</p>
+
+    <h4>Where a3r wins and loses on every metric we have (descriptive, page 3)</h4>
+    <ul>
+      <li><b>Ahead of attention and CLR:</b> K562 CORUM (7.95 against 3.51 and 6.39; |r| is 7.00), K562 DoRothEA A-B (1.11 against 1.09 and 1.06) and CollecTRI (1.13 against 1.10 and 1.03), <i>E. coli</i> regulons on M3D (strong 1.72, all 1.56 against attention 1.68 and 1.44) and EcoMAC (1.72 and 1.58 against 1.68 and 1.47), and <i>E. coli</i> complexes (26.1 against 22.6 and 21.8; M3D, tuning set). On BEELINE's primary truths, with the CLR-NS operator at t = 9, the median ratio is 1.73 against attention 1.54, CLR-NS 1.60 and GENIE3 1.69 (exploratory; not tuned).</li>
+      <li><b>Behind or level:</b> direct TF-to-target edges on M3D, where a3r (5.84) is below CLR (6.75) and GENIE3 (6.54) and above attention (5.17); per-regulon mean AP, where a3r (25.2) is level with attention (25.6) and above CLR (23.0); RPE1 merged CORUM, where CLR (6.77) is above a3r (6.14), which is above attention (3.33); and BEELINE cell-type ChIP truths, where every method is about 1.0.</li>
+      <li><b>Stacking trades away the other metrics.</b> a3r2 and a3r3 fall well below a3r on direct edges (3.95 and 3.30), and below it on K562 knockdown response, DoRothEA and CollecTRI, for a small gain on complexes. That is the reason a3r, not a3r2, is the candidate.</li>
+      <li>Knockdown response (a3r 3.13 against attention 2.38) comes from a truth with near-duplicate modules and is not a clean win.</li>
+    </ul>
+
+    <h4>What the preregistered a3r test showed (26 October)</h4>
+    <ul>
+      <li>Complex superiority over attention at t = 9 was required at one-sided p &lt; 0.025 on both <i>E. coli</i> datasets. It was +0.026 AUPR on M3D (p = 0.079) and +0.029 on EcoMAC (p = 0.051), so it did not confirm. The jackknife standard error on complexes was 0.018, and the smallest effect the design could detect was about 0.05.</li>
+      <li>Regulon non-inferiority (margin 0.005 AUPR) passed on both: +0.004 and +0.003.</li>
+      <li>Verdict: not adopted. Attention stays the method. The K562 numbers in the table (7.95 against CLR 6.39) are selected, not fitted: a3r has no fitted parameters, so it cannot memorise the truth, but it was picked as the best of about 20 read-outs by its K562 scores, and the best of many noisy scores is biased upward. The 20 candidates were highly correlated and the gain is large, so the bias is probably a fraction of the gap, but it has not been measured. The effect points the same way on RPE1 and <i>E. coli</i>, neither confirmatory. On RPE1, another cell line and a descriptive look only, a3r is +0.036 [+0.013, +0.059] AUPR above attention on merged CORUM.</li>
+    </ul>
+
+    <h4>What stacking showed (exploratory)</h4>
+    <ul>
+      <li>Neither two nor three layers meets the rule written before the run, on K562 or on <i>E. coli</i>, with either hub stratifier. The rule required a K562 CORUM gain of at least +0.005 over a3r and over the matched-depth control, with intervals excluding 0, and no loss over 0.005 on DoRothEA or CollecTRI.</li>
+      <li>K562: a3r2 is +0.0031 [&minus;0.0027, +0.0089] over a3r on CORUM and +0.0025 [&minus;0.0036, +0.0087] over a single layer at t = 18. It loses on CollecTRI (&minus;0.006), knockdown response (&minus;0.044) and CORUM without ribosomal complexes (&minus;0.003). Three layers lose more (CollecTRI &minus;0.011, knockdown response &minus;0.079).</li>
+      <li><i>E. coli</i>: a3r2 is non-inferior on strong-evidence regulons (+0.0006) but not on all-evidence regulons (&minus;0.0055, lower bound &minus;0.009). Three layers fail both (&minus;0.006 and &minus;0.012). Complex AUPR rises (+0.036 for two layers, +0.047 for three), but the interval for two layers includes 0, a single deeper layer gives only +0.001, and hub stratification roughly halves the gain. The truth is small.</li>
+      <li>A shorter second layer is much worse (t = 2: 1.63 on K562 CORUM; t = 4: 3.10). A plain repeat of the CLR step on a3r's output is not idempotent and is worse than a3r (5.85 and 6.83 for the two variants of the repeat).</li>
+      <li>What happens to the operator: nothing collapses, but the share of pairs the walk has not reached grows from 0.28% (one layer) to 5.7%, 12.3% and 17.2% (K562, layers 2 to 4), and the stationary distribution drifts away from layer 1's (Spearman 0.74, 0.52, 0.40).</li>
+    </ul>
+    <div class="exploratory"><b>Summary.</b> A single layer already carries the K562 complex gain over attention. A second layer adds a gain that is small, inside the noise and no larger than the same reach from a single deeper layer, and it costs the regulon and knockdown truths. Read at the point estimates alone, a3r2 leads on K562 CORUM (8.19) and strong-evidence regulons (1.73) and the a3r family beats attention and CLR on both. The a3r2-over-a3r gaps (+0.003, +0.0006) are inside the noise, though, and a3r2 gives up all-evidence regulons, CollecTRI and knockdown response, so a3r, the simpler form, is the candidate. It has not been confirmed (K562 and M3D are both tuning sets for it), and stacking it is not a lever. The depths tried were t = 9 at every layer, with a second layer at t = 2, 4 and 9 only. Layers longer than 9 were not run. Full tables: <code>docs/explore_stack_results.md</code>.</div>
+
+    <h3>D. a3r on yeast protein complexes: an exploratory estimate</h3>
+    <div class="tags"><span class="tag">Plan fixed before compute (design rev 2, 099c26d)</span><span class="tag">Exploratory estimation, not a confirmatory test</span><span class="tag">Run once</span></div>
+    <p><b>Question.</b> How large is the pooled AUPR difference between a3r and attention on protein complexes, in a dataset and truth where a3r had never been run? The 26 October test on <i>E. coli</i> could not confirm (+0.026 and +0.029, p = 0.079 and 0.051) and was underpowered. A new confirmatory test was designed first. Its projected precision (total standard error about 0.020) was too low to confirm a plausible effect, so on your decision of 13 November it was run as an estimation study instead: no p-value, no confirmed or not confirmed label, and a fixed set of sentences chosen by a script before the run.</p>
+    <p><b>Design in brief.</b> Expression: the DREAM5 network 4 yeast compendium (536 arrays, 5,950 genes), which is the matrix of the section 8 test, so it is not new to the project; a3r had never been run on it (checked by a guard before the run). Truth: EBI Complex Portal yeast complexes, 262 merged complexes and 13,438 positive gene pairs, frozen with a checksum before any score, about 14.5 effectively independent complexes (<i>E. coli</i>: 54 complexes, about 4.4). The two cytoplasmic ribosome subunits are kept as separate complexes, as in the source, and carry 28.9% of the positive pairs. Estimand: pooled AUPR of a3r minus attention at t = 9, with a3r minus CLR and attention minus CLR alongside. Reported interval: gene jackknife plus experiment-series jackknife (59 series). Every implementation check passed, including exact reproduction of the K562 and <i>E. coli</i> numbers and of the stored yeast attention and CLR scores. Full plan: <code>docs/plans/complex_confirm_design.md</code>; independent review before the run: <code>docs/plans/complex_confirm_review.md</code>.</p>
+
+    <div class="tablewrap">
+      <table class="t2 mid">
+        <thead><tr><th>Contrast (AUPR difference, main truth)</th><th>Estimate</th><th>Total interval (gene + series)</th><th>Gene-only interval</th><th>Complex-level interval (sensitivity)</th></tr></thead>
+        <tbody>
+          <tr><td>a3r minus attention</td><td class="num">+0.096</td><td class="num">+0.067 to +0.125</td><td class="num">+0.075 to +0.118</td><td class="num">&minus;0.023 to +0.215</td></tr>
+          <tr><td>a3r minus CLR</td><td class="num">+0.039</td><td class="num">+0.010 to +0.067</td><td class="num">+0.028 to +0.049</td><td class="num">&minus;0.026 to +0.103</td></tr>
+          <tr><td>attention minus CLR</td><td class="num">&minus;0.058</td><td class="num">&minus;0.098 to &minus;0.018</td><td class="num">&minus;0.076 to &minus;0.040</td><td class="num">&minus;0.122 to +0.007</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="caption">Pooled enrichment over random: CLR 18.1, attention 12.6, a3r 21.7 (base rate 0.0105). Complex-level interval: delete-half jackknife with complexes as the sampling unit; sensitivity only. The total interval is the reported one. The a3r minus CLR contrast has a smaller standard error than a3r minus attention, so its gene-only interval excludes 0 more easily; that is not evidence that a3r beats CLR.</p>
+
+    <p><b>The sentences the script wrote (verbatim, total interval):</b></p>
+    <ul>
+      <li>"The total interval excludes no difference: a3r exceeded attention on yeast complexes (preregistered exploratory estimation; not a confirmatory test)."</li>
+      <li>"The whole interval lies above the smallest effect of interest (+0.005)."</li>
+      <li>"The whole interval lies above the <i>E. coli</i> estimate (+0.027)."</li>
+      <li>"Exploratory estimation, not a confirmatory test, a replication or a validation. a3r is not adopted; this study cannot change that by itself (PI decisions 12 and 13 Nov)."</li>
+    </ul>
+
+    <h4>Qualifications, from the same outputs</h4>
+    <ul>
+      <li><b>Complexes as the sampling unit.</b> If the unit of generalisation is the complex and not the gene or the experiment, the interval is &minus;0.023 to +0.215 and includes 0. With 14.5 effectively independent complexes that interval is wide, and it was a sensitivity line, not the reported one.</li>
+      <li><b>Where the gain is.</b> Complexes of 20 or more genes: +0.137 [+0.106, +0.168]. Complexes of 3 to 6 genes: &minus;0.004 [&minus;0.011, +0.004]; 7 to 19 genes: &minus;0.003 [&minus;0.009, +0.002] (gene-only intervals). Without the ribosomal complexes: +0.046 [+0.025, +0.066]. Per complex (125 complexes with at least 10 positive pairs), the mean AP change is +0.0018, the median is about 0, and 60 improve while 65 worsen. So the gain is about how large complexes compare with the rest of the genome, not about ranking within a complex; that is what the mass-conservation account predicts, since the 1/n dilution is largest in large complexes. It is consistent with that account, not a test of it.</li>
+      <li><b>The ribosome rule matters.</b> The ribosome subunits are separate complexes in the source. With cross-subunit pairs removed, the difference is +0.191; with the two subunits joined it is +0.241 (effective independent complexes fall to 4.9). Both were descriptive sensitivity truths, fixed before the run. The K562 CORUM truth, where a3r was selected, merged the subunits.</li>
+      <li><b>Direction elsewhere.</b> Attention is below CLR on yeast complexes (&minus;0.058), in the same direction as K562 CORUM. On the touched DREAM5 regulon truth (descriptive) a3r minus attention is +0.011 [+0.007, +0.015]. Ribosomal-protein module coherence (AUROC): CLR 0.974, a3r 0.968, attention 0.953.</li>
+      <li><b>Realised precision.</b> The total interval's half-width is 0.029, against 0.040 projected.</li>
+      <li><b>What it uses up.</b> The Complex Portal yeast truth is now consumed for any later complex candidate. A code review of the code that ran was done after the run, not before it as the protocol required, and the reviewer saw the headline estimate by accident early on, so it is not fully blind. It found no bug that could change a reported number (two process findings, and minor robustness and gate-coverage gaps); <code>docs/complex_confirm_code_review.md</code>.</li>
+    </ul>
+    <div class="exploratory"><b>Summary.</b> On yeast, a dataset and truth where a3r was never selected or tuned, a3r's pooled AUPR on complexes is above attention's by an estimated +0.096, with the interval for gene and experiment resampling well above both 0 and the <i>E. coli</i> estimate. The gain is concentrated in large complexes, is absent in small and mid-size ones, and does not survive treating complexes as the unit of resampling. It is an estimate in a second organism, not a confirmation, and a3r is not adopted.</div>
+
+  </section>
+
+  <section id="ledger">
+    <h2>Every preregistered test so far</h2>
+    <p class="caption">Each outcome is taken from the verdict document of that test (<code>docs/clr_logpt_verdict/</code>, <code>docs/keff_verdict/</code>, <code>docs/scfm_scoring.md</code>, <code>docs/reciprocity_yeast_selections/</code>, <code>results/dream5/truth_net4/</code>, <code>docs/depth_log_results.md</code>), in the order they finished.</p>
+    <div class="tablewrap">
+      <table class="t4">
+        <thead><tr><th>Finished</th><th>Test (fixed design)</th><th>Outcome</th></tr></thead>
+        <tbody>
+          <tr><td>26 Oct</td><td>CLR applied to log P<sup>t</sup> as a fix for protein complexes; confirmatory on <i>E. coli</i> M3D and EcoMAC</td><td><b>Not adopted: failed to confirm.</b> Complex superiority over attention at t = 9 needed one-sided p &lt; 0.025 on both datasets: M3D +0.026 AUPR (p = 0.079), EcoMAC +0.029 (p = 0.051). Regulon non-inferiority passed. Attention stays the method.</td></tr>
+          <tr><td>27 Oct</td><td>Attention width: 8 variants, 32 primary tests, Holm-corrected</td><td><b>No variant meets the decision rule;</b> the headline width (10 effective partners) is unchanged. K25 and O3A each won 2 of their 4 tests and O3B 1, none enough to meet the rule.</td></tr>
+          <tr><td>2 Nov</td><td>Yeast reciprocity</td><td><b>Not run.</b> The data-quality gate failed in all 10 draws, so by the preregistration no truth was opened.</td></tr>
+          <tr><td>2 Nov</td><td>CLR-NS against zero-shot scPRINT attention, 7 BEELINE datasets</td><td><b>Non-inferior and superior</b> (Hodges-Lehmann +1.03 log2 AUPRC ratio, exact interval +0.34 to +1.90, p = 0.0078, positive in 7 of 7). The comparator scores at the level of its own permutation control, so it is a weak comparator.</td></tr>
+          <tr><td>11 Nov</td><td>DREAM5 yeast, network 4 (Y-M and Y-E)</td><td><b>Not replicated at the stated margin.</b> Y-M: Equivalent within 10%, on the boundary with Inconclusive, not Superior. Y-E: Inconclusive.</td></tr>
+          <tr><td>11 Nov</td><td>Log-scale depth re-test (not blind)</td><td><b>Reading (b), "not resolution-like";</b> with 3 and 5 truths the test could neither establish nor exclude the ordering.</td></tr>
+          <tr><td>13 Nov</td><td>a3r against attention on yeast complexes (DREAM5 net4 expression, Complex Portal); plan fixed before compute, run once; <b>estimation, not a test</b></td><td><b>Estimate +0.096 AUPR</b>, total 95% interval +0.067 to +0.125 (gene + experiment series); the complex-level interval, &minus;0.023 to +0.215, includes 0. Gain carried by complexes of 20 or more genes. a3r stays not adopted (follow-up D).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>Many looks.</b> The first six rows are confirmatory tests with a fixed design, and one of them (scPRINT) was positive; the seventh is an estimation study, not a test. The <i>E. coli</i> headline of items 1 to 4 is not one of them; it comes from development on M3D. Around the six sit dozens of exploratory analyses on the same M3D/RegulonDB and K562 truths (FDR operators, value transforms, multiscale algorithms, width rounds, rCLR, robust standardisation, macro averaging, hub controls, granularity). The nested bootstrap protects the depth choice. The other settings (10 effective partners, 50 candidates, lazy weight 0.5, the MI estimator, the truth construction with operon exclusion) were settled during development on the same data. Only the yeast tests lie outside that lineage: the section 8 test, and the a3r yeast estimate (follow-up D), which is exploratory and used the same expression matrix as section 8.</p>
+  </section>
+
+  <section>
+    <h2>What did not work</h2>
+    <ul class="neg">
+      <li>Hard FDR-thresholded operators: they isolate 62–77% of genes.</li>
+      <li>Value transforms and diffused-profile readouts.</li>
+      <li>Wider gene contexts on single cells.</li>
+      <li>Data-driven choice of attention width: all three options failed review before running, and were tested empirically anyway under a preregistration (finished 27 October). The headline width (10 effective partners) is unchanged and no variant meets the decision rule. A separate exploratory width study, on synthetic and label-free data with no truth opened, closed negatively on 31 October.</li>
+      <li>A label-free multiscale algorithm based on spectral plateaus: there are no plateaus; the structure is a continuum.</li>
+      <li>Yeast reciprocity test: not run. Its preregistered data-quality gate failed in all 10 draws (median chance-corrected reproducibility 0.12 for mutants against 0.30 for wild types), so by the preregistration no truth was opened. Reciprocity stays a synthetic-only candidate (Supplementary Note 18).</li>
+      <li>CLR applied to log P<sup>t</sup> as a fix for complexes: preregistered, failed to confirm (26 October; complex superiority p = 0.079 on M3D and 0.051 on EcoMAC; regulon non-inferiority passed). Attention stays the method.</li>
+      <li>Stacking a3r (a second and third attention layer on the log-then-CLR score): exploratory, 12 November. Neither two nor three layers meets the rule written beforehand on K562 or <i>E. coli</i> (follow-up C); the K562 complex gain over one layer is +0.003 [&minus;0.003, +0.009] and a single deeper layer matches it.</li>
+      <li>Depth as a discrete "resolution dial" ordering operons → regulons → sigmulons: not supported on a linear depth grid, and the preregistered re-test on a geometric grid to t = 256 did not find the fine-to-coarse ordering either (pre-specified reading (b); with 3 and 5 truths it could not have established or excluded it, follow-up A). Across truths, the best depth is not clearly related to median module size (slope 0.20; module-bootstrap interval 0.08 to 0.67, which ignores variation between truths; across the 7 truths −0.77 to 1.16; the sign depends on the operon truth). Within regulons, an earlier per-set analysis on the linear grid found best depth rising with set size (<i>t</i> ∝ <i>n</i><sup>0.43</sup>) but not for random sets.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>In progress and recently completed</h2>
+    <ul>
+      <li>GENIE3, GRNBoost2 and PIDC on the BEELINE single-cell benchmark: done. CLR is comparable to GENIE3 and PIDC. GRNBoost2 (legacy early stopping) is below CLR in 6 of 7 datasets (mean log2 −0.15; Wilcoxon P = 0.031, sign P = 0.125; hESC is the exception), a descriptive count, not a significant difference.</li>
+      <li>Preregistered attention-width test, including multi-head attention as the candidate fix for the complex loss: done (27 October; 8 variants, 32 primary tests, Holm-corrected). Headline unchanged at 10 effective partners; no variant meets the decision rule. Multi-head attention did not gain on K562 CORUM (−0.003 AUPR against the headline, Holm P = 0.54). The write-up and the list of individual tests that variants won are still to do.</li>
+      <li>Directed DREAM5 evaluation: done (section 8; ARACNE was not part of the design). The write-up is in progress.</li>
+      <li>a3r on yeast complexes: done, one run (follow-up D), with a post hoc code review (no bug found; not fully blind). Stacked a3r layers: done (follow-up C). Log-scale depth analysis: done (follow-up A). Robust row-standardisation, the PI's median/IQR idea: done, exploratory (follow-up B).</li>
+      <li>Still planned: perturbation-diversity learning curves, differential CLR, and a hub stratifier for the method table that does not depend on the walk (follow-up B's MI row mean is one, but it is tied to row centring and is not neutral).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Decisions for you and me</h2>
+    <ol class="decisions">
+      <li><b>Venue:</b> Nature Machine Intelligence (150-word abstract) or Nature Communications.</li>
+      <li><b>Scope:</b> one paper on CLR attention, with perturbation targets and differential CLR as a second paper.</li>
+      <li><b>The central claim:</b> "better recovery of regulatory programs from expression alone", not "better network inference". Is that strong enough for the target venue? The statistical review suggests scoping the claim to <i>E. coli</i>, or presenting the work as a reframing of CLR with characterised trade-offs, since every positive result comes from the development organism and lineage.</li>
+      <li><b>The human single-cell story:</b> CLR-NS rather than attention is the single-cell result. Does it belong in this paper?</li>
+      <li><b>The yeast result:</b> Y-M has a positive estimate under the 10% margin (the verdict "Equivalent" is on the boundary with Inconclusive), Y-E is inconclusive, and the network 3 pattern (module gain, edge cost) is not independent of the headline. How should this enter the paper and the abstract, which is currently scoped to <i>E. coli</i>?</li>
+      <li><b>What to do with a3r.</b> The evidence now is: selected on K562 (in-sample); not confirmed on <i>E. coli</i> (+0.026, +0.029, underpowered); an exploratory estimate of +0.096 on yeast, carried by large complexes, with an interval that includes 0 when complexes are the unit; behind CLR and GENIE3 on direct edges in <i>E. coli</i>. Is the headline method attention, a3r, or a presentation of both with their trade-offs? The decision of 12 November (not adopted) stands until you change it.</li>
+      <li><b>Whether the yeast estimate is the last evaluation of a3r</b> on a new complex truth for the paper. Not decided. The yeast Complex Portal truth is now consumed.</li>
+      <li><b>AI disclosure:</b> the analysis code, runs and drafts were produced with Claude (Anthropic), with independent AI statistical reviews, under my direction. A contributions statement is drafted to match Nature Portfolio policy.</li>
+    </ol>
+  </section>
+</main>
+
+</body></html>
