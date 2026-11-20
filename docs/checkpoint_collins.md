@@ -34,15 +34,15 @@ CLR (2007) standardizes each gene's mutual information against that gene's own b
 
 **4. Against established methods**
 
-Pooled AUPR over the base rate; bold is best in the full row (|r| is best on CORUM, 7.00) or statistically tied (Bonferroni; † tied only after correction).
+Pooled AUPR over the base rate; bold is best among the first five methods of the row (|r| is best on CORUM, 7.00) or statistically tied (Bonferroni; † tied only after correction). The last two columns are not part of that comparison and carry no bold: tcaCLR is the lead candidate (earlier name a3r), and tcaCLR2 is exploratory and outside the preregistration, tcaCLR with the walk depth set by the data instead of t = 9 (t2 = 25 on M3D, 18 on EcoMAC, 29 on K562; the hub-controlled row uses the M3D depth); no interval is computed for either column.
 
-| Data | Truth | Attention | CLR | GENIE3 | PIDC | GRNBoost2 |
-|---|---|---|---|---|---|---|
-| M3D | RegulonDB strong evidence | **1.68** | 1.44 | 1.51 | 1.45 | 1.36 |
-| EcoMAC (2,198 arrays, mixed platforms) | strong evidence | **1.68** | 1.39 | 1.50 | 1.43 | 1.36 |
-| M3D, hub-controlled | strong evidence | **1.56** | 1.40 | 1.47 | 1.40 | 1.37 |
-| Human K562 Perturb-seq | DoRothEA A–B | **1.09** | **1.06**† | **1.08** | **1.07** | 1.05 |
-| Human K562 Perturb-seq | CORUM complexes | 3.51 | **6.39** | 6.32 | **6.33** | 3.66 |
+| Data | Truth | Attention | CLR | GENIE3 | PIDC | GRNBoost2 | tcaCLR | tcaCLR2 |
+|---|---|---|---|---|---|---|---|---|
+| M3D | RegulonDB strong evidence | **1.68** | 1.44 | 1.51 | 1.45 | 1.36 | 1.72 | 1.78 |
+| EcoMAC (2,198 arrays, mixed platforms) | strong evidence | **1.68** | 1.39 | 1.50 | 1.43 | 1.36 | 1.72 | 1.77 |
+| M3D, hub-controlled | strong evidence | **1.56** | 1.40 | 1.47 | 1.40 | 1.37 | 1.63 | 1.67 |
+| Human K562 Perturb-seq | DoRothEA A–B | **1.09** | **1.06**† | **1.08** | **1.07** | 1.05 | 1.11 | 1.08 |
+| Human K562 Perturb-seq | CORUM complexes | 3.51 | **6.39** | 6.32 | **6.33** | 3.66 | 7.95 | 7.83 |
 
 Full table, with all truths and footnotes: `docs/whitepapers/sota_table.md`.
 
@@ -87,17 +87,17 @@ Intervals in this table resample genes only. In the DREAM5 yeast test the experi
 
 **Every look at tcaCLR on a complex truth.** The difference is pooled co-membership AUPR, tcaCLR minus aCLR, at t = 9.
 
-| Data and truth                                      | Status                                                | tcaCLR minus aCLR              | Interval and p-value                                              |
-|-----------------------------------------------------|-------------------------------------------------------|--------------------------------|-------------------------------------------------------------------|
-| K562 Perturb-seq, CORUM                             | Selection among about 20 read-outs (in-sample)        | 7.95 against 3.51 (enrichment) | Not an estimate of the difference                                 |
-| RPE1 Perturb-seq, merged CORUM                      | Descriptive                                           | +0.036                         | [+0.013, +0.059]                                                |
-| *E. coli* M3D, Complex Portal                       | Preregistered test, 26 Oct                            | +0.026                         | p = 0.079; threshold (one-sided p < 0.025) not met               |
-| *E. coli* EcoMAC, Complex Portal                    | Preregistered test, 26 Oct                            | +0.029                         | p = 0.051; threshold not met                                      |
-| DREAM5 net4 yeast, Complex Portal yeast             | Exploratory estimation, 13 Nov (follow-up D)          | +0.096                         | Total +0.067 to +0.125; complex-level −0.023 to +0.215            |
-| **HepG2 Perturb-seq, Complex Portal human (Arm A)** | **Preregistered confirmatory test, run once, 19 Nov** | **+0.0268**                    | **Total +0.0111 to +0.0424; one-sided p = 0.0004; threshold met** |
-| Kemmeren deletion compendium, CYC2008 (Arm B)       | Preregistered secondary estimate, no p-value, 19 Nov  | +0.0566                        | Total +0.0392 to +0.0741; complex-level −0.009 to +0.122          |
+| Data and truth                                      | Status                                                | tcaCLR minus aCLR              | Interval and p-value                                              | tcaCLR2 minus aCLR (exploratory; point estimate, interval not computed) |
+|-----------------------------------------------------|-------------------------------------------------------|--------------------------------|-------------------------------------------------------------------|-------------------------------|
+| K562 Perturb-seq, CORUM                             | Selection among about 20 read-outs (in-sample)        | 7.95 against 3.51 (enrichment) | Not an estimate of the difference                                 | 7.83 against 3.51 (enrichment) |
+| RPE1 Perturb-seq, merged CORUM                      | Descriptive                                           | +0.036                         | [+0.013, +0.059]                                                | +0.023                        |
+| *E. coli* M3D, Complex Portal                       | Preregistered test, 26 Oct                            | +0.026                         | p = 0.079; threshold (one-sided p < 0.025) not met               | +0.026                        |
+| *E. coli* EcoMAC, Complex Portal                    | Preregistered test, 26 Oct                            | +0.029                         | p = 0.051; threshold not met                                      | +0.033                        |
+| DREAM5 net4 yeast, Complex Portal yeast             | Exploratory estimation, 13 Nov (follow-up D)          | +0.096                         | Total +0.067 to +0.125; complex-level −0.023 to +0.215            | +0.093                        |
+| **HepG2 Perturb-seq, Complex Portal human (Arm A)** | **Preregistered confirmatory test, run once, 19 Nov** | **+0.0268**                    | **Total +0.0111 to +0.0424; one-sided p = 0.0004; threshold met** | +0.0213                       |
+| Kemmeren deletion compendium, CYC2008 (Arm B)       | Preregistered secondary estimate, no p-value, 19 Nov  | +0.0566                        | Total +0.0392 to +0.0741; complex-level −0.009 to +0.122          | +0.0577                       |
 
-The *E. coli* figures are from the 26 October test (follow-up C and the ledger below); the net4 estimate is follow-up D. Total interval: gene and experiment resampling. Complex-level interval: delete-half jackknife with complexes as the sampling unit, a sensitivity that never decides. The two complex tests with a p-value gave nearly the same point estimate, +0.026 and +0.029 on *E. coli* (threshold missed) and +0.027 on HepG2 (threshold met); see the reading below.
+The *E. coli* figures are from the 26 October test (follow-up C and the ledger below); the net4 estimate is follow-up D. Total interval: gene and experiment resampling. Complex-level interval: delete-half jackknife with complexes as the sampling unit, a sensitivity that never decides. The two complex tests with a p-value gave nearly the same point estimate, +0.026 and +0.029 on *E. coli* (threshold missed) and +0.027 on HepG2 (threshold met); see the reading below. The last column is tcaCLR2, the exploratory variant of tcaCLR with the walk depth set by the data (t2: K562 29, RPE1 26, M3D 25, EcoMAC 18, net4 21, HepG2 32, Kemmeren 23); it is outside the preregistration, and its entries are point estimates from the same score files, tcaCLR2 AUPR minus aCLR AUPR, with no interval and no p-value (not computed).
 
 #### The preregistered *E. coli* test (26 October)
 
@@ -126,6 +126,7 @@ The plan (`docs/plans/tcaclr_confirm_plan.md`) was frozen on 17 November, before
 | tcaCLR minus aCLR, main truth                                      | Arm A: HepG2, Complex Portal (test)            | Arm B: Kemmeren, CYC2008 (estimate)                                                   |
 |--------------------------------------------------------------------|------------------------------------------------|---------------------------------------------------------------------------------------|
 | AUPR: tcaCLR against aCLR                                          | 0.0669 against 0.0401                          | 0.208 against 0.151                                                                   |
+| Exploratory: AUPR, tcaCLR2 against aCLR (depth set by the data; interval and p-value not computed) | 0.0615 against 0.0401 (+0.0213)                | 0.2087 against 0.1510 (+0.0577)                                                       |
 | Estimate d                                                         | +0.0268                                        | +0.0566                                                                               |
 | Total 95% interval (gene + experiment)                             | +0.0111 to +0.0424                             | +0.0392 to +0.0741                                                                    |
 | SE gene, SE experiment                                             | 0.0060, 0.0052                                 | 0.0075, 0.0048                                                                        |
@@ -164,6 +165,7 @@ Gene-plus-experiment intervals. In Arm B the 7 to 19 class is above the register
 | Method    | Arm A: AUPR | Arm A: tcaCLR minus method     | Arm A: Holm one-sided p | Arm B: AUPR | Arm B: tcaCLR minus method     |
 |-----------|-------------|--------------------------------|-------------------------|-------------|--------------------------------|
 | tcaCLR    | 0.0669      |                                |                         | 0.208       |                                |
+| tcaCLR2 (exploratory) | 0.0615 | not computed                   | not computed            | 0.2087      | not computed                   |
 | PIDC      | 0.0660      | +0.0009 [−0.0071, +0.0089]\* | 0.41                    | 0.142       | +0.0654 [+0.0406, +0.0903]\* |
 | GENIE3    | 0.0592      | +0.0077 [+0.0009, +0.0145]\* | 0.052                   | 0.109       | +0.0984 [+0.0706, +0.1262]\* |
 | CLR       | 0.0582      | +0.0087 [−0.0032, +0.0206]   | 0.15                    | 0.121       | +0.0865 [+0.0575, +0.1155]   |
@@ -171,7 +173,7 @@ Gene-plus-experiment intervals. In Arm B the 7 to 19 class is above the register
 | aCLR      | 0.0401      | +0.0268 [+0.0111, +0.0424]   | 0.002                   | 0.151       | +0.0566 [+0.0392, +0.0741]   |
 | GRNBoost2 | 0.0392      | +0.0277 [+0.0149, +0.0405]\* | < 0.0001               | 0.078       | +0.1296 [+0.0972, +0.1620]\* |
 
-AUPR of the main truth, raw scores. Intervals are total (gene + experiment) except those marked \*, which are gene resampling only: error bars for GENIE3, GRNBoost2 and PIDC comparisons include gene resampling only and are narrower than they should be. Arm A: Holm-adjusted one-sided p over the six comparisons. Arm B: estimates and intervals only, no p-value and no best-of statement by registration; tcaCLR has the highest AUPR of the seven there. The registered trap: tcaCLR minus CLR has a smaller standard error than tcaCLR minus aCLR on *E. coli* (0.016 to 0.027 against 0.037 to 0.041) and can exclude 0 where the aCLR contrast does not; that is never a basis for "tcaCLR beats CLR". The HepG2 AUPR order is tcaCLR, PIDC, GENIE3, CLR, \|r\|, aCLR, GRNBoost2, and the differences to PIDC, GENIE3, CLR and \|r\| are small against the uncertainty.
+AUPR of the main truth, raw scores. Intervals are total (gene + experiment) except those marked \*, which are gene resampling only: error bars for GENIE3, GRNBoost2 and PIDC comparisons include gene resampling only and are narrower than they should be. Arm A: Holm-adjusted one-sided p over the six comparisons. Arm B: estimates and intervals only, no p-value and no best-of statement by registration; tcaCLR has the highest AUPR of the seven there. tcaCLR2, with the walk depth set by the data, is outside the seven methods and outside the registered comparisons: its AUPR is shown (lower than tcaCLR's on Arm A, 0.0615 against 0.0669; slightly higher on Arm B, 0.2087 against 0.2076), and its differences, intervals and p-values were not computed. The registered trap: tcaCLR minus CLR has a smaller standard error than tcaCLR minus aCLR on *E. coli* (0.016 to 0.027 against 0.037 to 0.041) and can exclude 0 where the aCLR contrast does not; that is never a basis for "tcaCLR beats CLR". The HepG2 AUPR order is tcaCLR, PIDC, GENIE3, CLR, \|r\|, aCLR, GRNBoost2, and the differences to PIDC, GENIE3, CLR and \|r\| are small against the uncertainty.
 
 **The registered sentences (verbatim, as the scoring scripts wrote them; the plan fixes them, so they are not paraphrased).**
 
@@ -409,9 +411,10 @@ Plan fixed before compute (design rev 2, 099c26d)Exploratory estimation, not a c
 |----------------------------------------|----------|--------------------------------|--------------------|--------------------------------------|
 | a3r minus attention                    | +0.096   | +0.067 to +0.125               | +0.075 to +0.118   | −0.023 to +0.215                     |
 | a3r minus CLR                          | +0.039   | +0.010 to +0.067               | +0.028 to +0.049   | −0.026 to +0.103                     |
+| tcaCLR2 minus attention (exploratory)  | +0.093   | not computed                   | not computed       | not computed                         |
 | attention minus CLR                    | −0.058   | −0.098 to −0.018               | −0.076 to −0.040   | −0.122 to +0.007                     |
 
-Pooled enrichment over random: CLR 18.1, attention 12.6, a3r 21.7 (base rate 0.0105). Complex-level interval: delete-half jackknife with complexes as the sampling unit; sensitivity only. The total interval is the reported one. The a3r minus CLR contrast has a smaller standard error than a3r minus attention, so its gene-only interval excludes 0 more easily; that is not evidence that a3r beats CLR.
+Pooled enrichment over random: CLR 18.1, attention 12.6, a3r 21.7, tcaCLR2 21.4 (base rate 0.0105). tcaCLR2 is a3r with the walk depth set by the data (t2 = 21 here), exploratory and outside the preregistration; its row is a point estimate only. Complex-level interval: delete-half jackknife with complexes as the sampling unit; sensitivity only. The total interval is the reported one. The a3r minus CLR contrast has a smaller standard error than a3r minus attention, so its gene-only interval excludes 0 more easily; that is not evidence that a3r beats CLR.
 
 **The sentences the script wrote (verbatim, total interval):**
 

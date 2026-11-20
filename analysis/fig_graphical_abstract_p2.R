@@ -22,10 +22,20 @@
 suppressPackageStartupMessages(library(grid))
 source("analysis/plot_theme.R")
 
-out_dir <- "docs/whitepapers/figures"
+out_dir <- Sys.getenv("SB_OUT", "docs/whitepapers/figures"); dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 FONT <- "Liberation Sans"
 ACLR_NAME <- "aCLR"       # DEFINED HERE ONLY (temporary name; earlier text "attention")
 LEAD_NAME <- "tcaCLR"     # DEFINED HERE ONLY (temporary name; earlier text "a3r")
+
+# ---- tcaCLR2 (exploratory): values from results/tcaclr2_scoreboard/cells_tcaclr2_all.csv (analysis/tcaclr2/assemble_tcaclr2_scoreboard.R) --------------------
+T2_NAME <- "tcaCLR2"
+t2c <- utils::read.csv(Sys.getenv("SB_T2", "results/tcaclr2_scoreboard/cells_tcaclr2_all.csv"), stringsAsFactors = FALSE)
+t2v <- function(ds, truth, metric, scope = "raw") t2c[t2c$dataset == ds & t2c$truth == truth & t2c$metric == metric & t2c$scope == scope & t2c$method == "tcaCLR2", ]
+t2_ecoli <- with(t2v("m3d", "SC", "pooled_aupr_over_base"), enrichment_over_random * base_rate)           # pooled AUPR, strong-evidence regulons (the E. coli column)
+t2_corum <- sprintf("%.2f", t2v("k562", "CORUM", "pooled_aupr_over_base")$enrichment_over_random)          # K562 CORUM, x random
+t2_beel  <- sprintf("%.2f", t2v("beeline", "all_14_cases", "beeline_median_auprc_ratio_primary")$enrichment_over_random)
+T2D <- utils::read.csv(Sys.getenv("SB_T2D", "results/tcaclr2_scoreboard/t2_by_dataset.csv"), stringsAsFactors = FALSE)
+T2_NOTE <- paste0(T2_NAME, ": exploratory, outside the preregistration; ", LEAD_NAME, " with the walk depth set by the data (t2 = M3D ", T2D$t2[T2D$label == "M3D"], ", K562 ", T2D$t2[T2D$label == "K562"], "; BEELINE per case ", T2D$t2[grepl("BEELINE", T2D$label)], "), not t = 9. E. coli: the M3D strong-evidence AUPR at t2; BEELINE: CLR-NS operator, t2 per case.")
 
 txt <- function(label, x, y, size = 12, col = ink[["primary"]], face = "plain",
                 just = "centre", lineheight = 1.05)
@@ -57,7 +67,7 @@ v <- data.frame(
   name = c("CLR", "CLR-NS", "|r| (correlation)",
            "Attention on |r|", "Attention on mutual information",
            "Attention on CLR of |r|", "Attention on CLR-NS", paste0(ACLR_NAME, " (adopted)"),
-           paste0(LEAD_NAME, " (lead candidate)"), paste0(LEAD_NAME, " stacked, 2 layers (exploratory)"),
+           paste0(LEAD_NAME, " (lead candidate)"), paste0(T2_NAME, " (exploratory)"), paste0(LEAD_NAME, " stacked, 2 layers (exploratory)"),
            paste0(LEAD_NAME, " stacked, 3 layers (exploratory)")),
   sub = c("context normalization, scores ranked directly",
           "CLR on |r| of normal scores (Blom)",
@@ -68,16 +78,17 @@ v <- data.frame(
           "CLR-NS scores, then softmax + walk",
           "MI, CLR normalization, softmax + walk",
           paste0(ACLR_NAME, ", then log of the walk + a second CLR"),
+          paste0(LEAD_NAME, " with the walk depth set by the data, not t = 9"),
           paste0(LEAD_NAME, " fed back as the score of a second layer; not adopted"),
           paste0(LEAD_NAME, " fed back twice; not adopted")),
-  dep = c("MI", "NS", "r", "r", "MI", "r", "NS", "MI", "MI", "MI", "MI"),
-  cn  = c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
-  sm  = c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
-  lc  = c(rep(FALSE, 8), TRUE, TRUE, TRUE),
-  walklab = c(NA, NA, NA, "t* = 8", "t* = 6", "t* = 7", "t* = 5", "t* = 9", "t = 9", "t = 9 ×2", "t = 9 ×3"),
-  ecoli = c(0.136, NA, NA, 0.143, 0.143, 0.153, 0.151, 0.158, 0.1622, 0.1629, 0.1566),
-  corum = c("6.39", "", "7.00", "", "", "", "", "3.51", "7.95", "8.19", "8.15"),
-  beeline = c("1.48", "1.60", "1.20", "", "", "", "no gain over CLR-NS", "1.54", "1.73", "1.65", "1.65"),
+  dep = c("MI", "NS", "r", "r", "MI", "r", "NS", "MI", "MI", "MI", "MI", "MI"),
+  cn  = c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
+  sm  = c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
+  lc  = c(rep(FALSE, 8), TRUE, TRUE, TRUE, TRUE),
+  walklab = c(NA, NA, NA, "t* = 8", "t* = 6", "t* = 7", "t* = 5", "t* = 9", "t = 9", "t = t2", "t = 9 ×2", "t = 9 ×3"),
+  ecoli = c(0.136, NA, NA, 0.143, 0.143, 0.153, 0.151, 0.158, 0.1622, t2_ecoli, 0.1629, 0.1566),
+  corum = c("6.39", "", "7.00", "", "", "", "", "3.51", "7.95", t2_corum, "8.19", "8.15"),
+  beeline = c("1.48", "1.60", "1.20", "", "", "", "no gain over CLR-NS", "1.54", "1.73", t2_beel, "1.65", "1.65"),
   stringsAsFactors = FALSE)
 
 draw_p2 <- function() {
@@ -102,7 +113,7 @@ draw_p2 <- function() {
     txt(h[[1]], h[[2]], hy, 11, ink[["secondary"]], "bold", just = h[[3]], lineheight = 0.95)
   seg(0.4, hy - 0.34, 15.7, hy - 0.34, ink[["secondary"]], 1.2)
 
-  ys <- seq(6.85, by = -0.52, length.out = nrow(v))
+  ys <- seq(6.85, by = -0.46, length.out = nrow(v))
   # E. coli dot axis 0.13 .. 0.17 (deliberately not from zero; ticks labelled)
   ax <- function(a) xe0 + (a - 0.13) / (0.17 - 0.13) * (xe1 - xe0)
   for (a in c(0.13, 0.14, 0.15, 0.16, 0.17)) {
@@ -113,7 +124,7 @@ draw_p2 <- function() {
 
   for (k in seq_len(nrow(v))) {
     y <- ys[k]; last <- k == 8; expl <- k > 8
-    if (last || expl) grid.roundrect(0.3, y, 15.5, 0.5, default.units = "native", just = c("left", "centre"),
+    if (last || expl) grid.roundrect(0.3, y, 15.5, 0.44, default.units = "native", just = c("left", "centre"),
                              r = unit(0.08, "inches"),
                              gp = gpar(fill = if (last) "#e3f5ee" else "#f4fbf8", col = pal[["aqua"]],
                                        lwd = if (last) 1.4 else 1, lty = if (last) 1 else 2))
@@ -140,6 +151,7 @@ draw_p2 <- function() {
       0.4, fy0, 9, ink[["secondary"]], just = "left")
   txt(paste0(LEAD_NAME, ": lead candidate; its 26 Oct preregistered E. coli test did not reach the threshold. It was picked among about 20 read-outs by its K562 scores (a selection, not a fit: it has no fitted parameters)."),
       0.4, fy0 - 0.19, 9, ink[["secondary"]], just = "left")
+  txt(T2_NOTE, 0.4, fy0 - 0.57, 9, ink[["secondary"]], just = "left")
   txt(paste0("Gaps between ", LEAD_NAME, " and its stacked versions are inside the noise. BEELINE: CLR is plain CLR; the ", ACLR_NAME, " and ", LEAD_NAME, " rows use the CLR-NS operator (", LEAD_NAME, " family at t = 9, not tuned)."),
       0.4, fy0 - 0.38, 9, ink[["secondary"]], just = "left")
 

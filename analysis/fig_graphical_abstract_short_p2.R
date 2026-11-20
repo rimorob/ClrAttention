@@ -18,7 +18,7 @@
 suppressPackageStartupMessages(library(grid))
 source("analysis/plot_theme.R")
 
-out_dir <- "docs/whitepapers/figures"
+out_dir <- Sys.getenv("SB_OUT", "docs/whitepapers/figures"); dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 LEAD_NAME <- "tcaCLR"                     # DEFINED HERE ONLY (temporary name; internal name a3r)
 ACLR_NAME <- "aCLR"                       # DEFINED HERE ONLY (temporary name)
 NAMES_NOTE <- "Method names are temporary."
@@ -26,6 +26,16 @@ LEAD_STATUS <- "lead candidate"
 GREEN <- pal[["green"]]
 DOT <- gpar(col = GREEN, lty = "11", lwd = 2.4, fill = NA)
 FONT <- "Liberation Sans"
+
+# ---- tcaCLR2 (exploratory): values from results/tcaclr2_scoreboard/cells_tcaclr2_all.csv (analysis/tcaclr2/assemble_tcaclr2_scoreboard.R) --------------------
+T2_NAME <- "tcaCLR2"
+t2c <- utils::read.csv(Sys.getenv("SB_T2", "results/tcaclr2_scoreboard/cells_tcaclr2_all.csv"), stringsAsFactors = FALSE)
+t2v <- function(ds, truth, metric, scope = "raw") t2c[t2c$dataset == ds & t2c$truth == truth & t2c$metric == metric & t2c$scope == scope & t2c$method == "tcaCLR2", ]
+t2_ecoli <- with(t2v("m3d", "SC", "pooled_aupr_over_base"), enrichment_over_random * base_rate)           # pooled AUPR, strong-evidence regulons (the E. coli column)
+t2_corum <- sprintf("%.2f", t2v("k562", "CORUM", "pooled_aupr_over_base")$enrichment_over_random)          # K562 CORUM, x random
+t2_beel  <- sprintf("%.2f", t2v("beeline", "all_14_cases", "beeline_median_auprc_ratio_primary")$enrichment_over_random)
+T2D <- utils::read.csv(Sys.getenv("SB_T2D", "results/tcaclr2_scoreboard/t2_by_dataset.csv"), stringsAsFactors = FALSE)
+T2_NOTE <- paste0(T2_NAME, ": exploratory, outside the preregistration; ", LEAD_NAME, " with the walk depth set by the data (t2 = M3D ", T2D$t2[T2D$label == "M3D"], ", K562 ", T2D$t2[T2D$label == "K562"], "; BEELINE per case ", T2D$t2[grepl("BEELINE", T2D$label)], "), not t = 9. E. coli: the M3D strong-evidence AUPR at t2; BEELINE: CLR-NS operator, t2 per case.")
 
 txt <- function(label, x, y, size = 12, col = ink[["primary"]], face = "plain",
                 just = "centre", lineheight = 1.05)
@@ -56,20 +66,21 @@ chip <- function(present, x, y, w, label, col, tcol = "white", new = FALSE) {
 # ---- the versions ----------------------------------------------------------------
 v <- data.frame(
   name = c("CLR (historical)", "Attention on |r|", "Attention on mutual information",
-           ACLR_NAME, LEAD_NAME),
+           ACLR_NAME, LEAD_NAME, T2_NAME),
   sub = c("Faith et al. 2007: context normalization, scores ranked directly",
           "softmax + walk, no CLR normalization",
           "softmax + walk, no CLR normalization",
           "MI, CLR normalization, softmax + walk (adopted)",
-          paste0(ACLR_NAME, ", then log + second CLR (lead candidate)")),
-  dep = c("MI", "r", "MI", "MI", "MI"),
-  cn  = c(TRUE, FALSE, FALSE, TRUE, TRUE),
-  sm  = c(FALSE, TRUE, TRUE, TRUE, TRUE),
-  lc  = c(FALSE, FALSE, FALSE, FALSE, TRUE),
-  walklab = c(NA, "t* = 8", "t* = 6", "t* = 9", "t = 9"),
-  ecoli = c(0.136, 0.143, 0.143, 0.158, 0.1622),
-  corum = c("6.39", "", "", "3.51", "7.95"),
-  beeline = c("1.48", "", "", "1.54", "1.73"),
+          paste0(ACLR_NAME, ", then log + second CLR (lead candidate)"),
+          paste0(LEAD_NAME, " with the walk depth set by the data (exploratory)")),
+  dep = c("MI", "r", "MI", "MI", "MI", "MI"),
+  cn  = c(TRUE, FALSE, FALSE, TRUE, TRUE, TRUE),
+  sm  = c(FALSE, TRUE, TRUE, TRUE, TRUE, TRUE),
+  lc  = c(FALSE, FALSE, FALSE, FALSE, TRUE, TRUE),
+  walklab = c(NA, "t* = 8", "t* = 6", "t* = 9", "t = 9", "t = t2"),
+  ecoli = c(0.136, 0.143, 0.143, 0.158, 0.1622, t2_ecoli),
+  corum = c("6.39", "", "", "3.51", "7.95", t2_corum),
+  beeline = c("1.48", "", "", "1.54", "1.73", t2_beel),
   stringsAsFactors = FALSE)
 
 draw_p2 <- function() {
@@ -77,7 +88,7 @@ draw_p2 <- function() {
   grid.rect(gp = gpar(fill = "white", col = NA))
   pushViewport(viewport(xscale = c(0, 16), yscale = c(0, 9)))
 
-  txt(paste0(paste0("The methods compared: CLR, ", ACLR_NAME, " and "), LEAD_NAME),
+  txt(paste0("The methods compared: CLR, ", ACLR_NAME, ", ", LEAD_NAME, " and ", T2_NAME),
       0.5, 8.55, 22, face = "bold", just = "left")
   txt("E. coli: strong-evidence regulons, 466 experiments (RegulonDB).  K562: CORUM complexes.  Single cells: BEELINE, median over 44 case-truth cells (14 dataset-and-gene-set cases).",
       0.5, 8.1, 11.5, ink[["secondary"]], just = "left")
@@ -98,7 +109,7 @@ draw_p2 <- function() {
                                        r = unit(0.05, "inches"), gp = DOT)
   seg(0.4, hy - 0.34, 15.7, hy - 0.34, ink[["secondary"]], 1.2)
 
-  ys <- seq(6.35, by = -0.85, length.out = nrow(v))
+  ys <- seq(6.35, by = -0.75, length.out = nrow(v))
   ax <- function(a) xe0 + (a - 0.13) / (0.17 - 0.13) * (xe1 - xe0)
   for (a in c(0.13, 0.14, 0.15, 0.16, 0.17)) {
     seg(ax(a), ys[1] + 0.42, ax(a), ys[length(ys)] - 0.42, ink[["grid"]], 0.9)
@@ -107,8 +118,8 @@ draw_p2 <- function() {
   txt("axis starts at 0.13", (xe0 + xe1) / 2, ys[length(ys)] - 0.7, 9, ink[["secondary"]], "italic")
 
   for (k in seq_len(nrow(v))) {
-    y <- ys[k]; adopted <- k == 4; lead <- k == 5
-    if (adopted || lead) grid.roundrect(0.3, y, 15.5, 0.74, default.units = "native", just = c("left", "centre"),
+    y <- ys[k]; adopted <- k == 4; lead <- k >= 5
+    if (adopted || lead) grid.roundrect(0.3, y, 15.5, 0.68, default.units = "native", just = c("left", "centre"),
                              r = unit(0.08, "inches"),
                              gp = gpar(fill = if (adopted) "#e3f5ee" else "#f4fbf8", col = pal[["aqua"]],
                                        lwd = if (adopted) 1.4 else 1, lty = if (adopted) 1 else 2))
@@ -132,6 +143,7 @@ draw_p2 <- function() {
       0.4, fy0 - 0.25, 9, ink[["secondary"]], just = "left")
   txt(paste0("BEELINE: CLR is plain CLR; ", ACLR_NAME, " and the lead method use the CLR-NS operator (CLR on |r| of normal scores), the lead at t = 9, not tuned (exploratory)."),
       0.4, fy0 - 0.5, 9, ink[["secondary"]], just = "left")
+  txt(T2_NOTE, 0.4, fy0 - 0.75, 9, ink[["secondary"]], just = "left")
 
   fy <- 0.4
   grid.roundrect(0.3, fy, 15.5, 0.5, default.units = "native", just = c("left", "centre"),

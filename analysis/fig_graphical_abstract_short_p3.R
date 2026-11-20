@@ -12,7 +12,7 @@
 
 suppressPackageStartupMessages(library(grid))
 source("analysis/plot_theme.R")
-out_dir <- Sys.getenv("SB_OUT", "docs/whitepapers/figures")           # SB_OUT / SB_CSV / SB_VERBOSE: only for re-running on another copy of the data (checks)
+out_dir <- Sys.getenv("SB_OUT", "docs/whitepapers/figures"); dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)           # SB_OUT / SB_CSV / SB_VERBOSE: only for re-running on another copy of the data (checks)
 FONT <- "Liberation Sans"
 LEAD_NAME <- "tcaCLR"                     # DEFINED HERE ONLY (temporary name; internal name a3r)
 ACLR_NAME <- "aCLR"                       # DEFINED HERE ONLY (temporary name)
@@ -33,6 +33,14 @@ conf_rows <- function(arm, ds) {
              source_file = file.path(CONF_DIR, arm, "metrics.csv"), status = "from_existing", note = "tcaCLR confirmatory run", stringsAsFactors = FALSE)
 }
 D <- rbind(D, conf_rows("armA", "hepg2"), conf_rows("armB", "kemmeren"))
+# tcaCLR2 cells (exploratory): same schema as scoreboard_data.csv, method key "tcaCLR2"
+T2_KEY <- "tcaCLR2"; T2_NAME <- "tcaCLR2"
+t2c <- utils::read.csv(Sys.getenv("SB_T2", "results/tcaclr2_scoreboard/cells_tcaclr2_all.csv"), stringsAsFactors = FALSE)
+D <- rbind(D, t2c[t2c$method == T2_KEY, names(D)])
+T2_DEPTHS <- utils::read.csv(Sys.getenv("SB_T2D", "results/tcaclr2_scoreboard/t2_by_dataset.csv"), stringsAsFactors = FALSE)   # label, t2 (assemble_tcaclr2_scoreboard.R)
+T2_NOTE1 <- paste0(T2_NAME, " is exploratory and outside the preregistration: ", LEAD_NAME, " with the depth set by the data (t2 per data set: ", paste0(T2_DEPTHS$label, " ", T2_DEPTHS$t2, collapse = ", "), "), not t = 9.")
+T2_NOTE2 <- paste0("It carries no statistical-tie marks (its mark, like the others, is the highest printed value of the row), and it is lower than ", LEAD_NAME, " on several non-pooled metrics (TF-edge AUPR, per-TF AUROC, per-regulon AP, RPE1, BEELINE medians).")
+AUDIT <- list(); AUDIT_DIR <- Sys.getenv("SB_AUDIT", "results/tcaclr2_scoreboard/figures"); dir.create(AUDIT_DIR, recursive = TRUE, showWarnings = FALSE)   # audit csv files (marks with and without tcaCLR2)
 
 txt <- function(label, x, y, size = 10, col = ink[["primary"]], face = "plain", just = "centre", lineheight = 1.0)
   grid.text(label, x, y, default.units = "native", just = just,
@@ -41,19 +49,20 @@ seg <- function(x0, y0, x1, y1, col = ink[["muted"]], lwd = 1, lty = 1)
   grid.segments(x0, y0, x1, y1, default.units = "native", gp = gpar(col = col, lwd = lwd, lty = lty, lineend = "butt"))
 
 # ---- columns ----------------------------------------------------------------------------------------------------------
-meths <- c("CLR", "Attention", LEAD_KEY, "GENIE3", "PIDC", "GRNBoost2", "abs_r")
-head1 <- c("CLR", ACLR_NAME, LEAD_NAME, "GENIE3", "PIDC", "GRNBoost2", "|r|")
-head2 <- c("historical", "adopted", "lead candidate", "", "", "", "")
+meths <- c("CLR", "Attention", LEAD_KEY, T2_KEY, "GENIE3", "PIDC", "GRNBoost2", "abs_r")
+head1 <- c("CLR", ACLR_NAME, LEAD_NAME, T2_NAME, "GENIE3", "PIDC", "GRNBoost2", "|r|")
+head2 <- c("historical", "adopted", "lead candidate", "depth set by data", "", "", "", "")
 EXPL <- "#bfe6d8"
-fillc <- c(CLR = pal[["orange"]], Attention = pal[["aqua"]], EXPL, GENIE3 = ink[["muted"]], PIDC = ink[["muted"]],
+fillc <- c(CLR = pal[["orange"]], Attention = pal[["aqua"]], EXPL, EXPL, GENIE3 = ink[["muted"]], PIDC = ink[["muted"]],
            GRNBoost2 = ink[["muted"]], abs_r = ink[["muted"]])
-names(fillc)[3] <- LEAD_KEY
+names(fillc)[3] <- LEAD_KEY; names(fillc)[4] <- T2_KEY
+EXPL_KEYS <- c(LEAD_KEY, T2_KEY)
 X_LAB <- 0.3                    # row labels start
 X_C0 <- 4.75                    # first method column starts
-CW <- (15.75 - X_C0) / 7        # column width
+CW <- (15.75 - X_C0) / 8        # column width
 NUM_X <- 0.16                   # number, left edge inside a cell
 ORG_X <- 0.62                   # bar origin (the 'random' tick) inside a cell
-BAR_W <- CW - ORG_X - 0.15      # longest bar
+BAR_W <- CW - ORG_X - 0.10      # longest bar
 cx0 <- function(j) X_C0 + (j - 1) * CW
 
 # ---- row specs ---------------------------------------------------------------------------------------------------------
@@ -128,11 +137,11 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
   # column bands (adopted and exploratory columns) and headers
   hy <- y_top + 0.5
   grid.rect(cx0(2), y_bot - 0.05, CW, y_top - y_bot + 0.78, default.units = "native", just = c("left", "bottom"), gp = gpar(fill = "#eaf7f1", col = NA))
-  grid.rect(cx0(3), y_bot - 0.05, CW, y_top - y_bot + 0.78, default.units = "native", just = c("left", "bottom"), gp = gpar(fill = "#f6fcf9", col = pal[["aqua"]], lty = 2, lwd = 1))
+  grid.rect(cx0(3), y_bot - 0.05, 2 * CW, y_top - y_bot + 0.78, default.units = "native", just = c("left", "bottom"), gp = gpar(fill = "#f6fcf9", col = pal[["aqua"]], lty = 2, lwd = 1))
   for (j in seq_along(meths)) {
     x <- cx0(j) + CW / 2
     txt(head1[j], x, hy + 0.12, 11, face = "bold")
-    if (nzchar(head2[j])) txt(head2[j], x, hy - 0.12, 9, if (j == 2) "#0d6e4c" else ink[["secondary"]], "italic")
+    if (nzchar(head2[j])) txt(head2[j], x, hy - 0.12, 8.5, if (j == 2) "#0d6e4c" else ink[["secondary"]], "italic")
   }
   seg(X_LAB, y_top + 0.1, 15.75, y_top + 0.1, ink[["secondary"]], 1)
   y <- y_top
@@ -151,6 +160,14 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
     # first or shared first: highest value, or tied with it at the printed precision
     best <- if (all(is.na(v))) integer(0) else which(!is.na(v) & vapply(v, function(z) !is.na(z) && fmt(z, r$digits) == fmt(max(v, na.rm = TRUE), r$digits), NA))
     firsts[best] <- firsts[best] + 1L
+    if (is.null(r$label)) NULL else if (TRUE) {      # audit: the mark with and without the tcaCLR2 column (the original columns only)
+      v0 <- v; v0[T2_KEY] <- NA_real_
+      best0 <- if (all(is.na(v0))) integer(0) else which(!is.na(v0) & vapply(v0, function(z) !is.na(z) && fmt(z, r$digits) == fmt(max(v0, na.rm = TRUE), r$digits), NA))
+      AUDIT[[length(AUDIT) + 1L]] <<- data.frame(row = r$label, dataset = r$ds, truth = r$truth, metric = r$metric, scope = r$scope, t(round(v, 6)),
+        best_without_tcaCLR2 = paste(names(v)[best0], collapse = "+"), best_with_tcaCLR2 = paste(names(v)[best], collapse = "+"),
+        tcaCLR2_in_best = T2_KEY %in% names(v)[best], tcaCLR2_takes_mark_from_tcaCLR = (LEAD_KEY %in% names(v)[best0]) && !(LEAD_KEY %in% names(v)[best]),
+        tcaCLR2_shares_mark_with_tcaCLR = (LEAD_KEY %in% names(v)[best0]) && (T2_KEY %in% names(v)[best]) && (LEAD_KEY %in% names(v)[best]),
+        tcaCLR2_takes_mark_from_other = (T2_KEY %in% names(v)[best]) && !(LEAD_KEY %in% names(v)[best0]) && !(T2_KEY %in% names(v)[best0]) && length(best0) > 0, stringsAsFactors = FALSE) }
     if (nzchar(Sys.getenv("SB_VERBOSE")) && tally) cat(sprintf("ROW %-62s | %s\n", paste(r$ds, r$truth, r$metric), paste(names(v)[best], collapse = ",")))
     span <- max(v - r$base, na.rm = TRUE); if (!is.finite(span) || span <= 0) span <- 1
     txt(r$label, X_LAB + 0.12, y, 10, just = "left")
@@ -159,7 +176,7 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
       seg(x0 + ORG_X, y - pitch * 0.42, x0 + ORG_X, y + pitch * 0.42, ink[["secondary"]], 0.8)          # random
       if (is.na(v[j])) { txt("–", x0 + NUM_X + 0.1, y, 11, ink[["muted"]]); next }
       frac <- (v[j] - r$base) / span; len <- if (frac >= 0) frac * BAR_W else max(frac, -0.08 / BAR_W) * BAR_W
-      expl <- meths[j] == LEAD_KEY
+      expl <- meths[j] %in% EXPL_KEYS
       bh <- pitch * 0.5
       grid.rect(x0 + ORG_X, y, abs(len), bh, default.units = "native", just = c(if (len >= 0) "left" else "right", "centre"),
                 gp = gpar(fill = fillc[[meths[j]]], col = if (expl) pal[["aqua"]] else NA, lwd = 1.1, lty = if (expl) 2 else 1))
@@ -184,7 +201,7 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
     y <- y - pitch / 2
   }
   # footer
-  for (k in seq_along(footer)) txt(footer[[k]]$text, 0.3, y_bot - 0.22 - (k - 1) * (if (length(footer) > 7) 0.178 else 0.185), footer[[k]]$size, footer[[k]]$col, footer[[k]]$face, just = "left")
+  for (k in seq_along(footer)) txt(footer[[k]]$text, 0.3, y_bot - 0.22 - (k - 1) * (if (length(footer) > 9) 0.163 else if (length(footer) > 7) 0.178 else 0.185), footer[[k]]$size, footer[[k]]$col, footer[[k]]$face, just = "left")
   popViewport()
 }
 
@@ -194,12 +211,12 @@ foot_common <- list(
   fl("A bold value with a dot is the highest printed value in its row (equal printed values share the mark and the tally), not a statistical winner; no intervals or tests are shown. A grey dash is a cell that was not run. Dotted green outline = human-data groups, new in this work."),
   fl(paste0("Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; ", LEAD_NAME, " was picked among about 20 read-outs by its K562 scores (selected, not fitted); K562 and M3D are tuning sets;")),
   fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the threshold; its preregistered HepG2 test (a separate result on a new truth) did.")))
-foot_raw <- c(foot_common, list(
+foot_raw <- c(foot_common, list(fl(T2_NOTE1), fl(T2_NOTE2),
   fl(paste0("DREAM5 yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; competitors from saved score matrices; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
   fl(paste0("HepG2 and Kemmeren rows: later preregistered runs, one pass each; ", ACLR_NAME, " and ", LEAD_NAME, " were not tuned on them (Kemmeren is estimate only). HepG2 shares its laboratory and screen family with K562; there ", LEAD_NAME, " is not shown better than CLR, |r|, GENIE3 or PIDC.")),
   fl("RPE1 row: GENIE3, PIDC and GRNBoost2 were run on its 8,745 genes (two duplicated-symbol rows dropped) and scored on the same truth. E. coli complex rows: competitors re-scored from the saved score matrices of the earlier comparison."),
-  fl(paste0(paste0("BEELINE: median over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases); ", ACLR_NAME, " and "), LEAD_NAME, paste0(" use the CLR-NS operator (", ACLR_NAME, " at its held-out depth, "), LEAD_NAME, " at t = 9, not tuned); CLR is plain CLR."))))
-foot_hub <- c(foot_common, list(
+  fl(paste0(paste0("BEELINE: median over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases); ", ACLR_NAME, " and "), LEAD_NAME, paste0(" use the CLR-NS operator (", ACLR_NAME, " at its held-out depth, "), LEAD_NAME, " at t = 9, not tuned; ", T2_NAME, " at its own t2); CLR is plain CLR."))))
+foot_hub <- c(foot_common, list(fl(T2_NOTE1), fl(T2_NOTE2),
   fl("The yeast complex row of the raw scoreboard is left out here: the study stored its hub-controlled scores only with the MI row-mean stratifier, not the stratifier used on this page, so they are not comparable."),
   fl(paste0("Hub-controlled: each method's scores are converted to percentiles within 10 strata of pi_i + pi_j (pi = stationary distribution of the ", ACLR_NAME, " walk). Not run for direct edges, per-regulon AP and BEELINE.")),
   fl("The competitors were scored on the complex rows (raw scores only) and not hub-controlled, so those cells are dashes here. The HepG2 and Kemmeren rows of the raw scoreboard (later runs) have no hub-controlled version and are not shown.")))
@@ -211,9 +228,15 @@ for (nm in c("", "b")) {
   rows <- if (nm == "") raw_rows else hub_rows
   sub <- paste(if (nm == "") SUB_RAW else SUB_HUB, NAMES_NOTE)
   ft <- if (nm == "") foot_raw else foot_hub
+  ybot <- if (nm == "") 1.85 else 1.75
+  AUDIT <- list()
   png(file.path(out_dir, paste0("graphical_abstract_short_p3", nm, ".png")), width = 2400, height = 1350, res = 150, type = "cairo", bg = "white")
-  draw_page(rows, sub, 7.3, ft, y_bot = if (nm == "") 1.58 else 1.43, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
+  draw_page(rows, sub, 7.3, ft, y_bot = ybot, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
+  au <- do.call(rbind, AUDIT); utils::write.csv(au, file.path(AUDIT_DIR, paste0("audit_best_marks_short_p3", nm, ".csv")), row.names = FALSE)
+  cnt <- function(col) vapply(meths, function(m) sum(vapply(strsplit(au[[col]], "+", fixed = TRUE), function(z) m %in% z, NA)), 0L)
+  tl <- data.frame(method = meths, rows_marked_without_tcaCLR2 = cnt("best_without_tcaCLR2"), rows_marked_with_tcaCLR2 = cnt("best_with_tcaCLR2")); tl$rows_marked_without_tcaCLR2[meths == T2_KEY] <- NA
+  utils::write.csv(tl, file.path(AUDIT_DIR, paste0("audit_tally_short_p3", nm, ".csv")), row.names = FALSE)
   cairo_pdf(file.path(out_dir, paste0("graphical_abstract_short_p3", nm, ".pdf")), width = 16, height = 9, bg = "white")
-  draw_page(rows, sub, 7.3, ft, y_bot = if (nm == "") 1.58 else 1.43, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
+  draw_page(rows, sub, 7.3, ft, y_bot = ybot, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
 }
-cat("wrote", file.path(out_dir, "graphical_abstract_short_p3{,b}.{png,pdf}"), "\n")
+cat("wrote", file.path(out_dir, "graphical_abstract_short_p3{,b}.{png,pdf}"), "and the audit csv files\n")

@@ -19,6 +19,7 @@ TOTAL=14400
 def fix(m):
     n=len(re.findall(r'<w:gridCol w:w="\d+" />',m.group(0)))
     w=[2.0]+[1.0]*(n-1) if n>2 else [1.0]*n
+    if n>=9: w=[2.0,1.6]+[1.0]*(n-2)   # nine-column table: give the Truth column room
     t=sum(w)
     return '<w:tblGrid>'+''.join('<w:gridCol w:w="%d" />'%int(TOTAL*x/t) for x in w)+'</w:tblGrid>'
 s=re.sub(r'<w:tblGrid>.*?</w:tblGrid>',fix,s,flags=re.S)

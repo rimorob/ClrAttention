@@ -22,7 +22,7 @@
 suppressPackageStartupMessages(library(grid))
 source("analysis/plot_theme.R")
 
-out_dir <- "docs/whitepapers/figures"
+out_dir <- Sys.getenv("SB_OUT", "docs/whitepapers/figures"); dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 FONT <- "Liberation Sans"   # Arial-metric sans
 
 # ---- the lead method's name: DEFINED HERE ONLY (rename = change this line and re-run) ----------------------------------
@@ -35,18 +35,23 @@ DOT <- gpar(col = GREEN, lty = "11", lwd = 2.6, fill = NA)
 
 # ---- numbers (docs/whitepapers/sota_table.md; results/explore_stack/*/pooled_levels.csv; raw scores) ---------------------
 EXPL <- "#bfe6d8"
+# ---- tcaCLR2 (exploratory): same metric and base-rate scaling as the other bars (raw pooled AUPR / base rate), from results/tcaclr2_scoreboard/cells_tcaclr2_all.csv ----
+T2_NAME <- "tcaCLR2"
+t2c <- utils::read.csv(Sys.getenv("SB_T2", "results/tcaclr2_scoreboard/cells_tcaclr2_all.csv"), stringsAsFactors = FALSE)
+t2e <- function(ds, truth) { x <- t2c[t2c$dataset == ds & t2c$truth == truth & t2c$metric == "pooled_aupr_over_base" & t2c$scope == "raw" & t2c$method == "tcaCLR2", ]; stopifnot(nrow(x) == 1L); x$enrichment_over_random }
+T2_M3D <- t2e("m3d", "SC"); T2_K562 <- t2e("k562", "CORUM")
 strip_a <- data.frame(   # M3D, strong-evidence (SC) RegulonDB regulons
-  label = c("CLR (historical)", ACLR_NAME, LEAD_NAME, "GENIE3", "PIDC"),
-  sub = c("", "adopted", "lead candidate", "", ""),
-  value = c(1.44, 1.68, 1.72, 1.51, 1.45),
-  col = c(pal[["orange"]], pal[["aqua"]], EXPL, ink[["muted"]], ink[["muted"]]),
-  new = c(FALSE, TRUE, TRUE, FALSE, FALSE), stringsAsFactors = FALSE)
+  label = c("CLR (historical)", ACLR_NAME, LEAD_NAME, T2_NAME, "GENIE3", "PIDC"),
+  sub = c("", "adopted", "lead candidate", "exploratory", "", ""),
+  value = c(1.44, 1.68, 1.72, T2_M3D, 1.51, 1.45),
+  col = c(pal[["orange"]], pal[["aqua"]], EXPL, EXPL, ink[["muted"]], ink[["muted"]]),
+  new = c(FALSE, TRUE, TRUE, TRUE, FALSE, FALSE), stringsAsFactors = FALSE)
 strip_b <- data.frame(   # K562, CORUM complexes
-  label = c("CLR (historical)", ACLR_NAME, LEAD_NAME, "GENIE3", "|r| (correlation)"),
-  sub = c("", "adopted", "lead; picked on K562", "", ""),
-  value = c(6.39, 3.51, 7.95, 6.32, 7.00),
-  col = c(pal[["orange"]], pal[["aqua"]], EXPL, ink[["muted"]], ink[["muted"]]),
-  new = c(FALSE, TRUE, TRUE, FALSE, FALSE), stringsAsFactors = FALSE)
+  label = c("CLR (historical)", ACLR_NAME, LEAD_NAME, T2_NAME, "GENIE3", "|r| (correlation)"),
+  sub = c("", "adopted", "lead; picked on K562", "exploratory", "", ""),
+  value = c(6.39, 3.51, 7.95, T2_K562, 6.32, 7.00),
+  col = c(pal[["orange"]], pal[["aqua"]], EXPL, EXPL, ink[["muted"]], ink[["muted"]]),
+  new = c(FALSE, TRUE, TRUE, TRUE, FALSE, FALSE), stringsAsFactors = FALSE)
 
 # ---- helpers ----------------------------------------------------------------
 txt <- function(label, x, y, size = 13, col = ink[["primary"]], face = "plain",
@@ -115,8 +120,10 @@ bar_strip <- function(d, x0, w, y_top, xmax, ticks, loss = FALSE, pitch = 0.34) 
     has_sub <- nzchar(d$sub[k]); dy <- if (has_sub) 0.06 else 0
     if (d$new[k]) grid.roundrect(x0 + 0.12, ry[k], w - 0.24, pitch - 0.03, default.units = "native",
                                  just = c("left", "centre"), r = unit(0.05, "inches"), gp = DOT)
-    txt(d$label[k], lab_x, ry[k] + dy, 11, face = if (d$new[k]) "bold" else "plain", just = "left")
-    if (has_sub) txt(d$sub[k], lab_x, ry[k] - 0.09, 8.5, ink[["secondary"]], "italic", just = "left")
+    # tcaCLR2: the status text sits on the same line as the label (rows are 0.26 apart, too close for a second line)
+    txt(d$label[k], lab_x, ry[k], 11, face = if (d$new[k]) "bold" else "plain", just = "left")
+    if (has_sub) { lw <- convertWidth(grobWidth(textGrob(d$label[k], gp = gpar(fontfamily = FONT, fontsize = 11, fontface = if (d$new[k]) "bold" else "plain"))), "native", TRUE)
+      txt(d$sub[k], lab_x + lw + 0.08, ry[k], 8, ink[["secondary"]], "italic", just = "left") }
     lead_row <- d$col[k] == EXPL
     grid.rect(bx0, ry[k], d$value[k] * sc, bh, default.units = "native", just = c("left", "centre"),
               gp = gpar(fill = d$col[k], col = if (lead_row) pal[["aqua"]] else NA, lwd = 1.1,
@@ -173,7 +180,7 @@ draw_abstract <- function() {
   txt("dotted green = new in this work", lx + 0.52, 8.2, 10.5, face = "bold", just = "left")
   grid.rect(lx, 7.94, 0.42, 0.13, default.units = "native", just = c("left", "centre"),
             gp = gpar(fill = EXPL, col = pal[["aqua"]], lwd = 1.1, lty = 2))
-  txt(paste0("dashed bar = ", LEAD_NAME, ", ", LEAD_STATUS), lx + 0.52, 7.94, 9.5, ink[["secondary"]], just = "left")
+  txt(paste0("dashed bars = ", LEAD_NAME, " (", LEAD_STATUS, "), ", T2_NAME, " (exploratory)"), lx + 0.52, 7.94, 9, ink[["secondary"]], just = "left")
 
   gap <- 0.18; Y <- 1.7; H <- 5.3
   Wv <- c(1.8, 3.0, 3.0, 3.0)
@@ -390,7 +397,7 @@ draw_abstract <- function() {
       face = "bold", just = "left", lineheight = 1.0)
   txt("regulon = genes controlled by one\ntranscription factor (TF)", x5 + 0.25, 6.45, 9.5,
       ink[["secondary"]], just = "left")
-  bar_strip(strip_a, x5, W5, 5.95, 2, c(0, 0.5, 1, 1.5, 2))
+  bar_strip(strip_a, x5, W5, 5.95, 2, c(0, 0.5, 1, 1.5, 2), pitch = 0.26)
   txt(paste0("per regulon: ", ACLR_NAME, " ties CLR and GENIE3"),
       x5 + 0.25, 3.8, 8.5, ink[["secondary"]], face = "italic", just = "left")
 
@@ -402,7 +409,7 @@ draw_abstract <- function() {
   txt(paste0("Human K562 protein complexes\n(CORUM; mostly ribosome): ", ACLR_NAME, "\nscores 1.8x lower than CLR"), x5 + 0.25, 3.28,
       11, face = "bold", just = "left", lineheight = 1.0)
   txt("complex = proteins that bind as one machine", x5 + 0.25, 2.93, 9, ink[["secondary"]], just = "left")
-  bar_strip(strip_b, x5, W5, 2.38, 9, c(0, 2, 4, 6, 8), loss = TRUE)
+  bar_strip(strip_b, x5, W5, 2.38, 9, c(0, 2, 4, 6, 8), loss = TRUE, pitch = 0.26)
   newbox(x5 + 0.1, 0.38, W5 - 0.2, 3.27, 0.08)
 
   popViewport()
