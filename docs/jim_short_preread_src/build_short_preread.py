@@ -95,7 +95,8 @@ for tbl in doc.iter(q("tbl")):
             if ncol >= 10:        # wide tables: the text length counts for body rows only (a long header just wraps), and a text column may take its full width
                 k_ = 1.0 if r is not rows[0] else 0.0
             wts[i] = max(wts[i], lw * 1.2 + 4.5, min(len(t), 42) * k_ + (3 if k_ else 0))
-    tsz = 16 if ncol >= 8 else (17 if ncol >= 6 else 18)         # table font in half-points: 8 pt for 8 or 9 columns
+    hdr0_ = "".join(rows[0].findall("w:tc", ns)[0].itertext()).strip()
+    tsz = 16 if (ncol >= 8 or (ncol == 6 and hdr0_ == "Data")) else (17 if ncol >= 6 else 18)         # table font in half-points: 8 pt for 8 or 9 columns and for the 6-column paired-difference table (Table A2, first header cell 'Data')
     ptsz = tsz / 2
     minw = [0.0] * ncol      # absolute minimum width (twips): the longest word of the column plus the cell margins
     for r in rows:
@@ -103,6 +104,8 @@ for tbl in doc.iter(q("tbl")):
         for i, c in enumerate(r.findall("w:tc", ns)):
             t = "".join(c.itertext()).strip()
             minw[i] = max(minw[i], max([len(w_) for w_ in t.split()] or [0]) * 0.6 * ptsz * 20 + 280)
+    if ncol >= 10:        # wide table with an 'estimate (lo, hi)' last column: hold the first line of that entry ('+0.28 (+0.21,') so it wraps in two lines, not three
+        minw[-1] = max(minw[-1], 13 * 0.6 * ptsz * 20 + 280)
     tot = sum(wts); gw = [usable * w / tot for w in wts]
     for _ in range(6):       # raise narrow columns to their minimum, take the difference from the others in proportion
         low = [i for i in range(ncol) if gw[i] < minw[i]]
@@ -119,7 +122,7 @@ for tbl in doc.iter(q("tbl")):
     pr.append(etree.fromstring('<w:tblBorders xmlns:w="%s">%s</w:tblBorders>' % (W, "".join(
         '<w:%s w:val="single" w:sz="4" w:space="0" w:color="BFBFBF"/>' % s for s in ("top", "left", "bottom", "right", "insideH", "insideV")))))
     pr.append(etree.fromstring('<w:tblLayout xmlns:w="%s" w:type="fixed"/>' % W))
-    pr.append(etree.fromstring('<w:tblCellMar xmlns:w="%s"><w:top w:w="40" w:type="dxa"/><w:left w:w="100" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar>' % W))
+    pr.append(etree.fromstring('<w:tblCellMar xmlns:w="%s"><w:top w:w="%d" w:type="dxa"/><w:left w:w="100" w:type="dxa"/><w:bottom w:w="%d" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar>' % (W, 20 if ncol >= 10 else 40, 20 if ncol >= 10 else 40)))   # tighter rows in the 11-column table A1 so it fits one page
     # order inside tblPr is schema-sensitive: tblStyle, tblW, jc, tblBorders, tblLayout, tblCellMar, tblLook
     order = ["tblStyle", "tblpPr", "tblOverlap", "bidiVisual", "tblStyleRowBandSize", "tblStyleColBandSize", "tblW", "jc", "tblCellSpacing",
              "tblInd", "tblBorders", "shd", "tblLayout", "tblCellMar", "tblLook"]
