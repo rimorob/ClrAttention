@@ -24,6 +24,7 @@ def fix(m):
     return '<w:tblGrid>'+''.join('<w:gridCol w:w="%d" />'%int(TOTAL*x/t) for x in w)+'</w:tblGrid>'
 s=re.sub(r'<w:tblGrid>.*?</w:tblGrid>',fix,s,flags=re.S)
 s=s.replace('<w:tblW w:type="auto" w:w="0" />','<w:tblW w:type="pct" w:w="5000" />')
+s=re.sub(r'(<pic:cNvPr )descr="[^"]*" ?',r'\1',s)   # picture-level alt text is the source file name: drop it
 open('word/document.xml','w',encoding='utf8').write(s)
 PY
 rm -f ../v21.docx; zip -q -r ../v21.docx .

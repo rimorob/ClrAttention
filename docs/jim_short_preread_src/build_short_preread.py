@@ -149,6 +149,8 @@ for p in doc.iter(q("p")):
         ppr = p.find("w:pPr", ns)
         if ppr is None: ppr = etree.Element(q("pPr")); p.insert(0, ppr)
         if ppr.find("w:keepNext", ns) is None: ppr.insert(0, etree.Element(q("keepNext")))
+# drop the picture-level alt text pandoc fills with the source file path (the figure-level alt text and caption stay)
+for e in doc.iter("{http://schemas.openxmlformats.org/drawingml/2006/picture}cNvPr"): e.attrib.pop("descr", None)
 files["word/document.xml"] = etree.tostring(doc, xml_declaration=True, encoding="UTF-8", standalone=True)
 
 # landscape + margins already in the reference's final sectPr; keep
