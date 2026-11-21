@@ -1,4 +1,4 @@
-# Scoreboard for the SHORT pre-read (portrait, 8.3 in wide canvas, printed 7.0 in wide): "Every metric, wins and losses". A descriptive scoreboard, drawn in code with grid.
+# Scoreboard for the SHORT pre-read (portrait, 8.3 in wide canvas, main version printed about 6.7 in wide, 8.8 in tall: see PRINT_H below): "Every metric, wins and losses". A descriptive scoreboard, drawn in code with grid.
 # Copy of analysis/fig_graphical_abstract_p3.R, revised 15 Nov. Columns kept: CLR (historical), CLR attention, the lead
 # method, GENIE3, PIDC, GRNBoost2, |r|. Columns dropped: a3r2 and a3r3 (the stacked variants). All metric rows kept
 # (no method or truth is dropped other than those two columns). The best value of a row is recomputed over the kept columns.
@@ -49,7 +49,7 @@ seg <- function(x0, y0, x1, y1, col = ink[["muted"]], lwd = 1, lty = 1)
   grid.segments(x0, y0, x1, y1, default.units = "native", gp = gpar(col = col, lwd = lwd, lty = lty, lineend = "butt"))
 
 # ---- columns (PORTRAIT: canvas W_CAN x H_CAN inches, printed at 6.9 in wide, scale 6.9 / W_CAN) ----------------------------------------
-W_CAN <- 8.3                    # canvas width in inches; printed width 6.9 in, so every font size here prints at 0.83x (>= 8.6 pt -> >= 7.1 pt)
+W_CAN <- 8.3                    # canvas width in inches; the main scoreboard is printed at 8.8 in tall (scale about 0.82: >= 8.6 pt -> >= 7.0 pt)
 meths <- c("CLR", "Attention", LEAD_KEY, T2_KEY, "GENIE3", "PIDC", "GRNBoost2", "abs_r")
 head1 <- c("CLR", ACLR_NAME, LEAD_NAME, T2_NAME, "GENIE3", "PIDC", "GRNBoost2", "|r|")
 head2 <- c("historical", "adopted", "lead\ncandidate", "depth set\nby data", "", "", "", "")
@@ -259,7 +259,9 @@ for (nm in c("", "b")) {
   AUDIT <- list()
   png(file.path(out_dir, paste0("graphical_abstract_short_p3", nm, ".png")), width = round(W_CAN * 300), height = round(H_CAN * 300), res = 300, type = "cairo", bg = "white")
   draw_page(rows, sub, ft, H_CAN, title = ttl, tally = nm == ""); invisible(dev.off())
-  cat(sprintf("p3%s: canvas %.2f x %.2f in; printed %.2f x %.2f in (scale %.3f); min font %.1f pt -> %.1f pt printed\n", nm, W_CAN, H_CAN, 6.9, H_CAN * 6.9 / W_CAN, 6.9 / W_CAN, 8.6, 8.6 * 6.9 / W_CAN))
+  PRINT_H <- if (nm == "") 8.8 else NA                                         # main scoreboard: printed height target (in), figure and short caption share one page
+  PRINT_W <- if (nm == "") PRINT_H * W_CAN / H_CAN else 7.0                    # printed width (in); the appendix version (b) stays 7.0 in wide
+  cat(sprintf("p3%s: canvas %.2f x %.2f in; printed %.2f x %.2f in (scale %.3f); min font %.1f pt -> %.2f pt printed\n", nm, W_CAN, H_CAN, PRINT_W, PRINT_W * H_CAN / W_CAN, PRINT_W / W_CAN, FS_FOOT, FS_FOOT * PRINT_W / W_CAN))
   au <- do.call(rbind, AUDIT); utils::write.csv(au, file.path(AUDIT_DIR, paste0("audit_best_marks_short_p3", nm, ".csv")), row.names = FALSE)
   cnt <- function(col) vapply(meths, function(m) sum(vapply(strsplit(au[[col]], "+", fixed = TRUE), function(z) m %in% z, NA)), 0L)
   tl <- data.frame(method = meths, rows_marked_without_tcaCLR2 = cnt("best_without_tcaCLR2"), rows_marked_with_tcaCLR2 = cnt("best_with_tcaCLR2")); tl$rows_marked_without_tcaCLR2[meths == T2_KEY] <- NA

@@ -17,7 +17,7 @@ LEAD_DESC = f"{ACLR_NAME} followed by a second CLR on the log of the walk"
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "jim_short_preread.md")
 OUT = sys.argv[2] if len(sys.argv) > 2 else "/home/boris/Projects/ClrAttention/docs/jim_short_preread.docx"
-REF = os.path.join(HERE, "..", "checkpoint_collins_src", "portrait.docx")   # Word reference template (US Letter portrait, 0.75 in side and 0.6 in top and bottom margins), shared with build_v21.sh
+REF = os.path.join(HERE, "..", "checkpoint_collins_src", "portrait.docx")   # Word reference template (US Letter portrait, 0.75 in side and 0.6 in top and bottom margins; this builder lowers top and bottom to 0.5 in), shared with build_v21.sh
 PAGEBREAK = "PAGEBREAKMARKER"
 
 md = open(SRC, encoding="utf-8").read()
@@ -169,6 +169,10 @@ for p in doc.iter(q("p")):
         if ppr.find("w:keepNext", ns) is None: ppr.insert(0, etree.Element(q("keepNext")))
 # drop the picture-level alt text pandoc fills with the source file path (the figure-level alt text and caption stay)
 for e in doc.iter("{http://schemas.openxmlformats.org/drawingml/2006/picture}cNvPr"): e.attrib.pop("descr", None)
+# top and bottom margins of THIS document only: 0.5 in (the shared template keeps 0.6 in), so a figure and its short caption share one page
+sect = body.find("w:sectPr", ns)
+pgmar = sect.find("w:pgMar", ns)
+pgmar.set(q("top"), "720"); pgmar.set(q("bottom"), "720")
 files["word/document.xml"] = etree.tostring(doc, xml_declaration=True, encoding="UTF-8", standalone=True)
 
 # page size and margins come from the reference's final sectPr (portrait.docx); keep

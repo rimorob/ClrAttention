@@ -1,4 +1,4 @@
-# Graphical abstract for the SHORT pre-read, page 1 (portrait, 8.3 in wide canvas, printed 7.0 in wide), drawn entirely in code with grid.
+# Graphical abstract for the SHORT pre-read, page 1 (portrait, 8.3 in wide canvas, printed about 6.4 in wide, 8.9 in tall: see PRINT_H below), drawn entirely in code with grid.
 # Copy of analysis/fig_graphical_abstract.R, revised 15 Nov (PI design):
 #  - signage: a DOTTED GREEN outline marks every element that is new in this work, including every
 #    element using human data (the original CLR paper evaluated no human data); historical CLR parts are
@@ -166,13 +166,15 @@ sm_weights <- function(s, keff = 10) {
 }
 
 # ---- vertical layout (distance from the top of the canvas) --------------------------------------------------------------------
-D_BAND <- 1.12; D_R1 <- 1.7; H1 <- 3.94          # band top, row 1 top, row 1 height
+D_BAND <- 1.12; D_R1 <- 1.66; H1 <- 3.90          # band top, row 1 top, row 1 height
 D_NOTE <- D_R1 + H1 + 0.12
 D_R2 <- D_NOTE + 0.15; H2 <- 1.45                 # row 2 (the walk)
 D_STR <- D_R2 + H2 + 0.07; HSTR <- 0.56           # lead-method strip
 D_ANA <- D_STR + HSTR + 0.07; HANA <- 0.3        # transformer analogy
-D_R3 <- D_ANA + HANA + 0.09; H3 <- 3.2          # results panel
+D_R3 <- D_ANA + HANA + 0.09; H3 <- 3.14          # results panel
 H_CAN <- D_R3 + H3 + 0.1
+PRINT_H <- 8.9                                              # printed height target (in): the figure and its short caption share one page
+PRINT_W <- PRINT_H * W_CAN / H_CAN                          # printed width (in) = canvas width x scale; scale = PRINT_H / H_CAN
 
 # ---- drawing ----------------------------------------------------------------
 draw_abstract <- function() {
@@ -440,5 +442,5 @@ draw_abstract(); invisible(dev.off())
 cairo_pdf(file.path(out_dir, "graphical_abstract_short_p1.pdf"), width = W_CAN, height = H_CAN, bg = "white")
 draw_abstract(); invisible(dev.off())
 invisible(dev.off())
-cat(sprintf("p1: canvas %.2f x %.2f in; printed 7.00 x %.2f in (scale %.3f); min font %.1f pt -> %.1f pt printed\n", W_CAN, H_CAN, H_CAN * 7 / W_CAN, 7 / W_CAN, FS_S, FS_S * 7 / W_CAN))
+cat(sprintf("p1: canvas %.2f x %.2f in; printed %.2f x %.2f in (scale %.3f); min font %.1f pt -> %.2f pt printed\n", W_CAN, H_CAN, PRINT_W, PRINT_H, PRINT_W / W_CAN, FS_S, FS_S * PRINT_W / W_CAN))
 cat("wrote", file.path(out_dir, "graphical_abstract_short_p1.{png,pdf}"), "\n")
