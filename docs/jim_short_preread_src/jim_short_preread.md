@@ -1,5 +1,5 @@
 ---
-title: "Summarizing the attention in CLR: a short pre-read for Jim Collins"
+title: "Focus on what matters: summarizing attention in context likelihood of relatedness"
 ---
 
 **Abstract.** Attention normalizes each query's compatibilities within its own context, an idea older than the transformer. Context likelihood of relatedness (CLR), its first widely adopted form in computational biology, remains standard for unsupervised network inference but stops at the scores. We add the step attention takes next, a summary of each gene's neighbourhood: a temperature-controlled softmax and a short walk, with depth chosen on held-out data without labels ({{ACLR_NAME}}). On strong-evidence *Escherichia coli* regulons, {{ACLR_NAME}} raises pooled recovery 16% over CLR and, controlling for hub genes, leads GENIE3 and PIDC, but it loses to CLR on tight complexes such as ribosomes. A second CLR on the log of the walk ({{LEAD_NAME}}) recovers complexes in K562 (selected among about 20 read-outs). In a preregistered test on HepG2 Perturb-seq it gained 0.027 AUPR over {{ACLR_NAME}} (95% interval 0.011 to 0.042), carried by a few large complexes; the *Escherichia coli* test missed its threshold.
