@@ -5,6 +5,7 @@
 2. **Pre-specified test of tcaCLR2 on fresh data.** Freeze the rule (docs/plans/tcaclr2_definition.md), the dataset, the truth, the metric and the comparators in git before any score exists; read as non-inferiority against tcaCLR. Lead candidate: DepMap gene dependency scores with Complex Portal or CORUM complexes (check overlap with the data already used first). Report as a pre-specified test, not a preregistered one, unless it is registered externally.
 
 ## Pending decisions or small work
+0. **scGPT extension (docs/plans/scgpt_extension_plan.md).** Plan written, nothing run. Needs the PI's decisions: download RPE1 and Jurkat single-cell files (8.7 GB each; n = 6 datasets makes every pre-specified contrast attainable, n = 4 allows no decision), permission to delete each raw h5ad after the control cells are extracted (disk budget), and whether Complex Portal complexes stay as a descriptive stratum. Expected outcome stated in the plan: CLR-NS vs the best scGPT readout is expected to fail (token-embedding cosine beat it on hESC, hHep and K562).
 3. Register edits in the Evidence and Losses text of the short pre-read (colloquialisms such as "answer in hand", "used up", "after many looks"); numbers and claims unchanged. Waiting for the PI's go.
 4. Verify the bibliographic details in the short pre-read's reference list (Schmidhuber is cited as 1992, the journal paper; the main write-up says 1991, the technical report).
 5. tcaCLR2 minus aCLR intervals (experiment-refit jackknife) are not computed; only point estimates are shown.
