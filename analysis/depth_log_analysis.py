@@ -103,7 +103,8 @@ rb.to_csv(D + "depth_log_boot_rho.csv", index=False); cens.to_csv(D + "depth_log
 INK, MUTE, BLUE, RED, SURF = "#0b0b0b", "#52514e", "#2a78d6", "#e34948", "#fcfcfb"
 grid = sorted(t for t in curves["ecoli"].t.unique() if t >= 1); X0 = -1.3
 xt = [X0] + [math.log2(t) for t in (1, 2, 4, 8, 16, 32, 64, 128, 256)]; xl = ["CLR"] + [str(t) for t in (1, 2, 4, 8, 16, 32, 64, 128, 256)]
-fig, axs = plt.subplots(2, 4, figsize=(15, 7.2)); axs = axs.ravel(); n = 0
+# portrait (7.0 x 7.6 in, printed at 1:1 in the Word documents): 4 rows x 2 columns, every text >= 7 pt
+fig, axs = plt.subplots(4, 2, figsize=(7.0, 7.6)); axs = axs.ravel(); n = 0
 for key, lab in ORGS:
     for truth in sorted(curves[key].truth.unique(), key=lambda s: int(s.split()[0])):
         ax = axs[n]; n += 1; g = curves[key][curves[key].truth == truth].sort_values("t"); r = R[(R.org == key) & (R.truth == truth)].iloc[0]
@@ -113,18 +114,19 @@ for key, lab in ORGS:
         ax.plot([X0], [0], "o", mfc=SURF, mec=MUTE, ms=7, mew=1.5)
         if r.t_best == 0: ax.plot([X0], [0], "o", color=BLUE, ms=9, mec=SURF, mew=2); txt, xx, yy = "CLR best", X0, 0.0
         else: yy = float(g[g.t == r.t_best].aupr.iloc[0] - base); xx = math.log2(r.t_best); ax.plot([xx], [yy], "o", color=BLUE, ms=8, mec=SURF, mew=2); txt = f"t = {r.t_best}" + (" (edge)" if r.censored else "")
-        ax.annotate(txt, (xx, yy), xytext=(0, 8), textcoords="offset points", ha="center", fontsize=8.5, color=INK)
+        ax.annotate(txt, (xx, yy), xytext=((7, 6) if r.t_best == 0 else (0, 6)), textcoords="offset points", ha=("left" if r.t_best == 0 else "center"), fontsize=7.5, color=INK)
         ax.axvline(math.log2(EDGE), color=RED, lw=1.0, ls="--", alpha=0.7)
-        ax.set_xticks(xt); ax.set_xticklabels(xl, fontsize=7.5, color=MUTE); ax.set_xlim(-1.7, 8.4); ax.margins(y=0.18)
-        ax.set_title(f"{'E. coli' if key == 'ecoli' else 'K562'}  {truth}", fontsize=10, color=INK, loc="left", pad=12)
-        ax.set_xlabel("walk depth t (log2 axis)", fontsize=9, color=MUTE); ax.tick_params(axis="y", colors=MUTE, labelsize=8.5)
+        ax.set_xticks(xt); ax.set_xticklabels(xl, fontsize=7, color=MUTE); ax.set_xlim(-1.7, 8.4); ax.margins(y=0.18)
+        ax.set_title(f"{'E. coli' if key == 'ecoli' else 'K562'}  {truth}", fontsize=8, color=INK, loc="left", pad=10)
+        ax.set_xlabel("walk depth t (log2 axis)", fontsize=7.5, color=MUTE); ax.tick_params(axis="y", colors=MUTE, labelsize=7)
         for sp in ("top", "right"): ax.spines[sp].set_visible(False)
         ax.grid(axis="y", color="#e5e4e0", lw=0.6)
-axs[0].set_ylabel("AUPR minus CLR (t = 0)", fontsize=9, color=MUTE); axs[4].set_ylabel("AUPR minus CLR (t = 0)", fontsize=9, color=MUTE)
-fig.suptitle("Geometric depth grid t = 1..256 (+ CLR). AUPR gain over CLR. Dot = best t (incl. CLR); shaded = within 1% of max AUPR (t >= 1); dashed red = grid edge 256.  Truths from fine to coarse.\n"
-             f"Pre-specified reading: {reading};  E. coli rho = {rho_e:.2f} (n = {int(P.n[0])}),  K562 rho = {rho_k:.2f} (n = {int(P.n[1])});  edge-censored truths: {int(R.censored.sum())} of {len(R)}",
-             fontsize=10, color=INK, x=0.01, ha="left")
-fig.tight_layout(rect=(0, 0, 1, 0.93)); fig.savefig(D + "depth_log_curves.png", dpi=170, facecolor=SURF); plt.close(fig)
+for k_ in (0, 2, 4, 6): axs[k_].set_ylabel("AUPR minus CLR (t = 0)", fontsize=7.5, color=MUTE)
+import textwrap
+_sup = ("Geometric depth grid t = 1..256 (+ CLR). AUPR gain over CLR. Dot = best t (incl. CLR); shaded = within 1% of max AUPR (t >= 1); dashed red = grid edge 256.  Truths from fine to coarse.\n"
+        f"Pre-specified reading: {reading};  E. coli rho = {rho_e:.2f} (n = {int(P.n[0])}),  K562 rho = {rho_k:.2f} (n = {int(P.n[1])});  edge-censored truths: {int(R.censored.sum())} of {len(R)}")
+fig.suptitle("\n".join(textwrap.fill(par, 118) for par in _sup.split("\n")), fontsize=7, color=INK, x=0.01, ha="left")
+fig.tight_layout(rect=(0, 0, 1, 0.955), h_pad=1.1, w_pad=1.0); fig.savefig(D + "depth_log_curves.png", dpi=300, facecolor=SURF); plt.close(fig)
 
 fig, axs = plt.subplots(1, 3, figsize=(14, 4.4))
 cols = {"ecoli": BLUE, "k562": "#eb6834"}

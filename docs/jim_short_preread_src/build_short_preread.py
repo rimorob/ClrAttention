@@ -17,7 +17,7 @@ LEAD_DESC = f"{ACLR_NAME} followed by a second CLR on the log of the walk"
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "jim_short_preread.md")
 OUT = sys.argv[2] if len(sys.argv) > 2 else "/home/boris/Projects/ClrAttention/docs/jim_short_preread.docx"
-REF = os.path.join(HERE, "..", "checkpoint_collins_src", "landscape.docx")   # Word reference template (landscape, margins), shared with build_v21.sh
+REF = os.path.join(HERE, "..", "checkpoint_collins_src", "portrait.docx")   # Word reference template (US Letter portrait, 0.75 in side and 0.6 in top and bottom margins), shared with build_v21.sh
 PAGEBREAK = "PAGEBREAKMARKER"
 
 md = open(SRC, encoding="utf-8").read()
@@ -70,13 +70,15 @@ style_edit("Subtitle", lambda x: sp(0, 40)(fonts(x)))
 style_edit("BodyText", sp(60, 80)); style_edit("FirstParagraph", sp(60, 80)); style_edit("Compact", sp(20, 20))
 style_edit("Caption", lambda x: x.replace('<w:rPr>', '<w:rPr><w:sz w:val="18"/><w:szCs w:val="18"/>', 1) if '<w:rPr>' in x else x)
 style_edit("ImageCaption", lambda x: x)
+style_edit("Caption", lambda x: x.replace('<w:pPr>', '<w:pPr><w:keepLines/>', 1))   # a caption never splits across pages
+style_edit("VerbatimChar", lambda x: re.sub(r'<w:sz w:val="\d+"\s*/>', '<w:sz w:val="16"/>', x))   # 8 pt code: the pseudocode lines fit the 7.0 in text width
 st = st.replace("Consolas", "Courier New")
 files["word/styles.xml"] = st.encode("utf-8")
 
 # ---- document: tables, images, code ----
 doc = etree.fromstring(files["word/document.xml"])
 body = doc.find("w:body", ns)
-usable = 14400
+usable = 10080          # text width in twips: 7.0 in (US Letter, 0.75 in side margins)
 for tbl in doc.iter(q("tbl")):
     rows = tbl.findall("w:tr", ns)
     ncol = len(tbl.find("w:tblGrid", ns).findall("w:gridCol", ns))
@@ -84,8 +86,24 @@ for tbl in doc.iter(q("tbl")):
     for r in rows:
         for i, c in enumerate(r.findall("w:tc", ns)):
             t = "".join(c.itertext()).strip()
-            wts[i] = max(wts[i], min(len(t), 42) + 3)
-    tot = sum(wts); cols = [int(usable * w / tot) for w in wts]
+            lw = max([len(w_) for w_ in t.split()] or [0])       # longest word: the column must hold it without a mid-word break
+            wts[i] = max(wts[i], lw * 1.2 + 4.5, min(len(t), 42) * (0.6 if ncol >= 8 else 1.0) + 3)
+    tsz = 16 if ncol >= 8 else (17 if ncol >= 6 else 18)         # table font in half-points: 8 pt for 8 or 9 columns
+    ptsz = tsz / 2
+    minw = [0.0] * ncol      # absolute minimum width (twips): the longest word of the column plus the cell margins
+    for r in rows:
+        for i, c in enumerate(r.findall("w:tc", ns)):
+            t = "".join(c.itertext()).strip()
+            minw[i] = max(minw[i], max([len(w_) for w_ in t.split()] or [0]) * 0.6 * ptsz * 20 + 280)
+    tot = sum(wts); gw = [usable * w / tot for w in wts]
+    for _ in range(6):       # raise narrow columns to their minimum, take the difference from the others in proportion
+        low = [i for i in range(ncol) if gw[i] < minw[i]]
+        rest = [i for i in range(ncol) if i not in low]
+        if not low or not rest: break
+        need = sum(minw[i] - gw[i] for i in low); sr = sum(gw[i] for i in rest)
+        for i in rest: gw[i] -= need * gw[i] / sr
+        for i in low: gw[i] = minw[i]
+    cols = [int(w) for w in gw]
     pr = tbl.find("w:tblPr", ns)
     for ch in list(pr):
         if ch.tag in (q("tblW"), q("tblLayout"), q("tblBorders"), q("tblCellMar")): pr.remove(ch)
@@ -124,7 +142,7 @@ for tbl in doc.iter(q("tbl")):
                 rpr = rr.find("w:rPr", ns)
                 if rpr is None: rpr = etree.Element(q("rPr")); rr.insert(0, rpr)
                 if rpr.find("w:sz", ns) is None:
-                    rpr.append(etree.fromstring('<w:sz xmlns:w="%s" w:val="18"/>' % W)); rpr.append(etree.fromstring('<w:szCs xmlns:w="%s" w:val="18"/>' % W))
+                    rpr.append(etree.fromstring('<w:sz xmlns:w="%s" w:val="%d"/>' % (W, tsz))); rpr.append(etree.fromstring('<w:szCs xmlns:w="%s" w:val="%d"/>' % (W, tsz)))
                 if ri == 0 and rpr.find("w:b", ns) is None: rpr.insert(0, etree.Element(q("b")))
 # page breaks: drop the marker paragraph, put pageBreakBefore on the next block's first paragraph
 for p in list(body.findall("w:p", ns)):
@@ -153,7 +171,7 @@ for p in doc.iter(q("p")):
 for e in doc.iter("{http://schemas.openxmlformats.org/drawingml/2006/picture}cNvPr"): e.attrib.pop("descr", None)
 files["word/document.xml"] = etree.tostring(doc, xml_declaration=True, encoding="UTF-8", standalone=True)
 
-# landscape + margins already in the reference's final sectPr; keep
+# page size and margins come from the reference's final sectPr (portrait.docx); keep
 with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as z:
     for n, b in files.items(): z.writestr(n, b)
 shutil.rmtree(tmp)

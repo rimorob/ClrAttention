@@ -1,4 +1,4 @@
-# Graphical abstract, page 3 (16:9) of the LONG checkpoint: "Every metric, wins and losses". A descriptive scoreboard, drawn in code with grid.
+# Graphical abstract, page 3  of the LONG checkpoint: "Every metric, wins and losses". A descriptive scoreboard, drawn in code with grid.
 # Companion of analysis/fig_graphical_abstract.R (page 1) and _p2.R; same palette and conventions. Rebuilt 19 Nov from the
 # SHORT pre-read's scoreboard code (analysis/fig_graphical_abstract_short_p3.R); the long figure now has the same eight columns
 # (the stacked variants of the lead method were dropped from it; they are not needed).
@@ -52,23 +52,32 @@ txt <- function(label, x, y, size = 10, col = ink[["primary"]], face = "plain", 
 seg <- function(x0, y0, x1, y1, col = ink[["muted"]], lwd = 1, lty = 1)
   grid.segments(x0, y0, x1, y1, default.units = "native", gp = gpar(col = col, lwd = lwd, lty = lty, lineend = "butt"))
 
-# ---- columns ----------------------------------------------------------------------------------------------------------
+# ---- columns (PORTRAIT: canvas W_CAN x H_CAN inches, printed at 6.9 in wide, scale 6.9 / W_CAN) ----------------------------------------
+W_CAN <- 8.3                    # canvas width in inches; printed width 6.9 in, so every font size here prints at 0.83x (>= 8.6 pt -> >= 7.1 pt)
 meths <- c("Attention", "CLR", LEAD_KEY, T2_KEY, "GENIE3", "PIDC", "GRNBoost2", "abs_r")
 head1 <- c(ACLR_NAME, "CLR", LEAD_NAME, T2_NAME, "GENIE3", "PIDC", "GRNBoost2", "|r|")
-head2 <- c("adopted", "", "lead candidate", "depth set by data", "", "", "", "")
+head2 <- c("adopted", "", "lead\ncandidate", "depth set\nby data", "", "", "", "")
 head3 <- c("", "", "", "exploratory", "", "", "", "")
 EXPL <- "#bfe6d8"
-fillc <- c(Attention = pal[["aqua"]], CLR = pal[["orange"]], EXPL, EXPL,
-           GENIE3 = ink[["muted"]], PIDC = ink[["muted"]], GRNBoost2 = ink[["muted"]], abs_r = ink[["muted"]])
+fillc <- c(Attention = pal[["aqua"]], CLR = pal[["orange"]], EXPL, EXPL, GENIE3 = ink[["muted"]], PIDC = ink[["muted"]],
+           GRNBoost2 = ink[["muted"]], abs_r = ink[["muted"]])
 names(fillc)[3] <- LEAD_KEY; names(fillc)[4] <- T2_KEY
 EXPL_KEYS <- c(LEAD_KEY, T2_KEY)
-X_LAB <- 0.3                    # row labels start
-X_C0 <- 4.75                    # first method column starts
-CW <- (15.75 - X_C0) / 8        # column width
-NUM_X <- 0.16                   # number, left edge inside a cell
-ORG_X <- 0.62                   # bar origin (the 'random' tick) inside a cell
-BAR_W <- CW - ORG_X - 0.06      # longest bar
+X_LAB <- 0.12                   # row labels start
+X_R <- W_CAN - 0.12             # right edge of the table
+X_C0 <- 2.45                    # first method column starts
+CW <- (X_R - X_C0) / 8          # column width
+NUM_X <- 0.09                   # number, left edge inside a cell
+ORG_X <- 0.44                   # bar origin (the 'random' tick) inside a cell
+BAR_W <- CW - ORG_X - 0.03      # longest bar
 cx0 <- function(j) X_C0 + (j - 1) * CW
+FS_ROW <- 8.8; FS_NUM <- 9; FS_GRP <- 9.3; FS_HEAD <- 9.2; FS_FOOT <- 8.6; LAB_W <- X_C0 - X_LAB - 0.1 - 0.08   # font sizes (canvas pt) and label width
+text_w <- function(s, size, face = "plain") convertWidth(grobWidth(textGrob(s, gp = gpar(fontfamily = FONT, fontsize = size, fontface = face))), "inches", TRUE)
+wrap_to <- function(s, size, width, face = "plain") {     # word wrap (never inside a word) to a width in inches
+  words <- strsplit(s, " ", fixed = TRUE)[[1]]; lines <- character(); cur <- ""
+  for (w in words) { cand <- if (nzchar(cur)) paste(cur, w) else w
+    if (!nzchar(cur) || text_w(cand, size, face) <= width) cur <- cand else { lines <- c(lines, cur); cur <- w } }
+  c(lines, cur) }
 
 # ---- row specs ---------------------------------------------------------------------------------------------------------
 # list(label, dataset, truth, metric, scope, base (baseline of the bar), digits)
@@ -128,36 +137,44 @@ cell_vals <- function(r) { x <- D[D$dataset == r$ds & D$truth == r$truth & D$met
   v[x$method[ok]] <- x$enrichment_over_random[ok]; v }
 fmt <- function(v, digits) if (digits == 2 && v >= 10) sprintf("%.1f", v) else sprintf(paste0("%.", digits, "f"), v)
 
-# ---- one page ----------------------------------------------------------------------------------------------------------
-draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tally = FALSE) {
+# ---- one page (portrait) ------------------------------------------------------------------------------------------------
+# Two passes: pass 1 (H = 40) only measures the height used, pass 2 draws on a canvas of exactly that height. y runs upward; T = top of the canvas.
+draw_page <- function(rows, sub, footer, H, title = TITLE, tally = FALSE) {
   grid.newpage(); grid.rect(gp = gpar(fill = "white", col = NA))
-  pushViewport(viewport(xscale = c(0, 16), yscale = c(0, 9)))
-  txt(title, 0.3, 8.65, 21, face = "bold", just = "left")
-  txt(sub, 0.3, 8.28, 11, ink[["secondary"]], just = "left")
+  pushViewport(viewport(xscale = c(0, W_CAN), yscale = c(0, H)))
+  T <- H
+  txt(title, X_LAB, T - 0.3, 17, face = "bold", just = "left")
+  sl <- wrap_to(sub, 9.6, X_R - X_LAB)
+  for (k in seq_along(sl)) txt(sl[k], X_LAB, T - 0.62 - (k - 1) * 0.17, 9.6, ink[["secondary"]], just = "left")
+  y_hdr <- T - 0.62 - (length(sl) - 1) * 0.17 - 0.52          # column header baseline row (name); sub-labels below it
   nr <- sum(vapply(rows, function(r) is.null(r$group), NA)); ng <- length(rows) - nr
-  nrows <- nr; if (tally) nr <- nr + 1          # the tally row takes one row pitch
+  nrows <- nr
   firsts <- stats::setNames(integer(length(meths)), meths)
-  GH <- 0.74                                   # group-header height relative to a row
-  pitch <- (y_top - y_bot) / (nr + ng * GH)
-  # column bands (adopted column; the lead method and tcaCLR2) and headers
-  hy <- y_top + 0.5
-  grid.rect(cx0(1), y_bot - 0.05, CW, y_top - y_bot + 0.78, default.units = "native", just = c("left", "bottom"), gp = gpar(fill = "#eaf7f1", col = NA))
-  grid.rect(cx0(3), y_bot - 0.05, 2 * CW, y_top - y_bot + 0.78, default.units = "native", just = c("left", "bottom"), gp = gpar(fill = "#f6fcf9", col = pal[["aqua"]], lty = 2, lwd = 1))
+  RH <- 0.19; GHH <- 0.185                                       # row height (one label line), group-header height
+  LH <- 0.14                                                   # line height of a wrapped row label
+  rh <- function(r) { if (!is.null(r$group)) return(GHH); nl <- length(wrap_to(r$label, FS_ROW, LAB_W)); max(RH, 0.06 + LH * nl) }
+  y_top <- y_hdr - 0.46
+  tot <- sum(vapply(rows, rh, 0)) + (if (tally) max(RH, 0.06 + LH * length(wrap_to(paste0("Rows with the highest value or tied for it (of ", nrows, ")"), FS_ROW, LAB_W, "bold"))) else 0)
+  y_bot <- y_top - tot
+  # column bands (adopted and exploratory columns) and headers
+  grid.rect(cx0(1), y_bot - 0.04, CW, y_hdr + 0.4 - y_bot + 0.04, default.units = "native", just = c("left", "bottom"), gp = gpar(fill = "#eaf7f1", col = NA))
+  grid.rect(cx0(3), y_bot - 0.04, 2 * CW, y_hdr + 0.4 - y_bot + 0.04, default.units = "native", just = c("left", "bottom"), gp = gpar(fill = "#f6fcf9", col = pal[["aqua"]], lty = 2, lwd = 1))
   for (j in seq_along(meths)) {
     x <- cx0(j) + CW / 2
-    txt(head1[j], x, hy + 0.1, 11, face = "bold")
-    if (nzchar(head2[j])) txt(head2[j], x, hy - 0.1, 9.5, if (j == 1) "#0d6e4c" else ink[["secondary"]], "italic")
-    if (nzchar(head3[j])) txt(head3[j], x, hy - 0.28, 9.5, ink[["secondary"]], "italic")
+    txt(head1[j], x, y_hdr + 0.2, FS_HEAD, face = "bold")
+    if (nzchar(head2[j])) txt(head2[j], x, y_hdr - 0.04, 8.6, if (j == 1) "#0d6e4c" else ink[["secondary"]], "italic", lineheight = 0.95)
+    if (nzchar(head3[j])) txt(head3[j], x, y_hdr - 0.28, 8.6, ink[["secondary"]], "italic")
   }
-  seg(X_LAB, y_top + 0.1, 15.75, y_top + 0.1, ink[["secondary"]], 1)
+  seg(X_LAB, y_top + 0.03, X_R, y_top + 0.03, ink[["secondary"]], 1)
   y <- y_top
   for (r in rows) {
+    h <- rh(r)
     if (!is.null(r$group)) {
-      y <- y - GH * pitch / 2
-      txt(r$group, X_LAB, y, 10.5, ink[["primary"]], "bold", just = "left")
-      seg(X_LAB, y - GH * pitch / 2 + 0.005, 15.75, y - GH * pitch / 2 + 0.005, ink[["grid"]], 0.9)
-      y <- y - GH * pitch / 2; next }
-    y <- y - pitch / 2
+      yc <- y - h * 0.5 - 0.02
+      txt(r$group, X_LAB, yc, FS_GRP, ink[["primary"]], "bold", just = "left")
+      seg(X_LAB, y - h + 0.005, X_R, y - h + 0.005, ink[["grid"]], 0.8)
+      y <- y - h; next }
+    yc <- y - h / 2
     v <- cell_vals(r)
     # first or shared first: highest value, or tied with it at the printed precision
     best <- if (all(is.na(v))) integer(0) else which(!is.na(v) & vapply(v, function(z) !is.na(z) && fmt(z, r$digits) == fmt(max(v, na.rm = TRUE), r$digits), NA))
@@ -172,37 +189,45 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
         tcaCLR2_takes_mark_from_other = (T2_KEY %in% names(v)[best]) && !(LEAD_KEY %in% names(v)[best0]) && !(T2_KEY %in% names(v)[best0]) && length(best0) > 0, stringsAsFactors = FALSE) }
     if (nzchar(Sys.getenv("SB_VERBOSE")) && tally) cat(sprintf("ROW %-62s | %s\n", paste(r$ds, r$truth, r$metric), paste(names(v)[best], collapse = ",")))
     span <- max(v - r$base, na.rm = TRUE); if (!is.finite(span) || span <= 0) span <- 1
-    txt(r$label, X_LAB + 0.12, y, 10, just = "left")
+    ll <- wrap_to(r$label, FS_ROW, LAB_W)
+    for (k in seq_along(ll)) txt(ll[k], X_LAB + 0.1, yc + ((length(ll) - 1) / 2 - (k - 1)) * LH, FS_ROW, just = "left")
     for (j in seq_along(meths)) {
       x0 <- cx0(j)
-      seg(x0 + ORG_X, y - pitch * 0.42, x0 + ORG_X, y + pitch * 0.42, ink[["secondary"]], 0.8)          # random
-      if (is.na(v[j])) { txt("–", x0 + NUM_X + 0.1, y, 11, ink[["muted"]]); next }
-      frac <- (v[j] - r$base) / span; len <- if (frac >= 0) frac * BAR_W else max(frac, -0.08 / BAR_W) * BAR_W
+      seg(x0 + ORG_X, yc - RH * 0.42, x0 + ORG_X, yc + RH * 0.42, ink[["secondary"]], 0.8)          # random
+      if (is.na(v[j])) { txt("–", x0 + NUM_X + 0.1, yc, 10, ink[["muted"]]); next }
+      frac <- (v[j] - r$base) / span; len <- if (frac >= 0) frac * BAR_W else max(frac, -0.04 / BAR_W) * BAR_W
       expl <- meths[j] %in% EXPL_KEYS
-      bh <- pitch * 0.5
-      grid.rect(x0 + ORG_X, y, abs(len), bh, default.units = "native", just = c(if (len >= 0) "left" else "right", "centre"),
-                gp = gpar(fill = fillc[[meths[j]]], col = if (expl) pal[["aqua"]] else NA, lwd = 1.1, lty = if (expl) 2 else 1))
+      bh <- RH * 0.5
+      grid.rect(x0 + ORG_X, yc, abs(len), bh, default.units = "native", just = c(if (len >= 0) "left" else "right", "centre"),
+                gp = gpar(fill = fillc[[meths[j]]], col = if (expl) pal[["aqua"]] else NA, lwd = 0.9, lty = if (expl) 2 else 1))
       isb <- j %in% best
-      if (isb) grid.circle(x0 + 0.07, y, 0.035, default.units = "native", gp = gpar(fill = ink[["primary"]], col = NA))
-      txt(fmt(v[j], r$digits), x0 + NUM_X + 0.02, y, 10, face = if (isb) "bold" else "plain", just = "left")
+      if (isb) grid.circle(x0 + 0.05, yc, 0.025, default.units = "native", gp = gpar(fill = ink[["primary"]], col = NA))
+      txt(fmt(v[j], r$digits), x0 + NUM_X, yc, FS_NUM, face = if (isb) "bold" else "plain", just = "left")
     }
-    y <- y - pitch / 2
+    y <- y - h
   }
   if (tally) {
-    seg(X_LAB, y, 15.75, y, ink[["secondary"]], 1.2)
-    y <- y - pitch / 2
-    txt(paste0("Rows with the highest value or tied for it (of ", nrows, ")"), X_LAB + 0.12, y, 10, face = "bold", just = "left")
+    seg(X_LAB, y, X_R, y, ink[["secondary"]], 1.1)
+    tl_ <- wrap_to(paste0("Rows with the highest value or tied for it (of ", nrows, ")"), FS_ROW, LAB_W, "bold")
+    h <- max(RH, 0.06 + LH * length(tl_)); yc <- y - h / 2
+    for (k in seq_along(tl_)) txt(tl_[k], X_LAB + 0.1, yc + ((length(tl_) - 1) / 2 - (k - 1)) * LH, FS_ROW, face = "bold", just = "left")
     win <- firsts == max(firsts)
     if (nzchar(Sys.getenv("SB_VERBOSE"))) cat("TALLY", paste(names(firsts), firsts, sep = "=", collapse = " "), "of", nrows, "\n")
     for (j in seq_along(meths)) {
       x0 <- cx0(j)
-      txt(sprintf("%d/%d", firsts[[j]], nrows), x0 + NUM_X + 0.02, y, 11, face = if (win[j]) "bold" else "plain", just = "left")
+      txt(sprintf("%d/%d", firsts[[j]], nrows), x0 + NUM_X, yc, FS_NUM, face = if (win[j]) "bold" else "plain", just = "left")
     }
-    y <- y - pitch / 2
+    y <- y - h
   }
-  # footer
-  for (k in seq_along(footer)) txt(footer[[k]]$text, 0.3, y_bot - 0.22 - (k - 1) * (if (length(footer) > 9) 0.163 else if (length(footer) > 7) 0.178 else 0.185), footer[[k]]$size, footer[[k]]$col, footer[[k]]$face, just = "left")
+  # footer (wrapped to the table width; one gap between notes)
+  yf <- y_bot - 0.2
+  for (k in seq_along(footer)) {
+    fl_ <- wrap_to(footer[[k]]$text, FS_FOOT, X_R - X_LAB)
+    for (m in seq_along(fl_)) { txt(fl_[m], X_LAB, yf, FS_FOOT, footer[[k]]$col, footer[[k]]$face, just = "left"); yf <- yf - 0.135 }
+    yf <- yf - 0.03
+  }
   popViewport()
+  H - yf + 0.12            # height used (pass 1 returns it; pass 2 should equal H)
 }
 
 fl <- function(t) list(text = t, size = 9, col = ink[["secondary"]], face = "plain")
@@ -224,19 +249,26 @@ foot_hub <- c(foot_common, list(fl(T2_NOTE1), fl(T2_NOTE2),
 SUB_RAW <- paste0("Raw scores. ", ACLR_NAME, " (adopted, t = 9) and CLR, then the lead method ", LEAD_NAME, " and tcaCLR2 (depth set by the data; both dashed), then competitors.")
 SUB_HUB <- "Hub-controlled versions of the same rows (page 3 shows the raw scores): each method's scores are compared only among gene pairs of similar hub degree."
 TITLE <- "Every metric, wins and losses"
+measure_dev <- png(tempfile(fileext = ".png"), width = 800, height = 800, type = "cairo")   # for text measurements and the height pass
 for (nm in c("", "b")) {
   rows <- if (nm == "") raw_rows else hub_rows
   sub <- paste(if (nm == "") SUB_RAW else SUB_HUB, NAMES_NOTE)
   ft <- if (nm == "") foot_raw else foot_hub
-  ybot <- if (nm == "") 1.85 else 1.75
+  ttl <- if (nm == "") TITLE else "Hub-controlled scoreboard"
   AUDIT <- list()
-  png(file.path(out_dir, paste0("graphical_abstract_p3", nm, ".png")), width = 2400, height = 1350, res = 150, type = "cairo", bg = "white")
-  draw_page(rows, sub, 7.3, ft, y_bot = ybot, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
+  H_CAN <- draw_page(rows, sub, ft, 40, title = ttl, tally = nm == "")      # pass 1: height used
+  dev.off()
+  AUDIT <- list()
+  png(file.path(out_dir, paste0("graphical_abstract_p3", nm, ".png")), width = round(W_CAN * 300), height = round(H_CAN * 300), res = 300, type = "cairo", bg = "white")
+  draw_page(rows, sub, ft, H_CAN, title = ttl, tally = nm == ""); invisible(dev.off())
+  cat(sprintf("p3%s: canvas %.2f x %.2f in; printed %.2f x %.2f in (scale %.3f); min font %.1f pt -> %.1f pt printed\n", nm, W_CAN, H_CAN, 6.9, H_CAN * 6.9 / W_CAN, 6.9 / W_CAN, 8.6, 8.6 * 6.9 / W_CAN))
   au <- do.call(rbind, AUDIT); utils::write.csv(au, file.path(AUDIT_DIR, paste0("audit_best_marks_p3", nm, ".csv")), row.names = FALSE)
   cnt <- function(col) vapply(meths, function(m) sum(vapply(strsplit(au[[col]], "+", fixed = TRUE), function(z) m %in% z, NA)), 0L)
   tl <- data.frame(method = meths, rows_marked_without_tcaCLR2 = cnt("best_without_tcaCLR2"), rows_marked_with_tcaCLR2 = cnt("best_with_tcaCLR2")); tl$rows_marked_without_tcaCLR2[meths == T2_KEY] <- NA
   utils::write.csv(tl, file.path(AUDIT_DIR, paste0("audit_tally_p3", nm, ".csv")), row.names = FALSE)
-  cairo_pdf(file.path(out_dir, paste0("graphical_abstract_p3", nm, ".pdf")), width = 16, height = 9, bg = "white")
-  draw_page(rows, sub, 7.3, ft, y_bot = ybot, title = if (nm == "") TITLE else "Hub-controlled scoreboard", tally = nm == ""); invisible(dev.off())
+  cairo_pdf(file.path(out_dir, paste0("graphical_abstract_p3", nm, ".pdf")), width = W_CAN, height = H_CAN, bg = "white")
+  draw_page(rows, sub, ft, H_CAN, title = ttl, tally = nm == ""); invisible(dev.off())
+  png(tempfile(fileext = ".png"), width = 800, height = 800, type = "cairo")
 }
+invisible(dev.off())
 cat("wrote", file.path(out_dir, "graphical_abstract_p3{,b}.{png,pdf}"), "and the audit csv files\n")
