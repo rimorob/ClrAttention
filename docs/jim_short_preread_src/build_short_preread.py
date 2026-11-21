@@ -83,15 +83,23 @@ for tbl in doc.iter(q("tbl")):
     rows = tbl.findall("w:tr", ns)
     ncol = len(tbl.find("w:tblGrid", ns).findall("w:gridCol", ns))
     wts = [4] * ncol
+    def is_sub(r_):    # full-width sub-header row: text in the first cell only, the others empty (merged below)
+        cs_ = r_.findall("w:tc", ns)
+        return r_ is not rows[0] and len(cs_) > 1 and bool("".join(cs_[0].itertext()).strip()) and not any("".join(c_.itertext()).strip() for c_ in cs_[1:])
     for r in rows:
+        if is_sub(r): continue
         for i, c in enumerate(r.findall("w:tc", ns)):
             t = "".join(c.itertext()).strip()
             lw = max([len(w_) for w_ in t.split()] or [0])       # longest word: the column must hold it without a mid-word break
-            wts[i] = max(wts[i], lw * 1.2 + 4.5, min(len(t), 42) * (0.6 if ncol >= 8 else 1.0) + 3)
+            k_ = (0.6 if ncol >= 8 else 1.0)
+            if ncol >= 10:        # wide tables: the text length counts for body rows only (a long header just wraps), and a text column may take its full width
+                k_ = 1.0 if r is not rows[0] else 0.0
+            wts[i] = max(wts[i], lw * 1.2 + 4.5, min(len(t), 42) * k_ + (3 if k_ else 0))
     tsz = 16 if ncol >= 8 else (17 if ncol >= 6 else 18)         # table font in half-points: 8 pt for 8 or 9 columns
     ptsz = tsz / 2
     minw = [0.0] * ncol      # absolute minimum width (twips): the longest word of the column plus the cell margins
     for r in rows:
+        if is_sub(r): continue
         for i, c in enumerate(r.findall("w:tc", ns)):
             t = "".join(c.itertext()).strip()
             minw[i] = max(minw[i], max([len(w_) for w_ in t.split()] or [0]) * 0.6 * ptsz * 20 + 280)
@@ -125,7 +133,7 @@ for tbl in doc.iter(q("tbl")):
             trpr = etree.SubElement(r, q("trPr")); r.remove(trpr); r.insert(0, trpr)
         if ri == 0 and trpr.find("w:tblHeader", ns) is None: etree.SubElement(trpr, q("tblHeader"))
         etree.SubElement(trpr, q("cantSplit"))
-        if ri < len(rows) - 1:
+        if ri < len(rows) - 1 and (len(rows) <= 12 or ri == 0 or is_sub(r)):
             for p in r.iter(q("p")):
                 ppr = p.find("w:pPr", ns)
                 if ppr is None: ppr = etree.Element(q("pPr")); p.insert(0, ppr)
@@ -144,6 +152,13 @@ for tbl in doc.iter(q("tbl")):
                 if rpr.find("w:sz", ns) is None:
                     rpr.append(etree.fromstring('<w:sz xmlns:w="%s" w:val="%d"/>' % (W, tsz))); rpr.append(etree.fromstring('<w:szCs xmlns:w="%s" w:val="%d"/>' % (W, tsz)))
                 if ri == 0 and rpr.find("w:b", ns) is None: rpr.insert(0, etree.Element(q("b")))
+        if is_sub(r):      # one merged, shaded, bold cell across the table
+            cs_ = r.findall("w:tc", ns)
+            for c_ in cs_[1:]: r.remove(c_)
+            tcpr = cs_[0].find("w:tcPr", ns)
+            tcpr.find("w:tcW", ns).set(q("w"), str(usable))
+            tcpr.insert(1, etree.fromstring('<w:gridSpan xmlns:w="%s" w:val="%d"/>' % (W, ncol)))
+            tcpr.append(etree.fromstring('<w:shd xmlns:w="%s" w:val="clear" w:color="auto" w:fill="F2F2F2"/>' % W))
 # page breaks: drop the marker paragraph, put pageBreakBefore on the next block's first paragraph
 for p in list(body.findall("w:p", ns)):
     if "PAGEBREAKMARKER" in "".join(p.itertext()):
