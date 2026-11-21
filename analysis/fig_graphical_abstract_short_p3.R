@@ -3,7 +3,7 @@
 # method, GENIE3, PIDC, GRNBoost2, |r|. Columns dropped: a3r2 and a3r3 (the stacked variants). All metric rows kept
 # (no method or truth is dropped other than those two columns). The best value of a row is recomputed over the kept columns.
 # Numbers: docs/whitepapers/figures/scoreboard_data.csv (built by analysis/scoreboard_matrix.R); nothing is a test.
-# Two pages: graphical_abstract_short_p3 (raw, main body) and graphical_abstract_short_p3b (hub-controlled, appendix).
+# Two pages: graphical_abstract_short_p3 (raw, main body) and graphical_abstract_short_p3b (hub-controlled, Figure 3 of the pre-read).
 # The lead method's name is defined once, in LEAD_NAME (the CSV keeps its internal key "a3r"; a rename is a one-line change here).
 # Dotted green = new in this work (human-data groups).
 #
@@ -245,7 +245,7 @@ foot_hub <- c(foot_common, list(fl(T2_NOTE1), fl(T2_NOTE2),
   fl("The competitors were scored on the complex rows (raw scores only) and not hub-controlled, so those cells are dashes here. The HepG2 and Kemmeren rows of the raw scoreboard (later runs) have no hub-controlled version and are not shown.")))
 
 SUB_RAW <- paste0("Raw scores. CLR (historical), ", ACLR_NAME, " (adopted) and the lead method (dashed), then competitors.")
-SUB_HUB <- "Appendix. Hub control: each method's scores are compared only among gene pairs of similar hub degree (how strongly connected the genes are). Raw scores are in the main body."
+SUB_HUB <- "Hub control: each method's scores are compared only among gene pairs of similar hub degree (how strongly connected the genes are). Raw scores are in Figure 2."
 TITLE <- "Every metric, wins and losses"
 measure_dev <- png(tempfile(fileext = ".png"), width = 800, height = 800, type = "cairo")   # for text measurements and the height pass
 for (nm in c("", "b")) {
@@ -260,7 +260,7 @@ for (nm in c("", "b")) {
   png(file.path(out_dir, paste0("graphical_abstract_short_p3", nm, ".png")), width = round(W_CAN * 300), height = round(H_CAN * 300), res = 300, type = "cairo", bg = "white")
   draw_page(rows, sub, ft, H_CAN, title = ttl, tally = nm == ""); invisible(dev.off())
   PRINT_H <- if (nm == "") 8.8 else NA                                         # main scoreboard: printed height target (in), figure and short caption share one page
-  PRINT_W <- if (nm == "") PRINT_H * W_CAN / H_CAN else 7.0                    # printed width (in); the appendix version (b) stays 7.0 in wide
+  PRINT_W <- if (nm == "") PRINT_H * W_CAN / H_CAN else 7.0                    # printed width (in); the hub-controlled version (b, Figure 3) is 7.0 in wide
   cat(sprintf("p3%s: canvas %.2f x %.2f in; printed %.2f x %.2f in (scale %.3f); min font %.1f pt -> %.2f pt printed\n", nm, W_CAN, H_CAN, PRINT_W, PRINT_W * H_CAN / W_CAN, PRINT_W / W_CAN, FS_FOOT, FS_FOOT * PRINT_W / W_CAN))
   au <- do.call(rbind, AUDIT); utils::write.csv(au, file.path(AUDIT_DIR, paste0("audit_best_marks_short_p3", nm, ".csv")), row.names = FALSE)
   cnt <- function(col) vapply(meths, function(m) sum(vapply(strsplit(au[[col]], "+", fixed = TRUE), function(z) m %in% z, NA)), 0L)

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Build docs/jim_short_preread.docx from jim_short_preread.md (pandoc + post-processing).
 Method names are temporary and live in the ONE block below (and once per figure script:
-analysis/fig_graphical_abstract_short{,_p2,_p3}.R, variables ACLR_NAME and LEAD_NAME). A rename = edit this block,
-edit those variables, re-run the three figure scripts, re-run this script.
+analysis/fig_graphical_abstract_short{,_p3}.R, variables ACLR_NAME and LEAD_NAME; _p2.R is no longer used by the document). A rename = edit this block,
+edit those variables, re-run the two figure scripts, re-run this script.
 Run: nice -n 19 python3 build_short_preread.py [source.md] [out.docx]
 """
 import re, subprocess, sys, zipfile, shutil, os, tempfile

@@ -1,3 +1,4 @@
+# NO LONGER USED in the short pre-read (its content is text in Appendix A). Kept as the source of those values.
 # Graphical abstract for the SHORT pre-read, page 2 (portrait, 8.3 in wide canvas, printed 7.0 in wide): the versions compared, one row each, drawn in code with grid.
 # Copy of analysis/fig_graphical_abstract_p2.R, revised 15 Nov: only CLR, CLR attention and the lead method, plus two
 # of the original ablation rows (attention without CLR normalization). Dropped rows: CLR-NS, |r| (correlation),
