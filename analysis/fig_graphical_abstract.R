@@ -6,7 +6,7 @@
 # Stouffer combination (zi + zj)/sqrt(2); the Stouffer combination is the one used here. No statement about who introduced
 # Stouffer or when. (The B-spline MI estimator is the same family in both, Daub et al. 2004.)
 # Names (19 Nov): aCLR = the adopted method (earlier text and file names: "attention"), tcaCLR = the log + second CLR read-out
-# (earlier: "a3r"); its stacked versions (earlier a3r2, a3r3) are "tcaCLR stacked, 2 layers" and "3 layers".
+# (earlier: "a3r"). The stacked variants of tcaCLR (two and three layers) are not shown on this figure.
 # Palette: analysis/plot_theme.R (blue = MI, orange = CLR normalization, violet = softmax,
 # magenta = depth/walk, aqua = the full method of this work, grey = competitors,
 # red = loss marker only). Network drawings and the heat map are schematic (seeded
@@ -24,27 +24,23 @@ FONT <- "Liberation Sans"   # Arial-metric sans
 
 # ---- numbers (docs/whitepapers/sota_table.md, raw scores) -------------------
 this_lab <- "aCLR (adopted)"
-# The two exploratory rows (a3r, a3r2) are values of results/explore_stack/{m3d,k562}/pooled_levels.csv
-# (raw scope; same base rate as the other bars). Neither was adopted: 26 Oct preregistered test and
-# 12 Nov stacked-layer run (docs/explore_stack_results.md); K562 is in-sample for a3r.
+# The tcaCLR row is a value of results/explore_stack/{m3d,k562}/pooled_levels.csv
+# (raw scope; same base rate as the other bars). Not adopted: 26 Oct preregistered test; K562 is in-sample for it.
 # ---- tcaCLR2 (exploratory): same metric and base-rate scaling as the other bars (raw pooled AUPR / base rate), from results/tcaclr2_scoreboard/cells_tcaclr2_all.csv ----
 T2_NAME <- "tcaCLR2"
 t2c <- utils::read.csv(Sys.getenv("SB_T2", "results/tcaclr2_scoreboard/cells_tcaclr2_all.csv"), stringsAsFactors = FALSE)
 t2e <- function(ds, truth) { x <- t2c[t2c$dataset == ds & t2c$truth == truth & t2c$metric == "pooled_aupr_over_base" & t2c$scope == "raw" & t2c$method == "tcaCLR2", ]; stopifnot(nrow(x) == 1L); x$enrichment_over_random }
 T2_M3D <- t2e("m3d", "SC"); T2_K562 <- t2e("k562", "CORUM")
 a3r_lab <- "tcaCLR (lead candidate)"
-a3r2_lab <- "tcaCLR stacked, 2 layers"
-a3r3_lab <- "tcaCLR stacked, 3 layers"
 strip_a <- data.frame(   # M3D, strong-evidence (SC) RegulonDB regulons
-  label = c(this_lab, a3r_lab, "tcaCLR2 (exploratory)", a3r2_lab, a3r3_lab, "GENIE3", "PIDC", "CLR"),
-  value = c(1.68, 1.72, T2_M3D, 1.73, 1.66, 1.51, 1.45, 1.44),
-  col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", "#bfe6d8", "#bfe6d8", ink[["muted"]], ink[["muted"]], pal[["orange"]]),
+  label = c(this_lab, a3r_lab, "tcaCLR2 (exploratory)", "GENIE3", "PIDC", "CLR"),
+  value = c(1.68, 1.72, T2_M3D, 1.51, 1.45, 1.44),
+  col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", ink[["muted"]], ink[["muted"]], pal[["orange"]]),
   stringsAsFactors = FALSE)
 strip_b <- data.frame(   # K562, CORUM complexes
-  label = c("aCLR", "tcaCLR (picked on K562)", "tcaCLR2 (exploratory)", "tcaCLR stacked, 2 layers",
-            "tcaCLR stacked, 3 layers", "CLR", "GENIE3", "|r| (correlation)"),
-  value = c(3.51, 7.95, T2_K562, 8.19, 8.15, 6.39, 6.32, 7.00),
-  col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", "#bfe6d8", "#bfe6d8", pal[["orange"]], ink[["muted"]], ink[["muted"]]),
+  label = c("aCLR", "tcaCLR (picked on K562)", "tcaCLR2 (exploratory)", "CLR", "GENIE3", "|r| (correlation)"),
+  value = c(3.51, 7.95, T2_K562, 6.39, 6.32, 7.00),
+  col = c(pal[["aqua"]], "#bfe6d8", "#bfe6d8", pal[["orange"]], ink[["muted"]], ink[["muted"]]),
   stringsAsFactors = FALSE)
 
 # ---- helpers ----------------------------------------------------------------
@@ -103,7 +99,7 @@ band <- function(x0, x1, y, fill, label) {   # labelled band + bracket over a gr
 bar_strip <- function(d, x0, w, y_top, xmax, ticks, loss = FALSE) {
   lab_x <- x0 + 0.25; bx0 <- x0 + 2.85; bx1 <- x0 + w - 0.6
   sc <- (bx1 - bx0) / xmax
-  n <- nrow(d); ry <- y_top - (seq_len(n) - 1) * 0.19; bh <- 0.14
+  n <- nrow(d); dy <- 1.33 / (n - 1); ry <- y_top - (seq_len(n) - 1) * dy; bh <- 0.14 * dy / 0.19 * 0.85   # six rows spread over the height the eight rows had
   # grid + random line
   for (t in ticks) seg(bx0 + t * sc, ry[1] + 0.17, bx0 + t * sc, ry[n] - 0.17, ink[["grid"]], 0.9)
   for (k in seq_len(n)) {

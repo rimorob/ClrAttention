@@ -6,14 +6,14 @@
 #   BEELINE median AUPRC ratio over 14 cases: results/beeline_baselines/summary.csv
 #     (|r| 1.20, CLR 1.48, CLR-NS 1.60, GENIE3 1.69, PIDC 1.56, GRNBoost2 1.47)
 #   scFM: results/scfm_score (BEELINE, preregistered primary: CLR-NS minus scPRINT R0, log2 AUPRC, +1.03)
-#   a3r rows (added 13 Nov; exploratory, not adopted): E. coli SC AUPR at t = 9 in every layer from
-#     results/explore_stack/m3d/pooled_levels.csv (a3r 0.1622, a3r2 0.1629, a3r3 0.1566); K562 CORUM enrichment
-#     from results/explore_stack/k562/pooled_levels.csv (7.95, 8.19, 8.15); K562 CORUM for CLR 6.39, |r| 7.00,
+#   a3r row (added 13 Nov; exploratory, not adopted): E. coli SC AUPR at t = 9 from
+#     results/explore_stack/m3d/pooled_levels.csv (a3r 0.1622); K562 CORUM enrichment
+#     from results/explore_stack/k562/pooled_levels.csv (7.95); K562 CORUM for CLR 6.39, |r| 7.00,
 #     CLR attention 3.51 from docs/whitepapers/sota_table.md. a3r was picked among ~20 readouts on K562 truths.
 # Names (19 Nov): aCLR = the adopted CLR attention (earlier text "attention"), tcaCLR = the log + second CLR read-out
-# (earlier text "a3r"); the stacked versions are "tcaCLR stacked, 2 layers" and "3 layers" (earlier a3r2, a3r3). Defined below.
+# (earlier text "a3r"). The stacked variants of tcaCLR are not shown. Defined below.
 # BEELINE for the adopted method and the tcaCLR family: median AUPRC ratio over the 44 case-truth cells of the primary truths,
-#   from docs/whitepapers/figures/scoreboard_data.csv (CLR-NS operator; the tcaCLR family at t = 9, not tuned): 1.54, 1.73, 1.65, 1.65.
+#   from docs/whitepapers/figures/scoreboard_data.csv (CLR-NS operator; the tcaCLR family at t = 9, not tuned): 1.54, 1.73.
 # Versions without a number in those files show a dash; nothing is interpolated.
 #
 # Output: docs/whitepapers/figures/graphical_abstract_p2.{png,pdf}
@@ -67,8 +67,7 @@ v <- data.frame(
   name = c("CLR", "CLR-NS", "|r| (correlation)",
            "Attention on |r|", "Attention on mutual information",
            "Attention on CLR of |r|", "Attention on CLR-NS", paste0(ACLR_NAME, " (adopted)"),
-           paste0(LEAD_NAME, " (lead candidate)"), paste0(T2_NAME, " (exploratory)"), paste0(LEAD_NAME, " stacked, 2 layers (exploratory)"),
-           paste0(LEAD_NAME, " stacked, 3 layers (exploratory)")),
+           paste0(LEAD_NAME, " (lead candidate)"), paste0(T2_NAME, " (exploratory)")),
   sub = c("context normalization, scores ranked directly",
           "CLR on |r| of normal scores (Blom)",
           "no normalization, scores ranked directly",
@@ -78,17 +77,15 @@ v <- data.frame(
           "CLR-NS scores, then softmax + walk",
           "MI, CLR normalization, softmax + walk",
           paste0(ACLR_NAME, ", then log of the walk + a second CLR"),
-          paste0(LEAD_NAME, " with the walk depth set by the data, not t = 9"),
-          paste0(LEAD_NAME, " fed back as the score of a second layer; not adopted"),
-          paste0(LEAD_NAME, " fed back twice; not adopted")),
-  dep = c("MI", "NS", "r", "r", "MI", "r", "NS", "MI", "MI", "MI", "MI", "MI"),
-  cn  = c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
-  sm  = c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
-  lc  = c(rep(FALSE, 8), TRUE, TRUE, TRUE, TRUE),
-  walklab = c(NA, NA, NA, "t* = 8", "t* = 6", "t* = 7", "t* = 5", "t* = 9", "t = 9", "t = t2", "t = 9 ×2", "t = 9 ×3"),
-  ecoli = c(0.136, NA, NA, 0.143, 0.143, 0.153, 0.151, 0.158, 0.1622, t2_ecoli, 0.1629, 0.1566),
-  corum = c("6.39", "", "7.00", "", "", "", "", "3.51", "7.95", t2_corum, "8.19", "8.15"),
-  beeline = c("1.48", "1.60", "1.20", "", "", "", "no gain over CLR-NS", "1.54", "1.73", t2_beel, "1.65", "1.65"),
+          paste0(LEAD_NAME, " with the walk depth set by the data, not t = 9")),
+  dep = c("MI", "NS", "r", "r", "MI", "r", "NS", "MI", "MI", "MI"),
+  cn  = c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE),
+  sm  = c(FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
+  lc  = c(rep(FALSE, 8), TRUE, TRUE),
+  walklab = c(NA, NA, NA, "t* = 8", "t* = 6", "t* = 7", "t* = 5", "t* = 9", "t = 9", "t = t2"),
+  ecoli = c(0.136, NA, NA, 0.143, 0.143, 0.153, 0.151, 0.158, 0.1622, t2_ecoli),
+  corum = c("6.39", "", "7.00", "", "", "", "", "3.51", "7.95", t2_corum),
+  beeline = c("1.48", "1.60", "1.20", "", "", "", "no gain over CLR-NS", "1.54", "1.73", t2_beel),
   stringsAsFactors = FALSE)
 
 draw_p2 <- function() {
@@ -113,7 +110,7 @@ draw_p2 <- function() {
     txt(h[[1]], h[[2]], hy, 11, ink[["secondary"]], "bold", just = h[[3]], lineheight = 0.95)
   seg(0.4, hy - 0.34, 15.7, hy - 0.34, ink[["secondary"]], 1.2)
 
-  ys <- seq(6.85, by = -0.46, length.out = nrow(v))
+  ys <- seq(6.85, by = -(11 * 0.46) / (nrow(v) - 1), length.out = nrow(v))   # ten rows spread over the height the twelve rows had
   # E. coli dot axis 0.13 .. 0.17 (deliberately not from zero; ticks labelled)
   ax <- function(a) xe0 + (a - 0.13) / (0.17 - 0.13) * (xe1 - xe0)
   for (a in c(0.13, 0.14, 0.15, 0.16, 0.17)) {
@@ -147,12 +144,12 @@ draw_p2 <- function() {
                                   face = if (k == 2) "bold" else "plain")
   }
   fy0 <- ys[length(ys)] - 0.53
-  txt("t* = held-out depth, chosen per version; the method comparison itself fixes t = 9. Stacked rows: t = 9 in every layer, not re-selected; stacking was not adopted (12 Nov stacked-layer run).",
+  txt("t* = held-out depth, chosen per version; the method comparison itself fixes t = 9.",
       0.4, fy0, 9, ink[["secondary"]], just = "left")
   txt(paste0(LEAD_NAME, ": lead candidate; its 26 Oct preregistered E. coli test did not reach the threshold. It was picked among about 20 read-outs by its K562 scores (a selection, not a fit: it has no fitted parameters)."),
       0.4, fy0 - 0.19, 9, ink[["secondary"]], just = "left")
   txt(T2_NOTE, 0.4, fy0 - 0.57, 9, ink[["secondary"]], just = "left")
-  txt(paste0("Gaps between ", LEAD_NAME, " and its stacked versions are inside the noise. BEELINE: CLR is plain CLR; the ", ACLR_NAME, " and ", LEAD_NAME, " rows use the CLR-NS operator (", LEAD_NAME, " family at t = 9, not tuned)."),
+  txt(paste0("BEELINE: CLR is plain CLR; the ", ACLR_NAME, " and ", LEAD_NAME, " rows use the CLR-NS operator (", LEAD_NAME, " family at t = 9, not tuned)."),
       0.4, fy0 - 0.38, 9, ink[["secondary"]], just = "left")
 
   # footer strip: what CLR was compared with

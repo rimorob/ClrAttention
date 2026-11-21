@@ -1,11 +1,10 @@
 # Graphical abstract, page 3 (16:9) of the LONG checkpoint: "Every metric, wins and losses". A descriptive scoreboard, drawn in code with grid.
 # Companion of analysis/fig_graphical_abstract.R (page 1) and _p2.R; same palette and conventions. Rebuilt 19 Nov from the
-# SHORT pre-read's scoreboard code (analysis/fig_graphical_abstract_short_p3.R), with the long figure's extra columns kept:
-# the stacked variants of the lead method (CSV keys a3r2, a3r3: two and three layers; exploratory, not adopted).
+# SHORT pre-read's scoreboard code (analysis/fig_graphical_abstract_short_p3.R); the long figure now has the same eight columns
+# (the stacked variants of the lead method were dropped from it; they are not needed).
 # Names: aCLR (CSV key "Attention", earlier text "attention") and tcaCLR (CSV key "a3r", earlier text "a3r"); both defined below.
 # Rows: the 19 rows of the earlier long figure plus the two rows of the later preregistered runs (HepG2 and Kemmeren),
 # read from docs/tcaclr_confirm_results/{armA,armB}/metrics.csv (seven methods: CLR, aCLR, tcaCLR, GENIE3, PIDC, GRNBoost2, |r|).
-# The stacked variants were not run on the new rows: dashes there.
 # Numbers: docs/whitepapers/figures/scoreboard_data.csv (built by analysis/scoreboard_matrix.R); nothing is a test:
 # no intervals, no p-values, no statistical winner. A bold value with a dot is the highest printed value of its row
 # (equal printed values share the mark and the tally). Two pages:
@@ -54,18 +53,18 @@ seg <- function(x0, y0, x1, y1, col = ink[["muted"]], lwd = 1, lty = 1)
   grid.segments(x0, y0, x1, y1, default.units = "native", gp = gpar(col = col, lwd = lwd, lty = lty, lineend = "butt"))
 
 # ---- columns ----------------------------------------------------------------------------------------------------------
-meths <- c("Attention", "CLR", LEAD_KEY, T2_KEY, "a3r2", "a3r3", "GENIE3", "PIDC", "GRNBoost2", "abs_r")
-head1 <- c(ACLR_NAME, "CLR", LEAD_NAME, T2_NAME, LEAD_NAME, LEAD_NAME, "GENIE3", "PIDC", "GRNBoost2", "|r|")
-head2 <- c("adopted", "", "lead candidate", "depth set by data", "stacked, 2 layers", "stacked, 3 layers", "", "", "", "")
-head3 <- c("", "", "", "exploratory", "exploratory", "exploratory", "", "", "", "")
+meths <- c("Attention", "CLR", LEAD_KEY, T2_KEY, "GENIE3", "PIDC", "GRNBoost2", "abs_r")
+head1 <- c(ACLR_NAME, "CLR", LEAD_NAME, T2_NAME, "GENIE3", "PIDC", "GRNBoost2", "|r|")
+head2 <- c("adopted", "", "lead candidate", "depth set by data", "", "", "", "")
+head3 <- c("", "", "", "exploratory", "", "", "", "")
 EXPL <- "#bfe6d8"
-fillc <- c(Attention = pal[["aqua"]], CLR = pal[["orange"]], EXPL, EXPL, a3r2 = EXPL, a3r3 = EXPL,
+fillc <- c(Attention = pal[["aqua"]], CLR = pal[["orange"]], EXPL, EXPL,
            GENIE3 = ink[["muted"]], PIDC = ink[["muted"]], GRNBoost2 = ink[["muted"]], abs_r = ink[["muted"]])
 names(fillc)[3] <- LEAD_KEY; names(fillc)[4] <- T2_KEY
-EXPL_KEYS <- c(LEAD_KEY, T2_KEY, "a3r2", "a3r3")
+EXPL_KEYS <- c(LEAD_KEY, T2_KEY)
 X_LAB <- 0.3                    # row labels start
 X_C0 <- 4.75                    # first method column starts
-CW <- (15.75 - X_C0) / 10       # column width
+CW <- (15.75 - X_C0) / 8        # column width
 NUM_X <- 0.16                   # number, left edge inside a cell
 ORG_X <- 0.62                   # bar origin (the 'random' tick) inside a cell
 BAR_W <- CW - ORG_X - 0.06      # longest bar
@@ -140,10 +139,10 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
   firsts <- stats::setNames(integer(length(meths)), meths)
   GH <- 0.74                                   # group-header height relative to a row
   pitch <- (y_top - y_bot) / (nr + ng * GH)
-  # column bands (adopted column; the lead method and its stacked variants) and headers
+  # column bands (adopted column; the lead method and tcaCLR2) and headers
   hy <- y_top + 0.5
   grid.rect(cx0(1), y_bot - 0.05, CW, y_top - y_bot + 0.78, default.units = "native", just = c("left", "bottom"), gp = gpar(fill = "#eaf7f1", col = NA))
-  grid.rect(cx0(3), y_bot - 0.05, 4 * CW, y_top - y_bot + 0.78, default.units = "native", just = c("left", "bottom"), gp = gpar(fill = "#f6fcf9", col = pal[["aqua"]], lty = 2, lwd = 1))
+  grid.rect(cx0(3), y_bot - 0.05, 2 * CW, y_top - y_bot + 0.78, default.units = "native", just = c("left", "bottom"), gp = gpar(fill = "#f6fcf9", col = pal[["aqua"]], lty = 2, lwd = 1))
   for (j in seq_along(meths)) {
     x <- cx0(j) + CW / 2
     txt(head1[j], x, hy + 0.1, 11, face = "bold")
@@ -197,8 +196,6 @@ draw_page <- function(rows, sub, y_top, footer, y_bot = 1.43, title = TITLE, tal
     if (nzchar(Sys.getenv("SB_VERBOSE"))) cat("TALLY", paste(names(firsts), firsts, sep = "=", collapse = " "), "of", nrows, "\n")
     for (j in seq_along(meths)) {
       x0 <- cx0(j)
-      if (win[j]) grid.roundrect(x0 + NUM_X - 0.1, y, 1.0, pitch * 0.8, default.units = "native", just = c("left", "centre"),
-                                 r = unit(0.05, "inches"), gp = gpar(fill = NA, col = ink[["primary"]], lwd = 1.4))
       txt(sprintf("%d/%d", firsts[[j]], nrows), x0 + NUM_X + 0.02, y, 11, face = if (win[j]) "bold" else "plain", just = "left")
     }
     y <- y - pitch / 2
@@ -213,18 +210,18 @@ foot_common <- list(
   fl("Bars start at random (tick; 1.00, or 0.50 for the AUROC row) and are scaled within each row; the value, not the bar, carries the comparison across rows."),
   fl("A bold value with a dot is the highest printed value in its row (equal printed values share the mark and the tally), not a statistical winner; no intervals or tests are shown. A grey dash is a cell that was not run, which cannot win."),
   fl(paste0("Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; ", LEAD_NAME, " was picked among about 20 read-outs by its K562 scores (selected, not fitted); K562 and M3D are tuning sets;")),
-  fl(paste0(ACLR_NAME, " and ", LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the threshold; its preregistered HepG2 test (a separate result on a new truth) did. The stacked variants (2 and 3 layers) are exploratory and not adopted.")))
+  fl(paste0(ACLR_NAME, " and ", LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the threshold; its preregistered HepG2 test (a separate result on a new truth) did.")))
 foot_raw <- c(foot_common, list(fl(T2_NOTE1), fl(T2_NOTE2),
-  fl(paste0("DREAM5 yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; competitors from saved score matrices; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line); the stacked variants were not run on it.")),
-  fl(paste0("HepG2 and Kemmeren rows: later preregistered runs, one pass each, ", ACLR_NAME, " and ", LEAD_NAME, " not tuned on them; Kemmeren is estimate only; stacked variants not run. HepG2 shares its lab and screen family with K562; there ", LEAD_NAME, " is not shown better than CLR, |r|, GENIE3 or PIDC.")),
+  fl(paste0("DREAM5 yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; competitors from saved score matrices; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
+  fl(paste0("HepG2 and Kemmeren rows: later preregistered runs, one pass each, ", ACLR_NAME, " and ", LEAD_NAME, " not tuned on them; Kemmeren is estimate only. HepG2 shares its lab and screen family with K562; there ", LEAD_NAME, " is not shown better than CLR, |r|, GENIE3 or PIDC.")),
   fl("RPE1 row: GENIE3, PIDC and GRNBoost2 were run on its 8,745 genes (two duplicated-symbol rows dropped) and scored on the same truth. E. coli complex rows: competitors re-scored from the saved score matrices of the earlier comparison."),
-  fl(paste0("BEELINE: median over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases); ", ACLR_NAME, " and the ", LEAD_NAME, " columns use the CLR-NS operator (", ACLR_NAME, " at its held-out depth, ", LEAD_NAME, " and the stacked variants at t = 9, not tuned; ", T2_NAME, " at its own t2); CLR is plain CLR; second row cell-type ChIP only."))))
+  fl(paste0("BEELINE: median over the 44 case-truth cells of the primary truths (14 dataset-and-gene-set cases); ", ACLR_NAME, " and the ", LEAD_NAME, " columns use the CLR-NS operator (", ACLR_NAME, " at its held-out depth, ", LEAD_NAME, " at t = 9, not tuned; ", T2_NAME, " at its own t2); CLR is plain CLR; second row cell-type ChIP only."))))
 foot_hub <- c(foot_common, list(fl(T2_NOTE1), fl(T2_NOTE2),
   fl("The yeast complex row of the raw scoreboard is left out here: the study stored its hub-controlled scores only with the MI row-mean stratifier, not the stratifier used on this page, so they are not comparable."),
   fl(paste0("Hub-controlled: each method's scores are converted to percentiles within 10 strata of pi_i + pi_j (pi = stationary distribution of the ", ACLR_NAME, " walk), the stratifier of the method table. Not run for direct edges, per-regulon AP and BEELINE.")),
   fl("The competitors were scored on the complex rows (raw scores only) and not hub-controlled, so those cells are dashes here. The HepG2 and Kemmeren rows of the raw scoreboard (later runs) have no hub-controlled version and are not shown.")))
 
-SUB_RAW <- paste0("Raw scores. ", ACLR_NAME, " (adopted, t = 9) and CLR, then the lead method ", LEAD_NAME, ", tcaCLR2 (depth set by the data) and two exploratory stacked variants (dashed), then competitors.")
+SUB_RAW <- paste0("Raw scores. ", ACLR_NAME, " (adopted, t = 9) and CLR, then the lead method ", LEAD_NAME, " and tcaCLR2 (depth set by the data; both dashed), then competitors.")
 SUB_HUB <- "Hub-controlled versions of the same rows (page 3 shows the raw scores): each method's scores are compared only among gene pairs of similar hub degree."
 TITLE <- "Every metric, wins and losses"
 for (nm in c("", "b")) {
