@@ -54,7 +54,7 @@ files = {n: zin.read(n) for n in zin.namelist()}
 st = files["word/styles.xml"].decode("utf-8")
 st = re.sub(r"<w:docDefaults>.*?</w:docDefaults>",
             '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri" w:eastAsia="Calibri"/>'
-            '<w:sz w:val="21"/><w:szCs w:val="21"/><w:lang w:val="en-US"/></w:rPr></w:rPrDefault>'
+            '<w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:val="en-US"/></w:rPr></w:rPrDefault>'
             '<w:pPrDefault><w:pPr><w:spacing w:after="80" w:line="240" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>', st, flags=re.S)
 def style_edit(sid, fn):
     global st

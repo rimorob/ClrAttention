@@ -2,7 +2,7 @@
 title: "Focus on what matters: summarizing attention in context likelihood of relatedness"
 ---
 
-**Abstract.** Attention normalizes each query's compatibilities within its own context. Context likelihood of relatedness (CLR), its first widely adopted form in computational biology, remains standard for unsupervised network inference but stops at the scores. We add the rest of the attention operation: a temperature-controlled softmax that converts scores to weights, and a weighted sum of neighbours' values, repeated as a short walk whose depth is chosen on held-out data without labels ({{ACLR_NAME}}). On strong-evidence *Escherichia coli* regulons, {{ACLR_NAME}} raises recovery 16% over CLR and, under hub control, leads GENIE3 and PIDC, but it loses to CLR on tight complexes such as ribosomes. A second CLR on the walk's log ({{LEAD_NAME}}) recovers complexes in K562 (selected among about 20 read-outs). In a preregistered test on HepG2 Perturb-seq it gained 0.027 AUPR over {{ACLR_NAME}} (95% CI 0.011 to 0.042), carried by a few large complexes; the *Escherichia coli* test missed its threshold.
+**Abstract.** Attention normalizes each query's compatibilities within its own context, an idea older than the transformer (Vaswani et al. 2017), with roots in kernel regression (Nadaraya 1964; Watson 1964) and fast weights (Schmidhuber 1992; Schlag et al. 2021). Context likelihood of relatedness (CLR; Faith et al. 2007), its first widely adopted form in computational biology, remains standard for unsupervised network inference but stops at the scores. We add the rest of the attention operation: a temperature-controlled softmax that converts scores to weights, and a weighted sum of neighbours' values, repeated as a short walk whose depth is chosen on held-out data without labels ({{ACLR_NAME}}). On strong-evidence *Escherichia coli* regulons, {{ACLR_NAME}} raises recovery 16% over CLR and, under hub control, leads GENIE3 and PIDC, but it loses to CLR on tight complexes such as ribosomes. A second CLR on the walk's log ({{LEAD_NAME}}) recovers complexes in K562 (selected among about 20 read-outs). In a preregistered test on HepG2 Perturb-seq it gained 0.027 AUPR over {{ACLR_NAME}} (95% CI 0.011 to 0.042), carried by a few large complexes; the *Escherichia coli* test missed its threshold.
 
 {{LEAD_NAME}} is {{LEAD_DESC}}; like {{ACLR_NAME}}, it has no fitted parameters, and it is our lead candidate.[^names] The appendix has more.
 
@@ -219,6 +219,20 @@ score[i,j] = (Z[i,j] + Z[j,i]) / sqrt(2)
 # F. AI disclosure
 
 The analysis code, runs and drafts were produced with Claude (Anthropic), with independent AI statistical reviews, under the author's direction. A contributions statement is drafted to match Nature Portfolio policy.
+
+# G. References for the prior art
+
+Faith, J. J. *et al.* Large-scale mapping and validation of *Escherichia coli* transcriptional regulation from a compendium of expression profiles. *PLoS Biol.* **5**, e8 (2007).
+
+Nadaraya, E. A. On estimating regression. *Theory Probab. Appl.* **9**, 141–142 (1964).
+
+Schlag, I., Irie, K. & Schmidhuber, J. Linear transformers are secretly fast weight programmers. In *Proc. 38th Int. Conf. Mach. Learn.*, PMLR **139**, 9355–9366 (2021).
+
+Schmidhuber, J. Learning to control fast-weight memories: an alternative to dynamic recurrent networks. *Neural Comput.* **4**, 131–139 (1992).
+
+Vaswani, A. *et al.* Attention is all you need. In *Adv. Neural Inf. Process. Syst.* **30** (2017).
+
+Watson, G. S. Smooth regression analysis. *Sankhyā A* **26**, 359–372 (1964).
 
 [^names]: {{ACLR_NAME}} is CLR with the attention summary added; method names are temporary.
 
