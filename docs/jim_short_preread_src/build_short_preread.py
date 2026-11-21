@@ -9,7 +9,7 @@ import re, subprocess, sys, zipfile, shutil, os, tempfile
 from lxml import etree
 
 # ---- NAMES: DEFINED HERE ONLY (temporary) ------------------------------------------------------------------------------
-ACLR_NAME = "aCLR"                                   # CLR + attention (earlier-adopted method)
+ACLR_NAME = "aCLR"                                   # CLR + attention summary (softmax and walk; earlier-adopted method)
 LEAD_NAME = "tcaCLR"                                 # lead method ("twice cooked aCLR")
 LEAD_DESC = f"{ACLR_NAME} followed by a second CLR on the log of the walk"
 # -------------------------------------------------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ st = files["word/styles.xml"].decode("utf-8")
 st = re.sub(r"<w:docDefaults>.*?</w:docDefaults>",
             '<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri" w:eastAsia="Calibri"/>'
             '<w:sz w:val="21"/><w:szCs w:val="21"/><w:lang w:val="en-US"/></w:rPr></w:rPrDefault>'
-            '<w:pPrDefault><w:pPr><w:spacing w:after="80" w:line="247" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>', st, flags=re.S)
+            '<w:pPrDefault><w:pPr><w:spacing w:after="80" w:line="240" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>', st, flags=re.S)
 def style_edit(sid, fn):
     global st
     m = re.search(r'<w:style [^>]*w:styleId="%s".*?</w:style>' % sid, st, re.S)
