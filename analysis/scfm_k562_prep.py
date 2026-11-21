@@ -27,17 +27,32 @@ Outputs: results/scfm_k562/{geneset.tsv,subsamples.tsv,geneset_meta.json}, ~/scf
 results/scfm_step2/gene_map/hK562_s{k}.tsv (same columns as the BEELINE gene maps).
 
   ~/venvs/scfm/bin/python -I analysis/scfm_k562_prep.py
+
+Parameterised for further datasets built exactly as K562 (docs/plans/scgpt_extension_plan.md, section 8; defaults reproduce the K562 run byte for byte):
+  --h5 FILE            single-cell h5ad (dense X, categorical obs `gene`, var `gene_name`, `gene_id`, obs `cell_barcode`)
+  --tag hHepG2         case prefix; extractor case names are <tag>_s1..5 (the leading "h" selects human); default hK562
+  --out DIR            results directory (geneset.tsv, subsamples.tsv, geneset_meta.json); default results/scfm_k562
+  --control-label STR  value of obs `gene` marking the non-targeting controls; default non-targeting
+  --inputs DIR / --gene-map-dir DIR   extractor inputs and gene maps (defaults ~/scfm_models/step2/inputs and results/scfm_step2/gene_map)
+Entry rule of the plan: a dataset with fewer than 1,024 controls but at least 512 uses all its controls as ONE subsample; fewer than 512 aborts.
+Test-only switches (never used for a production run; they change the result): --max-cells N takes the first N controls in file order,
+--n-cells M and --n-subsamples K change the subsample size and number.
 """
-import hashlib, json, os, sys
+import argparse, hashlib, json, os, sys
 import numpy as np, pandas as pd, h5py
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 H5 = f"{ROOT}/data/perturbseq/K562_essential_raw_singlecell_01.h5ad"
+CONTROL = "non-targeting"
+TAG = "hK562"
 COLLECTRI = f"{ROOT}/data/human_truth/collectri.tsv"
 OUT = f"{ROOT}/results/scfm_k562"
 RAW = os.path.expanduser("~/scfm_models/raw")
 INP = os.path.expanduser("~/scfm_models/step2/inputs")
+GENE_MAP_DIR = f"{ROOT}/results/scfm_step2/gene_map"
+N_SUB = 5
+MAX_CELLS = 0
 MIN_TARGETS, MIN_DETECT, N_VAR, N_CELLS = 10, 0.05, 1000, 1024
 
 
@@ -56,15 +71,40 @@ def cat(f, grp, field):
 
 
 def main():
+    global H5, OUT, TAG, CONTROL, INP, GENE_MAP_DIR, N_SUB, N_CELLS, MAX_CELLS
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--h5", default=H5)
+    ap.add_argument("--tag", default=TAG)
+    ap.add_argument("--out", default=OUT)
+    ap.add_argument("--control-label", default=CONTROL)
+    ap.add_argument("--inputs", default=INP)
+    ap.add_argument("--gene-map-dir", default=GENE_MAP_DIR)
+    ap.add_argument("--max-cells", type=int, default=0, help="TEST ONLY")
+    ap.add_argument("--n-cells", type=int, default=N_CELLS, help="TEST ONLY")
+    ap.add_argument("--n-subsamples", type=int, default=N_SUB, help="TEST ONLY")
+    a = ap.parse_args()
+    H5, OUT, TAG, CONTROL = os.path.abspath(a.h5), os.path.abspath(a.out), a.tag, a.control_label
+    INP, GENE_MAP_DIR, N_SUB, N_CELLS, MAX_CELLS = os.path.expanduser(a.inputs), os.path.abspath(a.gene_map_dir), a.n_subsamples, a.n_cells, a.max_cells
+    assert TAG.startswith("h"), "the tag must start with h (human) for the extractors"
     os.makedirs(OUT, exist_ok=True)
-    os.makedirs(f"{ROOT}/results/scfm_step2/gene_map", exist_ok=True)
+    os.makedirs(GENE_MAP_DIR, exist_ok=True)
     f = h5py.File(H5, "r")
     pert = cat(f, "obs", "gene")
     barcode = np.array([b.decode() if isinstance(b, bytes) else b for b in f["obs/cell_barcode"][:]])
     sym = cat(f, "var", "gene_name")
     gid = np.array([b.decode() if isinstance(b, bytes) else b for b in f["var/gene_id"][:]])
-    ctrl = np.where(pert == "non-targeting")[0]
-    print(f"{len(pert)} cells, {len(sym)} genes, {len(ctrl)} non-targeting control cells", flush=True)
+    ctrl = np.where(pert == CONTROL)[0]
+    if MAX_CELLS:
+        ctrl = ctrl[:MAX_CELLS]
+    print(f"{len(pert)} cells, {len(sym)} genes, {len(ctrl)} control cells (label {CONTROL!r})", flush=True)
+    # entry rule: >= 1,024 controls -> N_SUB subsamples of N_CELLS; 512..1,023 -> all controls as one subsample; fewer -> abort
+    if len(ctrl) >= N_CELLS:
+        n_sub, n_use = N_SUB, N_CELLS
+    elif len(ctrl) >= 512 or MAX_CELLS:
+        n_sub, n_use = 1, len(ctrl)
+        print(f"fewer than {N_CELLS} controls: all {n_use} cells, one subsample", flush=True)
+    else:
+        raise SystemExit(f"only {len(ctrl)} control cells (< 512): the dataset does not enter")
     C = f["X"][ctrl.tolist(), :]                 # control cells x genes, raw UMI (file order); perturbed cells are not read
     f.close()
     assert C.shape == (len(ctrl), len(sym)) and np.all(C >= 0) and np.all(C == np.round(C))
@@ -96,8 +136,8 @@ def main():
     # subsamples
     sub = {}
     rows = []
-    for k in range(1, 6):
-        idx = np.sort(np.random.default_rng(k).choice(len(ctrl), N_CELLS, replace=False))
+    for k in range(1, n_sub + 1):
+        idx = np.sort(np.random.default_rng(k).choice(len(ctrl), n_use, replace=False)) if n_use < len(ctrl) else np.arange(len(ctrl))
         sub[k] = idx
         for j in idx:
             rows.append((k, barcode[ctrl[j]], int(ctrl[j])))
@@ -144,15 +184,26 @@ def main():
                 drop_reasons=df[~df.in_scprint].status.value_counts().to_dict())
     os.makedirs(INP, exist_ok=True)
     cols = np.where(use)[0]
-    for k in range(1, 6):
-        case = f"hK562_s{k}"
-        df.to_csv(f"{ROOT}/results/scfm_step2/gene_map/{case}.tsv", sep="\t", index=False)
+    for k in range(1, n_sub + 1):
+        case = f"{TAG}_s{k}"
+        df.to_csv(f"{GENE_MAP_DIR}/{case}.tsv", sep="\t", index=False)
         X = C[sub[k]][:, cols].T.astype(np.float64)      # genes x cells, raw UMI counts
         np.savez(f"{INP}/{case}.npz", genes=np.array(gs.symbol, dtype=object), cells=np.array(barcode[ctrl[sub[k]]], dtype=object),
-                 tpm_beeline=X, counts=X, counts_ok=np.ones(len(gs), bool), cells_ok=np.ones(N_CELLS, bool))
+                 tpm_beeline=X, counts=X, counts_ok=np.ones(len(gs), bool), cells_ok=np.ones(n_use, bool))
+    # self-contained scoring inputs (so that the raw h5ad can be deleted after this step): per-cell total UMI over ALL matrix genes (needed by log1p(count / total * median))
+    # and the raw counts of the gene-set genes per subsample (genes in geneset.tsv order x cells, column-major float32 = exact integers). New files; none of the above is changed.
+    os.makedirs(f"{OUT}/expr", exist_ok=True)
+    tot_rows = []
+    for k in range(1, n_sub + 1):
+        Ck = C[sub[k]]
+        for j, t in zip(sub[k], Ck.sum(1, dtype=np.float64)):
+            tot_rows.append((k, barcode[ctrl[j]], int(ctrl[j]), float(t)))
+        with open(f"{OUT}/expr/{TAG}_s{k}.counts.f32", "wb") as fh:
+            fh.write(np.asfortranarray(Ck[:, cols].T.astype(np.float32)).tobytes(order="F"))
+    pd.DataFrame(tot_rows, columns=["subsample", "cell_barcode", "file_row", "total_umi"]).to_csv(f"{OUT}/cell_totals.tsv", sep="\t", index=False, float_format="%.0f")
     meta["geneset_sha256"] = sha256(f"{OUT}/geneset.tsv")
     meta["subsamples_sha256"] = sha256(f"{OUT}/subsamples.tsv")
-    meta["gene_map_sha256"] = sha256(f"{ROOT}/results/scfm_step2/gene_map/hK562_s1.tsv")
+    meta["gene_map_sha256"] = sha256(f"{GENE_MAP_DIR}/{TAG}_s1.tsv")
     json.dump(meta, open(f"{OUT}/geneset_meta.json", "w"), indent=1)
     print(json.dumps(meta, indent=1))
 

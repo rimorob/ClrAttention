@@ -1,0 +1,93 @@
+# scGPT extension: scripts, jobs, resources (stage 1)
+
+Implements `docs/plans/scgpt_extension_plan.md` with Revision 1 (complexes are a third primary truth). Written and smoke-tested on 21 Nov 2026. **Nothing was submitted to the scheduler, no real truth was scored for any new dataset, no download was made.** All job files are staged here, not in `jobs_pc/`.
+
+## What each script does
+
+| Script | Role |
+|---|---|
+| `analysis/scfm_k562_prep.py` (changed) | Gene set and subsamples from a Perturb-seq h5ad. New options `--h5`, `--tag` (case prefix, e.g. `hHepG2`), `--out`, `--control-label`, `--inputs`, `--gene-map-dir`; entry rule (at least 1,024 controls: 5 subsamples; 512 to 1,023: all controls, one subsample; fewer: abort); test-only `--max-cells/--n-cells/--n-subsamples`. New extra outputs `cell_totals.tsv` and `expr/<tag>_s<k>.counts.f32` (so the raw h5ad can be deleted after this step). Defaults reproduce K562. |
+| `analysis/scfm_extract_scgpt.py` | **Unchanged.** Call with `--cases hHepG2_s1,...,hHepG2_s5 --out ~/scfm_models/step3/hepg2/scgpt_A --device 1`. |
+| `analysis/scfm_k562_manifest.py` (changed) | `--dir`, `--out` (defaults = the K562 freeze). |
+| `analysis/scfm_score_export.py` (changed) | `--k562 --tag hepg2 --manifest-sha SHA` exports another single-cell dataset (scGPT sources only; output default `~/scfm_models/step4_<tag>`); smoke-only `--step3`, `--manifest`, `--gene-map-dir`. |
+| `analysis/scfm_score_k562.R` (changed) | The K562 script, now with `--tag K562|HepG2|RPE1|Jurkat` (registry `REG` in the script), scGPT-only datasets (no scPRINT sources or contrasts), `--prep_dir`, `--expr h5|files|auto`. Without `--tag` it is the 2 Nov script (outputs byte-identical, below). It keeps the regulator bootstrap (B = 1,000) and the KD-response truth. |
+| `analysis/scgpt_ext/score_ext.R` (new) | **The loop over datasets** (hESC, hHep, K562, HepG2, RPE1, Jurkat; a registry entry in `ext_lib.R` plus `--datasets`). Per unit (subsample or case): |r|, CLR, CLR-NS, tcaCLR (t = 9), tcaCLR2 and the four scGPT readouts on the scGPT gene set; truths DoRothEA A-B, CollecTRI (directed TF-node `score_truth`), Complex Portal complexes (pooled co-membership AUPR, `ap_fast`), knockdown response (secondary, where a bulk file exists). Gates stop the run before anything is written. `--truth synthetic` plants all truths from the networks and reads no truth file. |
+| `analysis/scgpt_ext/ext_lib.R` (new) | tcaCLR/tcaCLR2 on a CLR-NS matrix (`gl_make_P`, `tsb_walk`, `sk_a3r`, `ad_permute_genes`, `ad_Psym`, `ad_eigs`, `ed_t2` sourced from the existing libraries; no second operator builder), complex truth and scorer, stored-value gate. |
+| `analysis/scgpt_ext/build_complex_truth.R` (new, copy) | The builder `analysis/tcaclr_confirm/build_human_truth.R` with one marked change (see "Does not work as written"). |
+| `analysis/scgpt_ext/stats_ext.R` (new) | d_i per dataset, margin 0.15, exact Wilcoxon-Hodges-Lehmann interval, scPRINT-arm decision table, Holm P1/S1/S2, descriptive tables. `--legacy 1` reproduces `docs/scfm_scoring.md` sections 6 and 7. |
+| `analysis/scgpt_ext/test_ext.R` (new) | Unit tests (intervals vs `wilcox.test`, decision rows, p at n = 4/5/6, Holm flags, complex AUPR on the real complex structure with an oracle and a random score). |
+
+tcaCLR2 definition used: the edge rule of `docs/plans/tcaclr2_definition.md` with the CLR-NS extension of `analysis/tcaclr2/edge_scoreboard.R --id beeline`, recomputed on each unit's G-intersection matrix (10 per-gene permutations, seeds `ED$seed + 7000 + p`, `ed_t2`). It is a column only: no test, no Holm family, no decision label (`stats_ext.R` attaches decisions only to P1, S1, S2).
+
+## Checks run (all on scratch outputs)
+
+**Byte identity, K562 old code path.** Old script (`git show HEAD:analysis/scfm_score_k562.R`) and the changed script, both `--truth real --boot 100 --workers 4` on K562: `metrics_long.csv`, `bootstrap_contrasts.csv`, `key_methods_mean_over_subsamples.csv`, `readouts_vs_clrns_mean_over_subsamples.csv`, `sessionInfo.txt` byte-identical; log identical after removing time stamps. `metrics_long.csv`, `key_methods...csv` and `readouts_vs_clrns...csv` are also byte-identical to the committed `results/scfm_score_k562/` (B-independent files; the bootstrap `d` and `d_score_truth` columns equal the committed ones, intervals differ only by B). Prep (K562 default run into scratch): `geneset.tsv`, `subsamples.tsv`, `geneset_meta.json`, the five gene maps byte-identical, the five `hK562_s*.npz` arrays identical. Manifest script: `results/scfm_k562/sha256_manifest.csv` byte-identical (hash 787cbf87...080b). Export: `export_index.csv` and the files compared are byte-identical (95 matrices).
+
+**Gates in `score_ext.R` (all pass).** tcaCLR at t = 9 via `gl_make_P` / `sk_a3r` equals the independent `rz_operator` path (`sk_layer`) with maximum difference 0 (tolerance 1e-12) on every matrix tried; `gl_make_P` equals `rz_lazy_P(rz_operator)` (0). Stored-value gate (hESC_500 and hHep_500, full BEELINE case matrices, cell-type and non-specific ChIP, seen truths): tcaCLR and tcaCLR2 reproduce the stored scoreboard values (`results/scoreboard/beeline/metrics.csv` method a3r; `results/tcaclr2_scoreboard/beeline_metrics.csv`), the stored edge and t2 (17) to at most 5e-15. **For K562 there are no stored CLR-NS-based tcaCLR values** (the stored K562 tcaCLR is the MI-CLR operator on 5,671 genes), so for the single-cell datasets the t = 9 gate is the independent `rz_operator` implementation, and the stored-value gate is the BEELINE one. `--methods legacy` on K562 (real DoRothEA, CollecTRI, KD truths; spent): |r|, CLR, CLR-NS and the four scGPT readouts reproduce `results/scfm_score_k562/metrics_long.csv` on gene set S (105 rows, maximum difference 4.9e-15); complexes and tcaCLR/tcaCLR2 are not scored in that mode.
+
+**Reproduction of `docs/scfm_scoring.md` sections 6 and 7** (`stats_ext.R --legacy 1`, output `results/scgpt_ext/stats_legacy_check/` if run in place): all 45 compared numbers match to printed precision (section 6: HL and range of the two d_i for CLR-NS minus attention +0.37 (+0.18, +0.57), token cosine -0.78, hidden cosine -0.29, scPRINT R0 minus attention +0.08, token -1.07, hidden -0.58 and the exploratory LayerNorm'd cosine -0.754; section 7: per-truth and mean-of-three-truths d for CLR-NS and scPRINT R0 against attention, token cosine, hidden cosine, e.g. +1.002, +0.712, +0.160, mean +0.625). Only the truths those arms scored are used there; complexes were never scored in them.
+
+**Statistics tests** (`test_ext.R`, all pass): the exact interval and HL equal `wilcox.test(conf.int = TRUE, exact = TRUE)` for n = 5 to 8; n = 6 gives the 3rd and 19th of 21 Walsh averages (coverage 0.906), n = 5 gives L = min d_i and U = max Walsh average (0.9375), n = 4 gives no interval and the decision is refused; smallest p 1/64, 1/32, 1/16; Holm flags (n = 6: S2 confirmatory when p = 1/64, n = 5 and 4: none); tcaCLR2 enters no Holm row and no decision.
+
+**expression source.** `--expr files` (the scoring path after the raw h5ad is deleted) gives metric tables identical (maximum difference 0) to the h5 path.
+
+## Smoke and timings (HepG2 and others; scratch directories, synthetic truths)
+
+| Step | Input | Time | Memory |
+|---|---|---|---|
+| HepG2 prep, full controls | 4,976 controls, 9,624 genes, 5.6 GB h5ad | 11 s | 0.76 GB peak RSS |
+| HepG2 prep, smoke | 300 controls (first 300 in file order; one subsample) | 8 s | 0.37 GB |
+| scGPT extraction, smoke, GPU 1 | 300 cells, 1,254 genes | 48 s inference, 62 s wall with model load | GPU 2.97 GB peak; host 3.1 GB RSS; GPU idle before (device 1 at 71 MiB, no compute processes) |
+| score_ext, smoke | 1 unit, 300 cells | 28 s | 0.67 GB main, tree 0.7 GB |
+| score_ext, full-size expression | 5 units x 1,024 cells x 1,253 genes (HepG2 prep; random stand-ins for the four scGPT readouts, which cost the same) | **189 s total** (38 s per unit: 10 permuted CLR-NS operators and eigen-decompositions, the walk to t = 9 and t2, the independent rz path, scoring) | 0.83 GB main-process peak; no forked workers, so tree = main (PSS 0.73 GB) |
+| score_ext, hESC + hHep, 1 case each + stored-value gates | | 119 s (gates about 45 s) | 0.77 GB |
+| score_ext, K562 legacy check | 5 units | 61 s | 0.67 GB |
+| scfm_score_k562.R (old path, K562, B = 100) | 5 subsamples, 4 workers | 371 s | process-tree PSS 8.9 GB (sum of RSS 18.9 GB, counts shared pages repeatedly) |
+| scfm_score_k562.R `--tag HepG2` smoke | 1 subsample, 300 cells, B = 50 | 11 s | small |
+
+Extrapolation to full size. HepG2 chain: prep 11 s; extraction about 164 s per 1,024-cell subsample (K562 took 157 s) so about 14 min plus 15 s load for five, GPU device 1 only; freeze/export about 1 to 2 min (not timed separately here); `score_ext.R --datasets HepG2` about 4 min (189 s measured plus the complex-truth build, about 5 s per distinct gene vector, and the real truth scoring); regulator bootstrap (B = 1,000) about 20 min with 6 workers (K562 job 1023 took 21 min). **Full HepG2 chain prep -> extract -> freeze -> score about 21 min, about 41 min with the bootstrap.** n = 4 scoring (hESC + hHep about 4 min, K562 about 4 min, HepG2 about 4 min) about 12 min plus seconds for the statistics. RPE1 and Jurkat each add the same chain (extraction about 14 min each, scoring about 4 min).
+
+## Declared resources (job files in `jobs/`)
+
+Rule applied: no `mclapply` in the prep, extraction, freeze or `score_ext.R` jobs (checked: the process tree equals the main process), so the declaration is at least 2.5 times the measured main-process peak; the regulator bootstrap forks and keeps the 24 GB of job 1023.
+
+| Job | mem (GB) | cpus | after | Measured |
+|---|---|---|---|---|
+| 7600 hepg2 prep | 4 | 2 | | 0.76 GB |
+| 7601 hepg2 extract (GPU device 1) + QC | 8 | 2 | 7600 | 3.1 GB host (2.6 x), GPU 2.97 GB |
+| 7602 hepg2 freeze + export | 4 | 2 | 7601 | not separately measured (K562 equivalent small) |
+| 7610 hepg2 score (held for GO) | 8 | 4 | 7602 | 0.83 GB (9.6 x) |
+| 7611 hepg2 regulator bootstrap (held for GO) | 24 | 6 | 7602 | tree PSS 8.9 GB at 4 workers, B = 100; job 1023 ran at 24 GB |
+| 7612 hESC + hHep score (held) | 8 | 4 | | 0.77 GB |
+| 7613 K562 score (held) | 8 | 4 | | 0.67 GB |
+| 7620 statistics n = 4 | 2 | 1 | 7610, 7612, 7613 | seconds |
+| 7700 to 7702, 7710, 7711 (RPE1), 7800 to 7802, 7810 (Jurkat), 7820 (n = 6 statistics) | as above | | | not to be submitted yet |
+
+Header style: `# mem`, `# cpus`, comma-separated `# after:` only. The extraction job states device 1 in its text and in the command, refuses to start if device 1 shows more than 1.5 GB in use, and stops if `~/scfm_models` exceeds 30 GB. Score jobs 7610 to 7613 (and 7710, 7711, 7810) carry "HELD FOR THE PI GO": submit them only after the manifests are committed and the PI says GO. Order for the HepG2 chain: 7600, 7601, 7602, (commit manifest, record hash, PI GO), 7610. The freeze job writes `results/scfm_hepg2/sha256_manifest.csv` from the extraction it just verified; the committed copy is the freeze record, as E15.
+
+## Downloads, extraction and deletion order (for the lead to run; nothing was downloaded here)
+
+The URLs are from the plan and from the layout of the existing downloads and were not tested.
+
+1. **RPE1** (8.7 GB, one at a time). `curl -s https://api.figshare.com/v2/articles/20029387/files` lists the files; take the `download_url` of `rpe1_raw_singlecell_01.h5ad`, then `mkdir -p data/perturbseq && curl -L -o data/perturbseq/rpe1_raw_singlecell_01.h5ad <download_url>` and `sha256sum` it into a `.sha256` file next to it (as `data/hepg2_perturbseq/*.sha256`).
+2. Check the control label (`obs/gene`) and counts before prep: `~/venvs/scfm/bin/python -I -c "import h5py,numpy as np; f=h5py.File('data/perturbseq/rpe1_raw_singlecell_01.h5ad'); c=f['obs/gene'][:]; k=f['obs/__categories/gene'][:]; l=np.array([x.decode() for x in k])[c]; print([(x,(l==x).sum()) for x in set(l) if 'arget' in x or 'ontrol' in x])"`. If the label is not `non-targeting`, change `--control-label` in the job. If fewer than 512 controls the dataset does not enter; 512 to 1,023: one subsample (the extraction job then needs `--cases hRPE1_s1` and QC count 1).
+3. Submit 7700 (prep). It writes `results/scfm_rpe1/` including `cell_totals.tsv` and `expr/` (about 5 MB per subsample), which replace the raw file for all later scoring (`--expr auto` uses them when the h5ad is absent; identical results, tested).
+4. Verify `results/scfm_rpe1/geneset_meta.json` and run a synthetic smoke (`score_ext.R --datasets RPE1 --truth synthetic --units 1 --expr files`) once the extraction exists; then **delete `data/perturbseq/rpe1_raw_singlecell_01.h5ad`** and log the deletion (path, 8.7 GB, date, sha256, control cells kept) in `docs/disk_budget.md`. RPE1 KD truth uses the local `rpe1_normalized_bulk_01.h5ad`.
+5. Submit 7701, 7702, then (after GO) 7710 and 7711.
+6. **Jurkat** (after step 5 so that only one raw file is on disk): `mkdir -p data/jurkat_perturbseq && curl -L -o data/jurkat_perturbseq/GSE264667_jurkat_raw_singlecell_01.h5ad https://ftp.ncbi.nlm.nih.gov/geo/series/GSE264nnn/GSE264667/suppl/GSE264667_jurkat_raw_singlecell_01.h5ad`, sha256 as above, same label check (the HepG2 file of the same deposit uses `non-targeting`), then 7800, delete and log, 7801, 7802, GO, 7810. No KD truth for Jurkat (no bulk file; the registry has `NA`).
+7. After all five score jobs finish, submit 7820 (n = 6 statistics).
+
+## Does not work as written in the plan (reported, not changed)
+
+1. **The complex builder fails on the 1,250-gene universes.** `build_human_truth.R <universe> ...` stops in `make_variants` (`find1`: the 40S/60S and 37S/54S ribosomal subunit complexes cannot be located among the merged complexes when the universe has about 1,250 genes), for K562 and for the HepG2 gene set. It runs on a 9,600-gene universe. `build_complex_truth.R` drops only the subunit pairs that cannot be found, which only affects the secondary variants (`main_xsub_excl`, `main_ribo_joined`); the primary variant `main`, the paralog exclusions and the strata are unchanged (on a universe where the original runs, `cx_members.tsv` and `cx_excluded_pairs.tsv` are byte-identical). The original frozen files in `analysis/tcaclr_confirm/` are untouched.
+2. **Complex truth is small in the 1,250-gene universes (structure only, no score).** Primary variant `main`: K562 42 complexes, 202 genes, 20,301 pairs, 772 positive (3.8%), n_eff 10.0 (largest complex share 0.20); HepG2 39, 147, 10,730, 379 (3.5%), n_eff 10.3 (0.24); hESC_500 8 complexes, 33 genes, 528 pairs, 81 positive (15.3%), n_eff 4.7 (0.33); hESC_1000 16, 66, 2,145, 165 (7.7%), n_eff 8.9; hHep_500 31, 120, 7,140, 295 (4.1%), n_eff 17.7; hHep_1000 48, 187, 17,391, 487 (2.8%), n_eff 25.8. The confirm plan's own power gate used n_eff 27 (`TC$neff_test`) and 15 as degraded; none of these reaches 27.
+3. **Orientation of scGPT attention for the undirected complex pairs is not specified.** The scripts use max(A, Aᵀ) (one of the preregistered orientations); the directed truths use S = Aᵀ. Cosines are symmetric. Needs a one-line decision before the GO.
+4. **The raw h5ad cannot be deleted after prep alone** unless the expression is kept: the scorers need the total UMI per cell over all genes (log1p(count / total * median)). The prep now writes `cell_totals.tsv` and `expr/`; this is an addition to the plan (extra files, results identical).
+5. **No stored CLR-NS-based K562 tcaCLR exists**, so the K562 tcaCLR t = 9 gate is the independent `rz_operator` path, not a stored value (above).
+6. The "loop over datasets" is in the new `score_ext.R`, not in `scfm_score_k562.R`: the old script must stay byte-identical and its outputs are K562-specific; it gained `--tag` for the regulator bootstrap only.
+7. Complexes get no regulator bootstrap and no gene jackknife in this stage (per-truth values are reported beside each d_i); the plan lists the regulator bootstrap for the directed truths (`scfm_score_k562.R --tag`).
+8. `analysis/__pycache__/` appeared (untracked) from running the Python scripts.
+
+## Blocked on PI decisions
+
+Approved by the PI (recorded in the plan, Revision 1): RPE1 and Jurkat downloads, one at a time; deletion of each raw h5ad after control-cell extraction (log in `docs/disk_budget.md`). Still open: the GO to score (after the manifests are committed and the leakage-audit rows for HepG2, Jurkat, RPE1 are added, section 4 of the plan, which this stage does not do); the orientation of attention for complexes (item 3); acceptance of the builder change for small universes (item 1); whether the HepG2 raw file (counted, 5.6 GB, also used by the pseudobulk arm) may be deleted after its control cells are extracted. Not done in this stage: the leakage-audit rows, the max-statistic bootstrap, RPE1 and Jurkat runs.

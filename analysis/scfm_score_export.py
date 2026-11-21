@@ -14,6 +14,7 @@ Readouts: scprint_medium_{A,B}: R0 R0p R2; r1_{A,B}: R1; ctrl_*: R0; scprint_{la
 scgpt_A: attn_last_mean tok_cos tok_cos_ln hid_cos (the seed-1 stability rerun is not exported).
 
   python -I analysis/scfm_score_export.py [--out DIR] [--check-only]
+  python -I analysis/scfm_score_export.py --k562 --manifest-sha SHA [--tag hepg2] [--out DIR]   (K562, or another single-cell dataset: scGPT readouts only)
 """
 import argparse, csv, hashlib, os, sys
 import numpy as np, pandas as pd
@@ -65,23 +66,34 @@ def verify(mf=None, expect=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="~/scfm_models/step4_scoring")
+    ap.add_argument("--out", default="", help="default ~/scfm_models/step4_scoring, or ~/scfm_models/step4_<tag> with --tag")
     ap.add_argument("--check-only", action="store_true")
     ap.add_argument("--k562", action="store_true", help="export the K562 extraction (~/scfm_models/step3/k562) frozen in results/scfm_k562/sha256_manifest.csv")
     ap.add_argument("--manifest-sha", default="", help="with --k562: SHA-256 of that manifest, as recorded in the change log")
+    ap.add_argument("--tag", default="", help="with --k562: another single-cell dataset, e.g. hepg2: reads ~/scfm_models/step3/<tag>, verifies results/scfm_<tag>/sha256_manifest.csv "
+                    "and takes the gene maps of the cases <h-tag>_s*, default empty = the K562 paths (step3/k562, results/scfm_k562)")
+    ap.add_argument("--step3", default="", help="override the extraction directory (smoke tests)")
+    ap.add_argument("--manifest", default="", help="override the manifest file (smoke tests)")
+    ap.add_argument("--gene-map-dir", default=f"{ROOT}/results/scfm_step2/gene_map", help="gene maps of the cases (default as the production runs)")
     a = ap.parse_args()
     global STEP3
     if a.k562:
         assert a.manifest_sha, "--manifest-sha required with --k562"
-        STEP3 = os.path.expanduser("~/scfm_models/step3/k562")
+        tg = a.tag or "k562"
+        STEP3 = os.path.expanduser(f"~/scfm_models/step3/{tg}")
         for k in ("scprint_medium_B", "r1_B", "esm2_cos"):
             SOURCES.pop(k, None)
-        man = verify(f"{ROOT}/results/scfm_k562/sha256_manifest.csv", a.manifest_sha)
+        if a.tag:                      # extension datasets carry the scGPT readouts only (no scPRINT arm); K562 keeps its full source list
+            for k in [k for k in SOURCES if k != "scgpt_A"]:
+                SOURCES.pop(k)
+        if a.step3:
+            STEP3 = os.path.expanduser(a.step3)
+        man = verify(a.manifest or f"{ROOT}/results/scfm_{tg}/sha256_manifest.csv", a.manifest_sha)
     else:
         man = verify()
     if a.check_only:
         return
-    out = os.path.expanduser(a.out)
+    out = os.path.expanduser(a.out or (f"~/scfm_models/step4_{a.tag}" if a.tag else "~/scfm_models/step4_scoring"))
     index = []
     for src, (suf, keys) in SOURCES.items():
         os.makedirs(f"{out}/{src}", exist_ok=True)
@@ -93,7 +105,7 @@ def main():
             assert rel in man, rel
             z = np.load(f"{STEP3}/{rel}", allow_pickle=True)         # string object arrays (E13 note d)
             genes = [str(g) for g in z["genes"]]
-            gm = pd.read_csv(f"{ROOT}/results/scfm_step2/gene_map/{case}.tsv", sep="\t")
+            gm = pd.read_csv(f"{a.gene_map_dir}/{case}.tsv", sep="\t")
             if src == "scgpt_A":
                 exp = list(gm[gm.in_scgpt.values & gm.scgpt_token.notna().values].symbol)
             elif src.endswith("_B") or src.startswith("r1_B"):

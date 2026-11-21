@@ -13,11 +13,27 @@
 # Truth files are opened only in the stage "truths" below; with --truth synthetic (smoke test) they are never read.
 # Usage (repo root):
 #   Rscript analysis/scfm_score_k562.R --out results/scfm_score_k562 [--truth real|synthetic] [--boot 1000] [--workers 6]
+# Other single-cell datasets built exactly as K562 (docs/plans/scgpt_extension_plan.md, section 8): --tag HepG2 | RPE1 | Jurkat (registry REG below: h5, results
+# directory of the prep, case prefix, exports directory step4_<tag>, scPRINT arm, knockdown-response file). Without --tag the script is the K562 script of
+# 2 Nov 2026 (every output byte-identical; checked in analysis/scgpt_ext/README.md). Datasets without a scPRINT arm drop every scPRINT source and contrast; their
+# comparators and descriptive table use the scGPT gene set S in place of the scPRINT set A. The tcaCLR / tcaCLR2 / complex-truth stage is analysis/scgpt_ext/score_ext.R.
 args0 <- commandArgs(trailingOnly = TRUE)
-sopt <- list(out = "results/scfm_score_k562", truth = "real", exports = "~/scfm_models/step4_k562", boot = 1000L, workers = 6L, seed = 20261021L)
+sopt <- list(out = "results/scfm_score_k562", truth = "real", exports = "", boot = 1000L, workers = 6L, seed = 20261021L, tag = "K562", prep_dir = "", expr = "auto")
 i <- 1L
 while (i <= length(args0)) { k <- sub("^--", "", args0[i]); stopifnot(k %in% names(sopt))
   sopt[[k]] <- if (k %in% c("boot", "workers", "seed")) as.integer(args0[i + 1L]) else args0[i + 1L]; i <- i + 2L }
+REG <- list(
+  K562 = list(h5 = "data/perturbseq/K562_essential_raw_singlecell_01.h5ad", dir = "results/scfm_k562", prefix = "hK562_s", scprint = TRUE, exports = "~/scfm_models/step4_k562",
+              bulk = "data/perturbseq/K562_essential_normalized_bulk_01.h5ad"),
+  HepG2 = list(h5 = "data/hepg2_perturbseq/GSE264667_hepg2_raw_singlecell_01.h5ad", dir = "results/scfm_hepg2", prefix = "hHepG2_s", scprint = FALSE,
+               exports = "~/scfm_models/step4_hepg2", bulk = "results/tcaclr_confirm/pseudobulk/HepG2_rebuilt_bulk.h5ad"),
+  RPE1 = list(h5 = "data/perturbseq/rpe1_raw_singlecell_01.h5ad", dir = "results/scfm_rpe1", prefix = "hRPE1_s", scprint = FALSE,
+              exports = "~/scfm_models/step4_rpe1", bulk = "data/perturbseq/rpe1_normalized_bulk_01.h5ad"),
+  Jurkat = list(h5 = "data/jurkat_perturbseq/GSE264667_jurkat_raw_singlecell_01.h5ad", dir = "results/scfm_jurkat", prefix = "hJurkat_s", scprint = FALSE,
+                exports = "~/scfm_models/step4_jurkat", bulk = NA_character_))
+stopifnot(sopt$tag %in% names(REG)); DSR <- REG[[sopt$tag]]
+if (nzchar(sopt$prep_dir)) DSR$dir <- sopt$prep_dir          # smoke tests with a scratch prep directory
+if (!nzchar(sopt$exports)) sopt$exports <- DSR$exports
 sopt$exports <- path.expand(sopt$exports)
 
 src <- readLines("analysis/beeline.R"); cut_at <- grep("^## ---- main loop", src)[1]
@@ -32,25 +48,36 @@ stopifnot(exists("score_truth"))
 source("analysis/human_truths.R")                 # response_sets() (knockdown-response modules)
 say(sprintf("scfm_score_k562: truth=%s out=%s boot=%d workers=%d", sopt$truth, sopt$out, sopt$boot, sopt$workers))
 
-H5 <- "data/perturbseq/K562_essential_raw_singlecell_01.h5ad"
-gs <- utils::read.delim("results/scfm_k562/geneset.tsv", stringsAsFactors = FALSE)
+H5 <- DSR$h5; HASP <- DSR$scprint
+gs <- utils::read.delim(file.path(DSR$dir, "geneset.tsv"), stringsAsFactors = FALSE)
 gs$is_tf_part <- gs$is_tf_part %in% c("True", "TRUE", TRUE); gs$in_variable_part <- gs$in_variable_part %in% c("True", "TRUE", TRUE)
-sub <- utils::read.delim("results/scfm_k562/subsamples.tsv", stringsAsFactors = FALSE)
-metatxt <- readLines("results/scfm_k562/geneset_meta.json")
+sub <- utils::read.delim(file.path(DSR$dir, "subsamples.tsv"), stringsAsFactors = FALSE)
+metatxt <- readLines(file.path(DSR$dir, "geneset_meta.json"))
 MED <- as.numeric(sub("[^0-9.]*([0-9.]+).*", "\\1", grep("median_control_umi", metatxt, value = TRUE)))
-stopifnot(is.finite(MED), nrow(gs) == 1244L)
+NGS <- as.integer(sub("[^0-9]*([0-9]+).*", "\\1", grep("gene_set_size", metatxt, value = TRUE)))      # 1,244 for K562
+stopifnot(is.finite(MED), nrow(gs) == NGS)
+# expression source: the raw h5ad (default whenever the file exists) or, after the raw file has been deleted, the files written by the prep (expr/<prefix><k>.counts.f32 = raw UMI
+# of the gene-set genes, and cell_totals.tsv = total UMI over all matrix genes): the same log1p(count / total * median) values (the totals are exact integers).
+EXPR <- if (sopt$expr == "auto") (if (file.exists(H5)) "h5" else "files") else sopt$expr; stopifnot(EXPR %in% c("h5", "files"))
+if (EXPR == "h5") {
 cat_of <- function(grp, field) { codes <- rhdf5::h5read(H5, paste0(grp, "/", field)); cats <- rhdf5::h5read(H5, paste0(grp, "/__categories/", field))
   as.character(cats)[codes + 1L] }
 vg <- cat_of("var", "gene_name"); stopifnot(!anyDuplicated(vg[match(gs$symbol, vg)]), all(gs$symbol %in% vg))
 gi <- match(gs$symbol, vg)
 bar <- as.character(rhdf5::h5read(H5, "obs/cell_barcode"))
-SUBS <- 1:5
+} else tots <- utils::read.delim(file.path(DSR$dir, "cell_totals.tsv"), stringsAsFactors = FALSE)
+SUBS <- sort(unique(sub$subsample))               # 1:5 for K562 (a dataset with fewer than 1,024 controls has the single subsample 1)
 expr <- list()                                      # log-normalised expression of the five subsamples, gene-set genes x 1024 cells
 for (k in SUBS) {
   rows <- sub$file_row[sub$subsample == k]
+  if (EXPR == "h5") {
   C <- rhdf5::h5read(H5, "X", index = list(NULL, rows + 1L)); storage.mode(C) <- "double"      # file_row is 0-based
   stopifnot(identical(bar[rows + 1L], sub$cell_barcode[sub$subsample == k]))
   L <- log1p(t(t(C) / colSums(C)) * MED)[gi, , drop = FALSE]; rownames(L) <- gs$symbol
+  } else {
+  tk <- tots[tots$subsample == k, ]; stopifnot(identical(tk$cell_barcode, sub$cell_barcode[sub$subsample == k]), identical(tk$file_row, rows))
+  C <- matrix(readBin(file.path(DSR$dir, "expr", sprintf("%s%d.counts.f32", DSR$prefix, k)), "numeric", n = nrow(gs) * length(rows), size = 4L), nrow(gs), length(rows))
+  L <- log1p(t(t(C) / tk$total_umi) * MED); rownames(L) <- gs$symbol }
   expr[[k]] <- L; rm(C)
 }
 say(sprintf("expression: %d subsamples, %d genes x %d cells, median UMI scale %.0f", length(expr), nrow(expr[[1]]), ncol(expr[[1]]), MED))
@@ -63,11 +90,19 @@ rd_mat <- function(src, case, readout) {
 rd_genes <- function(src, case) readLines(file.path(sopt$exports, src, sprintf("%s.genes.txt", case)))
 orient <- function(A, o) switch(o, T = t(A), A = A, max = pmax(A, t(A)), sym = A)
 clean <- function(s) { s[!is.finite(s)] <- 0; diag(s) <- 0; s }
-cs <- function(k) paste0("hK562_s", k)
-gA <- rd_genes("scprint_medium_A", cs(1)); gS <- rd_genes("scgpt_A", cs(1)); gAS <- gA[gA %in% gS]
-GS <- list(full = gs$symbol, A = gA, S = gS, AS = gAS)
-for (k in SUBS) stopifnot(identical(rd_genes("scprint_medium_A", cs(k)), gA), identical(rd_genes("scgpt_A", cs(k)), gS))
-say(sprintf("gene sets: full %d, A (scPRINT) %d, S (scGPT) %d, AS %d", length(GS$full), length(gA), length(gS), length(gAS)))
+cs <- function(k) paste0(DSR$prefix, k)
+gS <- rd_genes("scgpt_A", cs(1))
+if (HASP) {
+  gA <- rd_genes("scprint_medium_A", cs(1)); gAS <- gA[gA %in% gS]
+  GS <- list(full = gs$symbol, A = gA, S = gS, AS = gAS)
+  for (k in SUBS) stopifnot(identical(rd_genes("scprint_medium_A", cs(k)), gA), identical(rd_genes("scgpt_A", cs(k)), gS))
+  say(sprintf("gene sets: full %d, A (scPRINT) %d, S (scGPT) %d, AS %d", length(GS$full), length(gA), length(gS), length(gAS)))
+} else {                                            # scGPT-only dataset: the comparison gene set is S; "A" keys below are replaced by "S"
+  gA <- gS; GS <- list(full = gs$symbol, S = gS)
+  for (k in SUBS) stopifnot(identical(rd_genes("scgpt_A", cs(k)), gS))
+  say(sprintf("gene sets (no scPRINT arm): full %d, S (scGPT) %d", length(GS$full), length(gS)))
+}
+GK <- if (HASP) "A" else "S"                        # gene-set key of the comparators / descriptive table
 
 ## ---- the networks (all five subsamples), per gene-set key --------------------------------------------------------------------
 nets <- list()      # nets[[key]][[label]][[k]]: cleaned G x G score matrix
@@ -81,6 +116,7 @@ for (k in SUBS) {
     f <- clr_fit(Xg); add_net(key, "cmp|clr|sym", k, f$clr_scores); f$release(FALSE)
     add_net(key, "cmp|clr_ns|sym", k, ns_clr(Xg))
   }
+  if (HASP) {
   A <- rd_mat("scprint_medium_A", cs(k), "R0"); add_net("A", "scprint_medium_A|R0|T", k, t(A)); add_net("A", "scprint_medium_A|R0|A", k, A)
   add_net("A", "scprint_medium_A|R0|max", k, pmax(A, t(A)))
   ii <- match(gAS, gA); add_net("AS", "scprint_medium_A|R0|T", k, t(A[ii, ii]))
@@ -89,10 +125,11 @@ for (k in SUBS) {
   for (sd in 1001:1003) add_net("A", sprintf("ctrl_perm_s%d|R0|T", sd), k, t(rd_mat(paste0("ctrl_perm_s", sd), cs(k), "R0")))
   for (v in c("rand_esm", "rand_emb")) for (sd in 1:3) add_net("A", sprintf("ctrl_%s_s%d|R0|T", v, sd), k, t(rd_mat(sprintf("ctrl_%s_s%d", v, sd), cs(k), "R0")))
   for (s in c("scprint_large_A", "scprint_small_A")) add_net("A", sprintf("%s|R0|T", s), k, t(rd_mat(s, cs(k), "R0")))
-  jj <- match(gAS, gS)
+  }
+  jj <- if (HASP) match(gAS, gS) else NULL
   for (rr in c("attn_last_mean", "tok_cos", "hid_cos", "tok_cos_ln")) {
     M <- rd_mat("scgpt_A", cs(k), rr); o <- if (rr == "attn_last_mean") "T" else "sym"
-    add_net("S", sprintf("scgpt_A|%s|%s", rr, o), k, orient(M, o)); add_net("AS", sprintf("scgpt_A|%s|%s", rr, o), k, orient(M[jj, jj], o))
+    add_net("S", sprintf("scgpt_A|%s|%s", rr, o), k, orient(M, o)); if (HASP) add_net("AS", sprintf("scgpt_A|%s|%s", rr, o), k, orient(M[jj, jj], o))
   }
   say(sprintf("subsample %d: networks built", k))
 }
@@ -102,16 +139,18 @@ if (sopt$truth == "real") {
   dor <- utils::read.delim("data/human_truth/dorothea.tsv", stringsAsFactors = FALSE)
   lv <- vapply(strsplit(dor$dorothea_level, ";"), function(x) any(x %in% c("A", "B")), NA); dor <- dor[lv, ]
   col <- utils::read.delim("data/human_truth/collectri.tsv", stringsAsFactors = FALSE)
-  rs <- response_sets(gs$symbol)
-  kd <- do.call(rbind, lapply(names(rs$members), function(nm) data.frame(Gene1 = strsplit(nm, "_")[[1]][2], Gene2 = gs$symbol[rs$members[[nm]]])))
   TRUTHS <- list(DoRothEA_AB = data.frame(Gene1 = dor$source_genesymbol, Gene2 = dor$target_genesymbol),
-                 CollecTRI = data.frame(Gene1 = col$source_genesymbol, Gene2 = col$target_genesymbol), KD_response = kd)
+                 CollecTRI = data.frame(Gene1 = col$source_genesymbol, Gene2 = col$target_genesymbol))
+  if (!is.na(DSR$bulk)) {                        # knockdown-response modules where a bulk file exists (Jurkat: none)
+    rs <- response_sets(gs$symbol, path = DSR$bulk)
+    kd <- do.call(rbind, lapply(names(rs$members), function(nm) data.frame(Gene1 = strsplit(nm, "_")[[1]][2], Gene2 = gs$symbol[rs$members[[nm]]])))
+    TRUTHS$KD_response <- kd }
   say(sprintf("truths (real): %s", paste(sprintf("%s %d edges", names(TRUTHS), vapply(TRUTHS, nrow, 1L)), collapse = "; ")))
 } else {            # smoke test: planted from the networks of subsample 1 (never from a truth file)
   set.seed(7L); G <- length(gA); tfi <- sort(sample(match(intersect(gA, gs$symbol[gs$is_tf_part]), gA), 60L))
   plant <- function(sig) do.call(rbind, lapply(tfi, function(r) { s <- rank(sig[r, ]) / G + rnorm(G, sd = 0.3); s[r] <- -Inf
     data.frame(Gene1 = gA[r], Gene2 = gA[order(s, decreasing = TRUE)[1:25]]) }))
-  sR0 <- nets$A[["scprint_medium_A|R0|T"]][[1]]; sNS <- nets$A[["cmp|clr_ns|sym"]][[1]]
+  sR0 <- if (HASP) nets$A[["scprint_medium_A|R0|T"]][[1]] else nets$S[["scgpt_A|attn_last_mean|T"]][[1]]; sNS <- nets[[GK]][["cmp|clr_ns|sym"]][[1]]
   TRUTHS <- list(DoRothEA_AB = plant(sNS), CollecTRI = plant(sR0), KD_response = plant(sR0 / stats::sd(sR0) + sNS / stats::sd(sNS)))
   say("truths (SYNTHETIC, smoke test)")
 }
@@ -143,6 +182,7 @@ PAIRS <- list(list("CLR-NS vs scPRINT R0", "A", "cmp|clr_ns|sym", "scprint_mediu
               list("scPRINT R0 vs scGPT attention (three-way set)", "AS", "scprint_medium_A|R0|T", "scgpt_A|attn_last_mean|T"),
               list("scPRINT R0 vs scGPT token cosine (three-way set)", "AS", "scprint_medium_A|R0|T", "scgpt_A|tok_cos|sym"),
               list("scPRINT R0 vs scGPT hidden cosine (three-way set)", "AS", "scprint_medium_A|R0|T", "scgpt_A|hid_cos|sym"))
+if (!HASP) PAIRS <- PAIRS[!grepl("scPRINT", vapply(PAIRS, `[[`, "", 1))]
 set.seed(sopt$seed)
 boot_rows <- list(); draws <- list()
 for (tn in names(TRUTHS)) {
@@ -177,9 +217,9 @@ bt <- rbind(bt, pool); utils::write.csv(bt, file.path(sopt$out, "bootstrap_contr
 for (k in seq_len(nrow(pool))) say(sprintf("  POOLED %-52s d = %+.3f [%+.3f, %+.3f]", pool$contrast[k], pool$d[k], pool$lo[k], pool$hi[k]))
 
 ## ---- descriptive point estimates for every other readout (mean over subsamples; no interval) ---------------------------------------
-cmpA <- res[res$source == "cmp" & res$gset == "A" & res$readout == "clr_ns", c("subsample", "truth", "auprc_ratio", "epr")]
+cmpA <- res[res$source == "cmp" & res$gset == GK & res$readout == "clr_ns", c("subsample", "truth", "auprc_ratio", "epr")]
 names(cmpA)[3:4] <- c("ap_ns", "epr_ns")
-pt <- merge(res[res$gset == "A" & res$source != "cmp", ], cmpA, by = c("subsample", "truth"))
+pt <- merge(res[res$gset == GK & res$source != "cmp", ], cmpA, by = c("subsample", "truth"))
 pt$d_ap <- log2(pt$ap_ns / pt$auprc_ratio); pt$d_epr <- log2(pmax(pt$epr_ns, 1e-9) / pmax(pt$epr, 1e-9))
 agg <- stats::aggregate(cbind(auprc_ratio, epr, d_ap, d_epr) ~ truth + source + readout + orient, pt, mean)
 utils::write.csv(agg, file.path(sopt$out, "readouts_vs_clrns_mean_over_subsamples.csv"), row.names = FALSE)
