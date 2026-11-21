@@ -43,14 +43,28 @@ ext_edge <- function(X, perms = ED$perms) {
   data.frame(G = nrow(X), N = ncol(X), edge = edge, edge_min = min(m[, "edge"]), edge_max = max(m[, "edge"]), t2 = ed_t2(edge), tstar = log(ED$eps) / log(edge),
              top_eig_min = min(m[, "top"]), op_diff = op_diff, perms = perms)
 }
-# tcaCLR (t = 9) and tcaCLR2 (t = t2) from one registered sequential chain on the CLR-NS operator. gate: max abs difference of the t = 9 read-out to the independent
-# rz_operator path (sk_layer of stack_lib.R, the path of analysis/scoreboard/sb_beeline.R that reproduced the stored scoreboard); must be < 1e-12.
-ext_tcaclr <- function(Cn, t2, gate = TRUE) {
+# tcaCLR (t = 9), tcaCLR2 (t = t2) and, when `tstar` is given, aCLR (Revision 3 of the plan) from one registered sequential chain on the CLR-NS operator. aCLR = the attention walk of
+# the CLR-NS operator WITHOUT the second CLR: symmetrised walk mass (P^t + t(P^t)) / 2 at t = tstar (the `att_blom` read-out of analysis/scoreboard/sb_beeline.R, whose operator is the same
+# soft10 / lazy-0.5 operator as gl_make_P); aCLR9 is the same at t = 9 (extra method of the scoreboard, used by the stored-value gate only). The tcaCLR / tcaCLR2 values do not depend on
+# `tstar` (the chain is the same; the extra depths only add read-outs). gate: max abs difference of the t = 9 read-out to the independent rz_operator path (sk_layer of stack_lib.R,
+# the path of analysis/scoreboard/sb_beeline.R that reproduced the stored scoreboard); must be < 1e-12.
+ext_tcaclr <- function(Cn, t2, gate = TRUE, tstar = NULL) {
   P <- gl_make_P(Cn, ED$keff, ED$cap)
-  o <- tsb_walk(P, c(9L, t2), function(t, Pt) sk_a3r(Pt))
+  o <- tsb_walk(P, c(9L, t2, tstar), function(t, Pt) list(a3r = if (t == 9L || t == t2) sk_a3r(Pt),
+                                                         att = if (t == 9L || (!is.null(tstar) && t == tstar)) (Pt + t(Pt)) / 2))
   g <- NA_real_
-  if (gate) { ref <- sk_layer(Cn, ts_out = 9L)$outs[["9"]]; g <- max(abs(o[["9"]] - ref)) }
-  list(tcaCLR = o[["9"]], tcaCLR2 = o[[as.character(t2)]], gate_rz = g)
+  if (gate) { ref <- sk_layer(Cn, ts_out = 9L)$outs[["9"]]; g <- max(abs(o[["9"]]$a3r - ref)) }
+  list(tcaCLR = o[["9"]]$a3r, tcaCLR2 = o[[as.character(t2)]]$a3r, aCLR = if (!is.null(tstar)) o[[as.character(tstar)]]$att, aCLR9 = o[["9"]]$att, gate_rz = g)
+}
+# Label-free held-out depth of aCLR for ONE unit: the registered function heldout_depth of analysis/beeline.R (random halves of the cells; operator on one half, criterion = AUPR of the
+# other half's top-1% CLR pairs; geometric mean of the two halves' best depths over the grid 1, 2, 4, ..., 64 and 3, 5, 6, 7, 10, 12), called exactly as the scoreboard's t_soft10 was
+# obtained (analysis/beeline.R run_case: soft10 operator of the MI-CLR fit, target = MI-CLR of the held-out half, scored genes = all genes). No truth is read. The cell split is the
+# only randomness: `seed` is set first (and the global RNG state is restored afterwards).
+ext_aclr_depth <- function(X, seed, label = "aCLR") {
+  old <- if (exists(".Random.seed", globalenv())) get(".Random.seed", globalenv()) else NULL
+  on.exit(if (!is.null(old)) assign(".Random.seed", old, globalenv()), add = TRUE)
+  set.seed(seed)
+  heldout_depth(X, function(Y) { g <- clr_fit(Y); A <- soft_op(g); g$release(FALSE); A }, label)
 }
 
 ## ---- complex truth ---------------------------------------------------------------------------------------------------------------------
@@ -82,7 +96,8 @@ ext_plant_complexes <- function(genes, sig, seed = 11L, n = 40L) {
 # results/tcaclr2_scoreboard/beeline_metrics.csv (tcaCLR_t9, tcaCLR2), t2 vs the stored edge file. These truths were seen before (BEELINE primary truths); this is a gate, not a new score.
 ext_gate_stored <- function(case, say = function(...) invisible(NULL)) {
   ds <- sub("_[0-9]+$", "", case); N <- as.integer(sub("^.*_", "", case)); X <- case_X(ds, N); genes <- rownames(X)
-  e <- ext_edge(X); Cn <- ns_clr(X); r <- ext_tcaclr(Cn, e$t2, gate = TRUE)
+  dep <- utils::read.csv("results/beeline_v2/heldout_depths.csv", stringsAsFactors = FALSE); tstar <- dep$t_soft10[dep$dataset == ds & dep$N == N]; stopifnot(length(tstar) == 1L)   # stored held-out depth t*
+  e <- ext_edge(X); Cn <- ns_clr(X); r <- ext_tcaclr(Cn, e$t2, gate = TRUE, tstar = tstar)
   stored_edge <- utils::read.delim(sprintf("results/tcaclr2_scoreboard/edge_beeline_%s_%d.tsv", ds, N), stringsAsFactors = FALSE)
   sa <- utils::read.csv("results/scoreboard/beeline/metrics.csv", stringsAsFactors = FALSE); sa <- sa[sa$method == "a3r" & sa$dataset == ds & sa$N == N, ]
   sb <- utils::read.csv("results/tcaclr2_scoreboard/beeline_metrics.csv", stringsAsFactors = FALSE); sb <- sb[sb$dataset == ds & sb$N == N, ]
@@ -90,6 +105,16 @@ ext_gate_stored <- function(case, say = function(...) invisible(NULL)) {
   out <- list(data.frame(gate = sprintf("%s: edge vs stored edge file", case), value = abs(e$edge - stored_edge$edge), tol = 1e-9),
               data.frame(gate = sprintf("%s: t2 equal to stored (%d)", case, stored_edge$t2), value = as.numeric(e$t2 != stored_edge$t2), tol = 0),
               data.frame(gate = sprintf("%s: tcaCLR t=9 vs rz_operator path", case), value = r$gate_rz, tol = 1e-12))
+  # aCLR (Revision 3): the walk read-out at the stored t* and at t = 9 vs the stored scoreboard methods attention_tstar and attention_t9 (same truths); the label-free depth function,
+  # called with the seed convention of analysis/beeline.R (set.seed(20260925 + ci), ci = row of expand.grid(N = c(500, 1000), ds = datasets)), vs the stored t*
+  ci <- match(paste(ds, N), with(expand.grid(N = c(500L, 1000L), ds = c("hESC", "hHep", "mDC", "mESC", "mHSC-E", "mHSC-GM", "mHSC-L"), stringsAsFactors = FALSE), paste(ds, N)))
+  t_re <- ext_aclr_depth(X, 20260925L + ci, sprintf("%s gate", case)); say(sprintf("  aCLR depth gate %s: recomputed held-out t* = %d, stored t* = %d", case, t_re, tstar))
+  out[[length(out) + 1L]] <- data.frame(gate = sprintf("%s: aCLR held-out depth recomputed (%d) equals stored t* (%d)", case, t_re, tstar), value = as.numeric(t_re != tstar), tol = 0)
+  sc <- utils::read.csv("results/scoreboard/beeline/metrics.csv", stringsAsFactors = FALSE); sc <- sc[sc$dataset == ds & sc$N == N, ]
+  for (mm in c("attention_tstar", "attention_t9")) for (t in names(gts)) {
+    x <- score_truth(ext_clean(if (mm == "attention_tstar") r$aCLR else r$aCLR9), genes, NULL, gts[[t]]); ref <- sc[sc$method == mm & sc$truth == t, ]
+    if (nrow(ref) == 1L) out[[length(out) + 1L]] <- data.frame(gate = sprintf("%s aCLR (%s) %s: AUPR ratio and EPR vs stored scoreboard", case, mm, t),
+      value = max(abs(x[["auprc_ratio"]] - ref$auprc_ratio), abs(x[["epr"]] - ref$epr)), tol = 1e-9) }
   for (m in c("tcaCLR", "tcaCLR2")) for (t in tn) {
     S <- ext_clean(r[[m]]); x <- score_truth(S, genes, NULL, gts[[t]])
     ref <- if (m == "tcaCLR") sa[sa$truth == t, ] else sb[sb$truth == t & sb$method == "tcaCLR2", ]

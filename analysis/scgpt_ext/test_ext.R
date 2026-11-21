@@ -35,8 +35,8 @@ if (nzchar(cxdir) && nzchar(gfile)) {
 fab <- function(ds, truths = EXT_PRIMARY) {          # CLR-NS beats attention by ~0.3 log2, tcaCLR by ~0.2, token cosine beats both, per-dataset shift
   do.call(rbind, lapply(seq_along(ds), function(i) do.call(rbind, lapply(1:2, function(u) do.call(rbind, lapply(truths, function(t) {
     base <- 1.4; sh <- 0.05 * i; data.frame(dataset = ds[i], unit = as.character(u), truth = t, gset = "S",
-      method = c("clr_ns", "tcaCLR", "tcaCLR2", "abs_pearson", "clr", "scgpt_attn", "scgpt_tok", "scgpt_hid", "scgpt_tokln"),
-      auprc_ratio = base * c(1.25 + sh, 1.15 + sh, 1.1, 1.0, 1.05, 1.0, 1.5, 1.2, 1.5) + 0.01 * u, epr = NA_real_, stringsAsFactors = FALSE) }))))) )
+      method = c("clr_ns", "tcaCLR", "tcaCLR2", "abs_pearson", "clr", "scgpt_attn", "scgpt_tok", "scgpt_hid", "scgpt_tokln", "aCLR"),
+      auprc_ratio = base * c(1.25 + sh, 1.15 + sh, 1.1, 1.0, 1.05, 1.0, 1.5, 1.2, 1.5, 1.12 + sh) + 0.01 * u, epr = NA_real_, stringsAsFactors = FALSE) }))))) )
 }
 for (n in c(6L, 5L, 4L)) {
   ds <- c("hESC", "hHep", "K562", "HepG2", "RPE1", "Jurkat")[seq_len(n)]; L <- fab(ds)
@@ -46,5 +46,8 @@ for (n in c(6L, 5L, 4L)) {
      if (n == 6L) isTRUE(h$confirmatory[3]) && !isTRUE(h$confirmatory[2]) else !any(h$confirmatory[2:3], na.rm = TRUE))
   ok(sprintf("n = %d: S1 d_i is the smallest over the three readouts (never above the attention d_i)", n), all(r$d_s1 <= r$d1 + 1e-12))
   ok(sprintf("n = %d: tcaCLR2 enters no Holm row and no decision", n), !any(grepl("tcaCLR2", r$holm$test)) && all(is.na(r$S$decision[grepl("tcaCLR2", r$S$label)])))
+  ka <- r$S$kind == "descriptive (aCLR)"          # (the label regex "aCLR" would also match "tcaCLR")
+  ok(sprintf("n = %d: aCLR is present as descriptive rows, enters no Holm row, no p and no decision", n), any(ka) && !any(grepl("(^| )aCLR", r$holm$test)) &&
+     all(is.na(r$S$decision[ka])) && all(is.na(r$S$p_NI[ka])) && identical(r$holm$test, c("P1", "S1", "S2")))
 }
 cat(sprintf("\n%s\n", if (fails == 0L) "ALL TESTS PASSED" else sprintf("%d TESTS FAILED", fails))); if (fails > 0L) quit(status = 1L)

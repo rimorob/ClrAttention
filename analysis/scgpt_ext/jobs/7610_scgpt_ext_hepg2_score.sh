@@ -2,7 +2,7 @@
 # mem: 8
 # cpus: 4
 # after: 7602_scgpt_ext_hepg2_freeze_export
-# HELD FOR THE PI 'GO': real truths (DoRothEA A-B, CollecTRI, Complex Portal complexes; knockdown response secondary). Submit only after the freeze manifest is committed. Run once. Scores HepG2: |r|, CLR, CLR-NS, tcaCLR (t = 9), tcaCLR2 (t2 from the permuted-data edge rule recomputed on each unit's matrix) and the four scGPT readouts on the scGPT gene set, all primary truths, with the gates of score_ext.R (stops before writing on a failure). No forked workers (main-process peak equals the process tree). Output results/scgpt_ext/<dataset>/.
+# HELD FOR THE PI 'GO': real truths (DoRothEA A-B, CollecTRI, Complex Portal complexes; knockdown response secondary). Submit only after the freeze manifest is committed. Run once. Scores HepG2: |r|, CLR, CLR-NS, aCLR (descriptive: attention walk on the CLR-NS operator at its label-free held-out depth t*, no second CLR), tcaCLR (t = 9), tcaCLR2 (t2 from the permuted-data edge rule recomputed on each unit's matrix) and the four scGPT readouts on the scGPT gene set, all primary truths, with the gates of score_ext.R (stops before writing on a failure). No forked workers (main-process peak equals the process tree). Output results/scgpt_ext/<dataset>/.
 set -e
 export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=1
 nice -n 19 Rscript analysis/scgpt_ext/score_ext.R --datasets HepG2 --out results/scgpt_ext --truth real --methods all --threads 4

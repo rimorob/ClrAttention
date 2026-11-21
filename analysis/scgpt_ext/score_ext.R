@@ -7,11 +7,14 @@
 # human complexes (pooled co-membership AUPR with ap_fast on the pair universe of the primary variant `main`, undirected, built on the unit's gene vector). Secondary, descriptive:
 # knockdown-response modules (bulk file in the registry; none for Jurkat). Orientation: scGPT attention S = t(A) for the directed truths, max(A, t(A)) for the undirected complex
 # pairs (the cosines are symmetric); the CLR-family scores are symmetric.
-# Methods (rows `method`): abs_pearson, clr, clr_ns, tcaCLR (t = 9), tcaCLR2 (t2 from the permuted-data edge rule recomputed on each unit's matrix), scgpt_attn, scgpt_tok, scgpt_hid, scgpt_tokln.
+# Methods (rows `method`): abs_pearson, clr, clr_ns, aCLR (Revision 3, descriptive: the attention walk of the CLR-NS operator without the second CLR, symmetrised (P^t + t(P^t)) / 2, at its
+# label-free held-out depth t* per unit = the depth convention of the BEELINE scoreboard's "attention_tstar", see ext_aclr_depth in ext_lib.R; t* per unit is written to aclr_depth.csv),
+# tcaCLR (t = 9), tcaCLR2 (t2 from the permuted-data edge rule recomputed on each unit's matrix), scgpt_attn, scgpt_tok, scgpt_hid, scgpt_tokln.
 #
 # Gates (stop on failure, before anything is written): per unit, tcaCLR at t = 9 through gl_make_P / sk_a3r equals the independent rz_operator path (sk_layer) to 1e-12, gl_make_P equals
 # rz_lazy_P(rz_operator) on the first permutation to 1e-12; --gate_stored (default for BEELINE datasets): tcaCLR and tcaCLR2 on the full BEELINE case matrix reproduce the stored scoreboard
-# values and edge files to 1e-9; --methods legacy (K562 check only): |r|, CLR, CLR-NS and the four scGPT readouts reproduce results/scfm_score_k562/metrics_long.csv to 1e-9.
+# values and edge files to 1e-9, and aCLR at the stored held-out t* (results/beeline_v2/heldout_depths.csv) reproduces the stored scoreboard methods attention_tstar and attention_t9 on every truth to 1e-9
+# (results/scoreboard/beeline/metrics.csv) and the depth function reproduces the stored t* (seed convention of analysis/beeline.R); --methods legacy (K562 check only): |r|, CLR, CLR-NS and the four scGPT readouts reproduce results/scfm_score_k562/metrics_long.csv to 1e-9.
 # No stored K562 tcaCLR values on the CLR-NS operator of the 1,244-gene sets exist (the stored K562 tcaCLR is the MI-CLR operator on 5,671 genes), so for the single-cell datasets the t = 9
 # gate is the independent rz_operator implementation; the stored-value gate is the BEELINE one.
 #
@@ -72,6 +75,7 @@ for (dn in DSN) {
     else tots <- utils::read.delim(file.path(prep, "cell_totals.tsv"), stringsAsFactors = FALSE)
     say("expression source: ", EXPR)
     UNITS <- sort(unique(sub$subsample)); unit_case <- function(k) paste0(R$prefix, k)
+    depth_seed <- function(k) sopt$seed + 1000L * match(dn, names(EXT_REG)) + as.integer(k)            # cell split of the aCLR held-out depth: fixed per dataset and subsample
     get_X <- function(k, genes) { rows <- sub$file_row[sub$subsample == k]
       if (EXPR == "h5") {
         C <- rhdf5::h5read(R$h5, "X", index = list(NULL, rows + 1L)); storage.mode(C) <- "double"                  # file_row is 0-based
@@ -85,6 +89,7 @@ for (dn in DSN) {
     tf_symbols <- gs$symbol[gs$is_tf_part]
   } else {
     UNITS <- R$cases; unit_case <- function(k) k
+    depth_seed <- function(k) sopt$seed + 1000L * match(dn, names(EXT_REG)) + match(k, R$cases)
     get_X <- function(k, genes) { X <- case_X(R$ds, as.integer(sub("^.*_", "", k))); stopifnot(all(genes %in% rownames(X))); X[genes, , drop = FALSE] }
     tf_symbols <- NULL                                         # set per unit below (BEELINE human TF list)
   }
@@ -106,7 +111,7 @@ for (dn in DSN) {
     say(sprintf("truths (real): %s", paste(sprintf("%s %d edges", names(TRUTHS), vapply(TRUTHS, nrow, 1L)), collapse = "; ")))
   }
 
-  rows <- list(); edges <- list(); counts <- list(); unit_info <- list(); synth <- NULL
+  rows <- list(); edges <- list(); adepth <- list(); counts <- list(); unit_info <- list(); synth <- NULL
   add_rows <- function(meta, res) rows[[length(rows) + 1L]] <<- data.frame(dataset = dn, meta, t(res), row.names = NULL)
   for (k in UNITS) {
     t_u <- Sys.time(); case <- unit_case(k); gS <- gS_of(k); X <- get_X(k, gS); G <- length(gS)
@@ -116,10 +121,12 @@ for (dn in DSN) {
     M$abs_pearson <- sym1(abs(stats::cor(t(X)))); f <- clr_fit(X); M$clr <- sym1(f$clr_scores); f$release(FALSE)
     Cn <- ns_clr(X); M$clr_ns <- sym1(Cn)
     if (!LEGACY_ONLY) {
-      e <- ext_edge(X); r <- ext_tcaclr(Cn, e$t2, gate = TRUE); edges[[length(edges) + 1L]] <- data.frame(dataset = dn, unit = k, e, gate_rz = r$gate_rz)
+      tstar <- ext_aclr_depth(X, depth_seed(k), sprintf("%s unit %s", dn, k)); adepth[[length(adepth) + 1L]] <- data.frame(dataset = dn, unit = k, t_heldout = tstar, seed = depth_seed(k))
+      e <- ext_edge(X); r <- ext_tcaclr(Cn, e$t2, gate = TRUE, tstar = tstar); edges[[length(edges) + 1L]] <- data.frame(dataset = dn, unit = k, e, gate_rz = r$gate_rz)
       stopifnot(r$gate_rz < 1e-12)
       say(sprintf("  edge %.5f (%.5f-%.5f), t2 = %d, tcaCLR t=9 vs rz_operator path max diff %.2g, gl_make_P vs rz_lazy_P %.2g", e$edge, e$edge_min, e$edge_max, e$t2, r$gate_rz, e$op_diff))
-      M$tcaCLR <- sym1(r$tcaCLR); M$tcaCLR2 <- sym1(r$tcaCLR2); rm(r)
+      say(sprintf("  aCLR held-out depth t* = %d (seed %d)", tstar, depth_seed(k)))
+      M$aCLR <- sym1(r$aCLR); M$tcaCLR <- sym1(r$tcaCLR); M$tcaCLR2 <- sym1(r$tcaCLR2); rm(r)
     }
     for (nm in names(EXT_SCGPT)) { A <- ext_rd_mat(exports, "scgpt_A", case, EXT_SCGPT[[nm]]); stopifnot(identical(rownames(A), gS))
       M[[nm]] <- if (nm == "scgpt_attn") list(dir = ext_clean(t(A)), sym = ext_clean(pmax(A, t(A)))) else sym1(A) }
@@ -159,6 +166,7 @@ for (dn in DSN) {
     if (d > 1e-9) stop("LEGACY GATE FAILED") }
   utils::write.csv(res, file.path(od, if (LEGACY_ONLY) "metrics_ext_legacy_check.csv" else "metrics_ext.csv"), row.names = FALSE)
   if (length(edges)) utils::write.csv(do.call(rbind, edges), file.path(od, "tcaclr2_edge_t2.csv"), row.names = FALSE)
+  if (length(adepth)) utils::write.csv(do.call(rbind, adepth), file.path(od, "aclr_depth.csv"), row.names = FALSE)
   utils::write.csv(do.call(rbind, counts), file.path(od, "complex_truth_counts.csv"), row.names = FALSE)
   utils::write.csv(do.call(rbind, unit_info), file.path(od, "unit_timing.csv"), row.names = FALSE)
   if (length(gates)) utils::write.csv(do.call(rbind, gates), file.path(od, "gates.csv"), row.names = FALSE)

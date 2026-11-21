@@ -13,7 +13,8 @@
 #         (materially if U < -delta); otherwise inconclusive. Attached only to P1 and the two key secondaries (and only where n >= 5 gives an interval).
 #  P1 = CLR-NS vs scGPT attention. Key secondaries, Holm 0.05 over two, confirmatory only if P1 shows NI: S1 = CLR-NS vs the best of the three scGPT readouts (attention, token cosine,
 #         hidden cosine) per dataset (smallest d_i, chosen on the truths), S2 = tcaCLR vs scGPT attention. Everything else is descriptive (intervals, no claim). tcaCLR2 is exploratory:
-#         a column with d_i, t2 and edge, never in a test, a Holm family or a decision label.
+#         a column with d_i, t2 and edge, never in a test, a Holm family or a decision label. aCLR (Revision 3: the attention walk of the CLR-NS operator at its label-free held-out depth,
+#         without the second CLR) is likewise a descriptive column with d_i, never in a test, a Holm family or a decision label.
 # Usage (repo root):
 #   Rscript analysis/scgpt_ext/stats_ext.R --in results/scgpt_ext --datasets hESC,hHep,K562,HepG2 --out results/scgpt_ext/stats
 #   Rscript analysis/scgpt_ext/stats_ext.R --legacy 1 --out results/scgpt_ext/stats_legacy_check      (reproduces docs/scfm_scoring.md sections 6 and 7; exit 1 on a mismatch)
@@ -39,7 +40,7 @@ decide <- function(L, U, delta = DELTA) {
 }
 
 ## ---- long tables ----------------------------------------------------------------------------------------------------------------------
-# normalised long table: dataset, unit, truth, gset, method, auprc_ratio. Methods: abs_pearson, clr, clr_ns, tcaCLR, tcaCLR2, scgpt_attn, scgpt_tok, scgpt_hid, scgpt_tokln, scprint_R0.
+# normalised long table: dataset, unit, truth, gset, method, auprc_ratio. Methods: abs_pearson, clr, clr_ns, aCLR, tcaCLR, tcaCLR2, scgpt_attn, scgpt_tok, scgpt_hid, scgpt_tokln, scprint_R0.
 SCGPT_RD <- c("scgpt_attn", "scgpt_tok", "scgpt_hid")
 load_ext <- function(dir, datasets) {
   do.call(rbind, lapply(datasets, function(d) { x <- utils::read.csv(file.path(dir, d, "metrics_ext.csv"), stringsAsFactors = FALSE)
@@ -95,7 +96,7 @@ summ_row <- function(label, d, kind = "descriptive", with_decision = FALSE) {
 fmt <- function(x, k = 3) ifelse(is.finite(x), sprintf(paste0("%+.", k, "f"), x), "NA")
 
 ## ---- the statistics -------------------------------------------------------------------------------------------------------------------
-run_stats <- function(L, datasets, truths, fresh = c("HepG2", "Jurkat", "RPE1"), out = NULL, edge = NULL, say = function(...) cat(..., "\n")) {
+run_stats <- function(L, datasets, truths, fresh = c("HepG2", "Jurkat", "RPE1"), out = NULL, edge = NULL, adepth = NULL, say = function(...) cat(..., "\n")) {
   n <- length(datasets); rows <- list(); dt <- list(); add <- function(...) rows[[length(rows) + 1L]] <<- summ_row(...)
   say(sprintf("== n = %d datasets (%s); primary truths %s; margin delta = %.2f", n, paste(datasets, collapse = ", "), paste(truths, collapse = ", "), DELTA))
   hh <- hl(rep(0, max(n, 1L))); say(sprintf("   interval at n = %d: C = %d, coverage %s, smallest attainable one-sided p = 1/2^n = %.4f%s", n, hh$C,
@@ -137,6 +138,12 @@ run_stats <- function(L, datasets, truths, fresh = c("HepG2", "Jurkat", "RPE1"),
     m <- ctr(ref, rd); if (!nrow(m)) next; add(sprintf("%s vs %s", ref, rd), dvec(m, datasets), if (ref == "tcaCLR2") "exploratory (tcaCLR2)" else "descriptive") }
   if (any(L$method == "tcaCLR2")) { m <- ctr("tcaCLR2", "tcaCLR"); if (nrow(m)) { add("tcaCLR2 vs tcaCLR", dvec(m, datasets), "exploratory (tcaCLR2)"); dt$c2 <- dtab_truth(m, "tcaCLR2 vs tcaCLR") }
     m <- ctr("tcaCLR2", "scgpt_attn"); if (nrow(m)) dt$c2a <- dtab(m, "tcaCLR2 vs scGPT attention (exploratory)") }
+  # aCLR (Revision 3): descriptive column, d_i and intervals only; no p, no decision label, no Holm row (kind "descriptive (aCLR)")
+  if (any(L$method == "aCLR")) {
+    for (rd in c("scgpt_attn", "scgpt_tok", "scgpt_hid", "scgpt_tokln")) { m <- ctr("aCLR", rd); if (nrow(m)) add(sprintf("aCLR vs %s", rd), dvec(m, datasets), "descriptive (aCLR)") }
+    m <- ctr("aCLR", "scgpt_attn"); if (nrow(m)) { dt$a1 <- dtab(m, "aCLR vs scGPT attention (descriptive)"); dt$a1t <- dtab_truth(m, "aCLR vs scGPT attention (descriptive)") }
+    for (pr in list(c("tcaCLR", "aCLR"), c("clr_ns", "aCLR"))) if (any(L$method == pr[1])) { m <- ctr(pr[1], pr[2]); if (nrow(m)) { add(sprintf("%s vs aCLR", pr[1]), dvec(m, datasets), "descriptive (aCLR)"); dt[[paste0("a_", pr[1])]] <- dtab_truth(m, sprintf("%s vs aCLR", pr[1])) } }
+    for (tn in truths) { m <- ctr("aCLR", "scgpt_attn", tr = tn); if (nrow(m)) add(sprintf("aCLR vs scgpt_attn, truth %s only", tn), dvec(m, datasets), "descriptive (aCLR)") } }
   for (tn in truths) for (rd in c("scgpt_attn", "scgpt_tok", "scgpt_hid")) for (ref in intersect(c("clr_ns", "tcaCLR"), unique(L$method))) {
     m <- ctr(ref, rd, tr = tn); if (!nrow(m)) next; add(sprintf("%s vs %s, truth %s only", ref, rd, tn), dvec(m, datasets), "per-truth") }
   # leave-one-dataset-out for P1 and S2
@@ -152,9 +159,12 @@ run_stats <- function(L, datasets, truths, fresh = c("HepG2", "Jurkat", "RPE1"),
   # tcaCLR2 depth per matrix (exploratory column)
   if (!is.null(edge) && nrow(edge)) { say("== tcaCLR2 (exploratory): t2 and edge per matrix"); for (ds in unique(edge$dataset)) { e <- edge[edge$dataset == ds, ]
     say(sprintf("   %-8s t2 = %s; edge %s", ds, paste(e$t2, collapse = "/"), paste(sprintf("%.4f", e$edge), collapse = "/"))) } }
+  if (!is.null(adepth) && nrow(adepth)) { say("== aCLR (descriptive): label-free held-out depth t* per matrix"); for (ds in unique(adepth$dataset)) { e <- adepth[adepth$dataset == ds, ]
+    say(sprintf("   %-8s t* = %s", ds, paste(e$t_heldout, collapse = "/"))) } }
   dtt <- do.call(rbind, dt); rownames(dtt) <- NULL
   if (!is.null(out)) { dir.create(out, recursive = TRUE, showWarnings = FALSE); utils::write.csv(S, file.path(out, "contrasts_ext.csv"), row.names = FALSE); utils::write.csv(dtt, file.path(out, "d_i_table.csv"), row.names = FALSE)
-    utils::write.csv(holm_tab, file.path(out, "holm_P1_S1_S2.csv"), row.names = FALSE); utils::write.csv(dS1, file.path(out, "S1_d_by_readout.csv")); if (!is.null(edge)) utils::write.csv(edge, file.path(out, "tcaclr2_t2_edge.csv"), row.names = FALSE) }
+    utils::write.csv(holm_tab, file.path(out, "holm_P1_S1_S2.csv"), row.names = FALSE); utils::write.csv(dS1, file.path(out, "S1_d_by_readout.csv")); if (!is.null(edge)) utils::write.csv(edge, file.path(out, "tcaclr2_t2_edge.csv"), row.names = FALSE)
+    if (!is.null(adepth) && nrow(adepth)) utils::write.csv(adepth, file.path(out, "aclr_heldout_depth.csv"), row.names = FALSE) }
   invisible(list(S = S, dtab = dtt, holm = holm_tab, d1 = d1, d_s1 = d_s1, d_s2 = d_s2))
 }
 
@@ -196,7 +206,8 @@ if (sys.nframe() == 0L) {
   } else {
     L <- load_ext(o$`in`, ds)
     edge <- do.call(rbind, lapply(ds, function(d) { f <- file.path(o$`in`, d, "tcaclr2_edge_t2.csv"); if (file.exists(f)) utils::read.csv(f, stringsAsFactors = FALSE)[, c("dataset", "unit", "G", "N", "edge", "t2")] }))
-    run_stats(L, ds, truths, out = o$out, edge = edge, say = say)
+    adepth <- do.call(rbind, lapply(ds, function(d) { f <- file.path(o$`in`, d, "aclr_depth.csv"); if (file.exists(f)) utils::read.csv(f, stringsAsFactors = FALSE) }))
+    run_stats(L, ds, truths, out = o$out, edge = edge, adepth = adepth, say = say)
   }
   say("done")
 }
