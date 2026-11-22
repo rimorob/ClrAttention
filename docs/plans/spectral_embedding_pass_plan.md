@@ -94,3 +94,49 @@ Commit this plan and the code; run the five development jobs (`analysis/spectral
 - The ring families assume a centred plane and a common centre per plane; a ring displaced from a bulk, or a non-Gaussian radial profile (a uniform disc), is not modelled (section 7); the validator is the check.
 - The edge-rule count is capped at 50 and taken among the first 60 eigenvalues.
 - Packages (user library, offline): mclust 6.1.4, HDclassif 2.2.2, pgmm 1.2.8 (installed from CRAN by this pass); the PI's additional princurve, circular, movMF, dbscan, flexmix, TDAstats, ripserr are installed (TDAstats is used by the validator; the others are not used).
+
+
+## 10. Development results and freeze (22 Nov 2026; written before the sealed dataset is scored)
+
+All 34 scored variants were run on the five development datasets (hESC, hHep, K562, HepG2, RPE1; jobs 7900-7904, controls 7905-7906, summary 7910, all rc = 0). Descriptive only. Mean over the five datasets of the per-dataset mean log2 ratio (variant AUPR/base over comparator AUPR/base, over units and the three primary truths); negative means the variant scored lower than the comparator:
+
+| Variant | vs scGPT token cosine | vs tcaCLR2 | vs scGPT attention |
+|---|---|---|---|
+| cos_kE | -0.69 | -0.18 | +0.82 |
+| cos_k20 | -0.70 | -0.18 | +0.82 |
+| cos_k50 | -0.70 | -0.19 | +0.81 |
+| cos_k10 | -0.71 | -0.19 | +0.81 |
+| cos_clr2_k10 | -0.72 | -0.20 | +0.80 |
+| cos_clr2_kE | -0.77 | -0.25 | +0.75 |
+| cos_k5 | -0.78 | -0.27 | +0.73 |
+| cos_clr2_k5 | -0.79 | -0.28 | +0.72 |
+| cos_clr2_k20 | -0.80 | -0.28 | +0.71 |
+| mclust_k5 | -0.80 | -0.28 | +0.71 |
+| mclust_k10 | -0.84 | -0.32 | +0.68 |
+| hddc_k10 | -0.85 | -0.33 | +0.66 |
+| cos_clr2_k50 | -0.85 | -0.33 | +0.67 |
+| pgmm_k5 | -0.86 | -0.34 | +0.66 |
+| hddc_k5 | -0.86 | -0.34 | +0.66 |
+| hddc_kE | -0.92 | -0.40 | +0.60 |
+| hddc_k20 | -0.92 | -0.40 | +0.60 |
+| mclust_kE | -0.94 | -0.42 | +0.58 |
+| pgmm_k10 | -0.94 | -0.43 | +0.57 |
+| mclust_k20 | -0.95 | -0.43 | +0.57 |
+| pgmm_kE | -0.98 | -0.47 | +0.53 |
+| pgmm_k20 | -1.01 | -0.50 | +0.50 |
+| hddc_k50 | -1.04 | -0.52 | +0.48 |
+| mclust_k50 | -1.08 | -0.57 | +0.43 |
+| ring_k50 | -1.28 | -0.76 | +0.24 |
+| rmix_k10 | -1.30 | -0.79 | +0.21 |
+| rmix_k50 | -1.30 | -0.79 | +0.21 |
+| rmix_k5 | -1.30 | -0.79 | +0.21 |
+| rmix_k20 | -1.30 | -0.79 | +0.21 |
+| ring_k10 | -1.30 | -0.79 | +0.21 |
+| ring_kE | -1.30 | -0.79 | +0.21 |
+| ring_k5 | -1.30 | -0.79 | +0.21 |
+| rmix_kE | -1.30 | -0.79 | +0.21 |
+| ring_k20 | -1.31 | -0.79 | +0.21 |
+
+Per truth (mean over the five datasets, AUPR/base): Complexes: best variant (plain cosine) 2.07, tcaCLR2 1.68, tcaCLR 1.86, CLR-NS 2.07, scGPT token cosine 4.95. DoRothEA A-B: 1.42, 1.75, 1.55, 1.32, 2.01. CollecTRI: 1.30, 1.86, 1.66, 1.38, 1.61. The ring families (polar-transform and radial-mixture) accepted no ring in any real plane; their scores equal the no-ring floor. The mixture families (mclust, HDDC, pgmm) scored below plain cosine, more so with more eigenmodes. Controls: planted structure recovered by the mixtures and not by the ring families on the real HepG2 embedding; permuted data give 0 eigenvalues above the permutation edge, so edge-rule variants are not scored there; forced-k mixtures still return components.
+
+**Freeze.** The frozen variants for the sealed dataset are cos_kE and cos_k10 (plain cosine similarity in the top-k eigenmodes of the tcaCLR2 walk, k by the permutation-edge rule and k = 10), the two best development variants; tcaCLR2 and the scGPT readouts are the comparators and are scored by the scGPT extension plan. Jurkat is scored once for the frozen variants, descriptively; no variant is added or dropped after this entry. Decided by the PI on 22 Nov 2026 ('freeze and score Jurkat'; the case for pretraining is left open in the paper).
