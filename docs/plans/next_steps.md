@@ -13,6 +13,7 @@
 7. The 2007 CLR statement (paper Euclidean-only, software both) remains in older repo files not yet updated (abstract_draft.md, figures/README.md, R/clr_attention.R, R/calibrate.R, docs/plans/fig1_review_round2.md, STATUS.md lines about CLR.zip).
 
 ## Unscheduled hypotheses and probes
+0. **Spectral-embedding pass (exploratory; docs/plans/spectral_embedding_pass_plan.md once written).** Embed genes in the top eigenmodes of the tcaCLR2 walk (k from the permutation-edge rule), fit mclust (BIC over components and covariance models), subspace mixtures where BIC picks the dimension per component (HDDC, mixtures of factor analyzers) and a polar-transform ring detector; pair score from posterior co-membership; compare with tcaCLR2 and with scGPT's token cosine on complexes, DoRothEA and CollecTRI. Framed as preparation for adding pretraining later. Development on hESC, hHep, K562, HepG2, RPE1; Jurkat held out for the frozen variants only (Jurkat scoring job 7810 is on hold until then).
 8. **Realistic planted simulation** (hubs, overlapping modules, resampled real complex structure) before any simulation-based depth rule is trusted; the clean-clique simulation disagreed with the real truths about depth.
 9. **aCLR retune.** Its best of 819 cells beat the registered cell by 14 to 69% relative (wide keff, unclipped first score); a hypothesis that needs a fresh truth.
 10. **Exploratory read-out table**: needs tcaCLR_allentries added to the registered list first, logged before any score output.
