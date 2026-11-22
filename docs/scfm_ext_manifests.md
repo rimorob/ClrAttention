@@ -13,5 +13,6 @@ Raw single-cell downloads:
 | File | SHA-256 | Size |
 |---|---|---|
 | rpe1_raw_singlecell_01.h5ad (figshare 20029387) | 9b05ef1f81526216fa008d677e9e0d03dce9a2f7a95499a4fb81e505e9d88ef1 | 8.70 GB |
+| GSE264667_jurkat_raw_singlecell_01.h5ad (GEO GSE264667; 12,013 non-targeting controls) | ffbe15f2c8f7ffcfd7b0ba9e6937d4ebc2d03b0179fa8234648a59bcb82c04a3 | 9.37 GB |
 
 Deleted after control-cell extraction (approved by the PI, 21 Nov 2026): data/perturbseq/rpe1_raw_singlecell_01.h5ad, 8.70 GB, sha256 as above; the extracted control cells (results/scfm_rpe1/expr and cell_totals.tsv, 25 MB) are kept and reproduce the scoring bit for bit (tested with --expr files). Re-download: figshare article 20029387.
