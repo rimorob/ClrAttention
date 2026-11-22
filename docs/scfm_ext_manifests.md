@@ -7,6 +7,7 @@ Each dataset's manifest (the SHA-256 of every file the scoring reads: control-ce
 | K562 | 787cbf87...080b (as frozen for the earlier K562 arm; recomputed byte-identical on 21 Nov 2026) | earlier arm | raw single-cell file kept |
 | HepG2 | e9ef6a4bb97762fd0ec1c0bc985b16ab4aefa6effe52641e248aff40eef5f3c5 | 21 Nov 2026, 14:20 | 5 files verified, 0 mismatches; raw single-cell file kept (also the source of the HepG2 pseudobulk) |
 | RPE1 | b6638a394b885827c0cf3dcec911362c5908f336f2b65e240fae5210be081d73 | 21 Nov 2026, 15:27 | 5 files verified, 0 mismatches; 11,485 non-targeting controls, five subsamples; raw single-cell file deleted after extraction (below) |
+| Jurkat | 6c0da6a2b5e4ab9eea97335b5c51840d3a49b6f5d3e5f28d5969963ad769848c | 21 Nov 2026, 18:58 | 5 files verified, 0 mismatches; 12,013 non-targeting controls, five subsamples; raw single-cell file deleted after extraction (below). SEALED: not scored until the spectral-pass variants are frozen (docs/plans/spectral_embedding_pass_plan.md) |
 
 Raw single-cell downloads:
 
@@ -16,3 +17,5 @@ Raw single-cell downloads:
 | GSE264667_jurkat_raw_singlecell_01.h5ad (GEO GSE264667; 12,013 non-targeting controls) | ffbe15f2c8f7ffcfd7b0ba9e6937d4ebc2d03b0179fa8234648a59bcb82c04a3 | 9.37 GB |
 
 Deleted after control-cell extraction (approved by the PI, 21 Nov 2026): data/perturbseq/rpe1_raw_singlecell_01.h5ad, 8.70 GB, sha256 as above; the extracted control cells (results/scfm_rpe1/expr and cell_totals.tsv, 25 MB) are kept and reproduce the scoring bit for bit (tested with --expr files). Re-download: figshare article 20029387.
+
+Deleted after control-cell extraction (approved by the PI, 21 Nov 2026): data/jurkat_perturbseq/GSE264667_jurkat_raw_singlecell_01.h5ad, 9.37 GB, sha256 ffbe15f2c8f7ffcfd7b0ba9e6937d4ebc2d03b0179fa8234648a59bcb82c04a3; the extracted control cells (results/scfm_jurkat) are kept and reproduce the scoring from files (tested with --expr files on synthetic truths). Re-download: GEO GSE264667 supplementary files.
