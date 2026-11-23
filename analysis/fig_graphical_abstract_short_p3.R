@@ -159,11 +159,27 @@ ext_rows <- list(
   X("DoRothEA A-B", "DoRothEA_AB"), X("CollecTRI", "CollecTRI"), X("Complex Portal complexes", "Complexes"), X("Mean of the three truths", NULL))
 # values of the value-only columns on the 21 rows of the scoreboard: scPRINT and scGPT were not scored on these metrics (scPRINT: BEELINE dataset means and K562 single cells, not the BEELINE medians or the K562 pseudobulk rows; scGPT: human single-cell datasets), so dashes
 
+# scPRINT zero-shot R0 (medium-v1.5, orientation S = A^T, arm A) medians in the two BEELINE median rows, from the scoring record: median over the 44 primary case-truth cells
+# (celltype_ChIP, nonspecific_ChIP, STRING, LOFGOF of the 14 cases) and over the 14 cell-type ChIP cells, on the genes scPRINT covers (gene set A). The other methods of these
+# rows use the full gene sets, so the two cells carry a dagger (SCP_DAGGER_ROWS).
+SCP <- utils::read.csv(Sys.getenv("SB_SCFM", "results/scfm_score/metrics_long.csv"), stringsAsFactors = FALSE)
+SCP <- SCP[SCP$source == "scprint_medium_A" & SCP$readout == "R0" & SCP$orient == "T" & SCP$gset == "A", ]
+SCP_PRIMARY <- SCP[SCP$truth %in% c("celltype_ChIP", "nonspecific_ChIP", "STRING", "LOFGOF"), ]
+stopifnot(nrow(SCP_PRIMARY) == 44, sum(SCP_PRIMARY$truth == "celltype_ChIP") == 14, !anyNA(SCP_PRIMARY$auprc_ratio))
+SCP_MED <- c(beeline_median_auprc_ratio_primary = stats::median(SCP_PRIMARY$auprc_ratio),
+             beeline_median_auprc_ratio_celltypeChIP = stats::median(SCP_PRIMARY$auprc_ratio[SCP_PRIMARY$truth == "celltype_ChIP"]))
+SCP_DAGGER_ROWS <- names(SCP_MED)
+cns_med <- function(gs) { y <- utils::read.csv(Sys.getenv("SB_SCFM", "results/scfm_score/metrics_long.csv"), stringsAsFactors = FALSE)
+  y <- y[y$source == "cmp" & y$readout == "clr_ns" & y$gset == gs & y$truth %in% c("celltype_ChIP", "nonspecific_ChIP", "STRING", "LOFGOF"), ]
+  stopifnot(nrow(y) == 44); c(primary = stats::median(y$auprc_ratio), ct = stats::median(y$auprc_ratio[y$truth == "celltype_ChIP"])) }
+CNS_A <- cns_med("A"); CNS_F <- cns_med("full")        # CLR-NS medians on the genes scPRINT covers and on the full gene sets (the figure's other columns are on the full gene sets)
 cell_vals <- function(r) { if (isTRUE(r$ext)) return(r$vals)
   x <- D[D$dataset == r$ds & D$truth == r$truth & D$metric == r$metric & D$scope == r$scope, ]
   v <- stats::setNames(rep(NA_real_, length(allm)), allm)
   ok <- x$status != "not_run" & !is.na(x$enrichment_over_random) & x$method %in% meths
-  v[x$method[ok]] <- x$enrichment_over_random[ok]; v }
+  v[x$method[ok]] <- x$enrichment_over_random[ok]
+  if (length(XK) && r$ds == "beeline" && r$metric %in% names(SCP_MED)) v[["scprint"]] <- SCP_MED[[r$metric]]
+  v }
 fmt <- function(v, digits) if (digits == 2 && v >= 10) sprintf("%.1f", v) else sprintf(paste0("%.", digits, "f"), v)
 
 # ---- one page (portrait) ------------------------------------------------------------------------------------------------
@@ -215,8 +231,11 @@ draw_page <- function(rows, sub, footer, H, title = TITLE, tally = FALSE, rows2 
       y <<- y - h; next }
     yc <- y - h / 2
     v <- cell_vals(r)
-    # first or shared first: highest value, or tied with it at the printed precision (over all columns that have a value, the value-only ones included)
-    best <- if (all(is.na(v))) integer(0) else which(!is.na(v) & vapply(v, function(z) !is.na(z) && fmt(z, r$digits) == fmt(max(v, na.rm = TRUE), r$digits), NA))
+    # first or shared first: highest value, or tied with it at the printed precision
+    # mark rule: the 21 rows of the tally (count = TRUE) are decided over the eight bar columns only (the value-only columns are on another gene set, dagger, and do not compete);
+    # the block below the tally (count = FALSE) is decided over all columns (same genes, same units)
+    vm <- if (count) v[meths] else v
+    best <- if (all(is.na(vm))) integer(0) else which(!is.na(vm) & vapply(vm, function(z) !is.na(z) && fmt(z, r$digits) == fmt(max(vm, na.rm = TRUE), r$digits), NA))
     if (count) firsts[best] <<- firsts[best] + 1L
     if (count) {      # audit: the mark with and without the tcaCLR2 column (the original columns only)
       v <- v[meths]; best <- best[best <= length(meths)]
@@ -227,7 +246,7 @@ draw_page <- function(rows, sub, footer, H, title = TITLE, tally = FALSE, rows2 
         tcaCLR2_in_best = T2_KEY %in% names(v)[best], tcaCLR2_takes_mark_from_tcaCLR = (LEAD_KEY %in% names(v)[best0]) && !(LEAD_KEY %in% names(v)[best]),
         tcaCLR2_shares_mark_with_tcaCLR = (LEAD_KEY %in% names(v)[best0]) && (T2_KEY %in% names(v)[best]) && (LEAD_KEY %in% names(v)[best]),
         tcaCLR2_takes_mark_from_other = (T2_KEY %in% names(v)[best]) && !(LEAD_KEY %in% names(v)[best0]) && !(T2_KEY %in% names(v)[best0]) && length(best0) > 0, stringsAsFactors = FALSE)
-      v <- cell_vals(r); best <- which(!is.na(v) & vapply(v, function(z) !is.na(z) && fmt(z, r$digits) == fmt(max(v, na.rm = TRUE), r$digits), NA)) }
+      v <- cell_vals(r); best <- which(!is.na(v[meths]) & vapply(v[meths], function(z) !is.na(z) && fmt(z, r$digits) == fmt(max(v[meths], na.rm = TRUE), r$digits), NA)) }
     if (!count) AUDIT_EXT[[length(AUDIT_EXT) + 1L]] <<- data.frame(row = r$label, t(round(v, 6)), marked = paste(names(v)[best], collapse = "+"), stringsAsFactors = FALSE)
     if (nzchar(Sys.getenv("SB_VERBOSE")) && count) cat(sprintf("ROW %-62s | %s\n", paste(r$ds, r$truth, r$metric), paste(names(v)[best], collapse = ",")))
     span <- max(v[meths] - r$base, na.rm = TRUE); if (!is.finite(span) || span <= 0) span <- 1       # bars are scaled over the bar columns
@@ -237,7 +256,8 @@ draw_page <- function(rows, sub, footer, H, title = TITLE, tally = FALSE, rows2 
       x0 <- cx0(j)
       if (j > length(meths)) {                                     # value-only column: centred number (mark dot to its left), dash when no value
         if (is.na(v[j])) { txt("–", x0 + XW / 2, yc, 10, ink[["muted"]]); next }
-        lab <- fmt(v[j], r$digits); isb <- j %in% best; tw <- text_w(lab, FS_NUM, if (isb) "bold" else "plain")
+        lab <- fmt(v[j], r$digits); if (j == 9 && r$metric %in% SCP_DAGGER_ROWS) lab <- paste0(lab, "\u2020")
+        isb <- j %in% best; tw <- text_w(lab, FS_NUM, if (isb) "bold" else "plain")
         txt(lab, x0 + XW / 2 + (if (isb) 0.03 else 0), yc, FS_NUM, face = if (isb) "bold" else "plain")
         if (isb) grid.circle(x0 + XW / 2 + 0.03 - tw / 2 - 0.045, yc, 0.025, default.units = "native", gp = gpar(fill = ink[["primary"]], col = NA))
         next }
@@ -290,7 +310,7 @@ foot_common <- list(
   fl(paste0("Pooled AUPR / base rate (1.00 = random), raw scores unless marked hub-controlled; ", LEAD_NAME, " was picked among about 20 read-outs by its K562 scores (selected, not fitted); K562 and M3D are tuning sets;")),
   fl(paste0(paste0(ACLR_NAME, " and "), LEAD_NAME, " settings were developed on M3D. ", LEAD_NAME, " is the lead candidate: its preregistered E. coli test did not reach the threshold; its preregistered HepG2 test (a separate result on a new truth) did.")))
 foot_ext <- list(
-  fl("Last three columns, value only (no bars): scPRINT zero-shot attention (R0) and scGPT whole-human attention and token cosine (a data-free similarity of pretrained gene embeddings; the scGPT hidden-state readout is in Appendix Table A5). scPRINT was run only on the BEELINE datasets and K562 single cells, and scGPT only on the human single-cell datasets, so none has a value on the 21 rows above (dashes); see Appendix Tables A3 to A6."),
+  fl(sprintf("Last three columns, value only (no bars): scPRINT zero-shot attention (R0), scGPT attention and token cosine; of the 21 rows only the median rows have an scPRINT value (Appendix A3). \u2020 scPRINT is scored on the genes it covers, while %s, %s, %s, %s and the competitors use the full gene sets (CLR-NS %.2f and %.2f on them, %.2f and %.2f on full sets). In the 21 rows the value-only columns take no mark and are not in the tally; in the last block all columns compete for the mark.", "CLR", ACLR_NAME, LEAD_NAME, T2_NAME, CNS_A[["primary"]], CNS_A[["ct"]], CNS_F[["primary"]], CNS_F[["ct"]])),
   fl("Last block, below the tally and not in it (the tally counts the 21 rows above): mean over six human single-cell datasets (hESC, hHep, K562, HepG2, RPE1, Jurkat) of the per-dataset values of Appendix Table A5, on the genes scGPT covers. GENIE3, PIDC and GRNBoost2 were not run on these data and scPRINT not on HepG2, RPE1 and Jurkat (dashes). The mark rule applies within each of these rows, scGPT columns included: the token cosine takes it on three of the four rows (not on CollecTRI)."))
 foot_raw <- c(foot_common, list(fl(T2_NOTE1), fl(T2_NOTE2),
   fl(paste0("DREAM5 yeast row: one exploratory estimation run (plan fixed in advance), not a confirmatory test; competitors from saved score matrices; ", LEAD_NAME, " was not run on the DREAM5 regulon or edge truths (except a descriptive line).")),
