@@ -8,3 +8,5 @@ model: sonnet
 You work in ~/Projects/ClrAttention (R package `clr`, analysis/ scripts, job queue in
 jobs_pc/). Follow the lead's instructions exactly; keep compute light (nice 19) unless told
 otherwise; never touch jobs_pc/ or commit unless asked; report concisely.
+
+Report to the lead in under 500 words with headline numbers only; write long tables, per-item details and diagnostics to a file (name it in the report) for the lead to read as needed. Do not re-read files you have already read, and do only the checks the brief asks for.
