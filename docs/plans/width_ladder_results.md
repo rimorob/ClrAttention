@@ -1,0 +1,8 @@
+# Width ladder results (exploratory, descriptive, spent truths; plan docs/plans/width_ladder_plan.md)
+
+Ran 22 Nov 2026 (jobs 8000-8015, assemble 8090): keff 2 to 128 (13 half-octave widths), depth fixed t = 9 (R9) or from the permutation-edge rule per width (RE), six datasets, pooled co-membership AUPR plus the direct-edge metrics; three multi-scale scores (MS1, MS2 rank/z over all widths, MS3 rank over widths 4 to 48). Gate passed (tcaCLR, tcaCLR2 reproduced to 4e-14). The assemble job's final heatmap PNG failed ("figure margins too large"); all tables (best_width.csv, surface_all.csv, ledger.csv, t_by_width.csv) were written. Tables in results/width_ladder/.
+
+Findings (best single width is a selection among 13 settings; typical winner inflation about 1.7 standard errors):
+1. **Width does not rescue direct TF-to-target edges.** M3D strong-evidence pooled direct-edge AUPR ratio peaks at the top of the ladder (keff 128) at 0.99 of tcaCLR (keff 10) and 0.86 of CLR, the same gap as tcaCLR; EcoMAC best width 8 (R9), 1.07 of CLR. Narrowing to keff 2 to 4 does not help.
+2. **Pooled co-membership is flat in width.** Best interior widths: regulon truths 3 to 12 (M3D 8, 12; EcoMAC 3, 12; K562 TF truths 3 to 8), complexes 6 to 48 (K562 CORUM 24, yeast 32 to 48, HepG2 3 to 8, M3D 8 to 12, Kemmeren 6). Gains over tcaCLR at keff 10 are 0 to 7% with fixed depth, up to 15% with the edge-rule depth (K562 knockdown response). Only 1 of 37 best widths per rule sits at the ladder's low edge (2).
+3. **Multi-scale scores do not beat the single tcaCLR.** MS3 is within about -5% to +5% of tcaCLR on co-membership and 14 to 26% worse on direct edges (head dilution).
