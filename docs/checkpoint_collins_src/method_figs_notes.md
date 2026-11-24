@@ -1,0 +1,25 @@
+# Method figures: build notes (internal; not for circulation)
+
+## What exists
+Eight PNGs (7.0 in wide, 300 dpi) in docs/checkpoint_collins_src/figures/: method_overview, method_clr, method_aclr, method_tcaclr, method_tcaclr2, method_global_tau, method_multiscale, method_baselines. Captions: docs/checkpoint_collins_src/method_captions.md (circulation wording). Scripts: analysis/method_figs/ (00_ and 01_ compute the numbers, 10_ to 17_ draw, mf_lib.R holds shared helpers; cache/ holds small .rds files and logs). Re-run order: 00, 01, then any of 10 to 17, each with nice -n 19 Rscript from the repo root. All text is >= 7 pt (the smallest size set in code is 7).
+
+## Where every number comes from
+- Real M3D matrix (results/baselines_m3d/expression.tsv, 4297 x 466, read only), fitted with ad_fit (the project's B-spline MI and CLR). The hand-computed CLR (row z, zeroed diagonal in mean and sd, clip, Stouffer) is asserted equal to the package score (max abs diff < 1e-9). The per-gene temperatures are recomputed with the bisection of clr:::.softmax_rows and checked against the package operator on 25 random rows (< 1e-9); P = 0.5 I + 0.5 A is asserted equal to gl_make_P. P^9 by gl_power_seq, second CLR by gl_zmat (asserted equal to a by-hand row z of log P^9).
+- Neighbourhood (11 genes): lexA (b4043); its five highest CLR scores (yebG, dinI, recA, dinF, sulA); the three highest tcaCLR scores not among those (recN, tisB, umuD); two background genes drawn at random (seed 7) among genes with no positive CLR score with lexA (rpoN, yeaR). Local-temperature genes: lexA and the genes whose tau is nearest the 10th, 50th, 90th percentile among genes with a full 50 candidates (rlmL, flgJ, napF).
+- tcaCLR2: 10 permutations redone for M3D with the stored seeds; edge 0.885918 and t2 25 reproduce results/tcaclr2/edge_m3d_tf_regulons.tsv (edge and range identical to 6 digits; asserted). The five-dataset table is READ from the stored edge files: M3D 25, EcoMAC 18 (results/tcaclr2_scoreboard/edge_ecomac.tsv), K562 29, HepG2 32, Kemmeren 23 (armB), as given in the brief; yeast 21 exists but is not printed. The 40-eigenvalue observed and permuted spectra are new computations (same operator and eigensolver).
+- Global temperature: tau 0.541248 recomputed and asserted equal to results/global_temp_ladder/m3d/tau_table.csv; effective-partner quantiles equal that table (median 5.44, q10 1.03, q90 26.84, max 46.37). EcoMAC (tau 0.6188, 1.0/4.9/27.4, range 1.0 to 46.4) is READ from results/global_temp_ladder/ecomac/tau_table.csv, not recomputed.
+- Multi-scale: the 13 operators rebuilt with gt_make_P, walk depth 9, second CLR, percentiles and z over all 9,229,956 pairs; mean effective partners per temperature match the stored table (1.21, 8.81, 22.28, 44.63 spot-checked). The illustration uses depth 9; the exploratory study also scored an edge-rule depth, not shown.
+- Overview matrices: tcaCLR2 at t = 25 and the global-temperature score at depth 9 computed in 01_.
+- |r| scatter: real lexA and recA profiles, r = 0.83.
+
+## PaperBanana track
+One draft only (run folder under docs/whitepapers/figures/pb_runs/, id run_20261124_101417_e67bd3), for the overview. No 429/quota/billing errors. Kept: the layout idea (numbered rows, axis tag per row, dashed rows for the exploratory steps). Discarded: the image itself, because it invents labels ("Core Pipeline", "Refined Network Graph", "Ensemble / Global Network Sensitivity", "Pairwise Gene Mutual Information" input node), expands the acronyms, and says walk depth is derived "via permutation tests" (the rule uses eigenvalues of permuted operators). Nothing from the draft appears in the figures; everything is code-built. Invented content kept from any AI draft: none.
+
+## Unverified or judgement calls
+- No fresh-eyes review; I looked at each PNG myself only.
+- Descriptions of GENIE3, GRNBoost2 and PIDC are from general knowledge (random-forest-type ensembles; boosted trees with early stopping; partial information decomposition on discretised data), not checked against the papers or the project's wrapper settings. PIDC wording ("share of information unique to the pair, aggregated over third genes") is a paraphrase.
+- The 2007 wording in the CLR caption follows the brief (PI statement), not re-checked against the 2007 sources.
+- tcaCLR2 caption's reading of 0.05 ("noise component decayed to 5%") is my paraphrase of the convention; the rule itself is as written in the stored edge files.
+- The example neighbourhood is dominated by one tight SOS-type module, so many matrix cells are near-uniform after the walk (rows of P^9 almost equal) and MS1 is 1.00 for within-module pairs. This is what the data give; it is stated in the multi-scale caption and the tcaCLR caption.
+- Panel sizes are tall (CLR and tcaCLR 8.3 in) because each shows two 11 x 11 matrices with numbers; if the page budget is tight, drop to 9 genes (edit 00_ neighbourhood) rather than shrinking the type.
+- Not done: no commit; STATUS.md, jobs_pc, results, existing figures and the long document untouched. analysis/method_figs/cache/ is untracked output.
