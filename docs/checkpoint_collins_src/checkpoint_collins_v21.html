@@ -144,39 +144,158 @@ t* = geometric mean of the two directions' best t; median over 50 splits = 9
 
     <p class="caption"><b>Which scores answer which question.</b> Pooled co-membership AUPR ranks all pairs of genes that share a regulon or a complex against all other pairs. TF-to-gene edge AUPR ranks pairs formed by a known regulator crossed with every other gene.</p>
 
+    <p><b>The two evaluation scores.</b> Both are the area under the precision-recall curve (AUPR, average precision, with tied scores sharing one precision value computed at the end of the tie) of one pooled ranking of a pair list <i>L</i>, divided by the fraction of positives in that list, so that a random ranking scores 1. For a pair score <i>s</i> and a list <i>L</i> with positive pairs <i>L</i><sup>+</sup> (the base rate &pi;<sub><i>L</i></sub> is the fraction of positives, <i>N</i><sub>pos</sub> / <i>N</i><sub>all</sub>, for <i>N</i><sub>all</sub> pairs of which <i>N</i><sub>pos</sub> are positive):</p>
+    <p class="eq">$$\text{ratio}(s,L)=\frac{\text{AUPR}(s;L)}{\pi_L},\qquad \pi_L=\frac{N_{\text{pos}}}{N_{\text{all}}}$$</p>
+    <p><i>Pooled co-membership</i>: <i>L</i> is the list of all unordered pairs of genes that belong to at least one retained regulon or complex, with pairs from the same operon removed, and a pair is positive when its two genes share a regulon or a complex. <i>TF-to-gene edge</i>: <i>L</i> is the list of all unordered pairs formed by a known regulator (one with at least one known target in the data) and any other gene, and a pair is positive when either direction is a known regulatory interaction.</p>
+
+    <h3>Notation</h3>
+    <ul>
+      <li>Genes are indexed by $i$, $j$, $k$; there are $G$ genes and $E$ profiles. $X$ is the $G \times E$ expression matrix and $x_i$ its row $i$.</li>
+      <li>$I_{ij}$ is the mutual information of genes $i$ and $j$ (with $I_{ii}=0$); $\mu_i$ and $\sigma_i$ are the mean and standard deviation of row $i$ of $I$.</li>
+      <li>$s_{ij}$ is the symmetric CLR score of the pair $(i,j)$; the Stouffer combination of two z-scores $a$ and $b$ is $(a+b)/\sqrt{2}$.</li>
+      <li>$C_i$ is the candidate set of gene $i$ (its strongest partners), $\tau_i$ its softmax temperature, $A$ the row-stochastic attention matrix, $P$ the lazy walk operator and $t$ the walk depth, so that $(P^{t})_{ij}$ is the chance that a $t$-step walk from $i$ is at $j$.</li>
+      <li>$R_i$ is the reachable set of gene $i$: the genes $j \ne i$ with $(P^{t})_{ij}>0$.</li>
+    </ul>
+
     <h3>CLR</h3>
     <img class="fig" src="method_clr.png" alt="CLR worked example on 11 E. coli genes: mutual information, row z-scores, clipping at zero and the symmetric combination.">
     <p class="caption"><b>Methods figure 2. CLR: each pair of genes is scored against the background of each gene.</b> The input is a genes-by-profiles expression matrix (here M3D, 4,297 genes by 466 profiles, with 11 genes displayed). (1) A B-spline estimator gives the mutual information (MI) of every gene pair. (2) For each gene (row), the MI values to all other genes define that gene's own background, summarised by a mean and standard deviation; for lexA the mean is .081 and the standard deviation .050, and the partner dinI at MI .485 sits 8.1 standard deviations above it. (3) Negative z-scores are set to 0, which here affects 35 of the 110 off-diagonal cells shown. (4) The two directions are combined into the symmetric score S<sub>ij</sub> = (max(z<sub>ij</sub>, 0) + max(z<sub>ji</sub>, 0)) / sqrt(2); for lexA and dinI this is (8.1 + 10.1) / sqrt(2) = 12.9, while lexA and the background gene yeaR score 0 because both z-scores are negative. The 2007 paper describes the Euclidean combination of the two z-scores; the 2007 software offered both Euclidean and Stouffer, and the Stouffer form is the one drawn. Nothing is learned in this step and no truth or label is used.</p>
     <p>CLR is the starting point of every later step. Each gene's mutual information with all other genes is turned into a z-score against that gene's own mean and standard deviation, so that a score says how unusual a partner is for that gene and not how large its raw mutual information is. Negative z-scores are set to zero and the two directions of a pair are combined symmetrically. The estimator, the combination and the clipping are fixed; CLR has no parameter to tune, and its output is the matrix on which the attention step operates.</p>
+    <p>With $I_{ij}$ the B-spline estimate of the mutual information of genes $i$ and $j$ (spline order 3, with $B=\text{round}\left(\sqrt{(1+\sqrt{1+24E})/2}\right)$ bins, which is 7 bins for the 466 profiles of M3D; $I_{ii}=0$), CLR is defined by:</p>
+    <p class="eq">$$\mu_i=\frac{1}{G}\sum_{j=1}^{G}I_{ij},\qquad \sigma_i=\sqrt{\frac{1}{G-1}\sum_{j=1}^{G}\left(I_{ij}-\mu_i\right)^{2}}$$</p>
+    <p class="eq">$$z_{ij}=\text{max}\left(0,\frac{I_{ij}-\mu_i}{\sigma_i}\right),\qquad s_{ij}=\frac{z_{ij}+z_{ji}}{\sqrt{2}},\qquad s_{ii}=0$$</p>
+    <p>The sums run over all $G$ genes including $j=i$ (whose mutual information is set to 0), and the standard deviation uses the divisor $G-1$.</p>
+<pre>
+Algorithm 1: CLR
+Input:   expression matrix X (G genes x E profiles)
+Output:  symmetric score matrix s (G x G)
+ 1. I[i,j] := B-spline mutual information of rows i and j of X (order 3, B bins); I[i,i] := 0
+ 2. for each gene i:  mu[i] := mean of I[i,1..G];  sigma[i] := sd of I[i,1..G] (divisor G-1)
+ 3. for each ordered pair (i,j):  z[i,j] := max(0, (I[i,j] - mu[i]) / sigma[i])
+ 4. for each pair i != j:  s[i,j] := (z[i,j] + z[j,i]) / sqrt(2);  s[i,i] := 0
+ 5. return s
+</pre>
 
     <h3>aCLR</h3>
     <img class="fig" src="method_aclr.png" alt="aCLR worked example: top-50 candidates, softmax with a per-gene temperature, the attention matrix and the lazy walk read out symmetrically.">
     <p class="caption"><b>Methods figure 3. aCLR: CLR scores become attention with a temperature set for each gene, followed by a lazy walk.</b> The input is the CLR score matrix of the previous figure (M3D shown; query gene lexA). (1) Each gene keeps its 50 highest positive scores (cap 50). (2) A softmax over those scores turns them into weights, with the temperature tau solved separately for each gene so that the gene attends to about 10 effective partners (the exponential of the entropy of its weights equals 10); for lexA tau is 1.62. (3) The weights form a row-stochastic attention matrix A. (4) A lazy walk P = 0.5 I + 0.5 A is run for t = 9 steps and read out symmetrically as (P<sup>9</sup> + P<sup>9</sup>&prime;) / 2. The lower panels show real rows: genes at the 10th, 50th and 90th percentile of tau over all 4,297 genes (rlmL 0.31, flgJ 0.68, napF 2.25) and lexA each reach exactly 10.0 effective partners, because the temperature follows the spread of the gene's own scores (all genes have 50 positive candidates; tau ranges from 0.085 to 9.7). The fixed parameters are 10 effective partners, cap 50, lazy weight 0.5 and depth 9; the temperatures are computed from the data, not tuned, and nothing is read from any truth.</p>
     <p>aCLR keeps each gene's 50 highest positive CLR scores and turns them into attention weights with a softmax. The softmax temperature is solved gene by gene so that every gene spreads its attention over about 10 effective partners, which is why a gene with widely spread scores and a gene with tightly bunched scores end up with the same breadth of attention. The resulting row-stochastic matrix is made lazy (weight 0.5 on staying in place) and walked for 9 steps, and the walk is symmetrised. The parameters are fixed in advance (effective partners 10, cap 50, lazy weight 0.5, depth t = 9), and no truth enters the computation.</p>
+    <p>Let $C_i$ be the set of the (at most 50) genes $j \ne i$ with the largest positive scores $s_{ij}$; a gene with no positive score attends to itself ($A_{ii}=1$) and a gene with at most 10 candidates weights them equally ($A_{ij}=1/\left\lvert C_i\right\rvert$). Otherwise:</p>
+    <p class="eq">$$A_{ij}=\frac{\exp\left(s_{ij}/\tau_i\right)}{\sum_{k\in C_i}\exp\left(s_{ik}/\tau_i\right)}\ \ (j\in C_i),\qquad A_{ij}=0\ \ (j\notin C_i)$$</p>
+    <p class="eq">$$H_i=-\sum_{j\in C_i}A_{ij}\,\ln\,A_{ij},\qquad \tau_i\ \text{solves}\ \exp\left(H_i\right)=10$$</p>
+    <p class="eq">$$P=0.5\,I+0.5\,A,\qquad a_{ij}=\frac{(P^{t})_{ij}+(P^{t})_{ji}}{2}\ \ (i\ne j),\qquad t=9$$</p>
+<pre>
+Algorithm 2: aCLR
+Input:   CLR scores s (G x G); effective partners 10, cap 50, lazy weight 0.5, depth t = 9
+Output:  symmetric score matrix a (G x G)
+ 1. for each gene i:  C[i] := the (at most 50) genes j != i with the largest s[i,j], keeping s[i,j] &gt; 0
+ 2.   if C[i] is empty:  A[i,i] := 1
+ 3.   else if |C[i]| &lt;= 10:  A[i,j] := 1 / |C[i]| for j in C[i]
+ 4.   else:  find tau[i] by bisection on log tau (from 1e-4 to 1e4) such that exp(H[i]) = 10, with
+              A[i,j] := exp(s[i,j]/tau[i]) / sum over k in C[i] of exp(s[i,k]/tau[i])  (j in C[i])
+              H[i]   := - sum over j in C[i] of A[i,j] ln A[i,j]
+ 5. P := 0.5 I + 0.5 A;  M := P^t
+ 6. for each pair i != j:  a[i,j] := (M[i,j] + M[j,i]) / 2;  a[i,i] := 0
+ 7. return a
+</pre>
 
     <h3>tcaCLR</h3>
     <img class="fig" src="method_tcaclr.png" alt="tcaCLR worked example: the 9-step walk matrix, row z-scores of its logarithm, clipping at zero and the symmetric combination.">
     <p class="caption"><b>Methods figure 4. tcaCLR: a second CLR on the logarithm of the walk matrix.</b> The input is the walk matrix P<sup>9</sup> of aCLR (lazy walk, 10 effective partners, cap 50, lazy weight 0.5, t = 9; M3D, same 11 genes). (1) Entry (i, j) of P<sup>9</sup> is the chance that a 9-step walk from i is at j, shown times 100. (2) For each gene, the logarithm of its row over the genes the walk reaches (lexA reaches 4,293 of the 4,296 others) defines a background with a mean and standard deviation (&minus;13.6 and 2.3 for lexA), and each entry becomes a z-score; unreached pairs stay out of the background and score 0. (3) Negative z-scores are set to 0. (4) The two directions are combined as in CLR, S2<sub>ij</sub> = (max(z<sub>ij</sub>, 0) + max(z<sub>ji</sub>, 0)) / sqrt(2); for lexA and dinI this is (4.7 + 4.5) / sqrt(2) = 6.5. The walk spreads weight across the whole module of the example, so the genes shown score within a narrow band of each other, while the two background genes remain low. The step is a normalisation of the walk matrix; it adds no parameter, no learned weight and no use of any truth.</p>
     <p>tcaCLR applies the CLR operation a second time, to the walk matrix instead of to mutual information. Walk probabilities span many orders of magnitude, so each row is put on a logarithmic scale before it is standardised against its own mean and standard deviation; pairs the walk never reaches stay out of the background and score 0. Negative z-scores are clipped and the two directions are combined exactly as in CLR. The walk is the aCLR walk with its fixed parameters (10 effective partners, cap 50, lazy weight 0.5, t = 9), and the second CLR adds no parameter.</p>
+    <p>With the walk matrix $(P^{t})_{ij}$ of aCLR and the reachable set $R_i$ of each gene, tcaCLR is defined by:</p>
+    <p class="eq">$$L_{ij}=\ln\,(P^{t})_{ij}\ \ (j\in R_i),\qquad m_i=\frac{1}{\left\lvert R_i\right\rvert}\sum_{j\in R_i}L_{ij},\qquad v_i=\sqrt{\frac{1}{\left\lvert R_i\right\rvert-1}\sum_{j\in R_i}\left(L_{ij}-m_i\right)^{2}}$$</p>
+    <p class="eq">$$z^{(2)}_{ij}=\text{max}\left(0,\frac{L_{ij}-m_i}{v_i}\right)\ \ (j\in R_i),\qquad s^{(2)}_{ij}=\frac{z^{(2)}_{ij}+z^{(2)}_{ji}}{\sqrt{2}},\qquad s^{(2)}_{ii}=0$$</p>
+    <p>Pairs that are not reachable ($j\notin R_i$) have $z^{(2)}_{ij}=0$ and stay out of the mean and standard deviation of row $i$.</p>
+<pre>
+Algorithm 3: tcaCLR
+Input:   walk matrix M = P^t of Algorithm 2 (G x G)
+Output:  symmetric score matrix s2 (G x G)
+ 1. for each gene i:  R[i] := the genes j != i with M[i,j] &gt; 0
+ 2. for each gene i:  L[i,j] := ln M[i,j] for j in R[i];
+    m[i] := mean of L[i,.] over R[i];  v[i] := sd of L[i,.] over R[i] (divisor |R[i]|-1)
+ 3. for each ordered pair (i,j):  z2[i,j] := max(0, (L[i,j] - m[i]) / v[i]) if j in R[i], else 0
+ 4. for each pair i != j:  s2[i,j] := (z2[i,j] + z2[j,i]) / sqrt(2);  s2[i,i] := 0
+ 5. return s2
+</pre>
 
     <h3>tcaCLR2</h3>
     <img class="fig" src="method_tcaclr2.png" alt="tcaCLR2 depth rule: spectra of permuted and observed operators, the edge of the permuted spectra and the resulting walk depth.">
     <p class="caption"><b>Methods figure 5. tcaCLR2: the walk depth t2 is derived from permutations of the data, with no truth read.</b> The input is the expression matrix only. Each gene's profile is permuted on its own, 10 times; the CLR scores and the aCLR operator (10 effective partners, cap 50, lazy weight 0.5) are rebuilt on every permuted matrix; the largest non-trivial eigenvalue of the symmetrised lazy operator is taken for each (the grey spectra), and the edge is their mean (0.886 for M3D). The depth is t2 = max(1, round(ln 0.05 / ln edge)), the 0.05 convention being that the noise component of the walk has decayed to 5% of its initial size; for M3D this gives t* = 24.73 and t2 = 25. The five datasets give M3D 25 (edge 0.886), EcoMAC 18 (0.846), K562 29 (0.903), HepG2 32 (0.910) and Kemmeren 23 (0.876). The observed spectrum (blue) is drawn for comparison only and does not enter the rule. Only the depth is adapted: keff (10), the cap (50) and the lazy weight (0.5) are not, and no regulon, complex or other truth, and no held-out score, is read to set t2.</p>
     <p>tcaCLR2 is tcaCLR with the walk depth set by the data in place of the fixed t = 9. Each gene's profile is permuted independently 10 times, the aCLR operator is rebuilt on every permuted matrix, and the largest non-trivial eigenvalue of each symmetrised operator gives the edge of the noise spectrum (the mean over the 10 permutations). The depth is the number of steps after which a noise component decays to 5% of its initial size, t2 = max(1, round(ln 0.05 / ln edge)), where 0.05 is a convention and not a fitted value. The effective partners (10), the cap (50) and the lazy weight (0.5) stay fixed, and no regulon, complex or other truth is read to set the depth.</p>
+    <p>For permutation $b=1,\dots,10$ every gene's profile is permuted on its own, and the CLR scores and the aCLR operator $A_b$ (10 effective partners, cap 50) are rebuilt. With $W_b=(A_b+A_b^{T})/2$ and $D_b$ the diagonal matrix of the row sums of $W_b$, the symmetrised lazy operator and the depth are:</p>
+    <p class="eq">$$P_{\text{sym},b}=0.5\,I+0.5\,D_b^{-1/2}\,W_b\,D_b^{-1/2},\qquad \text{edge}=\frac{1}{10}\sum_{b=1}^{10}\lambda_b,\qquad t_2=\text{max}\left(1,\text{round}\left(\frac{\ln\,0.05}{\ln\,\text{edge}}\right)\right)$$</p>
+    <p>Here $\lambda_b$ is the largest eigenvalue of $P_{\text{sym},b}$ other than the trivial eigenvalue 1 (the spectrum is real and lies in $[0,1]$, so the eigenvalue and its modulus coincide). The scores are those of tcaCLR with $t=t_2$. No truth is read; the effective partners (10), the cap (50) and the lazy weight (0.5) are not adapted.</p>
+<pre>
+Algorithm 4: tcaCLR2
+Input:   expression matrix X; effective partners 10, cap 50, lazy weight 0.5; 10 permutations; 0.05
+Output:  symmetric score matrix s2 (G x G)
+ 1. for b = 1..10:  X[b] := X with the values of every gene permuted independently across profiles
+ 2.   s[b] := CLR(X[b]) (Algorithm 1);  A[b] := attention matrix of s[b] (Algorithm 2, steps 1-4)
+ 3.   W := (A[b] + transpose(A[b])) / 2;  d := row sums of W;  D := diag(d)
+      Psym := 0.5 I + 0.5 D^(-1/2) W D^(-1/2)
+ 4.   lambda[b] := largest eigenvalue of Psym other than the trivial eigenvalue 1
+ 5. edge := mean of lambda[1..10];  t2 := max(1, round(ln 0.05 / ln edge))
+ 6. s := CLR(X);  P := 0.5 I + 0.5 A (Algorithm 2, steps 1-5, from s);  M := P^t2
+ 7. s2 := Algorithm 3 applied to M
+ 8. return s2
+</pre>
 
     <h3>Exploratory variants (not preregistered; used only on already-used truths)</h3>
     <img class="fig" src="method_global_tau.png" alt="Global temperature variant: effective partners per gene under one temperature for all genes compared with the per-gene rule.">
     <p class="caption"><b>Methods figure 6. Global temperature: one tau for all genes in place of one per gene (exploratory variant).</b> This variant is exploratory: it was not preregistered and was tested only on truths that had already been used. It keeps the CLR scores, the top-50 candidates, the lazy walk (t = 9) and the second CLR, and replaces only the temperature of the softmax: a single tau is solved so that the mean number of effective partners over all genes is 10 (0.5412 for M3D; 0.6188 for EcoMAC). On the same real rows, the per-gene rule gives rlmL, flgJ, lexA and napF exactly 10.0 effective partners each, while the global tau gives them 28.7, 6.7, 1.4 and 1.0. Over all 4,297 M3D genes the global rule yields effective partners from 1.0 to 46.4 (10th, 50th and 90th percentile 1.0, 5.4 and 26.8) with mean 10.0, whereas the per-gene temperatures themselves span 0.085 to 9.7. The figure is descriptive: it shows how the two rules distribute attention and makes no comparison of network quality.</p>
     <p>The global-temperature variant changes one thing in tcaCLR: a single softmax temperature is shared by all genes and is solved so that the mean number of effective partners over all genes is 10, instead of 10 for every gene. Genes with widely spread scores then attend to many partners and genes with tightly bunched scores attend to few. The CLR scores, the top-50 candidates, the lazy weight 0.5, the depth t = 9 and the second CLR are unchanged. The variant is exploratory and was run only on truths that had already been used.</p>
+    <p>Let $V$ be the set of genes with a non-empty candidate set $C_i$ (as in aCLR, the 50 largest positive scores) and $H_i(\tau)$ the entropy of the softmax weights of gene $i$ at temperature $\tau$. One temperature is shared by all genes:</p>
+    <p class="eq">$$\frac{1}{\left\lvert V\right\rvert}\sum_{i\in V}\exp\left(H_i(\tau)\right)=10,\qquad A_{ij}=\frac{\exp\left(s_{ij}/\tau\right)}{\sum_{k\in C_i}\exp\left(s_{ik}/\tau\right)}\ \ (j\in C_i)$$</p>
+    <p>Every gene with candidates uses this softmax (the equal-weight rule for genes with at most 10 candidates is not used here); a gene without candidates attends to itself. The walk $P=0.5\,I+0.5\,A$, the depth $t=9$ and the second CLR are as in tcaCLR.</p>
+<pre>
+Algorithm 5: tcaCLR with one temperature for all genes (exploratory variant)
+Input:   CLR scores s (G x G); effective partners 10, cap 50, lazy weight 0.5, depth t = 9
+Output:  symmetric score matrix s2 (G x G)
+ 1. for each gene i:  C[i] := the (at most 50) genes j != i with the largest s[i,j], keeping s[i,j] &gt; 0
+ 2. find one tau by bisection on log tau (from 1e-4 to 1e4) such that the mean over the genes
+    with C[i] non-empty of exp(H[i](tau)) equals 10
+ 3. for each gene i with C[i] non-empty:
+      A[i,j] := exp(s[i,j]/tau) / sum over k in C[i] of exp(s[i,k]/tau)  (j in C[i])
+    for each gene i with C[i] empty:  A[i,i] := 1
+ 4. P := 0.5 I + 0.5 A;  M := P^9
+ 5. s2 := Algorithm 3 applied to M
+ 6. return s2
+</pre>
 
     <img class="fig" src="method_multiscale.png" alt="Multi-scale scores: the same pair scored at 13 temperatures, with rank percentiles averaged across temperatures.">
     <p class="caption"><b>Methods figure 7. Multi-scale: the average of each pair's rank percentile over 13 temperatures (exploratory variant).</b> This variant is exploratory: it was not preregistered and was tested only on truths that had already been used. At each of 13 global temperatures (log<sub>2</sub> tau from &minus;4 to +2 in half octaves, mean effective partners 1.2 to 44.6 on M3D) the same walk (t = 9, as drawn) and second CLR give one score per pair. MS1 is the mean over the 13 temperatures of each pair's rank percentile among all 9.2 million pairs; MS2 is the mean of the pair's score standardised within each temperature (z over all pairs); MS3 is MS1 over the 8 temperatures from log<sub>2</sub> tau &minus;2.5 to +1. All temperatures are weighted equally and none is chosen, tuned or dropped. In the example, pairs inside the group of lexA, dinI and their partners are at the top percentile at every temperature (MS1 = 1.00), whereas pairs with the background genes move with the temperature (for example lexA-rpoN 0.35, lexA-yeaR 0.75).</p>
     <p>The multi-scale scores remove the choice of a single temperature by using 13 global temperatures at once, spaced in half octaves of tau. At each temperature the same walk (t = 9) and the same second CLR give one score per pair, and the 13 results are combined: MS1 averages each pair's rank percentile among all pairs, MS2 averages the pair's z-score within each temperature, and MS3 is MS1 restricted to the middle 8 temperatures. Every temperature has equal weight and none is selected on any truth. The variant is exploratory and was run only on truths that had already been used.</p>
+    <p>Let $N=G(G-1)/2$ be the number of gene pairs and $s^{(2)}_{\ell}$ the tcaCLR score (global temperature $\tau=2^{\ell}$, $t=9$) of a pair at $\log_2\tau=\ell$. With $\text{rank}$ the average-tie rank of a pair among all $N$ pairs, and $\bar{s}_{\ell}$ and $\text{sd}_{\ell}$ the mean and standard deviation of the scores of all pairs at $\ell$:</p>
+    <p class="eq">$$\text{MS1}=\frac{1}{13}\sum_{\ell}\frac{\text{rank}\left(s^{(2)}_{\ell}\right)}{N},\qquad \text{MS2}=\frac{1}{13}\sum_{\ell}\frac{s^{(2)}_{\ell}-\bar{s}_{\ell}}{\text{sd}_{\ell}},\qquad \ell\in\{-4,-3.5,\dots,2\}$$</p>
+    <p class="eq">$$\text{MS3}=\frac{1}{8}\sum_{\ell}\frac{\text{rank}\left(s^{(2)}_{\ell}\right)}{N},\qquad \ell\in\{-2.5,-2,\dots,1\}$$</p>
+<pre>
+Algorithm 6: multi-scale scores (exploratory variant)
+Input:   CLR scores s (G x G); the 13 values l = -4, -3.5, ..., 2; cap 50, lazy weight 0.5, t = 9
+Output:  pair scores MS1, MS2, MS3
+ 1. for each gene i:  C[i] := the (at most 50) genes j != i with the largest s[i,j], keeping s[i,j] &gt; 0
+ 2. N := G(G-1)/2
+ 3. for each l in the 13 values:
+ 4.   tau := 2^l;  A[i,j] := exp(s[i,j]/tau) / sum over k in C[i] of exp(s[i,k]/tau)  (j in C[i])
+      P := 0.5 I + 0.5 A
+ 5.   s2[l] := Algorithm 3 applied to P^9
+ 6.   r[l][i,j] := average-tie rank of s2[l][i,j] among the N pairs, divided by N
+ 7.   zs[l][i,j] := (s2[l][i,j] - mean over pairs) / sd over pairs
+ 8. MS1 := mean over the 13 values of r[l];  MS2 := mean over the 13 values of zs[l]
+ 9. MS3 := mean of r[l] over the 8 values l = -2.5, -2, ..., 1
+10. return MS1, MS2, MS3
+</pre>
 
     <h3>Comparison methods</h3>
     <img class="fig" src="method_baselines.png" alt="The four comparison methods: GENIE3, GRNBoost2, PIDC and absolute Pearson correlation, each with a schematic of what it scores.">
     <p class="caption"><b>Methods figure 8. Comparison methods: what each one scores.</b> GENIE3 fits, for each target gene, a random-forest-type tree ensemble that predicts the target's expression from all other genes; a candidate regulator's score for that target is its importance in the ensemble, giving one directed score per ordered pair. GRNBoost2 follows the same per-target scheme with gradient-boosted trees and early stopping. PIDC discretises expression, computes the mutual information of each pair and decomposes it by partial information decomposition against every third gene; a pair's score aggregates the share of its information that is unique to the pair, and is undirected. The fourth method is the absolute Pearson correlation of the two genes' profiles. The tree and information diagrams are drawings without data; the scatter shows the real M3D profiles of lexA and recA (r = 0.83 over 466 profiles). The panel states what each method computes and carries no statement about results.</p>
     <p>GENIE3 and GRNBoost2 are per-target regression methods: for each target gene a tree ensemble predicts the target from all other genes, and a regulator's score is its importance for that target, which gives a directed score for every ordered pair. GENIE3 uses a random-forest-type ensemble and GRNBoost2 uses gradient-boosted trees with early stopping. PIDC is undirected: it scores a pair by the part of its mutual information that remains unique to the pair after every third gene is taken into account. The absolute Pearson correlation of the two profiles is the simplest comparison. All four are used here as comparison methods and not as parts of the ladder.</p>
+    <ul>
+      <li>GENIE3: the score of regulator <i>i</i> for target <i>j</i> is the importance of gene <i>i</i> in a random-forest-type ensemble that predicts gene <i>j</i> from all other genes.</li>
+      <li>GRNBoost2: the same score with gradient-boosted trees and early stopping in place of the random forest.</li>
+      <li>PIDC: the score of a pair is the part of its mutual information that is unique to the pair, aggregated over all third genes.</li>
+      <li>Absolute Pearson correlation: the score of a pair is the absolute value of the correlation of the two profiles.</li>
+    </ul>
   </section>
 
   <section>

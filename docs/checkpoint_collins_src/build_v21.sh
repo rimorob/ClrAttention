@@ -10,7 +10,7 @@ W="$(mktemp -d)"; trap 'rm -rf "$W"' EXIT
 cd "$W"
 # pandoc reads the HTML and the PNGs from one folder: stage them together
 mkdir src; cp "$HERE/checkpoint_collins_v21.html" src/index.html; cp "$HERE"/figures/*.png src/
-nice -n 19 pandoc src/index.html -f html -t docx --resource-path=src --reference-doc="$HERE/portrait.docx" -o base.docx
+nice -n 19 pandoc src/index.html -f html+tex_math_dollars -t docx --resource-path=src --reference-doc="$HERE/portrait.docx" -o base.docx
 mkdir d && cd d && unzip -q ../base.docx
 python3 - <<'PY'
 import re
